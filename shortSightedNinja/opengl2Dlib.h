@@ -267,5 +267,20 @@ namespace gl2d
 
 #pragma endregion
 
+	glm::vec4 computeTextureAtlas(int xCount, int yCount, int x, int y);
+
+	struct TextureAtlas
+	{
+		TextureAtlas() {};
+		TextureAtlas(int x, int y) :xCount(x), yCount(y) {};
+
+		int xCount;
+		int yCount;
+
+		glm::vec4 get(int x, int y)
+		{
+			return computeTextureAtlas(xCount, yCount, x, y);
+		}
+	};
 
 };

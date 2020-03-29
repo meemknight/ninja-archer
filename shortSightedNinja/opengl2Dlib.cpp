@@ -1117,4 +1117,14 @@ namespace gl2d
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
+
+	glm::vec4 computeTextureAtlas(int xCount, int yCount, int x, int y)
+	{
+		float xSize = 1.f / xCount;
+		float ySize = 1.f / yCount;
+
+		return { x * xSize, 1-(y * ySize), (x + 1) * xSize, 1.f - ((y + 1) * ySize) };
+	}
+
+
 }

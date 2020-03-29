@@ -10,6 +10,10 @@
 #include "tools.h"
 #include "opengl2Dlib.h"
 
+#include "imgui.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_win32.h"
+
 LRESULT CALLBACK windProc(HWND, UINT, WPARAM, LPARAM);
 static bool quit = 0;
 
@@ -26,8 +30,8 @@ static bool isFocus = 0;
 
 extern "C"
 {
-	__declspec(dllexport) unsigned long NvOptimusEnablement = 1;
-	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+//	__declspec(dllexport) unsigned long NvOptimusEnablement = 1;
+//	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 
 int MAIN
@@ -75,6 +79,18 @@ int MAIN
 	gl2d::setErrorFuncCallback([](const char* c) {elog(c); });
 	gl2d::init();
 
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   
+
+	ImGui_ImplWin32_Init(wind);
+	const char *glslVersion = "#version 330";
+	ImGui_ImplOpenGL3_Init(glslVersion);
+	ImGui::StyleColorsDark();
+
 	if (!initGame())
 	{
 		return 0;
@@ -106,7 +122,16 @@ int MAIN
 			{
 				quit = true;
 			}
-		
+
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplWin32_NewFrame();
+			ImGui::NewFrame();
+
+			imguiFunc();
+
+			ImGui::Render();
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 			SwapBuffers(hdc);
 		
 			lbuttonPressed = false;
@@ -245,35 +270,38 @@ glm::ivec2 getWindowSize()
 	return d;
 }
 
-int isKeyPressed(int key)
+namespace input
 {
-	return GetAsyncKeyState(key);
-}
+	int isKeyHeld(int key)
+	{
+		return GetAsyncKeyState(key);
+	}
 
-int isKeyPressedOn(int key)
-{
-	return GetAsyncKeyState(key) & 0x8000;
-}
+	int isKeyPressedOn(int key)
+	{
+		return GetAsyncKeyState(key) & 0x8000;
+	}
 
-int isLMouseButtonPressed()
-{
-	return lbuttonPressed;
-}
+	int isLMouseButtonPressed()
+	{
+		return lbuttonPressed;
+	}
 
-int isRMouseButtonPressed()
-{
-	return rbuttonPressed;
-}
+	int isRMouseButtonPressed()
+	{
+		return rbuttonPressed;
+	}
 
-int isLMouseHeld()
-{
-	return lbutton;
-}
+	int isLMouseHeld()
+	{
+		return lbutton;
+	}
 
-int isRMouseHeld()
-{
-	return rbutton;
-}
+	int isRMouseHeld()
+	{
+		return rbutton;
+	}
+};
 
 void showMouse(bool show)
 {

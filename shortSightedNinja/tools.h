@@ -29,7 +29,7 @@
 #ifdef FORCE_LOG
 #define MAIN main()
 #else
-#define MAIN WINAPI wWinMain(HINSTANCE h, HINSTANCE, PWSTR lpCmdLine, int nCmdShow)
+#define MAIN WINAPI wWinMain(HINSTANCE , HINSTANCE, PWSTR , int )
 #endif
 
 #ifdef FORCE_LOG

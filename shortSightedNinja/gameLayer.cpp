@@ -48,6 +48,7 @@ bool gameLogic(float deltaTime)
 	w = getWindowSizeX();
 	h = getWindowSizeY();
 
+	glViewport(0, 0, w, h);
 	renderer2d.updateWindowMetrics(w,h);
 
 	//renderer2d.renderRectangle({ 100,100,100,100 }, Colors_Green);

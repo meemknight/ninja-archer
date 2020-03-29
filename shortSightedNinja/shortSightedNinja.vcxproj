@@ -28,9 +28,11 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mapData.cpp" />
     <ClCompile Include="mapRenderer.cpp" />
+    <ClCompile Include="math.cpp" />
     <ClCompile Include="opengl2Dlib.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stb_impl.cpp" />
+    <ClCompile Include="Ui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="gameLayer.h" />
@@ -44,11 +46,13 @@
     <ClInclude Include="imstb_truetype.h" />
     <ClInclude Include="mapData.h" />
     <ClInclude Include="mapRenderer.h" />
+    <ClInclude Include="math.h" />
     <ClInclude Include="opengl2Dlib.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="stb_truetype.h" />
     <ClInclude Include="tools.h" />
+    <ClInclude Include="Ui.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="blocks.frag" />

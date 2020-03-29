@@ -2,10 +2,13 @@
 #include "opengl2Dlib.h"
 #include <SFML/Audio.hpp>
 #include "mapRenderer.h"
+#include "mapData.h"
+#include "math.h"
 
 gl2d::Renderer2D renderer2d;
 //sf::Music music;
-MapRenderer map;
+MapRenderer mapRenderer;
+MapData mapData;
 
 #include "imgui.h"
 
@@ -17,11 +20,23 @@ bool initGame()
 	//if (music.openFromFile("ding.flac"))
 	//music.play();
 	ShaderProgram sp{ "blocks.vert","blocks.frag" };
-	sprites.loadFromFile("test.jpg");
+	sprites.loadFromFile("sprites.png");
 
-	map.init(sp);
-	map.sprites = sprites;
+	mapRenderer.init(sp);
+	mapRenderer.sprites = sprites;
 
+	mapData.create(10, 10, 
+		"          "
+		" !!!!!    "
+		"          "
+		"    !!!!! "
+		"          "
+		" !!!!!    "
+		"          "
+		"     !!!  "
+		"          "
+		" !!!!!    "
+	);
 
 	return true;
 }
@@ -65,12 +80,16 @@ bool gameLogic(float deltaTime)
 		renderer2d.currentCamera.zoom += deltaTime;
 	}
 
-	map.addBlock(renderer2d.toScreen({ 100,100,100,100 }), {0,1,1,0});
-	map.render();
+	//mapRenderer.addBlock(renderer2d.toScreen({ 100,100,100,100 }), { 0,1,1,0 }, {1,1,1,1});
+	//mapRenderer.render();
 
-	renderer2d.renderRectangle({ 200,300,100,100 }, {}, 0, sprites);
-	renderer2d.flush();
+	mapData.clearColorData();
 
+	std::vector<glm::vec2> triangles;
+
+	simulateLight({ 80,80 }, mapData, triangles);
+
+	mapRenderer.drawFromMapData(renderer2d ,mapData);
 
 	return true;
 

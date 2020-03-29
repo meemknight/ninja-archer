@@ -83,6 +83,8 @@ int MAIN
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   
 
 	ImGui_ImplWin32_Init(wind);
 	const char *glslVersion = "#version 330";

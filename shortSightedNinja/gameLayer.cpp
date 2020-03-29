@@ -4,15 +4,18 @@
 #include "mapRenderer.h"
 #include "mapData.h"
 #include "math.h"
+#include "Entity.h"
 
 gl2d::Renderer2D renderer2d;
 //sf::Music music;
 MapRenderer mapRenderer;
 MapData mapData;
+Entity player;
 
 #include "imgui.h"
 
 gl2d::Texture sprites;
+gl2d::Texture characterSprite;
 
 bool initGame()
 {
@@ -21,22 +24,26 @@ bool initGame()
 	//music.play();
 	ShaderProgram sp{ "blocks.vert","blocks.frag" };
 	sprites.loadFromFile("sprites.png");
+	characterSprite.loadFromFile("character.png");
 
 	mapRenderer.init(sp);
 	mapRenderer.sprites = sprites;
 
 	mapData.create(10, 10, 
+		"     !  ! "
+		" !!!!!  !!"
 		"          "
-		" !!!!!    "
 		"          "
-		"    !!!!! "
+		"!!  !!  ! "
 		"          "
-		" !!!!!    "
-		"          "
-		"     !!!  "
-		"          "
-		" !!!!!    "
+		" !        "
+		"      !!! "
+		"        ! "
+		" !!!      "
 	);
+
+	player.pos = { 200, 200 };
+	player.dimensions = { 24, 30 };
 
 	return true;
 }
@@ -54,23 +61,23 @@ bool gameLogic(float deltaTime)
 	//renderer2d.renderRectangle({ 100,100,100,100 }, Colors_Green);
 	//renderer2d.flush();
 
-	float speed = 500;
+	float speed = 100;
 
 	if (input::isKeyHeld('W'))
 	{
-		renderer2d.currentCamera.position.y -= deltaTime * speed;
+		player.pos.y -= deltaTime * speed;
 	}
 	if (input::isKeyHeld('S'))
 	{
-		renderer2d.currentCamera.position.y += deltaTime * speed;
+		player.pos.y += deltaTime * speed;
 	}
 	if (input::isKeyHeld('A'))
 	{
-		renderer2d.currentCamera.position.x -= deltaTime * speed;
+		player.pos.x -= deltaTime * speed;
 	}
 	if (input::isKeyHeld('D'))
 	{
-		renderer2d.currentCamera.position.x += deltaTime * speed;
+		player.pos.x += deltaTime * speed;
 	}
 	if (input::isKeyHeld('Q'))
 	{
@@ -80,6 +87,9 @@ bool gameLogic(float deltaTime)
 	{
 		renderer2d.currentCamera.zoom += deltaTime;
 	}
+
+	player.checkCollision(mapData);
+	player.updateMove();
 
 	//mapRenderer.addBlock(renderer2d.toScreen({ 100,100,100,100 }), { 0,1,1,0 }, {1,1,1,1});
 	//mapRenderer.render();
@@ -91,6 +101,9 @@ bool gameLogic(float deltaTime)
 	simulateLight({ 80,80 }, mapData, triangles);
 
 	mapRenderer.drawFromMapData(renderer2d ,mapData);
+
+	renderer2d.renderRectangle({ player.pos, player.dimensions }, {}, 0, characterSprite);
+	renderer2d.flush();
 
 	return true;
 

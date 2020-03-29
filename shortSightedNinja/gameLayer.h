@@ -17,7 +17,9 @@ glm::ivec2 getWindowSize();
 inline int getWindowSizeX() { return getWindowSize().x; }
 inline int getWindowSizeY() { return getWindowSize().y; }
 
-int isKeyPressed(int key);
+namespace input
+{
+int isKeyHeld(int key);
 int isKeyPressedOn(int key);
 
 int isLMouseButtonPressed();
@@ -25,11 +27,14 @@ int isRMouseButtonPressed();
 
 int isLMouseHeld();
 int isRMouseHeld();
+};
 
 void showMouse(bool show);
 bool isFocused();
+
 
 // game functions
 bool initGame();
 bool gameLogic(float deltaTime);
 void closeGame();
+void imguiFunc();

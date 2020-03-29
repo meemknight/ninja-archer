@@ -18,7 +18,6 @@ void MapRenderer::init(ShaderProgram s)
 	glEnableVertexAttribArray(0);
 
 
-
 	glBindVertexArray(0);
 
 }

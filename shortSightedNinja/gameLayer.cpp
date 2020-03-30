@@ -29,17 +29,47 @@ bool initGame()
 	mapRenderer.init(sp);
 	mapRenderer.sprites = sprites;
 
-	mapData.create(10, 10, 
-		"     !  ! "
-		" !!!!!  !!"
-		"          "
-		"          "
-		"!!  !!  ! "
-		"          "
-		" !        "
-		"      !!! "
-		"        ! "
-		" !!!      "
+	mapData.create(40, 40, 
+		"     !  !       !  !      !  !     !  ! "
+		" !!!!!  !!  !!!!!  !! !!!!!  !!!!!!!  !!"
+		"                                        "
+		"                                        "
+		"!!  !!  ! !!!  !!  ! !!  !!  ! !  !!  ! "
+		"                                        "
+		" !          !         !        !        "
+		"      !!!        !!!       !!!      !!! "
+		"        !          !         !        ! "
+		" !!!        !!!       !!!      !!!      "
+		"     !  !       !  !      !  !     !  ! "
+		" !!!!!  !!  !!!!!  !! !!!!!  !!!!!!!  !!"
+		"                                        "
+		"                                        "
+		"!!  !!  ! !!!  !!  ! !!  !!  ! !  !!  ! "
+		"                                        "
+		" !          !         !        !        "
+		"      !!!        !!!       !!!      !!! "
+		"        !          !         !        ! "
+		" !!!        !!!       !!!      !!!      "
+		"     !  !       !  !      !  !     !  ! "
+		" !!!!!  !!  !!!!!  !! !!!!!  !!!!!!!  !!"
+		"                                        "
+		"                                        "
+		"!!  !!  ! !!!  !!  ! !!  !!  ! !  !!  ! "
+		"                                        "
+		" !          !         !        !        "
+		"      !!!        !!!       !!!      !!! "
+		"        !          !         !        ! "
+		" !!!        !!!       !!!      !!!      "
+		"     !  !       !  !      !  !     !  ! "
+		" !!!!!  !!  !!!!!  !! !!!!!  !!!!!!!  !!"
+		"                                        "
+		"                                        "
+		"!!  !!  ! !!!  !!  ! !!  !!  ! !  !!  ! "
+		"                                        "
+		" !          !         !        !        "
+		"      !!!        !!!       !!!      !!! "
+		"        !          !         !        ! "
+		" !!!        !!!       !!!      !!!      "
 	);
 
 	player.pos = { 200, 200 };
@@ -62,6 +92,8 @@ bool gameLogic(float deltaTime)
 	//renderer2d.flush();
 
 	float speed = 100;
+
+	//renderer2d.currentCamera.position = { -500,-100 };
 
 	if (input::isKeyHeld('W'))
 	{
@@ -87,6 +119,9 @@ bool gameLogic(float deltaTime)
 	{
 		renderer2d.currentCamera.zoom += deltaTime;
 	}
+
+	//todo add player dimensions
+	renderer2d.currentCamera.follow(player.pos, deltaTime * 60, 30, renderer2d.windowW, renderer2d.windowH );
 
 	player.checkCollision(mapData);
 	player.updateMove();
@@ -115,12 +150,19 @@ void closeGame()
 }
 
 
-void imguiFunc()
+void imguiFunc(float deltaTime)
 {
 
 	static bool active = 0;
 	static glm::vec4 color;
 
+	//todo delta time
+	//todo xinput and input
+
+	//ImGui::Begin("delta");
+	//ImGui::Text(std::to_string(1.f/(deltaTime/1000.f)).c_str());
+	//
+	//ImGui::End();
 	//ImGui::Begin("My First Tool", &active, ImGuiWindowFlags_MenuBar);
 	//if (ImGui::BeginMenuBar())
 	//{

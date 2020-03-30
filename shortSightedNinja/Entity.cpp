@@ -21,23 +21,37 @@ bool aabb(glm::vec4 b1, glm::vec4 b2)
 
 void Entity::checkCollision(MapData & mapData)
 {
-	int minX;
-	int minY;
-	int maxX;
-	int maxY;
+	
 	glm::vec2 delta = pos - lastPos;
+	glm::vec2 fullDelta = pos - lastPos;
 
-	glm::vec2 newPos = performCollision(mapData, { pos.x, lastPos.y }, {dimensions.x, dimensions.y}, { delta.x, 0 });
+	//todo
+
+	glm::vec2 newPos = performCollision(mapData, { pos.x, lastPos.y }, { dimensions.x, dimensions.y }, { delta.x, 0 });
 	pos = performCollision(mapData, { newPos.x, pos.y }, { dimensions.x, dimensions.y }, { 0, delta.y });
 
-	
 }
 
 glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 size, glm::vec2 delta)
 {
+	int minX=0;
+	int minY=0;
+	int maxX=mapData.w;
+	int maxY=mapData.h;
+
+	minX = (pos.x - abs(delta.x) - BLOCK_SIZE)/BLOCK_SIZE;
+	maxX = ceil((pos.x + abs(delta.x) + BLOCK_SIZE + size.x)/BLOCK_SIZE);
 	
-	for (int y = 0; y < mapData.h; y++)
-		for (int x = 0; x < mapData.w; x++)
+	minY = (pos.y - abs(delta.y) - BLOCK_SIZE)/BLOCK_SIZE;
+	maxY = ceil((pos.y + abs(delta.y) + BLOCK_SIZE + size.y)/BLOCK_SIZE);
+
+	minX = max(0, minX);
+	minY = max(0, minY);
+	maxX = min(mapData.w, maxX);
+	maxY = min(mapData.h, maxY);
+
+	for (int y = minY; y < maxY; y++)
+		for (int x = minX; x < maxX; x++)
 		{
 			if (mapData.get(x, y).type == '!')
 			{
@@ -48,9 +62,11 @@ glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 s
 						if(delta.x < 0) // moving left
 						{
 							pos.x = x * BLOCK_SIZE + BLOCK_SIZE;
+							goto end;
 						}else
 						{
 							pos.x = x * BLOCK_SIZE - dimensions.x;
+							goto end;
 						}
 					}
 					else
@@ -58,9 +74,11 @@ glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 s
 						if(delta.y < 0) //moving up
 						{
 							pos.y = y * BLOCK_SIZE + BLOCK_SIZE;
+							goto end;
 						}else
 						{
 							pos.y = y * BLOCK_SIZE - dimensions.y;
+							goto end;
 						}
 					}
 				
@@ -69,5 +87,6 @@ glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 s
 
 		}
 
+	end:
 	return pos;
 }

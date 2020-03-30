@@ -128,13 +128,15 @@ namespace gl2d
 	struct Camera
 	{
 		glm::vec2  position;
-		glm::vec2  offset;   // Camera offset (displacement from target)
+		//glm::vec2  offset;   // Camera offset (displacement from target)
 		glm::vec2  target;   // Camera target (rotation and zoom origin)
 		float rotation; // Camera rotation in degrees
 		float zoom;     // Camera zoom (scaling), should be 1.0f by default
 
 		void setDefault() { *this = cameraCreateDefault(); }
 		glm::mat3 getMatrix();
+
+		void follow(glm::vec2 pos, float speed, float max, float w, float h);
 	};
 
 

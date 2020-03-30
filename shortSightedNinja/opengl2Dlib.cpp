@@ -1,5 +1,7 @@
 #include "opengl2Dlib.h"
 #include <fstream>
+#include <sstream>
+#include "tools.h"
 
 namespace gl2d
 {
@@ -1054,6 +1056,28 @@ namespace gl2d
 			0, 0, 1,
 		};
 		return m; //todo could have problems
+	}
+
+	void Camera::follow(glm::vec2 pos, float speed, float max, float w, float h)
+	{
+		pos.x -= w /2.F;
+		pos.y -= h / 2.f;
+		
+		glm::vec2 delta = pos - position;
+		float len = glm::length(delta);
+
+		delta = glm::normalize(delta);
+
+		if(len > 4)
+		if(len > max)
+		{
+			len = max;
+			position = pos - (max * delta);
+		}else
+		{
+			position += delta * speed;
+		}
+
 	}
 
 	void FrameBuffer::create(unsigned int w, unsigned int h)

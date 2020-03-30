@@ -127,7 +127,7 @@ int MAIN
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
 
-			imguiFunc();
+			imguiFunc(deltaTime);
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

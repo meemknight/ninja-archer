@@ -37,4 +37,4 @@ bool isFocused();
 bool initGame();
 bool gameLogic(float deltaTime);
 void closeGame();
-void imguiFunc();
+void imguiFunc(float deltaTime);

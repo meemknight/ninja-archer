@@ -30,9 +30,9 @@ void simulateLight(glm::vec2 pos, MapData &mapData, std::vector<glm::vec2> &tria
 	drawLine({100,100}, {200,200});
 
 
-	for(int x=0; x<10; x++)
+	for(int x=0; x<40; x++)
 	{
-		for(int y=0;y<10;y++)
+		for(int y=0;y<40;y++)
 		{
 			mapData.get(x, y).mainColor = { 1,1,1,1 };
 		}

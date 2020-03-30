@@ -91,7 +91,7 @@ bool gameLogic(float deltaTime)
 	//renderer2d.renderRectangle({ 100,100,100,100 }, Colors_Green);
 	//renderer2d.flush();
 
-	float speed = 100;
+	float speed = 200;
 
 	//renderer2d.currentCamera.position = { -500,-100 };
 
@@ -121,7 +121,7 @@ bool gameLogic(float deltaTime)
 	}
 
 	//todo add player dimensions
-	renderer2d.currentCamera.follow(player.pos, deltaTime * 60, 30, renderer2d.windowW, renderer2d.windowH );
+	renderer2d.currentCamera.follow(player.pos + (player.dimensions/2.f), deltaTime * 120, 30, renderer2d.windowW, renderer2d.windowH );
 
 	player.checkCollision(mapData);
 	player.updateMove();

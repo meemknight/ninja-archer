@@ -1,5 +1,6 @@
 #pragma once
 #include "glm/vec4.hpp"
+#include <vector>
 
 enum Block : char
 {
@@ -17,12 +18,19 @@ inline bool isOpaque(char b)
 	return b == dirt;
 }
 
+inline bool isColidable(char b)
+{
+	//todo
+	return b == dirt;
+
+}
+
 struct BlockInfo
 {
-	bool canBeLitLeft();
-	bool canBeLitRight();
-	bool canBeLitTop();
-	bool canBeLitDown();
+	bool hasNeighbourLeft();
+	bool hasNeighbourRight();
+	bool hasNeighbourTop();
+	bool hasNeighbourDown();
 	unsigned char neighBours;
 
 	glm::vec4 mainColor;
@@ -44,6 +52,11 @@ struct MapData
 	BlockInfo &get(int x, int y);
 
 	void clearColorData();
+	
+	void createEdges();
+	void setNeighbours();
+
+	std::vector<glm::vec4> edges;
 
 	void cleanup();
 };

@@ -17,6 +17,8 @@ void MapData::create(int w, int h, const char* d = 0)
 		}
 	}
 
+	setNeighbours();
+	createEdges();
 	//todo setup neighbours
 }
 
@@ -36,6 +38,15 @@ void MapData::clearColorData()
 	}
 }
 
+void MapData::createEdges()
+{
+	edges.clear();
+	edges.reserve((w*h) /2);
+
+
+	
+}
+
 void MapData::cleanup()
 {
 	if(data)
@@ -47,4 +58,8 @@ void MapData::cleanup()
 void BlockInfo::resetColors()
 {
 	mainColor = { 0,0,0,0 };
+}
+
+void MapData::setNeighbours()
+{
 }

@@ -27,8 +27,6 @@ void simulateLight(glm::vec2 pos, float radius, MapData &mapData, std::vector<gl
 
 	mapData.CalculateVisibilityPolygon(pos.x, pos.y, radius);
 
-	//llog(mapData.vecVisibilityPolygonPoints.size());
-
 	auto it = std::unique(
 		mapData.vecVisibilityPolygonPoints.begin(),
 		mapData.vecVisibilityPolygonPoints.end(),
@@ -37,8 +35,6 @@ void simulateLight(glm::vec2 pos, float radius, MapData &mapData, std::vector<gl
 			return fabs(t1.x - t2.x) < 0.1f && fabs(t1.y - t2.y) < 0.1f;
 		});
 	mapData.vecVisibilityPolygonPoints.resize(std::distance(mapData.vecVisibilityPolygonPoints.begin(), it));
-
-	llog(mapData.vecVisibilityPolygonPoints.size());
 
 	if (mapData.vecVisibilityPolygonPoints.size() > 1)
 	{
@@ -52,7 +48,7 @@ void simulateLight(glm::vec2 pos, float radius, MapData &mapData, std::vector<gl
 				{ 0.245f,0.189f,0.031f }, 3.0);
 
 			drawLine({mapData.vecVisibilityPolygonPoints[i].x,mapData.vecVisibilityPolygonPoints[i].y },
-				{ mapData.vecVisibilityPolygonPoints[i].x,mapData.vecVisibilityPolygonPoints[i].y },
+				{ mapData.vecVisibilityPolygonPoints[i + 1].x,mapData.vecVisibilityPolygonPoints[i + 1].y },
 				{ 0.245f,0.189f,0.031f }, 3.0);
 
 		}

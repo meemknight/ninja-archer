@@ -15,7 +15,8 @@ struct Entity
 	bool grounded;
 	bool movingRight;
 
-	void checkCollisionBrute(glm::vec2 pos, MapData &mapData);
+	void checkCollisionBrute(glm::vec2 &pos, glm::vec2 lastPos, MapData &mapData,
+	bool &upTouch, bool &downTouch, bool &leftTouch, bool &rightTouch);
 	void resolveConstrains(MapData &mapData);
 
 	void updateMove() 

@@ -5,6 +5,7 @@
 #include "mapData.h"
 #include "math.h"
 #include "Entity.h"
+#include "input.h"
 
 gl2d::Renderer2D renderer2d;
 //sf::Music music;
@@ -94,36 +95,30 @@ bool gameLogic(float deltaTime)
 	float speed = 200;
 
 	//renderer2d.currentCamera.position = { -500,-100 };
+	
+	player.pos.x += deltaTime * speed * input::getMoveDir();
 
-	if (input::isKeyHeld('W'))
-	{
-		player.pos.y -= deltaTime * speed;
-	}
-	if (input::isKeyHeld('S'))
-	{
-		player.pos.y += deltaTime * speed;
-	}
-	if (input::isKeyHeld('A'))
-	{
-		player.pos.x -= deltaTime * speed;
-	}
-	if (input::isKeyHeld('D'))
-	{
-		player.pos.x += deltaTime * speed;
-	}
-	if (input::isKeyHeld('Q'))
+	if (platform::isKeyHeld('Q'))
 	{
 		renderer2d.currentCamera.zoom-= deltaTime;
 	}
-	if (input::isKeyHeld('E'))
+	if (platform::isKeyHeld('E'))
 	{
 		renderer2d.currentCamera.zoom += deltaTime;
+	}
+
+	if(input::isKeyPressedOn(input::Buttons::jump))
+	{
+		player.jump();
 	}
 
 	//todo add player dimensions
 	renderer2d.currentCamera.follow(player.pos + (player.dimensions/2.f), deltaTime * 120, 30, renderer2d.windowW, renderer2d.windowH );
 
-	player.checkCollision(mapData);
+	player.applyGravity(deltaTime);
+	player.applyVelocity(deltaTime);
+
+	player.resolveConstrains(mapData);
 	player.updateMove();
 
 	//mapRenderer.addBlock(renderer2d.toScreen({ 100,100,100,100 }), { 0,1,1,0 }, {1,1,1,1});
@@ -137,7 +132,10 @@ bool gameLogic(float deltaTime)
 
 	mapRenderer.drawFromMapData(renderer2d ,mapData);
 
-	renderer2d.renderRectangle({ player.pos, player.dimensions }, {}, 0, characterSprite);
+	gl2d::TextureAtlas playerAtlas(1, 1);
+
+	renderer2d.renderRectangle({ player.pos, player.dimensions }, {}, 0, characterSprite,
+		playerAtlas.get(0,0, !player.movingRight));
 	renderer2d.flush();
 
 	return true;

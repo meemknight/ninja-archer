@@ -14,6 +14,8 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_win32.h"
 
+#include "input.h"
+
 LRESULT CALLBACK windProc(HWND, UINT, WPARAM, LPARAM);
 static bool quit = 0;
 
@@ -91,6 +93,8 @@ int MAIN
 	ImGui_ImplOpenGL3_Init(glslVersion);
 	ImGui::StyleColorsDark();
 
+	input::loadXinput();
+
 	if (!initGame())
 	{
 		return 0;
@@ -115,9 +119,11 @@ int MAIN
 		
 			float fDeltaTime = (float)deltaTime / CLOCKS_PER_SEC;
 		
-			fDeltaTime = std::min(fDeltaTime, 1.f / 20.f);
+			//todo
+			//fDeltaTime = std::min(fDeltaTime, 1.f / 20.f);
 		
-		
+			input::updateInput();
+
 			if (!gameLogic(fDeltaTime))
 			{
 				quit = true;
@@ -270,7 +276,7 @@ glm::ivec2 getWindowSize()
 	return d;
 }
 
-namespace input
+namespace platform
 {
 	int isKeyHeld(int key)
 	{

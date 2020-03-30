@@ -17,7 +17,7 @@ glm::ivec2 getWindowSize();
 inline int getWindowSizeX() { return getWindowSize().x; }
 inline int getWindowSizeY() { return getWindowSize().y; }
 
-namespace input
+namespace platform
 {
 int isKeyHeld(int key);
 int isKeyPressedOn(int key);

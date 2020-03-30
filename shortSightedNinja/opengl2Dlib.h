@@ -269,7 +269,7 @@ namespace gl2d
 
 #pragma endregion
 
-	glm::vec4 computeTextureAtlas(int xCount, int yCount, int x, int y);
+	glm::vec4 computeTextureAtlas(int xCount, int yCount, int x, int y, bool flip = 0);
 
 	struct TextureAtlas
 	{
@@ -279,9 +279,9 @@ namespace gl2d
 		int xCount;
 		int yCount;
 
-		glm::vec4 get(int x, int y)
+		glm::vec4 get(int x, int y, bool flip = 0)
 		{
-			return computeTextureAtlas(xCount, yCount, x, y);
+			return computeTextureAtlas(xCount, yCount, x, y, flip);
 		}
 	};
 

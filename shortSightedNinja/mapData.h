@@ -25,13 +25,23 @@ inline bool isColidable(char b)
 
 }
 
+struct Edge
+{
+	float sx, sy;
+	float ex, ey;
+};
+
 struct BlockInfo
 {
-	bool hasNeighbourLeft();
-	bool hasNeighbourRight();
-	bool hasNeighbourTop();
-	bool hasNeighbourDown();
-	unsigned char neighBours;
+	bool hasNeighborLeft();
+	bool hasNeighborRight();
+	bool hasNeighborTop();
+	bool hasNeighborDown();
+	unsigned char neighbors;
+
+	int edgeId[4];
+	bool edgeExist[4];
+
 
 	glm::vec4 mainColor;
 
@@ -40,23 +50,37 @@ struct BlockInfo
 	void resetColors();
 };
 
+#define NORTH 0
+#define SOUTH 1
+#define EAST 2
+#define WEST 3
+struct VisibilityPolygonPoints
+{
+	float angle;
+	float x, y;
+};
 struct MapData
 {
-
 	BlockInfo *data;
 
 	int w;
 	int h;
 
+	std::vector<Edge> vecEdges;
+
+	
+	std::vector<VisibilityPolygonPoints> vecVisibilityPolygonPoints;
+
 	void create(int w, int h, const char* d);
 	BlockInfo &get(int x, int y);
 
+	void ConvertTileMapToPolyMap();
+
+	void CalculateVisibilityPolygon(float ox, float oy, float radius);
+
 	void clearColorData();
 	
-	void createEdges();
-	void setNeighbours();
-
-	std::vector<glm::vec4> edges;
+	void setNeighbors();
 
 	void cleanup();
 };

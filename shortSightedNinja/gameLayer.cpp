@@ -30,46 +30,46 @@ bool initGame()
 	mapRenderer.sprites = sprites;
 
 	mapData.create(40, 40, 
-		"     !  !       !  !      !  !     !  ! "
-		" !!!!!  !!  !!!!!  !! !!!!!  !!!!!!!  !!"
 		"                                        "
 		"                                        "
-		"!!  !!  ! !!!  !!  ! !!  !!  ! !  !!  ! "
-		"                                        "
-		" !          !         !        !        "
-		"      !!!        !!!       !!!      !!! "
-		"        !          !         !        ! "
-		" !!!        !!!       !!!      !!!      "
-		"     !  !       !  !      !  !     !  ! "
-		" !!!!!  !!  !!!!!  !! !!!!!  !!!!!!!  !!"
 		"                                        "
 		"                                        "
-		"!!  !!  ! !!!  !!  ! !!  !!  ! !  !!  ! "
 		"                                        "
-		" !          !         !        !        "
-		"      !!!        !!!       !!!      !!! "
-		"        !          !         !        ! "
-		" !!!        !!!       !!!      !!!      "
-		"     !  !       !  !      !  !     !  ! "
-		" !!!!!  !!  !!!!!  !! !!!!!  !!!!!!!  !!"
+		"                                 !!     "
+		"                                 !!     "
 		"                                        "
 		"                                        "
-		"!!  !!  ! !!!  !!  ! !!  !!  ! !  !!  ! "
+		"                  !              !!!!!!!"
+		"                  !              !!!!!!!"
+		" !!!!!!!!!!!!!!!!!!!!!!!!!!  !!!!!!!!!!!"
+		"                        !    !          "
+		"                        !    !          "
+		"                        !    !        !!"
+		"                        !    !          "
+		"                        !    !!!        "
+		"                   !    !    !          "
+		"                   !         !       !!!"
+		"                   !         !          "
+		"                   !         !!!!       "
+		" !!!!!  !!!!!!!!!!!!!!!!!!!!!!          "
+		"                                      !!"
 		"                                        "
-		" !          !         !        !        "
-		"      !!!        !!!       !!!      !!! "
-		"        !          !         !        ! "
-		" !!!        !!!       !!!      !!!      "
-		"     !  !       !  !      !  !     !  ! "
-		" !!!!!  !!  !!!!!  !! !!!!!  !!!!!!!  !!"
 		"                                        "
 		"                                        "
-		"!!  !!  ! !!!  !!  ! !!  !!  ! !  !!  ! "
+		"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!      !"
+		"!                         !            !"
+		"!                         !          !!!"
+		"!!!!            !         !   !!!       "
+		"!            !!!!!!!      !             "
+		"!               !       !!!           !!"
+		"!!!!!!!                   !    !!!!     "
 		"                                        "
-		" !          !         !        !        "
-		"      !!!        !!!       !!!      !!! "
-		"        !          !         !        ! "
-		" !!!        !!!       !!!      !!!      "
+		"          !!                            "
+		"              !!                        "
+		"!!!!        !!!!!!!!       !!!!!!!!!!!!!"
+		"                                        "
+		"                       !!               "
+		" !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 	);
 
 	player.pos = { 200, 200 };
@@ -120,8 +120,16 @@ bool gameLogic(float deltaTime)
 		renderer2d.currentCamera.zoom += deltaTime;
 	}
 
+	if(input::isKeyPressedOn(VK_SPACE))
+	{
+		player.jump();
+	}
+
 	//todo add player dimensions
 	renderer2d.currentCamera.follow(player.pos + (player.dimensions/2.f), deltaTime * 120, 30, renderer2d.windowW, renderer2d.windowH );
+
+	player.applyGravity(deltaTime);
+	player.applyVelocity(deltaTime);
 
 	player.checkCollision(mapData);
 	player.updateMove();
@@ -137,7 +145,10 @@ bool gameLogic(float deltaTime)
 
 	mapRenderer.drawFromMapData(renderer2d ,mapData);
 
-	renderer2d.renderRectangle({ player.pos, player.dimensions }, {}, 0, characterSprite);
+	gl2d::TextureAtlas playerAtlas(1, 1);
+
+	renderer2d.renderRectangle({ player.pos, player.dimensions }, {}, 0, characterSprite,
+		playerAtlas.get(0,0, !player.movingRight));
 	renderer2d.flush();
 
 	return true;

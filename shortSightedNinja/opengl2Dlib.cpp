@@ -1142,12 +1142,19 @@ namespace gl2d
 	}
 
 
-	glm::vec4 computeTextureAtlas(int xCount, int yCount, int x, int y)
+	glm::vec4 computeTextureAtlas(int xCount, int yCount, int x, int y, bool flip)
 	{
 		float xSize = 1.f / xCount;
 		float ySize = 1.f / yCount;
 
-		return { x * xSize, 1-(y * ySize), (x + 1) * xSize, 1.f - ((y + 1) * ySize) };
+		if(flip)
+		{
+			return { (x+1) * xSize, 1 - (y * ySize), (x) * xSize, 1.f - ((y + 1) * ySize) };
+		}else
+		{
+			return { x * xSize, 1 - (y * ySize), (x + 1) * xSize, 1.f - ((y + 1) * ySize) };
+		}
+
 	}
 
 

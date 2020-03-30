@@ -19,23 +19,29 @@ void drawLine(glm::vec2 x, glm::vec2 y)
 
 }
 
+
 void simulateLight(glm::vec2 pos, MapData &mapData, std::vector<glm::vec2> &triangles)
 {
 	//mapData.get(0, 0).mainColor = { 1,1,1,1 }; light up
 	//BLOCK_SIZE
 	//isOpaque(mapData.get(0, 0).type);
+
 	triangles.clear();
 
-	
-	drawLine({100,100}, {200,200});
+	mapData.ConvertTileMapToPolyMap();
 
 
-	for(int x=0; x<40; x++)
+	for (int x = 0; x < 40; x++)
 	{
-		for(int y=0;y<40;y++)
+		for (int y = 0; y < 40; y++)
 		{
 			mapData.get(x, y).mainColor = { 1,1,1,1 };
 		}
+	}
+	llog(mapData.vecEdges.size());
+	for(auto &e: mapData.vecEdges)
+	{
+		drawLine({ e.sx, e.sy }, { e.ex, e.ey });
 	}
 
 }

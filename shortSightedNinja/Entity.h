@@ -15,8 +15,9 @@ struct Entity
 	bool grounded;
 	bool movingRight;
 
-	void checkCollision(MapData &mapData);
-	
+	void checkCollisionBrute(glm::vec2 pos, MapData &mapData);
+	void resolveConstrains(MapData &mapData);
+
 	void updateMove() 
 	{
 		if(lastPos.x - pos.x < 0)
@@ -37,6 +38,7 @@ struct Entity
 	void jump();
 
 private:
-	glm::vec2 performCollision(MapData &mapDat, glm::vec2 pos, glm::vec2 size, glm::vec2 delta);
+	glm::vec2 performCollision(MapData &mapDat, glm::vec2 pos, glm::vec2 size, glm::vec2 delta,
+	bool &upTouch, bool &downTouch, bool &leftTouch, bool &rightTouch);
 };
 

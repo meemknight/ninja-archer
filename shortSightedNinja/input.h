@@ -14,8 +14,8 @@ namespace input
 			down,
 			left,
 			right,
-			jump,
 			shoot,
+			jump,
 			up,
 			buttonsCount
 		};

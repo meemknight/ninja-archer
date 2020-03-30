@@ -40,7 +40,8 @@ namespace input
 	}
 
 	int bindings[Buttons::buttonsCount] = { 0, 'S', 'A', 'D', VK_SPACE, 0, 'W' };
-	WORD bindingsController[Buttons::buttonsCount] = { 0, 0, 0, 0, 0, 0, 0 };
+	WORD bindingsController[Buttons::buttonsCount] = { 0, XINPUT_GAMEPAD_DPAD_DOWN
+		, XINPUT_GAMEPAD_DPAD_LEFT, XINPUT_GAMEPAD_DPAD_RIGHT, 0, XINPUT_GAMEPAD_A, XINPUT_GAMEPAD_DPAD_UP };
 	float deadZone = 0.15f;
 	float moveSensitivity = 0.30f;
 
@@ -114,6 +115,7 @@ namespace input
 				if (b == input::Buttons::jump)
 				{
 					val = pad->bRightTrigger > 10;
+					val = val | (pad->wButtons & bindingsController[b]);
 				}
 				else if (b == input::Buttons::shoot)
 				{
@@ -132,6 +134,7 @@ namespace input
 					}
 
 					val = retValX < -moveSensitivity;
+					val =  val | (pad->wButtons & bindingsController[b]);
 				}else if(b == input::Buttons::right)
 				{
 					float retValX = pad->sThumbLX / (float)SHRT_MAX;
@@ -145,6 +148,7 @@ namespace input
 					}
 
 					val = retValX > moveSensitivity;
+					val = val | (pad->wButtons & bindingsController[b]);
 				}else if(b == input::Buttons::down)
 				{
 					float retValY = pad->sThumbLY / (float)SHRT_MAX;
@@ -158,6 +162,7 @@ namespace input
 					}
 
 					val = retValY < -moveSensitivity;
+					val = val | (pad->wButtons & bindingsController[b]);
 				}else if (b == input::Buttons::up)
 				{
 					float retValY = pad->sThumbLY / (float)SHRT_MAX;
@@ -171,6 +176,7 @@ namespace input
 					}
 
 					val = retValY > moveSensitivity;
+					val = val | (pad->wButtons & bindingsController[b]);
 				}
 				else
 				{

@@ -23,18 +23,74 @@ bool aabb(glm::vec4 b1, glm::vec4 b2)
 }
 
 
-void Entity::checkCollision(MapData & mapData)
+void Entity::checkCollisionBrute(glm::vec2 pos, MapData & mapData)
 {
-	
+	grounded = 0;
+
+	bool upTouch = 0;
+	bool downTouch = 0;
+	bool leftTouch = 0;
+	bool rightTouch = 0;
+
 	glm::vec2 delta = pos - lastPos;
 	glm::vec2 fullDelta = pos - lastPos;
 
-	//todo
+	
+
+	glm::vec2 newPos = performCollision(mapData, { pos.x, lastPos.y }, { dimensions.x, dimensions.y }, { delta.x, 0 },
+		upTouch, downTouch, leftTouch, rightTouch);
+	pos = performCollision(mapData, { newPos.x, pos.y }, { dimensions.x, dimensions.y }, { 0, delta.y },
+		upTouch, downTouch, leftTouch, rightTouch);
+
+
+
+	if(downTouch)
+	{
+		grounded = 1;
+	}
+
+	if(upTouch)
+	{
+		if(velocity.y<0)
+		{
+			velocity.y = 0;
+		}
+	}
+}
+
+void Entity::resolveConstrains(MapData & mapData)
+{
 	grounded = 0;
 
-	glm::vec2 newPos = performCollision(mapData, { pos.x, lastPos.y }, { dimensions.x, dimensions.y }, { delta.x, 0 });
-	pos = performCollision(mapData, { newPos.x, pos.y }, { dimensions.x, dimensions.y }, { 0, delta.y });
+	bool upTouch = 0;
+	bool downTouch = 0;
+	bool leftTouch = 0;
+	bool rightTouch = 0;
 
+	glm::vec2 delta = pos - lastPos;
+	glm::vec2 fullDelta = pos - lastPos;
+
+
+
+	glm::vec2 newPos = performCollision(mapData, { pos.x, lastPos.y }, { dimensions.x, dimensions.y }, { delta.x, 0 },
+		upTouch, downTouch, leftTouch, rightTouch);
+	pos = performCollision(mapData, { newPos.x, pos.y }, { dimensions.x, dimensions.y }, { 0, delta.y },
+		upTouch, downTouch, leftTouch, rightTouch);
+
+
+
+	if (downTouch)
+	{
+		grounded = 1;
+	}
+
+	if (upTouch)
+	{
+		if (velocity.y < 0)
+		{
+			velocity.y = 0;
+		}
+	}
 }
 
 void Entity::applyGravity(float deltaTime)
@@ -77,7 +133,8 @@ void Entity::jump()
 	}
 }
 
-glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 size, glm::vec2 delta)
+glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 size, glm::vec2 delta,
+	bool &upTouch, bool &downTouch, bool &leftTouch, bool &rightTouch)
 {
 	int minX=0;
 	int minY=0;
@@ -106,10 +163,12 @@ glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 s
 					{
 						if(delta.x < 0) // moving left
 						{
+							leftTouch |= 1;
 							pos.x = x * BLOCK_SIZE + BLOCK_SIZE;
 							goto end;
 						}else
 						{
+							rightTouch |= 1;
 							pos.x = x * BLOCK_SIZE - dimensions.x;
 							goto end;
 						}
@@ -118,11 +177,12 @@ glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 s
 					{
 						if(delta.y < 0) //moving up
 						{
+							upTouch |= 1;
 							pos.y = y * BLOCK_SIZE + BLOCK_SIZE;
 							goto end;
 						}else
 						{
-							grounded = 1;
+							downTouch |= 1;
 							pos.y = y * BLOCK_SIZE - dimensions.y;
 							goto end;
 						}

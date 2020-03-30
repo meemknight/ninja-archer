@@ -118,7 +118,7 @@ bool gameLogic(float deltaTime)
 	player.applyGravity(deltaTime);
 	player.applyVelocity(deltaTime);
 
-	player.checkCollision(mapData);
+	player.resolveConstrains(mapData);
 	player.updateMove();
 
 	//mapRenderer.addBlock(renderer2d.toScreen({ 100,100,100,100 }), { 0,1,1,0 }, {1,1,1,1});

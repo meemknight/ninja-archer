@@ -5,6 +5,7 @@
 #include "mapData.h"
 #include "math.h"
 #include "Entity.h"
+#include "input.h"
 
 gl2d::Renderer2D renderer2d;
 //sf::Music music;
@@ -94,33 +95,19 @@ bool gameLogic(float deltaTime)
 	float speed = 200;
 
 	//renderer2d.currentCamera.position = { -500,-100 };
+	
+	player.pos.x += deltaTime * speed * input::getMoveDir();
 
-	if (input::isKeyHeld('W'))
-	{
-		player.pos.y -= deltaTime * speed;
-	}
-	if (input::isKeyHeld('S'))
-	{
-		player.pos.y += deltaTime * speed;
-	}
-	if (input::isKeyHeld('A'))
-	{
-		player.pos.x -= deltaTime * speed;
-	}
-	if (input::isKeyHeld('D'))
-	{
-		player.pos.x += deltaTime * speed;
-	}
-	if (input::isKeyHeld('Q'))
+	if (platform::isKeyHeld('Q'))
 	{
 		renderer2d.currentCamera.zoom-= deltaTime;
 	}
-	if (input::isKeyHeld('E'))
+	if (platform::isKeyHeld('E'))
 	{
 		renderer2d.currentCamera.zoom += deltaTime;
 	}
 
-	if(input::isKeyPressedOn(VK_SPACE))
+	if(input::isKeyPressedOn(input::Buttons::jump))
 	{
 		player.jump();
 	}

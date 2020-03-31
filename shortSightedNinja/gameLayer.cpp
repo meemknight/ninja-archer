@@ -36,10 +36,10 @@ bool initGame()
 		"!!                                    !!"
 		"!!                                    !!"
 		"!!                                    !!"
+		"!!                         !!!!!!!!!!!!!"
 		"!!                                    !!"
 		"!!                                    !!"
-		"!!                                    !!"
-		"!!                                    !!"
+		"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 		"!!!!        !!!       !!!      !!!    !!"
 		"!!   !  !       !  !      !  !     !  !!"
 		"!!!!!!  !!  !!!!!  !! !!!!!  !!!!!!!  !!"
@@ -110,6 +110,15 @@ bool gameLogic(float deltaTime)
 		renderer2d.currentCamera.zoom += deltaTime;
 	}
 
+	static unsigned long g = 0;
+	if(player.grounded)
+	{
+	//	glog("1");
+	}else
+	{
+		elog(g++);
+	}
+	
 	if(input::isKeyPressedOn(input::Buttons::jump))
 	{
 		player.jump();
@@ -122,7 +131,9 @@ bool gameLogic(float deltaTime)
 	player.applyVelocity(deltaTime);
 
 	player.resolveConstrains(mapData);
+	player.checkGrounded(mapData);
 	player.updateMove();
+
 
 	//mapRenderer.addBlock(renderer2d.toScreen({ 100,100,100,100 }), { 0,1,1,0 }, {1,1,1,1});
 	//mapRenderer.render();
@@ -131,7 +142,8 @@ bool gameLogic(float deltaTime)
 
 	std::vector<glm::vec2> triangles;
 
-	simulateLight({ player.pos.x, player.pos.y }, 1000.0f, mapData, triangles);
+	simuleteLightTrace({ player.pos.x + player.dimensions.x / 2, player.pos.y+8 },
+		100, mapData, triangles);
 
 	mapRenderer.drawFromMapData(renderer2d ,mapData);
 

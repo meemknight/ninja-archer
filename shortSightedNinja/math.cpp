@@ -84,6 +84,33 @@ void simulateLight(glm::vec2 pos, float radius, MapData &mapData, std::vector<gl
 #pragma endregion
 }
 
+void simuleteLightTrace(glm::vec2 pos, float radius, MapData & mapData, std::vector<glm::vec2>& triangles)
+{
+	float rotateStep = 0.1;
+	float moveStep = BLOCK_SIZE * 0.1;
+
+	for(float i=0; i< 3.141*2.f; i+= rotateStep)
+	{
+		glm::vec2 movePos = pos;
+		glm::vec2 dir = { cos(i), -sin(i) };
+		dir *= moveStep;
+		
+		for(int d=0; d<radius; d += moveStep)
+		{
+			movePos += dir;
+			if(mapData.get(movePos.x / BLOCK_SIZE, movePos.y / BLOCK_SIZE).type == '!')
+			{
+				mapData.get(movePos.x / BLOCK_SIZE, movePos.y / BLOCK_SIZE).mainColor= glm::vec4(1, 1, 1, 1);
+				break;
+			}
+		}
+		drawLine( pos , movePos, { 0.245f,0.66f,0.66f }, 6.0);
+
+	}
+
+
+}
+
 
 
 /////////////////

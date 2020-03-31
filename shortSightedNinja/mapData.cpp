@@ -51,6 +51,8 @@ void MapData::cleanup()
 void BlockInfo::resetColors()
 {
 	mainColor = { 0,0,0,0 };
+	directionalLight = { 0,0,0,0 };
+	alpha = 0;
 }
 
 void MapData::setNeighbors()

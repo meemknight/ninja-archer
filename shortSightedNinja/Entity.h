@@ -36,6 +36,8 @@ struct Entity
 
 	void applyVelocity(float deltaTime);
 
+	void checkGrounded(MapData &mapDat);
+
 	void jump();
 
 private:

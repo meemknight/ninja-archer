@@ -68,8 +68,9 @@ void Entity::resolveConstrains(MapData & mapData)
 			velocity.y = 0;
 		}
 	}
+	return;
 	*/
-	
+
 	grounded = 0;
 	
 	bool upTouch = 0;
@@ -112,10 +113,10 @@ void Entity::resolveConstrains(MapData & mapData)
 			if (newPos != posTest)
 			{
 				pos = newPos;
-				return;
+				goto end;
 			}
 	
-		} while (glm::length((newPos + delta) - pos) > 1.0f);
+		} while (glm::length((newPos + delta) - pos) > 1.0f * BLOCK_SIZE);
 		//todo optimize this while
 	
 		checkCollisionBrute(pos,
@@ -127,6 +128,7 @@ void Entity::resolveConstrains(MapData & mapData)
 			rightTouch);
 	}
 	
+	end:
 	if (downTouch)
 	{
 		grounded = 1;
@@ -168,7 +170,27 @@ void Entity::applyVelocity(float deltaTime)
 
 	if (grounded && velocity.y > 0)
 	{
-		velocity.y = 0;
+		velocity.y = 20;
+	}
+
+}
+
+void Entity::checkGrounded(MapData &mapDat)
+{
+	int minx = floor((pos.x)/BLOCK_SIZE);
+	int maxx = floor((pos.x + dimensions.x)/BLOCK_SIZE);
+
+	minx = max(minx, 0);
+	maxx = min(maxx, mapDat.w);
+
+
+	for(int x=minx; x<=maxx; x++)
+	{
+		if(isColidable(mapDat.get(x, floor((pos.y +dimensions.y + 0.1)/BLOCK_SIZE)).type))
+		{
+			grounded = 1;
+			break;
+		}
 	}
 
 }
@@ -211,12 +233,12 @@ glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 s
 					{
 						if(delta.x < 0) // moving left
 						{
-							leftTouch |= 1;
+							leftTouch = 1;
 							pos.x = x * BLOCK_SIZE + BLOCK_SIZE;
 							goto end;
 						}else
 						{
-							rightTouch |= 1;
+							rightTouch = 1;
 							pos.x = x * BLOCK_SIZE - dimensions.x;
 							goto end;
 						}
@@ -225,12 +247,12 @@ glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 s
 					{
 						if(delta.y < 0) //moving up
 						{
-							upTouch |= 1;
+							upTouch = 1;
 							pos.y = y * BLOCK_SIZE + BLOCK_SIZE;
 							goto end;
 						}else
 						{
-							downTouch |= 1;
+							downTouch = 1;
 							pos.y = y * BLOCK_SIZE - dimensions.y;
 							goto end;
 						}

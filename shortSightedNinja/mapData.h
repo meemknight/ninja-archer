@@ -42,6 +42,10 @@ struct BlockInfo
 	int edgeId[4];
 	bool edgeExist[4];
 
+	//top down left right
+	glm::vec4 directionalLight;
+
+	float alpha;
 
 	glm::vec4 mainColor;
 

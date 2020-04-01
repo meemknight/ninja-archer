@@ -31,20 +31,20 @@ bool initGame()
 	mapRenderer.sprites = sprites;
 
 	mapData.create(40, 40, 
-		"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-		"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-		"!!                                    !!"
-		"!!                                    !!"
-		"!!                                    !!"
+		"!!!!!!!!!                             !!"
+		"!!!!!!!!!!!!!!!!                      !!"
+		"!!                         !          !!"
+		"!!                         !          !!"
+		"!!                         !          !!"
 		"!!                         !!!!!!!!!!!!!"
-		"!!                                    !!"
-		"!!                                    !!"
-		"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-		"!!!!        !!!       !!!      !!!    !!"
-		"!!   !  !       !  !      !  !     !  !!"
-		"!!!!!!  !!  !!!!!  !! !!!!!  !!!!!!!  !!"
-		"!!                                    !!"
-		"!!                                    !!"
+		"!!                         !          !!"
+		"!!                         !          !!"
+		"!!            !!!!!!!!!!!!!!!         !!"
+		"!!          !!!                       !!"
+		"!!                                  !!!!"
+		"!!!!!!!!!!              !           !!!!"
+		"!!                      !           !!!!"
+		"!!            !!!!!!!!!!!!!!!!!!!!!!!!!!"
 		"!!  !!  ! !!!  !!  ! !!  !!  ! !  !!  !!"
 		"!!                                    !!"
 		"!!          !         !        !      !!"
@@ -95,11 +95,19 @@ bool gameLogic(float deltaTime)
 	//renderer2d.renderRectangle({ 100,100,100,100 }, Colors_Green);
 	//renderer2d.flush();
 
-	float speed = 200;
 
 	//renderer2d.currentCamera.position = { -500,-100 };
 	
-	player.pos.x += deltaTime * speed * input::getMoveDir();
+	if(player.wallGrab == 0)
+	{
+		if(player.grounded)
+		{
+			player.run(deltaTime * input::getMoveDir());
+		}else
+		{
+			player.airRun(deltaTime * input::getMoveDir());
+		}
+	}
 
 	if (platform::isKeyHeld('Q'))
 	{
@@ -110,28 +118,47 @@ bool gameLogic(float deltaTime)
 		renderer2d.currentCamera.zoom += deltaTime;
 	}
 
-	static unsigned long g = 0;
-	if(player.grounded)
-	{
-	//	glog("1");
-	}else
-	{
-		elog(g++);
-	}
 	
 	if(input::isKeyPressedOn(input::Buttons::jump))
 	{
-		player.jump();
+		if(player.wallGrab == 0)
+		{
+			if(player.grounded)
+			{
+				player.jump();
+			}
+
+		}else if(player.wallGrab == 1)
+		{
+			player.strafe(-1);
+			player.jumpFromWall();
+			player.wallGrab = 0;
+		}
+		else if (player.wallGrab == -1)
+		{
+			player.strafe(1);
+			player.jumpFromWall();
+			player.wallGrab = 0;
+		}
+	}
+
+	if(input::isKeyHeld(input::Buttons::down))
+	{
+		player.wallGrab = 0;
 	}
 
 	//todo add player dimensions
 	renderer2d.currentCamera.follow(player.pos + (player.dimensions/2.f), deltaTime * 120, 30, renderer2d.windowW, renderer2d.windowH );
+
+	ilog(player.velocity.x);
+	
 
 	player.applyGravity(deltaTime);
 	player.applyVelocity(deltaTime);
 
 	player.resolveConstrains(mapData);
 	player.checkGrounded(mapData);
+	player.checkWall(mapData, input::getMoveDir());
 	player.updateMove();
 
 
@@ -142,8 +169,16 @@ bool gameLogic(float deltaTime)
 
 	std::vector<glm::vec2> triangles;
 
-	simuleteLightTrace({ player.pos.x + player.dimensions.x / 2, player.pos.y+8 },
-		100, mapData, triangles);
+	//simuleteLightTrace({ player.pos.x + player.dimensions.x / 2, player.pos.y+8 },
+	//	100, mapData, triangles);
+
+	for (int x = 0; x < 40; x++)
+	{
+		for (int y = 0; y < 40; y++)
+		{
+			mapData.get(x, y).mainColor = { 1,1,1,1 };
+		}
+	}
 
 	mapRenderer.drawFromMapData(renderer2d ,mapData);
 

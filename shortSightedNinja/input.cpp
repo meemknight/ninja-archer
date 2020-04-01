@@ -41,7 +41,7 @@ namespace input
 
 	int bindings[Buttons::buttonsCount] = { 0, 'S', 'A', 'D', VK_SPACE, 0, 'W' };
 	WORD bindingsController[Buttons::buttonsCount] = { 0, XINPUT_GAMEPAD_DPAD_DOWN
-		, XINPUT_GAMEPAD_DPAD_LEFT, XINPUT_GAMEPAD_DPAD_RIGHT, 0, XINPUT_GAMEPAD_A, XINPUT_GAMEPAD_DPAD_UP };
+		, XINPUT_GAMEPAD_DPAD_LEFT, XINPUT_GAMEPAD_DPAD_RIGHT, XINPUT_GAMEPAD_A, 0, XINPUT_GAMEPAD_DPAD_UP };
 	float deadZone = 0.15f;
 	float moveSensitivity = 0.30f;
 
@@ -58,7 +58,7 @@ namespace input
 		return buttonsHeld[b];
 	}
 
-	float getMoveDir()
+	int getMoveDir()
 	{
 		return -isKeyHeld(Buttons::left) + isKeyHeld(Buttons::right);
 	}

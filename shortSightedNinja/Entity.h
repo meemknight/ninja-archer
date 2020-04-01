@@ -12,6 +12,8 @@ struct Entity
 
 	glm::vec2 velocity;
 
+	int wallGrab = 0;
+
 	bool grounded;
 	bool movingRight;
 
@@ -32,13 +34,23 @@ struct Entity
 		lastPos = pos; 
 	}
 	
+	void strafe(int dir);
+
+	void run(float speed);
+
+	void airRun(float speed);
+
 	void applyGravity(float deltaTime);
 
 	void applyVelocity(float deltaTime);
 
 	void checkGrounded(MapData &mapDat);
 
+	void checkWall(MapData &mapData, int move);
+
 	void jump();
+
+	void jumpFromWall();
 
 private:
 	glm::vec2 performCollision(MapData &mapDat, glm::vec2 pos, glm::vec2 size, glm::vec2 delta,

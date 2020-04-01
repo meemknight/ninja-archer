@@ -2,9 +2,13 @@
 #include "glm/glm.hpp"
 
 float gravitationalAcceleration = 64;
-float jumpSpeed = 24;
+float jumpSpeed = 22;
+float jumpFromWallSpeed = 10;
 float velocityClamp = 30;
-float drag = 0.5f;
+float drag = 0.15f;
+float strafeSpeed = 10;
+float runSpeed = 14;
+float airRunSpeed = 10;
 
 //pos and size
 bool aabb(glm::vec4 b1, glm::vec4 b2)
@@ -71,7 +75,6 @@ void Entity::resolveConstrains(MapData & mapData)
 	return;
 	*/
 
-	grounded = 0;
 	
 	bool upTouch = 0;
 	bool downTouch = 0;
@@ -129,10 +132,6 @@ void Entity::resolveConstrains(MapData & mapData)
 	}
 	
 	end:
-	if (downTouch)
-	{
-		grounded = 1;
-	}
 	
 	if (upTouch)
 	{
@@ -141,11 +140,30 @@ void Entity::resolveConstrains(MapData & mapData)
 			velocity.y = 0;
 		}
 	}
+
+}
+
+void Entity::strafe(int dir)
+{
+	velocity.x = dir * strafeSpeed * BLOCK_SIZE;
+}
+
+void Entity::run(float speed)
+{
+	pos.x += speed * runSpeed * BLOCK_SIZE;
+}
+
+void Entity::airRun(float speed)
+{
+	pos.x += speed * airRunSpeed * BLOCK_SIZE;
 }
 
 void Entity::applyGravity(float deltaTime)
 {
-	velocity.y += deltaTime * gravitationalAcceleration * BLOCK_SIZE;
+	if(wallGrab == 0)
+	{
+		velocity.y += deltaTime * gravitationalAcceleration * BLOCK_SIZE;
+	}
 }
 
 void Entity::applyVelocity(float deltaTime)
@@ -153,12 +171,23 @@ void Entity::applyVelocity(float deltaTime)
 	const float c = velocityClamp * BLOCK_SIZE;
 	velocity = glm::clamp(velocity, { -c,-c }, { c, c });
 
+	if(wallGrab != 0)
+	{
+		velocity.y = 0;
+	}
+
+
 	pos += velocity * deltaTime;
 
 	//drag
 	velocity.x += velocity.x * (-drag * deltaTime * BLOCK_SIZE);
 
-	if (std::fabs(velocity.x) < 0.01)
+	if(grounded || wallGrab)
+	{
+		velocity.x = 0;
+	}
+
+	if (std::fabs(velocity.x) < 10)
 	{
 		velocity.x = 0;
 	}
@@ -177,8 +206,10 @@ void Entity::applyVelocity(float deltaTime)
 
 void Entity::checkGrounded(MapData &mapDat)
 {
-	int minx = floor((pos.x)/BLOCK_SIZE);
-	int maxx = floor((pos.x + dimensions.x)/BLOCK_SIZE);
+	grounded = 0;
+
+	int minx = floor((pos.x + 1)/BLOCK_SIZE);
+	int maxx = floor((pos.x + dimensions.x - 1)/BLOCK_SIZE);
 
 	minx = max(minx, 0);
 	maxx = min(maxx, mapDat.w);
@@ -195,12 +226,43 @@ void Entity::checkGrounded(MapData &mapDat)
 
 }
 
-void Entity::jump()
+void Entity::checkWall(MapData & mapData, int move)
 {
 	if(grounded)
 	{
-		velocity.y = -jumpSpeed * BLOCK_SIZE;
+		return;
 	}
+
+	int minY = floor((pos.y /BLOCK_SIZE)+0.1f);
+	int maxY = minY + 1;
+	int rightX = floor((pos.x + dimensions.x) / BLOCK_SIZE);
+	int leftX = floor((pos.x-2) / BLOCK_SIZE);
+
+	//llog(minY, rightX);
+
+	//for(int y= minY; y<maxY; y++)
+	//{
+	if(isColidable(mapData.get(rightX, minY).type) && move > 0)
+	{
+		wallGrab = 1;
+	}
+	if (isColidable(mapData.get(leftX, minY).type) && move < 0)
+	{
+		wallGrab = -1;
+	}
+	//}
+
+
+}
+
+void Entity::jump()
+{
+	velocity.y = -jumpSpeed * BLOCK_SIZE;
+}
+
+void Entity::jumpFromWall()
+{
+	velocity.y = -jumpFromWallSpeed * BLOCK_SIZE;
 }
 
 glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 size, glm::vec2 delta,

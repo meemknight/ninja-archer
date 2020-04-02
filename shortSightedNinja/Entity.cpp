@@ -155,6 +155,21 @@ void Entity::run(float speed)
 
 void Entity::airRun(float speed)
 {
+	if(speed > 0)
+	{
+		if(velocity.x < -20)
+		{
+			return;
+		}
+	}else 
+	if (speed < 0)
+	{
+		if (velocity.x > 20)
+		{
+			return;
+		}
+	}
+
 	pos.x += speed * airRunSpeed * BLOCK_SIZE;
 }
 

@@ -29,6 +29,10 @@ bool initGame()
 
 	mapRenderer.init(sp);
 	mapRenderer.sprites = sprites;
+	mapRenderer.upTexture.loadFromFile("top.png");
+	mapRenderer.downTexture.loadFromFile("bottom.png");
+	mapRenderer.leftTexture.loadFromFile("left.png");
+	mapRenderer.rightTexture.loadFromFile("right.png");
 
 	mapData.create(40, 40, 
 		"!!!!!!!!!                             !!"
@@ -37,9 +41,9 @@ bool initGame()
 		"!!                         !          !!"
 		"!!                         !          !!"
 		"!!                         !!!!!!!!!!!!!"
-		"!!                         !          !!"
-		"!!                         !          !!"
-		"!!            !!!!!!!!!!!!!!!         !!"
+		"!!                         !!!!       !!"
+		"!!                         !!!!       !!"
+		"!!            !!!!!!!!!!!!!!!!!       !!"
 		"!!          !!!                       !!"
 		"!!                                  !!!!"
 		"!!!!!!!!!!              !           !!!!"
@@ -152,7 +156,6 @@ bool gameLogic(float deltaTime)
 
 	ilog(player.velocity.x);
 	
-
 	player.applyGravity(deltaTime);
 	player.applyVelocity(deltaTime);
 
@@ -177,6 +180,7 @@ bool gameLogic(float deltaTime)
 		for (int y = 0; y < 40; y++)
 		{
 			mapData.get(x, y).mainColor = { 1,1,1,1 };
+			mapData.get(x, y).sideColors = { 1,1,1,1 };
 		}
 	}
 
@@ -184,8 +188,10 @@ bool gameLogic(float deltaTime)
 
 	gl2d::TextureAtlas playerAtlas(1, 1);
 
+
 	renderer2d.renderRectangle({ player.pos, player.dimensions }, {}, 0, characterSprite,
 		playerAtlas.get(0,0, !player.movingRight));
+
 	renderer2d.flush();
 
 	return true;

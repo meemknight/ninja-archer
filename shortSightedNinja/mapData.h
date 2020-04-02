@@ -37,6 +37,8 @@ struct BlockInfo
 	bool hasNeighborRight();
 	bool hasNeighborTop();
 	bool hasNeighborDown();
+
+	//up down left right 0000 udlr;
 	unsigned char neighbors;
 
 	int edgeId[4];
@@ -48,6 +50,7 @@ struct BlockInfo
 	float alpha;
 
 	glm::vec4 mainColor;
+	glm::vec4 sideColors;
 
 	char type;
 

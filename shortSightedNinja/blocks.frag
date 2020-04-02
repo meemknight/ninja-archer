@@ -2,9 +2,15 @@
 layout (location = 0) out vec4 color;
 
 uniform sampler2D u_sprites;
+uniform sampler2D u_up;
+uniform sampler2D u_down;
+uniform sampler2D u_left;
+uniform sampler2D u_right;
 
 in vec2 v_texCoord;
 in vec4 v_mainColor;
+in vec4 v_sideColor;
+in vec2 v_texColorCoord;
 
 vec3 rgbTohsv(vec3 c)
 {
@@ -29,9 +35,20 @@ void main()
 {
 	vec4 mainColor = clamp(v_mainColor, vec4(0,0,0,0), vec4(1,1,1,1));
 
-	color = mainColor  * vec4(texture(u_sprites,v_texCoord).xyz,1);
+	float lightBoost = texture2D(u_up,v_texColorCoord).x * v_sideColor.x * texture2D(u_up,v_texColorCoord).w;
+	lightBoost = max(lightBoost, texture(u_down,v_texColorCoord).x * v_sideColor.y * texture2D(u_down,v_texColorCoord).w);
+	lightBoost = max(lightBoost, texture(u_left,v_texColorCoord).x * v_sideColor.z * texture2D(u_left,v_texColorCoord).w);
+	lightBoost = max(lightBoost, texture(u_right,v_texColorCoord).x * v_sideColor.w * texture2D(u_right,v_texColorCoord).w);
+
+	lightBoost = min(lightBoost, 1);
+	lightBoost *= 0.2;
+
+	color = mainColor  * vec4(texture2D(u_sprites,v_texCoord).xyz,1);
 	
 	color.rgb = rgbTohsv(color.rgb);
+
+	color.b += (lightBoost);
+	color.b = min(color.b, 1.f);
 
 	color.rgb = hsvTorgb(color.rgb);
 }

@@ -3,12 +3,14 @@
 
 float gravitationalAcceleration = 64;
 float jumpSpeed = 22;
-float jumpFromWallSpeed = 10;
+float jumpFromWallSpeed = 20;
 float velocityClamp = 30;
 float drag = 0.15f;
 float strafeSpeed = 10;
 float runSpeed = 14;
 float airRunSpeed = 10;
+float grabMargin = 0.25f;
+float notGrabTimeVal = 0.4;
 
 //pos and size
 bool aabb(glm::vec4 b1, glm::vec4 b2)
@@ -183,6 +185,13 @@ void Entity::applyGravity(float deltaTime)
 
 void Entity::applyVelocity(float deltaTime)
 {
+
+	if (notGrabTime <= 0) { notGrabTime = 0; }
+	else
+	{
+		notGrabTime -= deltaTime;
+	}
+
 	const float c = velocityClamp * BLOCK_SIZE;
 	velocity = glm::clamp(velocity, { -c,-c }, { c, c });
 
@@ -243,12 +252,26 @@ void Entity::checkGrounded(MapData &mapDat)
 
 void Entity::checkWall(MapData & mapData, int move)
 {
+	if(notGrabTime > 0)
+	{
+		return;
+	}
+
 	if(grounded)
 	{
 		return;
 	}
 
 	int minY = floor((pos.y /BLOCK_SIZE)+0.1f);
+	float dist = (pos.y / BLOCK_SIZE) + 0.1f - floor((pos.y / BLOCK_SIZE) + 0.1f);
+	
+	//ilog(dist);
+
+	if(dist > grabMargin)
+	{
+		return;
+	}
+	
 	int maxY = minY + 1;
 	int rightX = floor((pos.x + dimensions.x) / BLOCK_SIZE);
 	int leftX = floor((pos.x-2) / BLOCK_SIZE);
@@ -259,11 +282,19 @@ void Entity::checkWall(MapData & mapData, int move)
 	//{
 	if(isColidable(mapData.get(rightX, minY).type) && move > 0)
 	{
-		wallGrab = 1;
+		if ((minY == 0 || !isColidable(mapData.get(rightX, minY - 1).type)))
+		{
+			pos.y = minY*BLOCK_SIZE;
+			wallGrab = 1;
+		}
 	}
 	if (isColidable(mapData.get(leftX, minY).type) && move < 0)
 	{
-		wallGrab = -1;
+		if (minY == 0 || !isColidable(mapData.get(leftX, minY - 1).type))
+		{
+			pos.y = minY * BLOCK_SIZE;
+			wallGrab = -1;
+		}
 	}
 	//}
 
@@ -277,6 +308,7 @@ void Entity::jump()
 
 void Entity::jumpFromWall()
 {
+	notGrabTime = notGrabTimeVal;
 	velocity.y = -jumpFromWallSpeed * BLOCK_SIZE;
 }
 

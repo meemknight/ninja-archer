@@ -134,13 +134,13 @@ bool gameLogic(float deltaTime)
 
 		}else if(player.wallGrab == 1)
 		{
-			player.strafe(-1);
+			//player.strafe(-1);
 			player.jumpFromWall();
 			player.wallGrab = 0;
 		}
 		else if (player.wallGrab == -1)
 		{
-			player.strafe(1);
+			//player.strafe(1);
 			player.jumpFromWall();
 			player.wallGrab = 0;
 		}
@@ -151,10 +151,10 @@ bool gameLogic(float deltaTime)
 		player.wallGrab = 0;
 	}
 
+	ilog(player.notGrabTime);
+
 	//todo add player dimensions
 	renderer2d.currentCamera.follow(player.pos + (player.dimensions/2.f), deltaTime * 120, 30, renderer2d.windowW, renderer2d.windowH );
-
-	ilog(player.velocity.x);
 	
 	player.applyGravity(deltaTime);
 	player.applyVelocity(deltaTime);
@@ -189,7 +189,6 @@ bool gameLogic(float deltaTime)
 	mapRenderer.drawFromMapData(renderer2d ,mapData);
 
 	gl2d::TextureAtlas playerAtlas(1, 1);
-
 
 	renderer2d.renderRectangle({ player.pos, player.dimensions }, {}, 0, characterSprite,
 		playerAtlas.get(0,0, !player.movingRight));

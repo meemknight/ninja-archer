@@ -21,6 +21,8 @@ struct Entity
 	bool &upTouch, bool &downTouch, bool &leftTouch, bool &rightTouch);
 	void resolveConstrains(MapData &mapData);
 
+	float notGrabTime = 0;
+
 	void updateMove() 
 	{
 		if(lastPos.x - pos.x < 0)

@@ -212,7 +212,6 @@ void imguiFunc(float deltaTime)
 	static glm::vec4 color;
 
 	//todo delta time
-	//todo xinput and input
 
 	//ImGui::Begin("delta");
 	//ImGui::Text(std::to_string(1.f/(deltaTime/1000.f)).c_str());

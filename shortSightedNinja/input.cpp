@@ -47,6 +47,7 @@ namespace input
 
 	int buttonsHeld[Buttons::buttonsCount] = {};
 	int buttonsPressed[Buttons::buttonsCount] = {};
+	int buttonsReleased[Buttons::buttonsCount] = {};
 
 	bool isKeyPressedOn(int b)
 	{
@@ -56,6 +57,11 @@ namespace input
 	bool isKeyHeld(int b) 
 	{
 		return buttonsHeld[b];
+	}
+
+	bool isKeyReleased(int b)
+	{
+		return buttonsReleased[b];
 	}
 
 	int getMoveDir()
@@ -82,6 +88,14 @@ namespace input
 			else
 			{
 				state = internal::getisKeyHeldDirect(i, nullptr);
+			}
+
+			if(!state && buttonsHeld[i])
+			{
+				buttonsReleased[i] = 1;
+			}else
+			{
+				buttonsReleased[i] = 0;
 			}
 
 			buttonsPressed[i] = 0;
@@ -114,12 +128,12 @@ namespace input
 				
 				if (b == input::Buttons::jump)
 				{
-					val = pad->bRightTrigger > 30;
+					val = pad->bRightTrigger > 20;
 					val = val | (pad->wButtons & bindingsController[b]);
 				}
 				else if (b == input::Buttons::shoot)
 				{
-					val = pad->bLeftTrigger > 30;
+					val = pad->bLeftTrigger > 20;
 				}
 				else if(b == input::Buttons::left)
 				{

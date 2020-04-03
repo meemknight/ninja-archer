@@ -11,6 +11,7 @@ float runSpeed = 14;
 float airRunSpeed = 10;
 float grabMargin = 0.25f;
 float notGrabTimeVal = 0.4;
+bool snapWallGrab = 1;
 
 //pos and size
 bool aabb(glm::vec4 b1, glm::vec4 b2)
@@ -265,7 +266,6 @@ void Entity::checkWall(MapData & mapData, int move)
 	int minY = floor((pos.y /BLOCK_SIZE)+0.1f);
 	float dist = (pos.y / BLOCK_SIZE) + 0.1f - floor((pos.y / BLOCK_SIZE) + 0.1f);
 	
-	//ilog(dist);
 
 	if(dist > grabMargin)
 	{
@@ -276,7 +276,6 @@ void Entity::checkWall(MapData & mapData, int move)
 	int rightX = floor((pos.x + dimensions.x) / BLOCK_SIZE);
 	int leftX = floor((pos.x-2) / BLOCK_SIZE);
 
-	//llog(minY, rightX);
 
 	//for(int y= minY; y<maxY; y++)
 	//{
@@ -284,7 +283,10 @@ void Entity::checkWall(MapData & mapData, int move)
 	{
 		if ((minY == 0 || !isColidable(mapData.get(rightX, minY - 1).type)))
 		{
-			pos.y = minY*BLOCK_SIZE;
+			if(snapWallGrab)
+			{
+				pos.y = minY * BLOCK_SIZE;
+			}
 			wallGrab = 1;
 		}
 	}
@@ -292,7 +294,10 @@ void Entity::checkWall(MapData & mapData, int move)
 	{
 		if (minY == 0 || !isColidable(mapData.get(leftX, minY - 1).type))
 		{
-			pos.y = minY * BLOCK_SIZE;
+			if (snapWallGrab)
+			{
+				pos.y = minY * BLOCK_SIZE;
+			}
 			wallGrab = -1;
 		}
 	}

@@ -25,6 +25,7 @@ namespace input
 	
 	bool isKeyPressedOn(int b);
 	bool isKeyHeld(int b);
+	bool isKeyReleased(int b);
 
 	int getMoveDir();
 

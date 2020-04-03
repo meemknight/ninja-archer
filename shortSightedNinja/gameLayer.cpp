@@ -7,6 +7,18 @@
 #include "Entity.h"
 #include "input.h"
 
+extern float gravitationalAcceleration;
+extern float jumpSpeed;
+extern float jumpFromWallSpeed;
+extern float velocityClamp;
+//extern float drag;
+//extern float strafeSpeed = 10;
+extern float runSpeed;
+extern float airRunSpeed;
+extern float grabMargin;
+extern float notGrabTimeVal;
+extern bool snapWallGrab;
+
 gl2d::Renderer2D renderer2d;
 //sf::Music music;
 MapRenderer mapRenderer;
@@ -146,12 +158,19 @@ bool gameLogic(float deltaTime)
 		}
 	}
 
+	if(input::isKeyReleased(input::Buttons::jump))
+	{
+		if(player.velocity.y < 0)
+		{
+			player.velocity.y *= 0.4;
+		}
+	}
+
 	if(input::isKeyHeld(input::Buttons::down))
 	{
 		player.wallGrab = 0;
 	}
 
-	ilog(player.notGrabTime);
 
 	//todo add player dimensions
 	renderer2d.currentCamera.follow(player.pos + (player.dimensions/2.f), deltaTime * 120, 30, renderer2d.windowW, renderer2d.windowH );
@@ -163,7 +182,6 @@ bool gameLogic(float deltaTime)
 	player.checkGrounded(mapData);
 	player.checkWall(mapData, input::getMoveDir());
 	player.updateMove();
-
 
 	//mapRenderer.addBlock(renderer2d.toScreen({ 100,100,100,100 }), { 0,1,1,0 }, {1,1,1,1});
 	//mapRenderer.render();
@@ -212,11 +230,36 @@ void imguiFunc(float deltaTime)
 	static glm::vec4 color;
 
 	//todo delta time
+	/*
+	extern float gravitationalAcceleration;
+extern float jumpSpeed;
+extern float jumpFromWallSpeed;
+extern float velocityClamp;
+//extern float drag;
+//extern float strafeSpeed = 10;
+extern float runSpeed;
+extern float airRunSpeed;
+extern float grabMargin;
+extern float notGrabTimeVal;
+extern bool snapWallGrab;
+	*/
 
 	//ImGui::Begin("delta");
 	//ImGui::Text(std::to_string(1.f/(deltaTime/1000.f)).c_str());
-	//
 	//ImGui::End();
+
+	ImGui::Begin("Move settings");
+	ImGui::SliderFloat("gravitationalAcceleration", &gravitationalAcceleration, 30, 100);
+	ImGui::SliderFloat("jumpSpeed", &jumpSpeed, 1, 50);
+	ImGui::SliderFloat("jumpFromWallSpeed", &jumpFromWallSpeed, 1, 50);
+	ImGui::SliderFloat("velocityClamp", &velocityClamp, 10, 70);
+	ImGui::SliderFloat("runSpeed", &runSpeed, 1, 40);
+	ImGui::SliderFloat("airRunSpeed", &airRunSpeed, 1, 40);
+	ImGui::SliderFloat("grabMargin", &grabMargin, 0, 1);
+	ImGui::Checkbox("snapWallGrab", &snapWallGrab);
+
+	ImGui::End();
+
 	//ImGui::Begin("My First Tool", &active, ImGuiWindowFlags_MenuBar);
 	//if (ImGui::BeginMenuBar())
 	//{

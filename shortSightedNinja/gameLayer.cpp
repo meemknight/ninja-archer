@@ -37,12 +37,12 @@ bool initGame()
 	mapData.create(40, 40, 
 		"!!!!!!!!!                             !!"
 		"!!!!!!!!!!!!!!!!                      !!"
-		"!!                         !          !!"
-		"!!                         !          !!"
-		"!!                         !          !!"
-		"!!                         !!!!!!!!!!!!!"
-		"!!                         !!!!       !!"
-		"!!                         !!!!       !!"
+		"!!!!!!!!!!!!!              !          !!"
+		"!!!                        !          !!"
+		"!!!                        !          !!"
+		"!!!!!!!!!!!!!!!!           !!!!!!!!!!!!!"
+		"!!!!!!!!               !      !       !!"
+		"!!!!!!                 !     !!       !!"
 		"!!            !!!!!!!!!!!!!!!!!       !!"
 		"!!          !!!                       !!"
 		"!!                                  !!!!"
@@ -175,14 +175,16 @@ bool gameLogic(float deltaTime)
 	//simuleteLightTrace({ player.pos.x + player.dimensions.x / 2, player.pos.y+8 },
 	//	100, mapData, triangles);
 
-	for (int x = 0; x < 40; x++)
-	{
-		for (int y = 0; y < 40; y++)
-		{
-			mapData.get(x, y).mainColor = { 1,1,1,1 };
-			mapData.get(x, y).sideColors = { 1,1,1,1 };
-		}
-	}
+	//for (int x = 0; x < 40; x++)
+	//{
+	//	for (int y = 0; y < 40; y++)
+	//	{
+	//		mapData.get(x, y).mainColor = { 1,1,1,1 };
+	//		mapData.get(x, y).sideColors = { 1,1,1,1 };
+	//	}
+	//}
+
+	simuleteLightSpot(player.pos, 14, mapData, triangles);
 
 	mapRenderer.drawFromMapData(renderer2d ,mapData);
 

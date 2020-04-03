@@ -41,7 +41,7 @@ void main()
 	lightBoost = max(lightBoost, texture(u_right,v_texColorCoord).x * v_sideColor.w * texture2D(u_right,v_texColorCoord).w);
 
 	lightBoost = min(lightBoost, 1);
-	lightBoost *= 0.2;
+	lightBoost *= 0.3;
 
 	color = mainColor  * vec4(texture2D(u_sprites,v_texCoord).xyz,1);
 	

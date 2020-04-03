@@ -36,6 +36,7 @@ void MapData::clearColorData()
 		for (int i = 0; i < w*h; i++)
 		{
 			data[i].mainColor = { 0,0,0,0 };
+			data[i].sideColors = { 0,0,0,0 };
 		}
 	}
 }

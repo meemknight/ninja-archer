@@ -1,4 +1,7 @@
 #include "MapRenderer.h"
+#include <algorithm>
+#undef min
+#undef max
 
 gl2d::TextureAtlas spriteAtlas(BLOCK_COUNT, 4);
 
@@ -135,9 +138,38 @@ void MapRenderer::render()
 
 void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData)
 {
-	for(int h=0; h<mapData.h; h++)
+	
+	glm::vec2 minPos = { 0,0 };
+	glm::vec2 maxPos = {0,0};
+
+	minPos.x = ((renderer.currentCamera.position.x));
+	minPos.y = ((renderer.currentCamera.position.y));
+	maxPos.x = ((renderer.currentCamera.position.x+renderer.windowW));
+	maxPos.y = ((renderer.currentCamera.position.y+renderer.windowH));
+
+	minPos = gl2d::scaleAroundPoint(minPos, renderer.currentCamera.position +
+		glm::vec2{ renderer.windowW / 2, renderer.windowH / 2 }, 1.f/renderer.currentCamera.zoom);
+
+	maxPos= gl2d::scaleAroundPoint(maxPos, renderer.currentCamera.position +
+		glm::vec2{ renderer.windowW / 2, renderer.windowH / 2 }, 1.f/renderer.currentCamera.zoom);
+
+	minPos /= BLOCK_SIZE;
+	maxPos /= BLOCK_SIZE;
+
+	minPos.x--;
+	minPos.y--;
+
+	maxPos.x++;
+	maxPos.y++;
+
+	minPos = glm::max(minPos, glm::vec2{ 0,0 });
+	maxPos = glm::min(maxPos, glm::vec2{ mapData.w,mapData.h });
+
+	ilog(maxPos.x, maxPos.y);
+
+	for(int h= minPos.y; h<maxPos.y; h++)
 	{
-		for(int w=0;w<mapData.w; w++)
+		for(int w= minPos.x;w<maxPos.x; w++)
 		{
 			
 			if(mapData.get(w, h).type != Block::none && mapData.get(w,h).mainColor.w != 0)

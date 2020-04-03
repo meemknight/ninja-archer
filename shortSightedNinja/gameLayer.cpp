@@ -202,7 +202,8 @@ bool gameLogic(float deltaTime)
 	//	}
 	//}
 
-	simuleteLightSpot(player.pos, 14, mapData, triangles);
+
+	simuleteLightSpot(player.pos, 44, mapData, triangles);
 
 	mapRenderer.drawFromMapData(renderer2d ,mapData);
 
@@ -221,7 +222,6 @@ void closeGame()
 {
 	//music.stop();
 }
-
 
 void imguiFunc(float deltaTime)
 {

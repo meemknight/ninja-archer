@@ -189,31 +189,8 @@ namespace gl2d
 
 	glm::vec2 scaleAroundPoint(glm::vec2 vec, glm::vec2 point, float scale)
 	{
-
 		vec = (vec - point) * scale + point;
 
-		//vec.x = vec.x * scale;
-		//vec.y = vec.y * scale;
-		//
-		//glm::vec2 move = point - (point * scale);
-		//
-		//vec += move;
-
-		//vec.x = vec.x * scale;
-		//vec.y = vec.y * scale;
-		//
-		//if (scale > 1)
-		//{
-		//	scale = scale - 1;
-		//}
-		//else
-		//{
-		//	scale = scale - 1;
-		//}
-		//
-		//vec.x = vec.x + point.x * scale;
-		//vec.y = vec.y + point.y * scale;
-		//
 		return vec;
 	}
 

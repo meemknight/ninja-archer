@@ -29,6 +29,8 @@ namespace input
 
 	int getMoveDir();
 
+	glm::vec2 getShootDir(glm::vec2 centre);
+
 	//used internally
 	namespace internal
 	{

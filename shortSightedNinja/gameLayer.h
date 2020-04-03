@@ -8,8 +8,6 @@ void errorMessage(const char *c);
 ///sets the mouse pos relative to the window's drawing area
 void setRelMousePosition(int x, int y);
 
-///gets the mouse pos relative to the window's drawing area
-glm::ivec2 getRelMousePosition();
 
 //gets the drawing region sizes
 glm::ivec2 getWindowSize();
@@ -19,6 +17,10 @@ inline int getWindowSizeY() { return getWindowSize().y; }
 
 namespace platform
 {
+
+///gets the mouse pos relative to the window's drawing area
+glm::ivec2 getRelMousePosition();
+
 int isKeyHeld(int key);
 int isKeyPressedOn(int key);
 
@@ -27,11 +29,11 @@ int isRMouseButtonPressed();
 
 int isLMouseHeld();
 int isRMouseHeld();
-};
 
 void showMouse(bool show);
 bool isFocused();
-
+bool mouseMoved();
+};
 
 // game functions
 bool initGame();

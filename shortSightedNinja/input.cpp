@@ -69,6 +69,21 @@ namespace input
 		return -isKeyHeld(Buttons::left) + isKeyHeld(Buttons::right);
 	}
 
+	glm::vec2 lastShootDir = {1,0};
+
+	glm::vec2 getShootDir(glm::vec2 centre)
+	{
+
+		if(platform::mouseMoved())
+		{
+			lastShootDir = glm::vec2(platform::getRelMousePosition()) - centre;
+			lastShootDir = glm::normalize(lastShootDir);
+		}
+
+		return lastShootDir;
+
+	}
+
 	void updateInput()
 	{
 		XINPUT_STATE s;
@@ -77,6 +92,36 @@ namespace input
 		{
 			read = 0;
 		}
+
+		if(read)
+		{
+			const XINPUT_GAMEPAD *pad = &s.Gamepad;
+			float retValX = pad->sThumbRX / (float)SHRT_MAX;
+			float retValY = -pad->sThumbRY / (float)SHRT_MAX;
+
+			retValX = std::max(-1.f, retValX);
+			retValX = std::min(1.f, retValX);
+
+			retValY = std::max(-1.f, retValY);
+			retValY = std::min(1.f, retValY);
+
+			if (abs(retValX) < deadZone)
+			{
+				retValX = 0.f;
+			}
+			if (abs(retValY) < deadZone)
+			{
+				retValY = 0.f;
+			}
+
+			if (retValX != 0 || retValY != 0)
+			{
+				lastShootDir = { retValX, retValY };
+				lastShootDir = glm::normalize(lastShootDir);
+			}
+		
+		}
+
 
 		for (int i = 0; i < Buttons::buttonsCount; i++)
 		{

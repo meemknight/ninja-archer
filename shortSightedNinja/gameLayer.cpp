@@ -106,20 +106,21 @@ bool gameLogic(float deltaTime)
 	h = getWindowSizeY();
 
 	glViewport(0, 0, w, h);
-	renderer2d.updateWindowMetrics(w,h);
+	renderer2d.updateWindowMetrics(w, h);
 
 	//renderer2d.renderRectangle({ 100,100,100,100 }, Colors_Green);
 	//renderer2d.flush();
 
 
 	//renderer2d.currentCamera.position = { -500,-100 };
-	
-	if(player.wallGrab == 0)
+
+	if (player.wallGrab == 0)
 	{
-		if(player.grounded)
+		if (player.grounded)
 		{
 			player.run(deltaTime * input::getMoveDir());
-		}else
+		}
+		else
 		{
 			player.airRun(deltaTime * input::getMoveDir());
 		}
@@ -127,24 +128,25 @@ bool gameLogic(float deltaTime)
 
 	if (platform::isKeyHeld('Q'))
 	{
-		renderer2d.currentCamera.zoom-= deltaTime;
+		renderer2d.currentCamera.zoom -= deltaTime;
 	}
 	if (platform::isKeyHeld('E'))
 	{
 		renderer2d.currentCamera.zoom += deltaTime;
 	}
 
-	
-	if(input::isKeyPressedOn(input::Buttons::jump))
+
+	if (input::isKeyPressedOn(input::Buttons::jump))
 	{
-		if(player.wallGrab == 0)
+		if (player.wallGrab == 0)
 		{
-			if(player.grounded)
+			if (player.grounded)
 			{
 				player.jump();
 			}
 
-		}else if(player.wallGrab == 1)
+		}
+		else if (player.wallGrab == 1)
 		{
 			//player.strafe(-1);
 			player.jumpFromWall();
@@ -158,23 +160,23 @@ bool gameLogic(float deltaTime)
 		}
 	}
 
-	if(input::isKeyReleased(input::Buttons::jump))
+	if (input::isKeyReleased(input::Buttons::jump))
 	{
-		if(player.velocity.y < 0)
+		if (player.velocity.y < 0)
 		{
 			player.velocity.y *= 0.4;
 		}
 	}
 
-	if(input::isKeyHeld(input::Buttons::down))
+	if (input::isKeyHeld(input::Buttons::down))
 	{
 		player.wallGrab = 0;
 	}
 
 
 	//todo add player dimensions
-	renderer2d.currentCamera.follow(player.pos + (player.dimensions/2.f), deltaTime * 120, 30, renderer2d.windowW, renderer2d.windowH );
-	
+	renderer2d.currentCamera.follow(player.pos + (player.dimensions / 2.f), deltaTime * 120, 30, renderer2d.windowW, renderer2d.windowH);
+
 	player.applyGravity(deltaTime);
 	player.applyVelocity(deltaTime);
 
@@ -202,15 +204,21 @@ bool gameLogic(float deltaTime)
 	//	}
 	//}
 
-
 	simuleteLightSpot(player.pos, 44, mapData, triangles);
 
-	mapRenderer.drawFromMapData(renderer2d ,mapData);
+	mapRenderer.drawFromMapData(renderer2d, mapData);
 
 	gl2d::TextureAtlas playerAtlas(1, 1);
 
 	renderer2d.renderRectangle({ player.pos, player.dimensions }, {}, 0, characterSprite,
-		playerAtlas.get(0,0, !player.movingRight));
+		playerAtlas.get(0, 0, !player.movingRight));
+
+	glm::vec2 cursorPos = input::getShootDir({ w / 2,h / 2 });
+	cursorPos *= BLOCK_SIZE * 2;
+	cursorPos += player.pos;
+	cursorPos += glm::vec2{player.dimensions.x / 2, player.dimensions.y /2};
+
+	renderer2d.renderRectangle({ cursorPos, 4, 4 }, Colors_Green);
 
 	renderer2d.flush();
 

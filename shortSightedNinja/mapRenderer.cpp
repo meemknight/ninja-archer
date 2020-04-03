@@ -165,8 +165,6 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData)
 	minPos = glm::max(minPos, glm::vec2{ 0,0 });
 	maxPos = glm::min(maxPos, glm::vec2{ mapData.w,mapData.h });
 
-	ilog(maxPos.x, maxPos.y);
-
 	for(int h= minPos.y; h<maxPos.y; h++)
 	{
 		for(int w= minPos.x;w<maxPos.x; w++)

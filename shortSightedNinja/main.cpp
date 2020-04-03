@@ -29,6 +29,7 @@ static int lbutton = 0;
 static int rbutton = 0;
 static int lbuttonPressed = 0;
 static int rbuttonPressed = 0;
+static int bMouseMoved = 0;
 
 static bool isFocus = 0;
 
@@ -144,6 +145,7 @@ int MAIN
 		
 			lbuttonPressed = false;
 			rbuttonPressed = false;
+			bMouseMoved = false;
 		}
 	
 	}
@@ -246,7 +248,9 @@ LRESULT CALLBACK windProc(HWND wind, UINT m, WPARAM wp, LPARAM lp)
 	case WM_CLOSE:
 		quit = true;
 		break;
-
+	case WM_MOUSEMOVE:
+		bMouseMoved = 1;
+		break;
 	case WM_ACTIVATE:
 		if (wp == WA_ACTIVE)
 		{
@@ -318,24 +322,6 @@ void setRelMousePosition(int x, int y)
 	SetCursorPos(p.x, p.y);
 }
 
-///gets the mouse pos relative to the window's drawing area
-glm::ivec2 getRelMousePosition()
-{
-	//todo refactor
-
-	POINT p = {};
-	GetCursorPos(&p);
-
-	WINDOWPLACEMENT wp;
-
-	GetWindowPlacement(wind, &wp);
-
-	p.x -= wp.rcNormalPosition.left;
-	p.y -= wp.rcNormalPosition.top;
-
-	return { p.x, p.y };
-}
-
 //gets the drawing region sizes
 glm::ivec2 getWindowSize()
 {
@@ -349,6 +335,25 @@ glm::ivec2 getWindowSize()
 
 namespace platform
 {
+	///gets the mouse pos relative to the window's drawing area
+	glm::ivec2 getRelMousePosition()
+	{
+		//todo refactor
+
+		POINT p = {};
+		GetCursorPos(&p);
+
+		WINDOWPLACEMENT wp;
+
+		GetWindowPlacement(wind, &wp);
+
+		p.x -= wp.rcNormalPosition.left;
+		p.y -= wp.rcNormalPosition.top;
+
+		return { p.x, p.y };
+	}
+
+
 	int isKeyHeld(int key)
 	{
 		return GetAsyncKeyState(key);
@@ -378,14 +383,20 @@ namespace platform
 	{
 		return rbutton;
 	}
+
+	void showMouse(bool show)
+	{
+		ShowCursor(show);
+	}
+
+	bool isFocused()
+	{
+		return GetActiveWindow() == wind;
+	}
+
+	bool mouseMoved()
+	{
+		return bMouseMoved;
+	}
+
 };
-
-void showMouse(bool show)
-{
-	ShowCursor(show);
-}
-
-bool isFocused()
-{
-	return GetActiveWindow() == wind;
-}

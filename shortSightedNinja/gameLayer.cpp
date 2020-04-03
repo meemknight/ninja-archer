@@ -29,7 +29,7 @@ Entity player;
 
 gl2d::Texture sprites;
 gl2d::Texture characterSprite;
-
+gl2d::Texture targetSprite;
 bool initGame()
 {
 	renderer2d.create();
@@ -38,6 +38,7 @@ bool initGame()
 	ShaderProgram sp{ "blocks.vert","blocks.frag" };
 	sprites.loadFromFile("sprites.png");
 	characterSprite.loadFromFile("character.png");
+	targetSprite.loadFromFile("target.png");
 
 	mapRenderer.init(sp);
 	mapRenderer.sprites = sprites;
@@ -218,7 +219,7 @@ bool gameLogic(float deltaTime)
 	cursorPos += player.pos;
 	cursorPos += glm::vec2{player.dimensions.x / 2, player.dimensions.y /2};
 
-	renderer2d.renderRectangle({ cursorPos, 4, 4 }, Colors_Green);
+	renderer2d.renderRectangle({ cursorPos, 14, 14 }, {1,0,0,0.4}, {}, 0, targetSprite);
 
 	renderer2d.flush();
 

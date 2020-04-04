@@ -61,6 +61,14 @@ private:
 
 struct Arrow
 {
+	enum
+	{
+		normalArrow,
+		fireArrow,
+		slimeArrow,
+	}type = fireArrow;
+
+
 	//pos is the tip of the arrrow
 	glm::vec2 pos;
 	glm::vec2 lastPos;
@@ -74,7 +82,11 @@ struct Arrow
 	
 	bool leftMap(int w, int h);
 
+	bool timeOut(float deltaTime);
+
 	float light = 1;
+
+	float liveTime = 5;
 
 	bool stuckInWall = 0;
 };

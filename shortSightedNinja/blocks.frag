@@ -33,6 +33,7 @@ vec3 hsvTorgb(vec3 c)
 
 void main()
 {
+
 	vec4 mainColor = clamp(v_mainColor, vec4(0,0,0,0), vec4(1,1,1,1));
 
 	float lightBoost = texture2D(u_up,v_texColorCoord).x * v_sideColor.x * texture2D(u_up,v_texColorCoord).w;
@@ -43,7 +44,7 @@ void main()
 	lightBoost = min(lightBoost, 1);
 	lightBoost *= 0.3;
 
-	color = mainColor  * vec4(texture2D(u_sprites,v_texCoord).xyz,1);
+	color = mainColor  * vec4(texture2D(u_sprites,v_texCoord).xyzw);
 	
 	color.rgb = rgbTohsv(color.rgb);
 

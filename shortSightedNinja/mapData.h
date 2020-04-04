@@ -6,6 +6,30 @@ enum Block : char
 {
 	none = ' ',
 	dirt,
+	grassLeft,
+	gras,
+	grasRight,
+	stone,
+	brick,
+	redTarget,
+	blueTarget,
+	greenTarget,
+	redBlock,
+	redNo,
+	blueBlock,
+	blueNo,
+	greenBlock,
+	greenNo,
+	dirtBackground,
+	stoneBackground,
+	dirtTorch,
+	dirtLitTorch,
+	stoneTorch,
+	stoneLitTorch,
+	brickTorch,
+	brickLitTorch,
+	brickBackground,
+	lastBlock,
 };
 
 inline bool isAir(char b)
@@ -13,17 +37,34 @@ inline bool isAir(char b)
 	return b == none;
 }
 
-inline bool isOpaque(char b)
-{
-	return b == dirt;
-}
-
 inline bool isColidable(char b)
 {
-	//todo
-	return b == dirt;
+	
+	if(b == redNo ||
+		b == blueNo ||
+		b == greenNo||
+		b == dirtBackground ||
+		b == stoneBackground ||
+		b == dirtTorch ||
+		b == stoneTorch ||
+		b == stoneLitTorch ||
+		b == dirtLitTorch ||
+		b == brickLitTorch ||
+		b == brickTorch ||
+		b == brickBackground
+		) {
+		return 0;
+	}
+
+	return b != none;
 
 }
+
+inline bool isOpaque(char b)
+{
+	return isColidable(b);
+}
+
 
 struct Edge
 {
@@ -48,6 +89,7 @@ struct BlockInfo
 	glm::vec4 directionalLight;
 
 	float alpha;
+	float heat;
 
 	glm::vec4 mainColor;
 	glm::vec4 sideColors;
@@ -74,7 +116,6 @@ struct MapData
 	int h;
 
 	std::vector<Edge> vecEdges;
-
 	
 	std::vector<VisibilityPolygonPoints> vecVisibilityPolygonPoints;
 

@@ -169,19 +169,30 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData)
 	{
 		for(int w= minPos.x;w<maxPos.x; w++)
 		{
-			
-			if(mapData.get(w, h).type != Block::none && mapData.get(w,h).mainColor.w != 0)
+			auto &g = mapData.get(w, h);
+			if(g.type != Block::none && g.mainColor.w != 0)
 			{
-				glm::vec4 sideC = mapData.get(w, h).sideColors;
+				glm::vec4 sideC = g.sideColors;
 
-				if (mapData.get(w, h).hasNeighborTop()) { sideC.x = 0; }
-				if (mapData.get(w, h).hasNeighborDown()) { sideC.y = 0; }
-				if (mapData.get(w, h).hasNeighborLeft()) { sideC.z = 0; }
-				if (mapData.get(w, h).hasNeighborRight()) { sideC.w = 0; }
+				if(!isColidable(g.type))
+				{
+					sideC = {};
+				}else
+				{
+					if (g.hasNeighborTop()) { sideC.x = 0; }
+					if (g.hasNeighborDown()) { sideC.y = 0; }
+					if (g.hasNeighborLeft()) { sideC.z = 0; }
+					if (g.hasNeighborRight()) { sideC.w = 0; }
+				}
+
+				auto color = g.mainColor;
+
+				color.g *= g.heat;
+				color.b *= g.heat;
 
 				addBlock(renderer.toScreen({ w*BLOCK_SIZE,h*BLOCK_SIZE,BLOCK_SIZE,BLOCK_SIZE }), 
 					spriteAtlas.get(mapData.get(w, h).type- Block::none-1,0)
-					, mapData.get(w, h).mainColor, sideC);
+					,color , sideC);
 
 			}
 

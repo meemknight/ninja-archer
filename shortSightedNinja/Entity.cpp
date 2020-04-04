@@ -1,5 +1,6 @@
 #include "Entity.h"
 #include "glm/glm.hpp"
+#include <algorithm>
 
 float gravitationalAcceleration = 64;
 float jumpSpeed = 22;
@@ -14,6 +15,9 @@ float notGrabTimeVal = 0.4;
 bool snapWallGrab = 1;
 
 float arrowSpeed = 25;
+
+#undef max;
+#undef min;
 
 //pos and size
 bool aabb(glm::vec4 b1, glm::vec4 b2)
@@ -234,13 +238,17 @@ void Entity::checkGrounded(MapData &mapDat)
 {
 	grounded = 0;
 
+	if (pos.y < -dimensions.y)
+	{
+		return;
+	}
+
 	int minx = floor((pos.x + 1)/BLOCK_SIZE);
 	int maxx = floor((pos.x + dimensions.x - 1)/BLOCK_SIZE);
 
-	minx = max(minx, 0);
-	maxx = min(maxx, mapDat.w);
-
-
+	minx = std::max(minx, 0);
+	maxx = std::min(maxx, mapDat.w);
+	
 	for(int x=minx; x<=maxx; x++)
 	{
 		if(isColidable(mapDat.get(x, floor((pos.y +dimensions.y + 0.1)/BLOCK_SIZE)).type))
@@ -332,15 +340,15 @@ glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 s
 	minY = (pos.y - abs(delta.y) - BLOCK_SIZE)/BLOCK_SIZE;
 	maxY = ceil((pos.y + abs(delta.y) + BLOCK_SIZE + size.y)/BLOCK_SIZE);
 
-	minX = max(0, minX);
-	minY = max(0, minY);
-	maxX = min(mapData.w, maxX);
-	maxY = min(mapData.h, maxY);
+	minX = std::max(0, minX);
+	minY = std::max(0, minY);
+	maxX = std::min(mapData.w, maxX);
+	maxY = std::min(mapData.h, maxY);
 
 	for (int y = minY; y < maxY; y++)
 		for (int x = minX; x < maxX; x++)
 		{
-			if (mapData.get(x, y).type == '!')
+			if (isColidable(mapData.get(x, y).type))
 			{
 				if(aabb({ pos,dimensions }, { x*BLOCK_SIZE, y*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }))
 				{
@@ -385,19 +393,25 @@ glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 s
 void Arrow::draw(gl2d::Renderer2D & renderer, gl2d::Texture t)
 {
 	float angle = 0;
-
+	
 	angle = std::asin(-shootDir.y);
 	angle = glm::degrees(angle);
 
 	if(shootDir.x < 0)
 	{
 		angle = 180.f - angle;
-
 	}
 	
-	renderer.renderRectangle({ pos.x - BLOCK_SIZE, pos.y - (BLOCK_SIZE / 2.f),BLOCK_SIZE, BLOCK_SIZE }, { light,light,light,light }, { BLOCK_SIZE/2,0 }, angle, t);
-	
+	float dim = 1;
+	if(liveTime < 1)
+	{
+		dim = liveTime;
+		dim = std::max(dim, 0.f);
+	}
 
+	gl2d::TextureAtlas ta(4, 1);
+
+	renderer.renderRectangle({ pos.x - BLOCK_SIZE, pos.y - (BLOCK_SIZE / 2.f),BLOCK_SIZE, BLOCK_SIZE }, { light,light,light,light*dim }, { BLOCK_SIZE/2,0 }, angle, t, ta.get(type,0));
 
 }
 
@@ -415,6 +429,11 @@ void Arrow::move(float deltaTime)
 
 void Arrow::checkCollision(MapData &mapData)
 {
+	if(stuckInWall)
+	{
+		return;
+	}
+
 	glm::vec2 curPos = lastPos;
 	bool done = 0;
 
@@ -442,6 +461,53 @@ void Arrow::checkCollision(MapData &mapData)
 
 		if(isColidable(mapData.get(curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE).type))
 		{
+			auto t = mapData.get(curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE).type;
+
+			if(t==Block::redTarget)
+			{
+				for(int i=0;i<mapData.w * mapData.h; i++)
+				{
+					if(mapData.data[i].type == Block::redBlock)
+					{
+						mapData.data[i].type++;
+					}else if (mapData.data[i].type == Block::redNo)
+					{
+						mapData.data[i].type--;
+					}
+				}
+				mapData.setNeighbors();
+
+			}else if (t == Block::blueTarget)
+			{
+				for (int i = 0; i < mapData.w * mapData.h; i++)
+				{
+					if (mapData.data[i].type == Block::blueBlock)
+					{
+						mapData.data[i].type++;
+					}
+					else if (mapData.data[i].type == Block::blueNo)
+					{
+						mapData.data[i].type--;
+					}
+				}
+				mapData.setNeighbors();
+			}
+			else if (t == Block::greenTarget)
+			{
+				for (int i = 0; i < mapData.w * mapData.h; i++)
+				{
+					if (mapData.data[i].type == Block::greenBlock)
+					{
+						mapData.data[i].type++;
+					}
+					else if (mapData.data[i].type == Block::greenNo)
+					{
+						mapData.data[i].type--;
+					}
+				}
+				mapData.setNeighbors();
+			}
+
 			stuckInWall = 1;
 			break;
 		}
@@ -457,6 +523,23 @@ bool Arrow::leftMap(int w, int h)
 		||pos.x > (w+30)*BLOCK_SIZE
 		|| pos.y >(h + 30)*BLOCK_SIZE) {
 		return true;
+	}
+
+	return false;
+}
+
+bool Arrow::timeOut(float deltaTime)
+{
+	if(stuckInWall)
+	{
+		liveTime -= deltaTime;
+		if (liveTime < 0) { return true; }
+	}else
+	{
+		if(type == fireArrow)
+		{
+			liveTime = 15;
+		}
 	}
 
 	return false;

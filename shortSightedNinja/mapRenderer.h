@@ -7,7 +7,7 @@
 #include "mapData.h"
 
 #define BLOCK_SIZE 16
-#define BLOCK_COUNT 16
+#define BLOCK_COUNT 32
 
 struct MapRenderer
 {

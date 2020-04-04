@@ -37,6 +37,7 @@ void MapData::clearColorData()
 		{
 			data[i].mainColor = { 0,0,0,0 };
 			data[i].sideColors = { 0,0,0,0 };
+			data[i].resetColors();
 		}
 	}
 }
@@ -74,6 +75,7 @@ void BlockInfo::resetColors()
 	mainColor = { 0,0,0,0 };
 	directionalLight = { 0,0,0,0 };
 	alpha = 0;
+	heat = 1;
 	sideColors = {};
 }
 

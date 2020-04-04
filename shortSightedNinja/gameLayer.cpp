@@ -70,15 +70,15 @@ bool initGame()
 	mapData.create(40, 40, 
 		"!!!!!!!!!                             !!"
 		"!!!!!!!!!!!!!!!!                      !!"
-		"!!!!!!!!!!!!!              !          !!"
-		"!!!                                 !!!!"
-		"!!!                                 !!!!"
-		"!!!!!!!!!!!!!!!!           !!!!!!!!!!!!!"
-		"!!!!!!!!               !      !       !!"
-		"!!!!!!                 !     !!       !!"
-		"!!            !!!!!!!!!!!!!!!!!       !!"
-		"!!          !!!                       !!"
-		"!!                                  !!!!"
+		"!!!!!!!!!!!!!              '          !!"
+		"!!!                 +      *        (!!!"
+		"!!!                 +      *        !!!!"
+		"!!!!!!!!#######$***********!!!!,,,,,!!!!"
+		"!!!!!!!!               +      -       !!"
+		"!!!!!!                 +     --       !!"
+		"!!000000000000!!!!!!!!!!!!!!!!!       !!"
+		"!!0020003000!!!                       !!"
+		"!!00000000                          !!!!"
 		"!!!!!!!!!!              !           !!!!"
 		"!!                      !           !!!!"
 		"!!            !!!!!!!!!!!!!!!!!!!!!!!!!!"
@@ -162,7 +162,6 @@ bool gameLogic(float deltaTime)
 		renderer2d.currentCamera.zoom += deltaTime;
 	}
 
-
 	if (input::isKeyPressedOn(input::Buttons::jump))
 	{
 		if (player.wallGrab == 0)
@@ -229,7 +228,33 @@ bool gameLogic(float deltaTime)
 	mapData.clearColorData();
 
 	simuleteLightSpot(player.pos + glm::vec2(player.dimensions.x/2, player.dimensions.y / 2),
-		10, mapData, arrows, stencilRenderer2d, lightTexture);
+		12, mapData, arrows, stencilRenderer2d, lightTexture, 0);
+
+#pragma region lights
+
+	for (int y = 0; y < mapData.h; y++)
+		for(int x=0; x<mapData.w; x++)
+		{
+			auto &d = mapData.get(x, y);
+			if(
+				d.type == Block::brickLitTorch||
+				d.type == Block::dirtLitTorch||
+				d.type == Block::stoneLitTorch
+				)
+			{
+				simuleteLightSpot({x*BLOCK_SIZE,y*BLOCK_SIZE },
+					6, mapData, arrows, stencilRenderer2d, lightTexture, 0.3);
+			}
+		}
+
+	for(auto &i: arrows)
+	{
+		simuleteLightSpot({ i.pos},
+			6, mapData, arrows, stencilRenderer2d, lightTexture, 0.1);
+	}
+
+#pragma endregion
+
 
 #pragma region drawStencil
 
@@ -244,6 +269,38 @@ bool gameLogic(float deltaTime)
 	backGroundFBO.clear();
 #pragma endregion
 
+#pragma region target
+	{
+		float fine = 1 * BLOCK_SIZE;
+		glm::vec2 pos = player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2);
+		glm::vec2 dir = input::getShootDir({ w / 2,h / 2 });
+		float dist = BLOCK_SIZE * 10;
+		for (int i = fine; i < BLOCK_SIZE * 10; i += fine)
+		{
+			pos += fine * dir;
+
+			if (pos.x < 0
+				|| pos.y < 0
+				|| pos.x >(mapData.w)*BLOCK_SIZE
+				|| pos.y >(mapData.h)*BLOCK_SIZE) 
+			{
+				
+			}else
+			{
+				if (isColidable(mapData.get(pos.x / BLOCK_SIZE, pos.y / BLOCK_SIZE).type))
+				{
+					dist = i;
+					break;
+				}
+			}
+			
+			renderer2d.renderRectangle({ pos, 4,4 }, { 1,1,1,1 });
+		}
+
+		
+	}
+#pragma endregion
+
 	mapRenderer.drawFromMapData(renderer2d, mapData);
 
 	gl2d::TextureAtlas playerAtlas(1, 1);
@@ -254,7 +311,7 @@ bool gameLogic(float deltaTime)
 #pragma region arrows
 	for(auto i=arrows.begin(); i<arrows.end(); i++)
 	{
-		if(i->leftMap(mapData.w, mapData.h))
+		if(i->leftMap(mapData.w, mapData.h) || i->timeOut(deltaTime))
 		{
 			arrows.erase(i);
 			continue;
@@ -269,12 +326,7 @@ bool gameLogic(float deltaTime)
 #pragma endregion
 
 
-	glm::vec2 cursorPos = input::getShootDir({ w / 2,h / 2 });
-	cursorPos *= BLOCK_SIZE * 2;
-	cursorPos += player.pos;
-	cursorPos += glm::vec2{player.dimensions.x / 2, player.dimensions.y /2};
-
-	renderer2d.renderRectangle({ cursorPos, 14, 14 }, { 1,0,0,0.4 }, {}, 0, targetSprite);
+	//renderer2d.renderRectangle({ cursorPos, 14, 14 }, { 1,0,0,0.4 }, {}, 0, targetSprite);
 
 	renderer2d.flush();
 

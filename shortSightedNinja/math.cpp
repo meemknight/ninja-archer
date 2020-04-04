@@ -6,6 +6,7 @@
 #include "Entity.h"
 
 #undef max
+#undef min
 
 extern gl2d::Renderer2D renderer2d;
 
@@ -116,9 +117,10 @@ void simuleteLightTrace(glm::vec2 pos, float radius, MapData & mapData, std::vec
 
 }
 
-void simuleteLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vector<Arrow> &arrows, gl2d::Renderer2D &maskRenderer, gl2d::Texture lightT)
+void simuleteLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vector<Arrow> &arrows, gl2d::Renderer2D &maskRenderer, gl2d::Texture lightT, float heat)
 {
 	//stencilRenderer.renderRectangle({ 3 * BLOCK_SIZE, 3 * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 1,1,1,1 });
+
 
 	maskRenderer.renderRectangle({ pos.x - radius*BLOCK_SIZE*2, pos.y - radius * BLOCK_SIZE*2, 4 * radius*BLOCK_SIZE, 4 * radius*BLOCK_SIZE }, {}, 0, lightT);
 
@@ -155,8 +157,16 @@ void simuleteLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vect
 				if (xPos >= 0 && yPos >= 0 && xPos < mapData.w && yPos < mapData.h)
 				{
 					float perc = dist / maxDist;
+					glm::vec4 color= { 1 - perc,1 - perc,1 - perc,1 };
+					
+					{
+						float heatPerc = std::max(0.08f, perc);
+						heatPerc = std::pow(heatPerc, heat);
+						mapData.get(xPos, yPos).heat = std::min( heatPerc, mapData.get(xPos, yPos).heat );
+					}
+
 					mapData.get(xPos, yPos).mainColor = glm::max(mapData.get(xPos, yPos).mainColor,
-						glm::vec4{ 1 - perc,1 - perc,1 - perc,1 });
+						color);
 
 					float top = 0;
 					float bottom = 0;

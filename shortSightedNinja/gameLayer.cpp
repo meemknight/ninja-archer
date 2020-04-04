@@ -30,6 +30,10 @@ Entity player;
 gl2d::Texture sprites;
 gl2d::Texture characterSprite;
 gl2d::Texture targetSprite;
+gl2d::Texture arrowSprite;
+
+std::vector<Arrow> arrows;
+
 bool initGame()
 {
 	renderer2d.create();
@@ -39,6 +43,7 @@ bool initGame()
 	sprites.loadFromFile("sprites.png");
 	characterSprite.loadFromFile("character.png");
 	targetSprite.loadFromFile("target.png");
+	arrowSprite.loadFromFile("arrow.png");
 
 	mapRenderer.init(sp);
 	mapRenderer.sprites = sprites;
@@ -95,6 +100,8 @@ bool initGame()
 	player.dimensions = { 24, 30 };
 
 	mapData.ConvertTileMapToPolyMap();
+
+	arrows.reserve(10);
 
 	return true;
 }
@@ -174,6 +181,15 @@ bool gameLogic(float deltaTime)
 		player.wallGrab = 0;
 	}
 
+	if(input::isKeyPressedOn(input::Buttons::shoot))
+	{
+		Arrow a;
+		a.pos = player.pos + glm::vec2(player.dimensions.x , player.dimensions.y / 2);
+		a.shootDir = input::getShootDir({ w / 2,h / 2 });
+		//a.pos.x += a.shootDir.x * BLOCK_SIZE * 0.9;
+		//a.pos.y += a.shootDir.y * BLOCK_SIZE * 0.9;
+		arrows.push_back(a);
+	}
 
 	//todo add player dimensions
 	renderer2d.currentCamera.follow(player.pos + (player.dimensions / 2.f), deltaTime * 120, 30, renderer2d.windowW, renderer2d.windowH);
@@ -193,18 +209,6 @@ bool gameLogic(float deltaTime)
 
 	std::vector<glm::vec2> triangles;
 
-	//simuleteLightTrace({ player.pos.x + player.dimensions.x / 2, player.pos.y+8 },
-	//	100, mapData, triangles);
-
-	//for (int x = 0; x < 40; x++)
-	//{
-	//	for (int y = 0; y < 40; y++)
-	//	{
-	//		mapData.get(x, y).mainColor = { 1,1,1,1 };
-	//		mapData.get(x, y).sideColors = { 1,1,1,1 };
-	//	}
-	//}
-
 	simuleteLightSpot(player.pos, 44, mapData, triangles);
 
 	mapRenderer.drawFromMapData(renderer2d, mapData);
@@ -213,6 +217,23 @@ bool gameLogic(float deltaTime)
 
 	renderer2d.renderRectangle({ player.pos, player.dimensions }, {}, 0, characterSprite,
 		playerAtlas.get(0, 0, !player.movingRight));
+
+#pragma region arrows
+	for(auto i=arrows.begin(); i<arrows.end(); i++)
+	{
+		if(i->leftMap(mapData.w, mapData.h))
+		{
+			arrows.erase(i);
+			continue;
+		}
+
+		i->move(deltaTime * BLOCK_SIZE * 10);
+		i->draw(renderer2d, arrowSprite);
+	}
+	
+#pragma endregion
+
+
 
 	glm::vec2 cursorPos = input::getShootDir({ w / 2,h / 2 });
 	cursorPos *= BLOCK_SIZE * 2;

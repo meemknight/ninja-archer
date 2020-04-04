@@ -173,12 +173,12 @@ namespace input
 				
 				if (b == input::Buttons::jump)
 				{
-					val = pad->bRightTrigger > 20;
+					val = pad->bLeftTrigger > 20;
 					val = val | (pad->wButtons & bindingsController[b]);
 				}
 				else if (b == input::Buttons::shoot)
 				{
-					val = pad->bLeftTrigger > 20;
+					val = pad->bRightTrigger > 20;
 				}
 				else if(b == input::Buttons::left)
 				{

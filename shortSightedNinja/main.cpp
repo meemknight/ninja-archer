@@ -343,12 +343,14 @@ namespace platform
 		POINT p = {};
 		GetCursorPos(&p);
 
-		WINDOWPLACEMENT wp;
+		//WINDOWPLACEMENT wp;
+		//
+		//GetWindowPlacement(wind, &wp);
+		//
+		//p.x -= wp.rcNormalPosition.left;
+		//p.y -= wp.rcNormalPosition.top;
 
-		GetWindowPlacement(wind, &wp);
-
-		p.x -= wp.rcNormalPosition.left;
-		p.y -= wp.rcNormalPosition.top;
+		ScreenToClient(wind, &p);
 
 		return { p.x, p.y };
 	}

@@ -380,3 +380,45 @@ glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 s
 	end:
 	return pos;
 }
+
+void Arrow::draw(gl2d::Renderer2D & renderer, gl2d::Texture t)
+{
+	float angle = 0;
+
+	angle = std::asin(-shootDir.y);
+	angle = glm::degrees(angle);
+
+	if(shootDir.x < 0)
+	{
+		angle = 180.f - angle;
+	}
+
+	renderer.renderRectangle({ pos.x - BLOCK_SIZE, pos.y - (BLOCK_SIZE / 2.f),BLOCK_SIZE, BLOCK_SIZE }, {0,0}, angle, t);
+
+}
+
+void Arrow::move(float deltaTime)
+{
+	if(!stuckInWall)
+	{
+		//toto arrow speed
+		pos += shootDir * deltaTime;
+	}
+}
+
+
+void Arrow::checkCollision()
+{
+}
+
+bool Arrow::leftMap(int w, int h)
+{
+	if(pos.x < -20*BLOCK_SIZE
+		|| pos.y < -20 * BLOCK_SIZE
+		||pos.x > (w+20)*BLOCK_SIZE
+		|| pos.y >(h + 20)*BLOCK_SIZE) {
+		return true;
+	}
+
+	return false;
+}

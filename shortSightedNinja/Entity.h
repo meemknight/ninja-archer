@@ -59,3 +59,19 @@ private:
 	bool &upTouch, bool &downTouch, bool &leftTouch, bool &rightTouch);
 };
 
+struct Arrow
+{
+	//pos is the tip of the arrrow
+	glm::vec2 pos;
+	glm::vec2 shootDir;
+
+	void draw(gl2d::Renderer2D &renderer, gl2d::Texture t);
+
+	void move(float deltaTime);
+
+	void checkCollision();
+	
+	bool leftMap(int w, int h);
+
+	bool stuckInWall = 0;
+};

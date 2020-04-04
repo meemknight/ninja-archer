@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "math.h"
 #include <glm/glm.hpp>
+#include "Entity.h"
 
 #undef max
 
@@ -115,8 +116,28 @@ void simuleteLightTrace(glm::vec2 pos, float radius, MapData & mapData, std::vec
 
 }
 
-void simuleteLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vector<glm::vec2>& triangles)
+void simuleteLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vector<glm::vec2>& triangles, std::vector<Arrow> &arrows)
 {
+	{
+		float r = radius;
+		float maxDist = r * r *BLOCK_SIZE * BLOCK_SIZE;
+		for (auto &i : arrows)
+		{
+
+			float x = pos.x - i.pos.x;
+			float y = pos.y - i.pos.y;
+			float dist = x * x + y * y;
+
+			float perc = dist / maxDist;
+			float l = (1 - perc);
+
+			if (l < 0) { l = 0; }
+			l = sqrt(l);
+
+			i.light = std::max(i.light, l);
+		}
+	}
+
 	for (int y = -radius; y <= radius; y += 1)
 	{
 		for (int x = -radius; x <= radius; x += 1)

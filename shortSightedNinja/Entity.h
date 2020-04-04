@@ -63,15 +63,18 @@ struct Arrow
 {
 	//pos is the tip of the arrrow
 	glm::vec2 pos;
+	glm::vec2 lastPos;
 	glm::vec2 shootDir;
 
 	void draw(gl2d::Renderer2D &renderer, gl2d::Texture t);
 
 	void move(float deltaTime);
 
-	void checkCollision();
+	void checkCollision(MapData &mapData);
 	
 	bool leftMap(int w, int h);
+
+	float light = 1;
 
 	bool stuckInWall = 0;
 };

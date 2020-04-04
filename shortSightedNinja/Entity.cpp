@@ -13,6 +13,8 @@ float grabMargin = 0.25f;
 float notGrabTimeVal = 0.4;
 bool snapWallGrab = 1;
 
+float arrowSpeed = 25;
+
 //pos and size
 bool aabb(glm::vec4 b1, glm::vec4 b2)
 {
@@ -200,7 +202,6 @@ void Entity::applyVelocity(float deltaTime)
 	{
 		velocity.y = 0;
 	}
-
 
 	pos += velocity * deltaTime;
 
@@ -391,9 +392,12 @@ void Arrow::draw(gl2d::Renderer2D & renderer, gl2d::Texture t)
 	if(shootDir.x < 0)
 	{
 		angle = 180.f - angle;
-	}
 
-	renderer.renderRectangle({ pos.x - BLOCK_SIZE, pos.y - (BLOCK_SIZE / 2.f),BLOCK_SIZE, BLOCK_SIZE }, {0,0}, angle, t);
+	}
+	
+	renderer.renderRectangle({ pos.x - BLOCK_SIZE, pos.y - (BLOCK_SIZE / 2.f),BLOCK_SIZE, BLOCK_SIZE }, { light,light,light,light }, { BLOCK_SIZE/2,0 }, angle, t);
+	
+
 
 }
 
@@ -401,22 +405,57 @@ void Arrow::move(float deltaTime)
 {
 	if(!stuckInWall)
 	{
+		lastPos = pos;
 		//toto arrow speed
-		pos += shootDir * deltaTime;
+		pos += shootDir * deltaTime * arrowSpeed;
+		
 	}
 }
 
 
-void Arrow::checkCollision()
+void Arrow::checkCollision(MapData &mapData)
 {
+	glm::vec2 curPos = lastPos;
+	bool done = 0;
+
+	float affinity = 0.3;
+
+	while(!done)
+	{
+		if (glm::length(pos - curPos) > BLOCK_SIZE * affinity)
+		{
+			curPos.x += shootDir.x * BLOCK_SIZE * affinity;
+			curPos.y += shootDir.y * BLOCK_SIZE * affinity;
+
+		}else
+		{
+			curPos = pos;
+			done = 1;
+		}
+
+		if (pos.x < 0
+			|| pos.y < 0
+			|| pos.x >(mapData.w)*BLOCK_SIZE
+			|| pos.y >(mapData.h)*BLOCK_SIZE) {
+			break;
+		}
+
+		if(isColidable(mapData.get(curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE).type))
+		{
+			stuckInWall = 1;
+			break;
+		}
+	}
+
+
 }
 
 bool Arrow::leftMap(int w, int h)
 {
-	if(pos.x < -20*BLOCK_SIZE
-		|| pos.y < -20 * BLOCK_SIZE
-		||pos.x > (w+20)*BLOCK_SIZE
-		|| pos.y >(h + 20)*BLOCK_SIZE) {
+	if(pos.x < -30*BLOCK_SIZE
+		|| pos.y < -30 * BLOCK_SIZE
+		||pos.x > (w+30)*BLOCK_SIZE
+		|| pos.y >(h + 30)*BLOCK_SIZE) {
 		return true;
 	}
 

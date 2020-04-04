@@ -56,8 +56,8 @@ bool initGame()
 		"!!!!!!!!!                             !!"
 		"!!!!!!!!!!!!!!!!                      !!"
 		"!!!!!!!!!!!!!              !          !!"
-		"!!!                        !          !!"
-		"!!!                        !          !!"
+		"!!!                                 !!!!"
+		"!!!                                 !!!!"
 		"!!!!!!!!!!!!!!!!           !!!!!!!!!!!!!"
 		"!!!!!!!!               !      !       !!"
 		"!!!!!!                 !     !!       !!"
@@ -184,7 +184,7 @@ bool gameLogic(float deltaTime)
 	if(input::isKeyPressedOn(input::Buttons::shoot))
 	{
 		Arrow a;
-		a.pos = player.pos + glm::vec2(player.dimensions.x , player.dimensions.y / 2);
+		a.pos = player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2);
 		a.shootDir = input::getShootDir({ w / 2,h / 2 });
 		//a.pos.x += a.shootDir.x * BLOCK_SIZE * 0.9;
 		//a.pos.y += a.shootDir.y * BLOCK_SIZE * 0.9;
@@ -209,7 +209,7 @@ bool gameLogic(float deltaTime)
 
 	std::vector<glm::vec2> triangles;
 
-	simuleteLightSpot(player.pos, 44, mapData, triangles);
+	simuleteLightSpot(player.pos, 20, mapData, triangles, arrows);
 
 	mapRenderer.drawFromMapData(renderer2d, mapData);
 
@@ -227,8 +227,10 @@ bool gameLogic(float deltaTime)
 			continue;
 		}
 
-		i->move(deltaTime * BLOCK_SIZE * 10);
+		i->move(deltaTime * BLOCK_SIZE);
 		i->draw(renderer2d, arrowSprite);
+		i->checkCollision(mapData);
+		i->light = 0;
 	}
 	
 #pragma endregion
@@ -240,7 +242,7 @@ bool gameLogic(float deltaTime)
 	cursorPos += player.pos;
 	cursorPos += glm::vec2{player.dimensions.x / 2, player.dimensions.y /2};
 
-	renderer2d.renderRectangle({ cursorPos, 14, 14 }, {1,0,0,0.4}, {}, 0, targetSprite);
+	renderer2d.renderRectangle({ cursorPos, 14, 14 }, { 1,0,0,0.4 }, {}, 0, targetSprite);
 
 	renderer2d.flush();
 

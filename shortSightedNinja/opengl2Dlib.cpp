@@ -3,6 +3,9 @@
 #include <sstream>
 #include "tools.h"
 
+GLint maskSamplerUniform = 0;
+gl2d::internal::ShaderProgram maskShader = {};
+
 namespace gl2d
 {
 #pragma region shaders
@@ -36,6 +39,20 @@ namespace gl2d
 		"{\n"
 		"    color = v_color * texture(u_sampler, v_texture);\n"
 		"}\n";
+
+	static const char* maskFragmentShader =
+		"#version 300 es\n"
+		"precision mediump float;\n"
+		"out vec4 color;\n"
+		"in vec4 v_color;\n"
+		"in vec2 v_texture;\n"
+		"uniform sampler2D u_sampler;\n"
+		"uniform sampler2D u_mask;\n"
+		"void main()\n"
+		"{\n"
+		"    color = v_color * texture(u_sampler, v_texture)* texture(u_mask, v_texture);\n"
+		"}\n";
+
 
 #pragma endregion
 
@@ -168,6 +185,8 @@ namespace gl2d
 	void init()
 	{
 		defaultShader = internal::createShaderProgram(defaultVertexShader, defaultFragmentShader);
+		maskShader = internal::createShaderProgram(defaultVertexShader, maskFragmentShader);
+		maskSamplerUniform = glGetUniformLocation(maskShader.id, "u_mask");
 		enableNecessaryGLFeatures();
 	}
 
@@ -189,31 +208,8 @@ namespace gl2d
 
 	glm::vec2 scaleAroundPoint(glm::vec2 vec, glm::vec2 point, float scale)
 	{
-
 		vec = (vec - point) * scale + point;
 
-		//vec.x = vec.x * scale;
-		//vec.y = vec.y * scale;
-		//
-		//glm::vec2 move = point - (point * scale);
-		//
-		//vec += move;
-
-		//vec.x = vec.x * scale;
-		//vec.y = vec.y * scale;
-		//
-		//if (scale > 1)
-		//{
-		//	scale = scale - 1;
-		//}
-		//else
-		//{
-		//	scale = scale - 1;
-		//}
-		//
-		//vec.x = vec.x + point.x * scale;
-		//vec.y = vec.y + point.y * scale;
-		//
 		return vec;
 	}
 
@@ -1156,6 +1152,5 @@ namespace gl2d
 		}
 
 	}
-
 
 }

@@ -25,8 +25,11 @@ namespace input
 	
 	bool isKeyPressedOn(int b);
 	bool isKeyHeld(int b);
+	bool isKeyReleased(int b);
 
-	float getMoveDir();
+	int getMoveDir();
+
+	glm::vec2 getShootDir(glm::vec2 centre);
 
 	//used internally
 	namespace internal

@@ -56,7 +56,7 @@ static INT64                g_Time = 0;
 static INT64                g_TicksPerSecond = 0;
 static ImGuiMouseCursor     g_LastMouseCursor = ImGuiMouseCursor_COUNT;
 static bool                 g_HasGamepad = false;
-static bool                 g_WantUpdateHasGamepad = true;
+bool                 g_WantUpdateHasGamepad = true;
 
 // Functions
 bool    ImGui_ImplWin32_Init(void* hwnd)
@@ -106,7 +106,7 @@ void    ImGui_ImplWin32_Shutdown()
     g_hWnd = (HWND)0;
 }
 
-static bool ImGui_ImplWin32_UpdateMouseCursor()
+bool ImGui_ImplWin32_UpdateMouseCursor()
 {
     ImGuiIO& io = ImGui::GetIO();
     if (io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange)

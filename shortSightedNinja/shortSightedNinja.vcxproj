@@ -32,6 +32,7 @@
     <ClCompile Include="mapRenderer.cpp" />
     <ClCompile Include="math.cpp" />
     <ClCompile Include="opengl2Dlib.cpp" />
+    <ClCompile Include="Particle.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stb_impl.cpp" />
     <ClCompile Include="Ui.cpp" />
@@ -52,6 +53,7 @@
     <ClInclude Include="mapRenderer.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="opengl2Dlib.h" />
+    <ClInclude Include="Particle.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="stb_truetype.h" />

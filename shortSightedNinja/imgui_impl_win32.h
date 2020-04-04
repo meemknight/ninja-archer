@@ -12,6 +12,14 @@
 IMGUI_IMPL_API bool     ImGui_ImplWin32_Init(void* hwnd);
 IMGUI_IMPL_API void     ImGui_ImplWin32_Shutdown();
 IMGUI_IMPL_API void     ImGui_ImplWin32_NewFrame();
+bool ImGui_ImplWin32_UpdateMouseCursor();
+
+#ifndef WM_MOUSEHWHEEL
+#define WM_MOUSEHWHEEL 0x020E
+#endif
+#ifndef DBT_DEVNODES_CHANGED
+#define DBT_DEVNODES_CHANGED 0x0007
+#endif
 
 // Configuration: Disable gamepad support or linking with xinput.lib
 //#define IMGUI_IMPL_WIN32_DISABLE_GAMEPAD

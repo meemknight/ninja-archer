@@ -36,6 +36,7 @@ void MapData::clearColorData()
 		for (int i = 0; i < w*h; i++)
 		{
 			data[i].mainColor = { 0,0,0,0 };
+			data[i].sideColors = { 0,0,0,0 };
 		}
 	}
 }
@@ -48,13 +49,74 @@ void MapData::cleanup()
 	}
 }
 
+bool BlockInfo::hasNeighborLeft()
+{
+	return neighbors & 0b0000'0010;
+}
+
+bool BlockInfo::hasNeighborRight()
+{
+	return neighbors & 0b0000'0001;
+}
+
+bool BlockInfo::hasNeighborTop()
+{
+	return neighbors & 0b0000'1000;
+}
+
+bool BlockInfo::hasNeighborDown()
+{
+	return neighbors & 0b0000'0100;
+}
+
 void BlockInfo::resetColors()
 {
 	mainColor = { 0,0,0,0 };
+	directionalLight = { 0,0,0,0 };
+	alpha = 0;
+	sideColors = {};
 }
 
 void MapData::setNeighbors()
 {
+	for(int y=0; y<h; y++)
+	{
+		for(int x=0; x<w; x++)
+		{
+			auto &n = get(x, y).neighbors;
+			n = 0;
+
+			if (y > 0) // top
+			{
+				if(isOpaque(get(x,y-1).type))
+				{
+					n |= 0b0000'1000;
+				}
+			}
+			if (y < h-1) // bottom
+			{
+				if (isOpaque(get(x, y + 1).type))
+				{
+					n |= 0b0000'0100;
+				}
+			}
+			if (x > 0) // left
+			{
+				if (isOpaque(get(x-1, y).type))
+				{
+					n |= 0b0000'0010;
+				}
+			}
+			if (x < w - 1) // bottom
+			{
+				if (isOpaque(get(x+1, y).type))
+				{
+					n |= 0b0000'0001;
+				}
+			}
+
+		}
+	}
 }
 
 void MapData::ConvertTileMapToPolyMap()

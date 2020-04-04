@@ -16,6 +16,8 @@
 
 #include "input.h"
 
+extern bool g_WantUpdateHasGamepad;
+
 LRESULT CALLBACK windProc(HWND, UINT, WPARAM, LPARAM);
 static bool quit = 0;
 
@@ -27,6 +29,7 @@ static int lbutton = 0;
 static int rbutton = 0;
 static int lbuttonPressed = 0;
 static int rbuttonPressed = 0;
+static int bMouseMoved = 0;
 
 static bool isFocus = 0;
 
@@ -142,6 +145,7 @@ int MAIN
 		
 			lbuttonPressed = false;
 			rbuttonPressed = false;
+			bMouseMoved = false;
 		}
 	
 	}
@@ -153,6 +157,75 @@ int MAIN
 
 LRESULT CALLBACK windProc(HWND wind, UINT m, WPARAM wp, LPARAM lp)
 {
+	if (ImGui::GetCurrentContext() == NULL)
+		goto endImgui;
+	
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		switch (m)
+		{
+		case WM_LBUTTONDOWN: case WM_LBUTTONDBLCLK:
+		case WM_RBUTTONDOWN: case WM_RBUTTONDBLCLK:
+		case WM_MBUTTONDOWN: case WM_MBUTTONDBLCLK:
+		case WM_XBUTTONDOWN: case WM_XBUTTONDBLCLK:
+		{
+			int button = 0;
+			if (m == WM_LBUTTONDOWN || m == WM_LBUTTONDBLCLK) { button = 0; }
+			if (m == WM_RBUTTONDOWN || m == WM_RBUTTONDBLCLK) { button = 1; }
+			if (m == WM_MBUTTONDOWN || m == WM_MBUTTONDBLCLK) { button = 2; }
+			if (m == WM_XBUTTONDOWN || m == WM_XBUTTONDBLCLK) { button = (GET_XBUTTON_WPARAM(wp) == XBUTTON1) ? 3 : 4; }
+			if (!ImGui::IsAnyMouseDown() && ::GetCapture() == NULL)
+				::SetCapture(wind);
+			io.MouseDown[button] = true;
+			goto endImgui;
+		}
+		case WM_LBUTTONUP:
+		case WM_RBUTTONUP:
+		case WM_MBUTTONUP:
+		case WM_XBUTTONUP:
+		{
+			int button = 0;
+			if (m == WM_LBUTTONUP) { button = 0; }
+			if (m == WM_RBUTTONUP) { button = 1; }
+			if (m == WM_MBUTTONUP) { button = 2; }
+			if (m == WM_XBUTTONUP) { button = (GET_XBUTTON_WPARAM(wp) == XBUTTON1) ? 3 : 4; }
+			io.MouseDown[button] = false;
+			if (!ImGui::IsAnyMouseDown() && ::GetCapture() == wind)
+				::ReleaseCapture();
+			goto endImgui;
+		}
+		case WM_MOUSEWHEEL:
+			io.MouseWheel += (float)GET_WHEEL_DELTA_WPARAM(wp) / (float)WHEEL_DELTA;
+			goto endImgui;
+		case WM_MOUSEHWHEEL:
+			io.MouseWheelH += (float)GET_WHEEL_DELTA_WPARAM(wp) / (float)WHEEL_DELTA;
+			goto endImgui;
+		case WM_KEYDOWN:
+		case WM_SYSKEYDOWN:
+			if (wp < 256)
+				io.KeysDown[wp] = 1;
+			goto endImgui;
+		case WM_KEYUP:
+		case WM_SYSKEYUP:
+			if (wp < 256)
+				io.KeysDown[wp] = 0;
+			goto endImgui;
+		case WM_CHAR:
+			// You can also use ToAscii()+GetKeyboardState() to retrieve characters.
+			io.AddInputCharacter((unsigned int)wp);
+			goto endImgui;
+		case WM_SETCURSOR:
+			if (LOWORD(lp) == HTCLIENT && ImGui_ImplWin32_UpdateMouseCursor())
+				goto endImgui;;
+			goto endImgui;
+		case WM_DEVICECHANGE:
+			if ((UINT)wp == DBT_DEVNODES_CHANGED)
+				g_WantUpdateHasGamepad = true;
+			goto endImgui;
+		}
+	}
+	endImgui:
+
 	LRESULT l = 0;
 
 	switch (m)
@@ -175,7 +248,9 @@ LRESULT CALLBACK windProc(HWND wind, UINT m, WPARAM wp, LPARAM lp)
 	case WM_CLOSE:
 		quit = true;
 		break;
-
+	case WM_MOUSEMOVE:
+		bMouseMoved = 1;
+		break;
 	case WM_ACTIVATE:
 		if (wp == WA_ACTIVE)
 		{
@@ -214,6 +289,7 @@ void EnableOpenGL(HWND hwnd, HDC* hDC, HGLRC* hRC)
 	pfd.iPixelType = PFD_TYPE_RGBA;
 	pfd.cColorBits = 32; //todo look into this (24)
 	pfd.cDepthBits = 16;
+	pfd.cStencilBits = 8;
 	pfd.iLayerType = PFD_MAIN_PLANE;
 
 	iFormat = ChoosePixelFormat(*hDC, &pfd);
@@ -247,24 +323,6 @@ void setRelMousePosition(int x, int y)
 	SetCursorPos(p.x, p.y);
 }
 
-///gets the mouse pos relative to the window's drawing area
-glm::ivec2 getRelMousePosition()
-{
-	//todo refactor
-
-	POINT p = {};
-	GetCursorPos(&p);
-
-	WINDOWPLACEMENT wp;
-
-	GetWindowPlacement(wind, &wp);
-
-	p.x -= wp.rcNormalPosition.left;
-	p.y -= wp.rcNormalPosition.top;
-
-	return { p.x, p.y };
-}
-
 //gets the drawing region sizes
 glm::ivec2 getWindowSize()
 {
@@ -278,6 +336,27 @@ glm::ivec2 getWindowSize()
 
 namespace platform
 {
+	///gets the mouse pos relative to the window's drawing area
+	glm::ivec2 getRelMousePosition()
+	{
+		//todo refactor
+
+		POINT p = {};
+		GetCursorPos(&p);
+
+		//WINDOWPLACEMENT wp;
+		//
+		//GetWindowPlacement(wind, &wp);
+		//
+		//p.x -= wp.rcNormalPosition.left;
+		//p.y -= wp.rcNormalPosition.top;
+
+		ScreenToClient(wind, &p);
+
+		return { p.x, p.y };
+	}
+
+
 	int isKeyHeld(int key)
 	{
 		return GetAsyncKeyState(key);
@@ -307,14 +386,20 @@ namespace platform
 	{
 		return rbutton;
 	}
+
+	void showMouse(bool show)
+	{
+		ShowCursor(show);
+	}
+
+	bool isFocused()
+	{
+		return GetActiveWindow() == wind;
+	}
+
+	bool mouseMoved()
+	{
+		return bMouseMoved;
+	}
+
 };
-
-void showMouse(bool show)
-{
-	ShowCursor(show);
-}
-
-bool isFocused()
-{
-	return GetActiveWindow() == wind;
-}

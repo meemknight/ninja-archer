@@ -2,9 +2,18 @@
 #include "glm/glm.hpp"
 
 float gravitationalAcceleration = 64;
-float jumpSpeed = 24;
+float jumpSpeed = 22;
+float jumpFromWallSpeed = 20;
 float velocityClamp = 30;
-float drag = 0.5f;
+float drag = 0.15f;
+float strafeSpeed = 10;
+float runSpeed = 14;
+float airRunSpeed = 10;
+float grabMargin = 0.25f;
+float notGrabTimeVal = 0.4;
+bool snapWallGrab = 1;
+
+float arrowSpeed = 25;
 
 //pos and size
 bool aabb(glm::vec4 b1, glm::vec4 b2)
@@ -68,9 +77,9 @@ void Entity::resolveConstrains(MapData & mapData)
 			velocity.y = 0;
 		}
 	}
+	return;
 	*/
-	
-	grounded = 0;
+
 	
 	bool upTouch = 0;
 	bool downTouch = 0;
@@ -112,10 +121,10 @@ void Entity::resolveConstrains(MapData & mapData)
 			if (newPos != posTest)
 			{
 				pos = newPos;
-				return;
+				goto end;
 			}
 	
-		} while (glm::length((newPos + delta) - pos) > 1.0f);
+		} while (glm::length((newPos + delta) - pos) > 1.0f * BLOCK_SIZE);
 		//todo optimize this while
 	
 		checkCollisionBrute(pos,
@@ -127,10 +136,7 @@ void Entity::resolveConstrains(MapData & mapData)
 			rightTouch);
 	}
 	
-	if (downTouch)
-	{
-		grounded = 1;
-	}
+	end:
 	
 	if (upTouch)
 	{
@@ -139,24 +145,75 @@ void Entity::resolveConstrains(MapData & mapData)
 			velocity.y = 0;
 		}
 	}
+
+}
+
+void Entity::strafe(int dir)
+{
+	velocity.x = dir * strafeSpeed * BLOCK_SIZE;
+}
+
+void Entity::run(float speed)
+{
+	pos.x += speed * runSpeed * BLOCK_SIZE;
+}
+
+void Entity::airRun(float speed)
+{
+	if(speed > 0)
+	{
+		if(velocity.x < -20)
+		{
+			return;
+		}
+	}else 
+	if (speed < 0)
+	{
+		if (velocity.x > 20)
+		{
+			return;
+		}
+	}
+
+	pos.x += speed * airRunSpeed * BLOCK_SIZE;
 }
 
 void Entity::applyGravity(float deltaTime)
 {
-	velocity.y += deltaTime * gravitationalAcceleration * BLOCK_SIZE;
+	if(wallGrab == 0)
+	{
+		velocity.y += deltaTime * gravitationalAcceleration * BLOCK_SIZE;
+	}
 }
 
 void Entity::applyVelocity(float deltaTime)
 {
+
+	if (notGrabTime <= 0) { notGrabTime = 0; }
+	else
+	{
+		notGrabTime -= deltaTime;
+	}
+
 	const float c = velocityClamp * BLOCK_SIZE;
 	velocity = glm::clamp(velocity, { -c,-c }, { c, c });
+
+	if(wallGrab != 0)
+	{
+		velocity.y = 0;
+	}
 
 	pos += velocity * deltaTime;
 
 	//drag
 	velocity.x += velocity.x * (-drag * deltaTime * BLOCK_SIZE);
 
-	if (std::fabs(velocity.x) < 0.01)
+	if(grounded || wallGrab)
+	{
+		velocity.x = 0;
+	}
+
+	if (std::fabs(velocity.x) < 10)
 	{
 		velocity.x = 0;
 	}
@@ -168,17 +225,97 @@ void Entity::applyVelocity(float deltaTime)
 
 	if (grounded && velocity.y > 0)
 	{
-		velocity.y = 0;
+		velocity.y = 20;
 	}
+
+}
+
+void Entity::checkGrounded(MapData &mapDat)
+{
+	grounded = 0;
+
+	int minx = floor((pos.x + 1)/BLOCK_SIZE);
+	int maxx = floor((pos.x + dimensions.x - 1)/BLOCK_SIZE);
+
+	minx = max(minx, 0);
+	maxx = min(maxx, mapDat.w);
+
+
+	for(int x=minx; x<=maxx; x++)
+	{
+		if(isColidable(mapDat.get(x, floor((pos.y +dimensions.y + 0.1)/BLOCK_SIZE)).type))
+		{
+			grounded = 1;
+			break;
+		}
+	}
+
+}
+
+void Entity::checkWall(MapData & mapData, int move)
+{
+	if(notGrabTime > 0)
+	{
+		return;
+	}
+
+	if(grounded)
+	{
+		return;
+	}
+
+	int minY = floor((pos.y /BLOCK_SIZE)+0.1f);
+	float dist = (pos.y / BLOCK_SIZE) + 0.1f - floor((pos.y / BLOCK_SIZE) + 0.1f);
+	
+
+	if(dist > grabMargin)
+	{
+		return;
+	}
+	
+	int maxY = minY + 1;
+	int rightX = floor((pos.x + dimensions.x) / BLOCK_SIZE);
+	int leftX = floor((pos.x-2) / BLOCK_SIZE);
+
+
+	//for(int y= minY; y<maxY; y++)
+	//{
+	if(isColidable(mapData.get(rightX, minY).type) && move > 0)
+	{
+		if ((minY == 0 || !isColidable(mapData.get(rightX, minY - 1).type)))
+		{
+			if(snapWallGrab)
+			{
+				pos.y = minY * BLOCK_SIZE;
+			}
+			wallGrab = 1;
+		}
+	}
+	if (isColidable(mapData.get(leftX, minY).type) && move < 0)
+	{
+		if (minY == 0 || !isColidable(mapData.get(leftX, minY - 1).type))
+		{
+			if (snapWallGrab)
+			{
+				pos.y = minY * BLOCK_SIZE;
+			}
+			wallGrab = -1;
+		}
+	}
+	//}
+
 
 }
 
 void Entity::jump()
 {
-	if(grounded)
-	{
-		velocity.y = -jumpSpeed * BLOCK_SIZE;
-	}
+	velocity.y = -jumpSpeed * BLOCK_SIZE;
+}
+
+void Entity::jumpFromWall()
+{
+	notGrabTime = notGrabTimeVal;
+	velocity.y = -jumpFromWallSpeed * BLOCK_SIZE;
 }
 
 glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 size, glm::vec2 delta,
@@ -211,12 +348,12 @@ glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 s
 					{
 						if(delta.x < 0) // moving left
 						{
-							leftTouch |= 1;
+							leftTouch = 1;
 							pos.x = x * BLOCK_SIZE + BLOCK_SIZE;
 							goto end;
 						}else
 						{
-							rightTouch |= 1;
+							rightTouch = 1;
 							pos.x = x * BLOCK_SIZE - dimensions.x;
 							goto end;
 						}
@@ -225,12 +362,12 @@ glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 s
 					{
 						if(delta.y < 0) //moving up
 						{
-							upTouch |= 1;
+							upTouch = 1;
 							pos.y = y * BLOCK_SIZE + BLOCK_SIZE;
 							goto end;
 						}else
 						{
-							downTouch |= 1;
+							downTouch = 1;
 							pos.y = y * BLOCK_SIZE - dimensions.y;
 							goto end;
 						}
@@ -243,4 +380,84 @@ glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 s
 
 	end:
 	return pos;
+}
+
+void Arrow::draw(gl2d::Renderer2D & renderer, gl2d::Texture t)
+{
+	float angle = 0;
+
+	angle = std::asin(-shootDir.y);
+	angle = glm::degrees(angle);
+
+	if(shootDir.x < 0)
+	{
+		angle = 180.f - angle;
+
+	}
+	
+	renderer.renderRectangle({ pos.x - BLOCK_SIZE, pos.y - (BLOCK_SIZE / 2.f),BLOCK_SIZE, BLOCK_SIZE }, { light,light,light,light }, { BLOCK_SIZE/2,0 }, angle, t);
+	
+
+
+}
+
+void Arrow::move(float deltaTime)
+{
+	if(!stuckInWall)
+	{
+		lastPos = pos;
+		//toto arrow speed
+		pos += shootDir * deltaTime * arrowSpeed;
+		
+	}
+}
+
+
+void Arrow::checkCollision(MapData &mapData)
+{
+	glm::vec2 curPos = lastPos;
+	bool done = 0;
+
+	float affinity = 0.3;
+
+	while(!done)
+	{
+		if (glm::length(pos - curPos) > BLOCK_SIZE * affinity)
+		{
+			curPos.x += shootDir.x * BLOCK_SIZE * affinity;
+			curPos.y += shootDir.y * BLOCK_SIZE * affinity;
+
+		}else
+		{
+			curPos = pos;
+			done = 1;
+		}
+
+		if (pos.x < 0
+			|| pos.y < 0
+			|| pos.x >(mapData.w)*BLOCK_SIZE
+			|| pos.y >(mapData.h)*BLOCK_SIZE) {
+			break;
+		}
+
+		if(isColidable(mapData.get(curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE).type))
+		{
+			stuckInWall = 1;
+			break;
+		}
+	}
+
+
+}
+
+bool Arrow::leftMap(int w, int h)
+{
+	if(pos.x < -30*BLOCK_SIZE
+		|| pos.y < -30 * BLOCK_SIZE
+		||pos.x > (w+30)*BLOCK_SIZE
+		|| pos.y >(h + 30)*BLOCK_SIZE) {
+		return true;
+	}
+
+	return false;
 }

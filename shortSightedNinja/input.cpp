@@ -41,12 +41,13 @@ namespace input
 
 	int bindings[Buttons::buttonsCount] = { 0, 'S', 'A', 'D', VK_SPACE, 0, 'W' };
 	WORD bindingsController[Buttons::buttonsCount] = { 0, XINPUT_GAMEPAD_DPAD_DOWN
-		, XINPUT_GAMEPAD_DPAD_LEFT, XINPUT_GAMEPAD_DPAD_RIGHT, 0, XINPUT_GAMEPAD_A, XINPUT_GAMEPAD_DPAD_UP };
+		, XINPUT_GAMEPAD_DPAD_LEFT, XINPUT_GAMEPAD_DPAD_RIGHT, XINPUT_GAMEPAD_A, 0, XINPUT_GAMEPAD_DPAD_UP };
 	float deadZone = 0.15f;
 	float moveSensitivity = 0.30f;
 
 	int buttonsHeld[Buttons::buttonsCount] = {};
 	int buttonsPressed[Buttons::buttonsCount] = {};
+	int buttonsReleased[Buttons::buttonsCount] = {};
 
 	bool isKeyPressedOn(int b)
 	{
@@ -58,9 +59,29 @@ namespace input
 		return buttonsHeld[b];
 	}
 
-	float getMoveDir()
+	bool isKeyReleased(int b)
+	{
+		return buttonsReleased[b];
+	}
+
+	int getMoveDir()
 	{
 		return -isKeyHeld(Buttons::left) + isKeyHeld(Buttons::right);
+	}
+
+	glm::vec2 lastShootDir = {1,0};
+
+	glm::vec2 getShootDir(glm::vec2 centre)
+	{
+
+		if(platform::mouseMoved())
+		{
+			lastShootDir = glm::vec2(platform::getRelMousePosition()) - centre;
+			lastShootDir = glm::normalize(lastShootDir);
+		}
+
+		return lastShootDir;
+
 	}
 
 	void updateInput()
@@ -72,6 +93,36 @@ namespace input
 			read = 0;
 		}
 
+		if(read)
+		{
+			const XINPUT_GAMEPAD *pad = &s.Gamepad;
+			float retValX = pad->sThumbRX / (float)SHRT_MAX;
+			float retValY = -pad->sThumbRY / (float)SHRT_MAX;
+
+			retValX = std::max(-1.f, retValX);
+			retValX = std::min(1.f, retValX);
+
+			retValY = std::max(-1.f, retValY);
+			retValY = std::min(1.f, retValY);
+
+			if (abs(retValX) < deadZone)
+			{
+				retValX = 0.f;
+			}
+			if (abs(retValY) < deadZone)
+			{
+				retValY = 0.f;
+			}
+
+			if (retValX != 0 || retValY != 0)
+			{
+				lastShootDir = { retValX, retValY };
+				lastShootDir = glm::normalize(lastShootDir);
+			}
+		
+		}
+
+
 		for (int i = 0; i < Buttons::buttonsCount; i++)
 		{
 			bool state;
@@ -82,6 +133,14 @@ namespace input
 			else
 			{
 				state = internal::getisKeyHeldDirect(i, nullptr);
+			}
+
+			if(!state && buttonsHeld[i])
+			{
+				buttonsReleased[i] = 1;
+			}else
+			{
+				buttonsReleased[i] = 0;
 			}
 
 			buttonsPressed[i] = 0;
@@ -114,12 +173,12 @@ namespace input
 				
 				if (b == input::Buttons::jump)
 				{
-					val = pad->bRightTrigger > 10;
+					val = pad->bLeftTrigger > 20;
 					val = val | (pad->wButtons & bindingsController[b]);
 				}
 				else if (b == input::Buttons::shoot)
 				{
-					val = pad->bLeftTrigger > 10;
+					val = pad->bRightTrigger > 20;
 				}
 				else if(b == input::Buttons::left)
 				{

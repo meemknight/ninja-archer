@@ -8,4 +8,4 @@ void simulateLight(glm::vec2 pos, float radius, MapData& mapData, std::vector<gl
 
 void simuleteLightTrace(glm::vec2 pos, float radius, MapData& mapData, std::vector<glm::vec2>& triangles);
 
-void simuleteLightSpot(glm::vec2 pos, float radius, MapData& mapData, std::vector<glm::vec2>& triangles, std::vector<Arrow> &arrows);
+void simuleteLightSpot(glm::vec2 pos, float radius, MapData& mapData, std::vector<Arrow> &arrows, gl2d::Renderer2D &stencilRenderer);

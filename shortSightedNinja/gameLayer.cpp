@@ -20,6 +20,8 @@ extern float notGrabTimeVal;
 extern bool snapWallGrab;
 
 gl2d::Renderer2D renderer2d;
+gl2d::Renderer2D stencilRenderer2d;
+gl2d::Renderer2D backgroundRenderer2d;
 //sf::Music music;
 MapRenderer mapRenderer;
 MapData mapData;
@@ -37,6 +39,8 @@ std::vector<Arrow> arrows;
 bool initGame()
 {
 	renderer2d.create();
+	stencilRenderer2d.create();
+	backgroundRenderer2d.create();
 	//if (music.openFromFile("ding.flac"))
 	//music.play();
 	ShaderProgram sp{ "blocks.vert","blocks.frag" };
@@ -108,13 +112,15 @@ bool initGame()
 
 bool gameLogic(float deltaTime)
 {
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	int w, h;
 	w = getWindowSizeX();
 	h = getWindowSizeY();
 
 	glViewport(0, 0, w, h);
 	renderer2d.updateWindowMetrics(w, h);
+	stencilRenderer2d.updateWindowMetrics(w, h);
+	backgroundRenderer2d.updateWindowMetrics(w, h);
 
 	//renderer2d.renderRectangle({ 100,100,100,100 }, Colors_Green);
 	//renderer2d.flush();
@@ -193,6 +199,8 @@ bool gameLogic(float deltaTime)
 
 	//todo add player dimensions
 	renderer2d.currentCamera.follow(player.pos + (player.dimensions / 2.f), deltaTime * 120, 30, renderer2d.windowW, renderer2d.windowH);
+	stencilRenderer2d.currentCamera = renderer2d.currentCamera;
+	backgroundRenderer2d.currentCamera = renderer2d.currentCamera;
 
 	player.applyGravity(deltaTime);
 	player.applyVelocity(deltaTime);
@@ -207,9 +215,26 @@ bool gameLogic(float deltaTime)
 
 	mapData.clearColorData();
 
-	std::vector<glm::vec2> triangles;
+	simuleteLightSpot(player.pos, 10, mapData, arrows, stencilRenderer2d);
 
-	simuleteLightSpot(player.pos, 20, mapData, triangles, arrows);
+#pragma region drawStencil
+	glEnable(GL_STENCIL_TEST);
+	
+	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	glStencilFunc(GL_ALWAYS, 1, 0xff);
+	glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
+	stencilRenderer2d.flush();
+	
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	glStencilFunc(GL_EQUAL, 1, 0xff);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+	
+	//draw here
+	backgroundRenderer2d.renderRectangle({ -20 * BLOCK_SIZE, -20 * BLOCK_SIZE, 60 * BLOCK_SIZE, 60 * BLOCK_SIZE }, { 0.1,0.1,0.1,1 });
+	backgroundRenderer2d.flush();
+	
+	glDisable(GL_STENCIL_TEST);
+#pragma endregion
 
 	mapRenderer.drawFromMapData(renderer2d, mapData);
 
@@ -234,7 +259,6 @@ bool gameLogic(float deltaTime)
 	}
 	
 #pragma endregion
-
 
 
 	glm::vec2 cursorPos = input::getShootDir({ w / 2,h / 2 });

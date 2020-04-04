@@ -116,9 +116,11 @@ void simuleteLightTrace(glm::vec2 pos, float radius, MapData & mapData, std::vec
 
 }
 
-void simuleteLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vector<Arrow> &arrows, gl2d::Renderer2D &stencilRenderer)
+void simuleteLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vector<Arrow> &arrows, gl2d::Renderer2D &maskRenderer, gl2d::Texture lightT)
 {
 	//stencilRenderer.renderRectangle({ 3 * BLOCK_SIZE, 3 * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 1,1,1,1 });
+
+	maskRenderer.renderRectangle({ pos.x - radius*BLOCK_SIZE*2, pos.y - radius * BLOCK_SIZE*2, 4 * radius*BLOCK_SIZE, 4 * radius*BLOCK_SIZE }, {}, 0, lightT);
 
 	{
 		float r = radius;
@@ -197,7 +199,7 @@ void simuleteLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vect
 
 					static int c;
 				}
-				stencilRenderer.renderRectangle({ xPos*BLOCK_SIZE, yPos*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 1,1,1,1 });
+				
 			}
 			
 

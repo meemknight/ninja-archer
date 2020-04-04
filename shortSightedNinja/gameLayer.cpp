@@ -19,6 +19,9 @@ extern float grabMargin;
 extern float notGrabTimeVal;
 extern bool snapWallGrab;
 
+extern gl2d::internal::ShaderProgram maskShader;
+extern GLint maskSamplerUniform;
+
 gl2d::Renderer2D renderer2d;
 gl2d::Renderer2D stencilRenderer2d;
 gl2d::Renderer2D backgroundRenderer2d;
@@ -33,6 +36,10 @@ gl2d::Texture sprites;
 gl2d::Texture characterSprite;
 gl2d::Texture targetSprite;
 gl2d::Texture arrowSprite;
+gl2d::Texture lightTexture;
+
+gl2d::FrameBuffer backGroundFBO;
+gl2d::Texture backgroundTexture;
 
 std::vector<Arrow> arrows;
 
@@ -41,6 +48,7 @@ bool initGame()
 	renderer2d.create();
 	stencilRenderer2d.create();
 	backgroundRenderer2d.create();
+	backgroundRenderer2d.setShaderProgram(maskShader);
 	//if (music.openFromFile("ding.flac"))
 	//music.play();
 	ShaderProgram sp{ "blocks.vert","blocks.frag" };
@@ -48,6 +56,9 @@ bool initGame()
 	characterSprite.loadFromFile("character.png");
 	targetSprite.loadFromFile("target.png");
 	arrowSprite.loadFromFile("arrow.png");
+	lightTexture.loadFromFile("light.png");
+	backgroundTexture.loadFromFile("background.jpg");
+	backGroundFBO.create(40 * BLOCK_SIZE, 40 * BLOCK_SIZE);
 
 	mapRenderer.init(sp);
 	mapRenderer.sprites = sprites;
@@ -103,6 +114,7 @@ bool initGame()
 	player.updateMove();
 	player.dimensions = { 24, 30 };
 
+	//todo remove
 	mapData.ConvertTileMapToPolyMap();
 
 	arrows.reserve(10);
@@ -119,7 +131,8 @@ bool gameLogic(float deltaTime)
 
 	glViewport(0, 0, w, h);
 	renderer2d.updateWindowMetrics(w, h);
-	stencilRenderer2d.updateWindowMetrics(w, h);
+	stencilRenderer2d.updateWindowMetrics(backGroundFBO.texture.GetSize().x, 
+		backGroundFBO.texture.GetSize().y);
 	backgroundRenderer2d.updateWindowMetrics(w, h);
 
 	//renderer2d.renderRectangle({ 100,100,100,100 }, Colors_Green);
@@ -199,7 +212,7 @@ bool gameLogic(float deltaTime)
 
 	//todo add player dimensions
 	renderer2d.currentCamera.follow(player.pos + (player.dimensions / 2.f), deltaTime * 120, 30, renderer2d.windowW, renderer2d.windowH);
-	stencilRenderer2d.currentCamera = renderer2d.currentCamera;
+	//stencilRenderer2d.currentCamera = renderer2d.currentCamera;
 	backgroundRenderer2d.currentCamera = renderer2d.currentCamera;
 
 	player.applyGravity(deltaTime);
@@ -215,25 +228,20 @@ bool gameLogic(float deltaTime)
 
 	mapData.clearColorData();
 
-	simuleteLightSpot(player.pos, 10, mapData, arrows, stencilRenderer2d);
+	simuleteLightSpot(player.pos + glm::vec2(player.dimensions.x/2, player.dimensions.y / 2),
+		10, mapData, arrows, stencilRenderer2d, lightTexture);
 
 #pragma region drawStencil
-	glEnable(GL_STENCIL_TEST);
+
+	stencilRenderer2d.flushFBO(backGroundFBO);
 	
-	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-	glStencilFunc(GL_ALWAYS, 1, 0xff);
-	glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
-	stencilRenderer2d.flush();
-	
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-	glStencilFunc(GL_EQUAL, 1, 0xff);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-	
-	//draw here
-	backgroundRenderer2d.renderRectangle({ -20 * BLOCK_SIZE, -20 * BLOCK_SIZE, 60 * BLOCK_SIZE, 60 * BLOCK_SIZE }, { 0.1,0.1,0.1,1 });
+	backgroundRenderer2d.renderRectangle({ 0,0, mapData.w*BLOCK_SIZE, mapData.h*BLOCK_SIZE }, {}, 0, backgroundTexture);
+	glUseProgram(backgroundRenderer2d.currentShader.id);
+	glUniform1i(maskSamplerUniform, 1);
+	backGroundFBO.texture.bind(1);
 	backgroundRenderer2d.flush();
 	
-	glDisable(GL_STENCIL_TEST);
+	backGroundFBO.clear();
 #pragma endregion
 
 	mapRenderer.drawFromMapData(renderer2d, mapData);

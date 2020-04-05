@@ -61,12 +61,13 @@ private:
 
 struct Arrow
 {
-	enum
+	enum ArrowTypes: int
 	{
-		normalArrow,
+		normalArrow=0,
 		fireArrow,
 		slimeArrow,
-	}type = fireArrow;
+		lastArror,
+	}type = normalArrow;
 
 
 	//pos is the tip of the arrrow
@@ -88,5 +89,6 @@ struct Arrow
 
 	float liveTime = 5;
 
+	bool hitOnce = 0;
 	bool stuckInWall = 0;
 };

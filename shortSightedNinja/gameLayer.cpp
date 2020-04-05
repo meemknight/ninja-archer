@@ -6,6 +6,7 @@
 #include "math.h"
 #include "Entity.h"
 #include "input.h"
+#include "Ui.h"
 
 extern float gravitationalAcceleration;
 extern float jumpSpeed;
@@ -43,8 +44,23 @@ gl2d::Texture backgroundTexture;
 
 std::vector<Arrow> arrows;
 
+int currentArrow = Arrow::normalArrow;
+
+struct Item
+{
+	int type;
+	int count;
+	int maxCount;
+};
+
+std::vector <Item> inventory;
+
 bool initGame()
 {
+	inventory.push_back({ 0,1,1 });
+	inventory.push_back({ 1,1,1 });
+	inventory.push_back({ 2,1,1 });
+
 	renderer2d.create();
 	stencilRenderer2d.create();
 	backgroundRenderer2d.create();
@@ -153,11 +169,11 @@ bool gameLogic(float deltaTime)
 		}
 	}
 
-	if (platform::isKeyHeld('Q'))
+	if (platform::isKeyHeld('Z'))
 	{
 		renderer2d.currentCamera.zoom -= deltaTime;
 	}
-	if (platform::isKeyHeld('E'))
+	if (platform::isKeyHeld('X'))
 	{
 		renderer2d.currentCamera.zoom += deltaTime;
 	}
@@ -202,6 +218,7 @@ bool gameLogic(float deltaTime)
 	if(input::isKeyPressedOn(input::Buttons::shoot))
 	{
 		Arrow a;
+		a.type = (Arrow::ArrowTypes)currentArrow;
 		a.pos = player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2);
 		a.shootDir = input::getShootDir({ w / 2,h / 2 });
 		//a.pos.x += a.shootDir.x * BLOCK_SIZE * 0.9;
@@ -232,6 +249,26 @@ bool gameLogic(float deltaTime)
 
 #pragma region lights
 
+	if(input::isKeyPressedOn(input::Buttons::swapLeft))
+	{
+		currentArrow--;
+		if(currentArrow <0)
+		{
+			currentArrow = Arrow::lastArror - 1;
+		}
+
+	}else if(input::isKeyPressedOn(input::Buttons::swapRight))
+	{
+		currentArrow++;
+		if (currentArrow >= Arrow::lastArror)
+		{
+			currentArrow = 0;
+		}
+	}
+
+
+
+
 	for (int y = 0; y < mapData.h; y++)
 		for(int x=0; x<mapData.w; x++)
 		{
@@ -243,14 +280,15 @@ bool gameLogic(float deltaTime)
 				)
 			{
 				simuleteLightSpot({x*BLOCK_SIZE,y*BLOCK_SIZE },
-					6, mapData, arrows, stencilRenderer2d, lightTexture, 0.3);
+					5, mapData, arrows, stencilRenderer2d, lightTexture, 0.3);
 			}
 		}
 
 	for(auto &i: arrows)
 	{
+		if(i.type == Arrow::fireArrow)
 		simuleteLightSpot({ i.pos},
-			6, mapData, arrows, stencilRenderer2d, lightTexture, 0.1);
+			5, mapData, arrows, stencilRenderer2d, lightTexture, 0.1);
 	}
 
 #pragma endregion
@@ -294,7 +332,7 @@ bool gameLogic(float deltaTime)
 				}
 			}
 			
-			renderer2d.renderRectangle({ pos, 4,4 }, { 1,1,1,1 });
+			renderer2d.renderRectangle({ pos, 2,2 }, { 1,1,1,0.8 });
 		}
 
 		
@@ -309,24 +347,36 @@ bool gameLogic(float deltaTime)
 		playerAtlas.get(0, 0, !player.movingRight));
 
 #pragma region arrows
-	for(auto i=arrows.begin(); i<arrows.end(); i++)
+	for(auto i=0; i<arrows.size(); i++)
 	{
-		if(i->leftMap(mapData.w, mapData.h) || i->timeOut(deltaTime))
+		auto &a = arrows[i];
+		if(a.leftMap(mapData.w, mapData.h) || a.timeOut(deltaTime))
 		{
-			arrows.erase(i);
+			arrows.erase(arrows.begin() + i);
+			i--;
 			continue;
 		}
 
-		i->move(deltaTime * BLOCK_SIZE);
-		i->draw(renderer2d, arrowSprite);
-		i->checkCollision(mapData);
-		i->light = 0;
+		a.move(deltaTime * BLOCK_SIZE);
+		a.draw(renderer2d, arrowSprite);
+		a.checkCollision(mapData);
+		a.light = 0;
 	}
 	
 #pragma endregion
 
+	{
+		auto c = renderer2d.currentCamera;
+		renderer2d.currentCamera.setDefault();
 
-	//renderer2d.renderRectangle({ cursorPos, 14, 14 }, { 1,0,0,0.4 }, {}, 0, targetSprite);
+		Ui::Frame f({ 0,0, w,h });
+
+		renderer2d.renderRectangle(
+			Ui::Box().xLeft(20).yBottom(-20).yDimensionPercentage(0.1f).xAspectRatio(1)
+			, {}, 45, arrowSprite, gl2d::computeTextureAtlas(4,1, currentArrow,0));
+		
+		renderer2d.currentCamera = c;
+	}
 
 	renderer2d.flush();
 

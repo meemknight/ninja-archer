@@ -17,6 +17,8 @@ namespace input
 			jump,
 			shoot,
 			up,
+			swapLeft,
+			swapRight,
 			buttonsCount
 		};
 	};

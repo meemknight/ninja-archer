@@ -396,7 +396,7 @@ void Arrow::draw(gl2d::Renderer2D & renderer, gl2d::Texture t)
 	
 	angle = std::asin(-shootDir.y);
 	angle = glm::degrees(angle);
-
+	
 	if(shootDir.x < 0)
 	{
 		angle = 180.f - angle;
@@ -408,11 +408,10 @@ void Arrow::draw(gl2d::Renderer2D & renderer, gl2d::Texture t)
 		dim = liveTime;
 		dim = std::max(dim, 0.f);
 	}
-
+	
 	gl2d::TextureAtlas ta(4, 1);
-
+	
 	renderer.renderRectangle({ pos.x - BLOCK_SIZE, pos.y - (BLOCK_SIZE / 2.f),BLOCK_SIZE, BLOCK_SIZE }, { light,light,light,light*dim }, { BLOCK_SIZE/2,0 }, angle, t, ta.get(type,0));
-
 }
 
 void Arrow::move(float deltaTime)
@@ -508,7 +507,27 @@ void Arrow::checkCollision(MapData &mapData)
 				mapData.setNeighbors();
 			}
 
-			stuckInWall = 1;
+			if(type == slimeArrow && hitOnce == 0)
+			{
+				hitOnce = 1;
+				
+				if ((lastPos.x < floor(curPos.x / BLOCK_SIZE)*BLOCK_SIZE && shootDir.x > 0) ||
+					(lastPos.x > floor((curPos.x / BLOCK_SIZE) + 1)*BLOCK_SIZE&& shootDir.x < 0))
+				{
+					shootDir.x *= -1;
+				}else
+				{
+					shootDir.y *= -1;
+				}
+
+				curPos.x += shootDir.x * BLOCK_SIZE * affinity;
+				curPos.y += shootDir.y * BLOCK_SIZE * affinity;
+				pos = curPos;
+			}else
+			{
+				stuckInWall = 1;
+			}
+
 			break;
 		}
 	}

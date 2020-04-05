@@ -44,16 +44,24 @@ gl2d::Texture backgroundTexture;
 
 std::vector<Arrow> arrows;
 
+std::vector<Pickup> pickups;
+
+gl2d::Font font;
+
 int currentArrow = Arrow::normalArrow;
 
-struct Item
+const float arrowPickupCullDown = 5;
+
+struct ArrowItem
 {
 	int type;
 	int count;
 	int maxCount;
 };
 
-std::vector <Item> inventory;
+//this vector should always have all arrows in order (and all of them there)
+std::vector <ArrowItem> inventory;
+std::vector <ArrowItem> actualInventorty;
 
 struct LightSource
 {
@@ -66,9 +74,11 @@ std::vector <LightSource> wallLights;
 
 bool initGame()
 {
-	inventory.push_back({ 0,1,1 });
-	inventory.push_back({ 1,1,1 });
-	inventory.push_back({ 2,1,1 });
+	//this vector should always have all arrows in order (and all of them there)
+	inventory.push_back({ 0,3,5 });
+	inventory.push_back({ 1,4,5 });
+	inventory.push_back({ 2,5,5 });
+	inventory.push_back({ 3,3,5 });
 
 	renderer2d.create();
 	stencilRenderer2d.create();
@@ -85,12 +95,16 @@ bool initGame()
 	backgroundTexture.loadFromFile("background.jpg");
 	backGroundFBO.create(40 * BLOCK_SIZE, 40 * BLOCK_SIZE);
 
+	font.createFromFile("font.ttf");
+
 	mapRenderer.init(sp);
 	mapRenderer.sprites = sprites;
 	mapRenderer.upTexture.loadFromFile("top.png");
 	mapRenderer.downTexture.loadFromFile("bottom.png");
 	mapRenderer.leftTexture.loadFromFile("left.png");
 	mapRenderer.rightTexture.loadFromFile("right.png");
+
+	pickups.push_back({ 4, 4, 1 });
 
 	mapData.create(40, 40, 
 		"!!!!!!!!!                             !!"
@@ -229,15 +243,34 @@ bool gameLogic(float deltaTime)
 		}
 	}
 
+	actualInventorty.clear();
+
+	for (auto i : inventory)
+	{
+		if (i.count)
+		{
+			actualInventorty.push_back(i);
+		}
+	}
+
 	if (input::isKeyHeld(input::Buttons::down))
 	{
 		player.wallGrab = 0;
 	}
 
-	if(input::isKeyPressedOn(input::Buttons::shoot))
+	if(input::isKeyPressedOn(input::Buttons::shoot) && currentArrow > -1)
 	{
+		for(auto &i:inventory)
+		{
+			if(i.type == actualInventorty[currentArrow].type)
+			{
+				i.count--;
+				break;
+			}
+		}
+
 		Arrow a;
-		a.type = (Arrow::ArrowTypes)currentArrow;
+		a.type = (Arrow::ArrowTypes)actualInventorty[currentArrow].type;
 		a.pos = player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2);
 		a.shootDir = input::getShootDir({ w / 2,h / 2 });
 		//a.pos.x += a.shootDir.x * BLOCK_SIZE * 0.9;
@@ -264,26 +297,36 @@ bool gameLogic(float deltaTime)
 	mapData.clearColorData();
 
 	simuleteLightSpot(player.pos + glm::vec2(player.dimensions.x/2, player.dimensions.y / 2),
-		12, mapData, arrows, stencilRenderer2d, lightTexture, 0);
+		12, mapData, arrows, pickups, stencilRenderer2d, lightTexture, 0);
+
+#pragma region inventory
+
 
 	if (input::isKeyPressedOn(input::Buttons::swapLeft))
 	{
 		currentArrow--;
-		if (currentArrow < 0)
-		{
-			currentArrow = Arrow::lastArror - 1;
-		}
-
 	}
 	else if (input::isKeyPressedOn(input::Buttons::swapRight))
 	{
 		currentArrow++;
-		if (currentArrow >= Arrow::lastArror)
-		{
-			currentArrow = 0;
-		}
 	}
 
+	if (currentArrow < -1)
+	{
+		currentArrow = actualInventorty.size()-1;
+	}
+
+	if (currentArrow >= actualInventorty.size())
+	{
+		currentArrow = -1;
+	}
+
+	if(actualInventorty.size()==0)
+	{
+		currentArrow = -1;
+	}
+
+#pragma endregion
 
 #pragma region lights
 
@@ -335,7 +378,6 @@ bool gameLogic(float deltaTime)
 				perc = i.animationDuration - (i.animationStartTime / 2.f);
 				perc = perc/(i.animationStartTime / 2.f);
 				perc = 1 - perc;
-				ilog(perc);
 				r *= perc;
 				intensity *= perc * 2;
 				intensity = std::max(intensity, 0.3f);
@@ -351,7 +393,7 @@ bool gameLogic(float deltaTime)
 		}
 
 		simuleteLightSpot({ i.pos.x*BLOCK_SIZE + BLOCK_SIZE/2,i.pos.y*BLOCK_SIZE + BLOCK_SIZE/2 },
-			r, mapData, arrows, stencilRenderer2d, lightTexture, intensity);
+			r, mapData, arrows, pickups, stencilRenderer2d, lightTexture, intensity);
 	
 	}
 
@@ -374,7 +416,7 @@ bool gameLogic(float deltaTime)
 			if(r > 0)
 			{
 				simuleteLightSpot({ i.pos },
-					r, mapData, arrows, stencilRenderer2d, lightTexture, 0.1);
+					r, mapData, arrows, pickups, stencilRenderer2d, lightTexture, 0.1);
 			}
 			
 		}
@@ -399,37 +441,86 @@ bool gameLogic(float deltaTime)
 
 #pragma region target
 	{
-		float fine = 1 * BLOCK_SIZE;
-		glm::vec2 pos = player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2);
-		glm::vec2 dir = input::getShootDir({ w / 2,h / 2 });
-		float dist = BLOCK_SIZE * 10;
-		for (int i = fine; i < BLOCK_SIZE * 10; i += fine)
+		if(currentArrow!=-1)
 		{
-			pos += fine * dir;
+			glm::vec4 color = { 1,1,1,1 };
 
-			if (pos.x < 0
-				|| pos.y < 0
-				|| pos.x >(mapData.w)*BLOCK_SIZE
-				|| pos.y >(mapData.h)*BLOCK_SIZE) 
+			switch (actualInventorty[currentArrow].type)
 			{
-				
-			}else
-			{
-				if (isColidable(mapData.get(pos.x / BLOCK_SIZE, pos.y / BLOCK_SIZE).type))
-				{
-					dist = i;
-					break;
-				}
+			case Arrow::normalArrow :
+				color = { 0.8,0.8,0.8,1 };
+				break;
+			case Arrow::fireArrow:
+				color = { 0.9,0.0,0.0,1 };
+				break;
+			case Arrow::slimeArrow:
+				color = { 0.0,0.9,0.0,1 };
+				break;
+			case Arrow::keyArrow:
+				color = { 0.9,0.9,0.0,1 };
+				break;
+			default:
+				break;
 			}
-			
-			renderer2d.renderRectangle({ pos, 2,2 }, { 1,1,1,0.8 });
-		}
 
+			float fine = 0.9 * BLOCK_SIZE;
+			glm::vec2 pos = player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2);
+			glm::vec2 dir = input::getShootDir({ w / 2,h / 2 });
+			float dist = BLOCK_SIZE * 10;
+			for (int i = fine; i < BLOCK_SIZE * 10; i += fine)
+			{
+				pos += fine * dir;
+
+				if (pos.x < 0
+					|| pos.y < 0
+					|| pos.x >(mapData.w)*BLOCK_SIZE
+					|| pos.y >(mapData.h)*BLOCK_SIZE)
+				{
+
+				}
+				else
+				{
+					if (isColidable(mapData.get(pos.x / BLOCK_SIZE, pos.y / BLOCK_SIZE).type))
+					{
+						dist = i;
+						break;
+					}
+				}
+
+				renderer2d.renderRectangle({ pos, 3,3 }, color);
+			}
+		}
 		
 	}
 #pragma endregion
 
 	mapRenderer.drawFromMapData(renderer2d, mapData);
+
+#pragma region pickups
+	for (auto &i : pickups)
+	{
+		i.draw(renderer2d, arrowSprite, deltaTime);
+		i.light = 0;
+
+		if(i.colidePlayer(player))
+		{
+			i.cullDown = arrowPickupCullDown;
+			inventory[i.type].count = inventory[i.type].maxCount;
+		}
+	}
+	
+	actualInventorty.clear();
+
+	for (auto i : inventory)
+	{
+		if (i.count)
+		{
+			actualInventorty.push_back(i);
+		}
+	}
+
+#pragma endregion
+
 
 	gl2d::TextureAtlas playerAtlas(1, 1);
 
@@ -461,9 +552,99 @@ bool gameLogic(float deltaTime)
 
 		Ui::Frame f({ 0,0, w,h });
 
-		renderer2d.renderRectangle(
-			Ui::Box().xLeft(20).yBottom(-20).yDimensionPercentage(0.1f).xAspectRatio(1)
-			, {}, 45, arrowSprite, gl2d::computeTextureAtlas(4,1, currentArrow,0));
+
+		{
+			Ui::Frame cornerLeft(Ui::Box().xLeft(20).yBottom(-20).xDimensionPercentage(0.1f).yAspectRatio(0.5f)());
+
+			int centerCount = 1;
+			int leftCount = 1;
+			int rightCount = 1;
+
+			if (actualInventorty.size() != 0)
+			{
+
+				int left = currentArrow - 1;
+				if(left==-1)
+				{
+				}else
+				{
+					if (left < -1)
+					{
+						left = actualInventorty.size() - 1;
+					}
+
+					leftCount = actualInventorty[left].count;
+					left = actualInventorty[left].type;
+				}
+				
+				int center = currentArrow;
+				if (center <= -1)
+				{
+					
+				}
+				else
+				{
+					centerCount = actualInventorty[center].count;
+					center = actualInventorty[center].type;
+				}
+
+
+				int right = currentArrow + 1;;
+				if(right >= actualInventorty.size())
+				{
+					right = -1;
+				}else
+				{
+					rightCount = actualInventorty[right].count;
+					right = actualInventorty[right].type;
+				}
+
+				//todo change current arrow
+				if(left!=-1)
+				{
+					for (int i = -1; i < leftCount - 1; i++)
+					{
+						renderer2d.renderRectangle(
+							Ui::Box().xLeft(i*8).yCenter().yDimensionPercentage(0.7f).xAspectRatio(1)
+							, { 0.4,0.4,0.4,1 }
+						, {}, 45, arrowSprite, gl2d::computeTextureAtlas(4, 1, left, 0));
+					}
+				}
+			
+
+				if(right!=-1)
+				{
+					for (int i = -1; i < rightCount - 1; i++)
+					{
+						renderer2d.renderRectangle(
+							Ui::Box().xRight(i*8).yCenter().yDimensionPercentage(0.7f).xAspectRatio(1)
+							, { 0.4,0.4,0.4,1 }
+						, {}, 45, arrowSprite, gl2d::computeTextureAtlas(4, 1, right, 0));
+					}
+				}
+		
+
+				if(center!=-1)
+				{
+				
+					for(int i=-1; i<centerCount-1;i++)
+					{
+						renderer2d.renderRectangle(
+							Ui::Box().xCenter(i*10).yCenter().yDimensionPercentage(0.9f).xAspectRatio(1)
+							, {}, 45, arrowSprite, gl2d::computeTextureAtlas(4, 1, center, 0));
+					}
+
+
+				//renderer2d.renderText(Ui::Box().xCenter().yBottom()(),
+				//	"1/2", font, { 1,1,1,1 }, 0.5);
+
+				}
+
+			}
+
+		}
+		
+
 		
 		renderer2d.currentCamera = c;
 	}

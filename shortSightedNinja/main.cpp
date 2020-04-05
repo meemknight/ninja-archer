@@ -123,7 +123,7 @@ int MAIN
 			float fDeltaTime = (float)deltaTime / CLOCKS_PER_SEC;
 		
 			//todo
-			//fDeltaTime = std::min(fDeltaTime, 1.f / 20.f);
+			fDeltaTime = std::min(fDeltaTime, 1.f / 20.f);
 		
 			input::updateInput();
 

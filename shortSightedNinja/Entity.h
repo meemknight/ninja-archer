@@ -93,3 +93,24 @@ struct Arrow
 	bool hitOnce = 0;
 	bool stuckInWall = 0;
 };
+
+struct Pickup
+{
+	Pickup() {};
+	Pickup(int x, int y, int type) { pos.x = x, pos.y = y, this->type = type; };
+
+	float animPos = 0;
+
+	float light = 1;
+
+	int type = 1;
+
+	float cullDown = 0;
+
+	glm::ivec2 pos;
+
+	bool colidePlayer(Entity &player);
+
+	void draw(gl2d::Renderer2D &renderer2d, gl2d::Texture arrowTexture, float deltaTime);
+
+};

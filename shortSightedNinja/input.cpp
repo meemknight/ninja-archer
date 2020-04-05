@@ -106,7 +106,7 @@ namespace input
 			retValY = std::max(-1.f, retValY);
 			retValY = std::min(1.f, retValY);
 
-			if (abs(retValX) < deadZone || abs(retValY) < deadZone)
+			if (abs(retValX) < deadZone && abs(retValY) < deadZone)
 			{
 
 			}

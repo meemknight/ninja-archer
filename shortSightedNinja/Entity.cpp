@@ -42,6 +42,11 @@ void Entity::checkCollisionBrute(glm::vec2 &pos, glm::vec2 lastPos, MapData & ma
 
 	glm::vec2 delta = pos - lastPos;
 
+	if (pos.y < -dimensions.y)
+	{
+		return;
+	}
+
 	glm::vec2 newPos = performCollision(mapData, { pos.x, lastPos.y }, { dimensions.x, dimensions.y }, { delta.x, 0 },
 		upTouch, downTouch, leftTouch, rightTouch);
 	pos = performCollision(mapData, { newPos.x, pos.y }, { dimensions.x, dimensions.y }, { 0, delta.y },
@@ -262,6 +267,11 @@ void Entity::checkGrounded(MapData &mapDat)
 
 void Entity::checkWall(MapData & mapData, int move)
 {
+	if (pos.y < -BLOCK_SIZE)
+	{
+		return;
+	}
+
 	if(notGrabTime > 0)
 	{
 		return;
@@ -389,6 +399,7 @@ glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 s
 	end:
 	return pos;
 }
+gl2d::TextureAtlas ta(4, 1);
 
 void Arrow::draw(gl2d::Renderer2D & renderer, gl2d::Texture t)
 {
@@ -409,7 +420,6 @@ void Arrow::draw(gl2d::Renderer2D & renderer, gl2d::Texture t)
 		dim = std::max(dim, 0.f);
 	}
 	
-	gl2d::TextureAtlas ta(4, 1);
 	
 	renderer.renderRectangle({ pos.x - BLOCK_SIZE, pos.y - (BLOCK_SIZE / 2.f),BLOCK_SIZE, BLOCK_SIZE }, { light,light,light,light*dim }, { BLOCK_SIZE/2,0 }, angle, t, ta.get(type,0));
 }
@@ -581,4 +591,33 @@ bool Arrow::timeOut(float deltaTime)
 	}
 
 	return false;
+}
+
+bool Pickup::colidePlayer(Entity &player)
+{
+	return aabb({ player.pos, player.dimensions }, { pos.x*BLOCK_SIZE, pos.y*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE });
+}
+
+void Pickup::draw(gl2d::Renderer2D & renderer2d, gl2d::Texture arrowTexture, float deltaTime)
+{
+
+	float levitate = cos((animPos += deltaTime) / 0.7f);
+
+	if(cullDown<=0)
+	{
+		cullDown = 0;
+
+		levitate += 1;
+		levitate /= 2.f;
+
+		levitate *= 0.8;
+
+		renderer2d.renderRectangle({ pos.x*BLOCK_SIZE,(pos.y - levitate)*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { light, light, light, 1 }, {}, 45,
+			arrowTexture, ta.get(type, 0));
+	}else
+	{
+		cullDown -= deltaTime;
+	}
+
+	
 }

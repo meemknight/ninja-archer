@@ -506,6 +506,25 @@ void Arrow::checkCollision(MapData &mapData)
 				}
 				mapData.setNeighbors();
 			}
+			else if (t == Block::keyHole)
+			{
+				if(type == Arrow::ArrowTypes::keyArrow)
+				{
+					for (int i = 0; i < mapData.w * mapData.h; i++)
+					{
+						if (mapData.data[i].type == Block::yellowBlock)
+						{
+							mapData.data[i].type++;
+						}
+						else if (mapData.data[i].type == Block::yellowNo)
+						{
+							mapData.data[i].type--;
+						}
+					}
+					mapData.setNeighbors();
+				}
+				
+			}
 
 			if(type == slimeArrow && hitOnce == 0)
 			{

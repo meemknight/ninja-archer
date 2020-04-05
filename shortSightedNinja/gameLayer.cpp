@@ -55,6 +55,15 @@ struct Item
 
 std::vector <Item> inventory;
 
+struct LightSource
+{
+	static constexpr int animationStartTime = 2;
+	glm::ivec2 pos;
+	float animationDuration = animationStartTime;
+};
+
+std::vector <LightSource> wallLights;
+
 bool initGame()
 {
 	inventory.push_back({ 0,1,1 });
@@ -85,21 +94,21 @@ bool initGame()
 
 	mapData.create(40, 40, 
 		"!!!!!!!!!                             !!"
-		"!!!!!!!!!!!!!!!!                      !!"
+		"!!!!!!!!!!!!!!!2                      !!"
 		"!!!!!!!!!!!!!              '          !!"
 		"!!!                 +      *        (!!!"
 		"!!!                 +      *        !!!!"
 		"!!!!!!!!#######$***********!!!!,,,,,!!!!"
-		"!!!!!!!!               +      -       !!"
-		"!!!!!!                 +     --       !!"
-		"!!000000000000!!!!!!!!!!!!!!!!!       !!"
-		"!!0020003000!!!                       !!"
-		"!!00000000                          !!!!"
-		"!!!!!!!!!!              !           !!!!"
-		"!!                      !           !!!!"
-		"!!            !!!!!!!!!!!!!!!!!!!!!!!!!!"
-		"!!  !!  ! !!!  !!  ! !!  !!  ! !  !!  !!"
-		"!!                                    !!"
+		"!!!!!!!!33333333       +      -3333333!!"
+		"!!!!!!3333333333       +     --3333333!!"
+		"!!333333333333!!!!!!!!!!!!!!!!!3333333!!"
+		"!!3353336333!!!33333333333333333333333!!"
+		"!!3333333333333333333333333333331111!!!!"
+		"!!!!!!!!!!33333333333333233333331333!!!!"
+		"!!3333333333333333333333!33333331333!!!!"
+		"!!3353335333533353333333!!!!!!!!!!!!!!!!"
+		"!!333333333333333333333333333333333333!!"
+		"!!!!!!!!!!!!!!!!!!!!!!!!!             !!"
 		"!!          !         !        !      !!"
 		"!!    !!!        !!!       !!!      !!!!"
 		"!!      !          !         !        !!"
@@ -128,12 +137,22 @@ bool initGame()
 
 	player.pos = { BLOCK_SIZE*4, BLOCK_SIZE*4 };
 	player.updateMove();
-	player.dimensions = { 24, 30 };
+	player.dimensions = { 20, 30 };
 
 	//todo remove
 	mapData.ConvertTileMapToPolyMap();
 
 	arrows.reserve(10);
+
+	//setup light sources
+	for(int y=0; y<mapData.h; y++)
+		for (int x = 0; x < mapData.w; x++)
+		{
+			if(isLitTorch(mapData.get(x,y).type))
+			{
+				wallLights.push_back({ {x,y}, 0});
+			}
+		}
 
 	return true;
 }
@@ -247,17 +266,16 @@ bool gameLogic(float deltaTime)
 	simuleteLightSpot(player.pos + glm::vec2(player.dimensions.x/2, player.dimensions.y / 2),
 		12, mapData, arrows, stencilRenderer2d, lightTexture, 0);
 
-#pragma region lights
-
-	if(input::isKeyPressedOn(input::Buttons::swapLeft))
+	if (input::isKeyPressedOn(input::Buttons::swapLeft))
 	{
 		currentArrow--;
-		if(currentArrow <0)
+		if (currentArrow < 0)
 		{
 			currentArrow = Arrow::lastArror - 1;
 		}
 
-	}else if(input::isKeyPressedOn(input::Buttons::swapRight))
+	}
+	else if (input::isKeyPressedOn(input::Buttons::swapRight))
 	{
 		currentArrow++;
 		if (currentArrow >= Arrow::lastArror)
@@ -267,28 +285,100 @@ bool gameLogic(float deltaTime)
 	}
 
 
+#pragma region lights
 
+	{
+		int minX = 0;
+		int minY = 0;
+		int maxX = mapData.w;
+		int maxY = mapData.h;
 
-	for (int y = 0; y < mapData.h; y++)
-		for(int x=0; x<mapData.w; x++)
+		minX = (player.pos.x) / BLOCK_SIZE;
+		maxX = (player.pos.x +player.dimensions.x) / BLOCK_SIZE;
+
+		minY = (player.pos.y) / BLOCK_SIZE;
+		maxY = (player.pos.y + player.dimensions.y) / BLOCK_SIZE;
+
+		minX = std::max(0, minX);
+		minY = std::max(0, minY);
+		maxX = std::min(mapData.w, maxX);
+		maxY = std::min(mapData.h, maxY);
+
+		for(int y=minY; y<=maxY;y++)
 		{
-			auto &d = mapData.get(x, y);
-			if(
-				d.type == Block::brickLitTorch||
-				d.type == Block::dirtLitTorch||
-				d.type == Block::stoneLitTorch
-				)
+			for (int x = minX; x <= maxX; x++)
 			{
-				simuleteLightSpot({x*BLOCK_SIZE,y*BLOCK_SIZE },
-					5, mapData, arrows, stencilRenderer2d, lightTexture, 0.3);
+				if (unLitTorch(mapData.get(x, y).type))
+				{
+					mapData.get(x, y).type++;
+					wallLights.push_back({{ x,y }});
+				}
 			}
 		}
+	}
+
+	for(auto &i: wallLights)
+	{
+		float r = 5;
+		float intensity = 0.3;
+
+		if(i.animationDuration <= 0)
+		{
+			r = 5;
+			intensity = 0.3;
+		}else
+		{
+			float perc;
+
+			if(i.animationDuration > i.animationStartTime /2.f)
+			{
+				perc = i.animationDuration - (i.animationStartTime / 2.f);
+				perc = perc/(i.animationStartTime / 2.f);
+				perc = 1 - perc;
+				ilog(perc);
+				r *= perc;
+				intensity *= perc * 2;
+				intensity = std::max(intensity, 0.3f);
+			}else
+			{
+				perc = i.animationStartTime / 2.f - i.animationDuration;
+				perc = perc / (i.animationStartTime / 2.f);
+				perc = 1 - perc;
+				intensity *=  (perc+1);
+			}
+
+			i.animationDuration -= deltaTime;
+		}
+
+		simuleteLightSpot({ i.pos.x*BLOCK_SIZE + BLOCK_SIZE/2,i.pos.y*BLOCK_SIZE + BLOCK_SIZE/2 },
+			r, mapData, arrows, stencilRenderer2d, lightTexture, intensity);
+	
+	}
 
 	for(auto &i: arrows)
 	{
 		if(i.type == Arrow::fireArrow)
-		simuleteLightSpot({ i.pos},
-			5, mapData, arrows, stencilRenderer2d, lightTexture, 0.1);
+		{
+			float r = 5;
+
+			if(i.liveTime < 5)
+			{
+				r *= (i.liveTime / 5.f );
+
+				if(i.liveTime < 1)
+				{
+					r = 0;
+				}
+			}
+
+			if(r > 0)
+			{
+				simuleteLightSpot({ i.pos },
+					r, mapData, arrows, stencilRenderer2d, lightTexture, 0.1);
+			}
+			
+		}
+	
 	}
 
 #pragma endregion
@@ -343,7 +433,7 @@ bool gameLogic(float deltaTime)
 
 	gl2d::TextureAtlas playerAtlas(1, 1);
 
-	renderer2d.renderRectangle({ player.pos, player.dimensions }, {}, 0, characterSprite,
+	renderer2d.renderRectangle({ player.pos - glm::vec2(2,0),  24, 30  }, {}, 0, characterSprite,
 		playerAtlas.get(0, 0, !player.movingRight));
 
 #pragma region arrows

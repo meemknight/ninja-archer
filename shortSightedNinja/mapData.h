@@ -20,6 +20,9 @@ enum Block : char
 	blueNo,
 	greenBlock,
 	greenNo,
+	yellowBlock,
+	yellowNo,
+	keyHole,
 	dirtBackground,
 	stoneBackground,
 	dirtTorch,
@@ -29,6 +32,9 @@ enum Block : char
 	brickTorch,
 	brickLitTorch,
 	brickBackground,
+	unlitTorch,
+	litTorch,
+	pole,
 	lastBlock,
 };
 
@@ -42,7 +48,8 @@ inline bool isColidable(char b)
 	
 	if(b == redNo ||
 		b == blueNo ||
-		b == greenNo||
+		b == greenNo ||
+		b == yellowNo||
 		b == dirtBackground ||
 		b == stoneBackground ||
 		b == dirtTorch ||
@@ -51,7 +58,10 @@ inline bool isColidable(char b)
 		b == dirtLitTorch ||
 		b == brickLitTorch ||
 		b == brickTorch ||
-		b == brickBackground
+		b == brickBackground ||
+		b == litTorch ||
+		b == unlitTorch ||
+		b == pole
 		) {
 		return 0;
 	}
@@ -65,6 +75,15 @@ inline bool isOpaque(char b)
 	return isColidable(b);
 }
 
+inline bool isLitTorch(char b)
+{
+	return b == dirtLitTorch | b == brickLitTorch | b == stoneLitTorch | b==litTorch;
+}
+
+inline bool unLitTorch(char b)
+{
+	return b == dirtTorch | b == brickTorch | b == stoneTorch | b == unlitTorch;
+}
 
 struct Edge
 {

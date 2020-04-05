@@ -66,6 +66,7 @@ struct Arrow
 		normalArrow=0,
 		fireArrow,
 		slimeArrow,
+		keyArrow,
 		lastArror,
 	}type = normalArrow;
 

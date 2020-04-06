@@ -1,6 +1,8 @@
 #version 330
 layout (location = 0) out vec4 color;
 
+//uniform int u_time;
+
 uniform sampler2D u_sprites;
 uniform sampler2D u_up;
 uniform sampler2D u_down;
@@ -42,7 +44,7 @@ void main()
 	lightBoost = max(lightBoost, texture(u_right,v_texColorCoord).x * v_sideColor.w * texture2D(u_right,v_texColorCoord).w);
 
 	lightBoost = min(lightBoost, 1);
-	lightBoost *= 0.3;
+	lightBoost *= 0.5;
 
 	vec4 c =  texture(u_sprites,v_texCoord);
 	color = mainColor  * c;
@@ -51,6 +53,10 @@ void main()
 
 	color.b += (lightBoost);
 	color.b = min(color.b, 1.f);
+
+	//color.r += cos(u_time*0.0002)*0.02;
+	//if(color.r>1){color.r-=1;}
+	//if(color.r<0){color.r = 1+color.r;}
 
 	color.rgb = hsvTorgb(color.rgb);
 

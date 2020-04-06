@@ -76,7 +76,6 @@ void BlockInfo::resetColors()
 {
 	mainColor = { 0,0,0,0 };
 	directionalLight = { 0,0,0,0 };
-	alpha = 0;
 	heat = 1;
 	sideColors = {};
 }

@@ -85,6 +85,9 @@ void loadLevel()
 
 	renderer2d.currentCamera.zoom = 5.1;
 
+	pickups.clear();
+	arrows.clear();
+
 	pickups.push_back({ 4, 4, 1 });
 
 	mapData.create(40, 40,
@@ -565,6 +568,7 @@ bool gameLogic(float deltaTime)
 	}
 #pragma endregion
 
+#pragma region draw map
 	{
 		static int animPos;
 		static float timePassed;
@@ -576,8 +580,12 @@ bool gameLogic(float deltaTime)
 		}
 		animPos %= 4;
 
+		//glUseProgram(mapRenderer.shader.id);
+		//glUniform1i(glGetUniformLocation(mapRenderer.shader.id, "u_time"), clock());
 		mapRenderer.drawFromMapData(renderer2d, mapData, deltaTime, animPos);
 	}
+#pragma endregion
+
 
 #pragma region pickups
 	for (auto &i : pickups)
@@ -603,7 +611,6 @@ bool gameLogic(float deltaTime)
 	}
 
 #pragma endregion
-
 
 	player.draw(renderer2d, deltaTime, characterSprite);
 
@@ -718,7 +725,6 @@ bool gameLogic(float deltaTime)
 							Ui::Box().xCenter(i*10).yCenter().yDimensionPercentage(0.9f).xAspectRatio(1)
 							, {}, 45, arrowSprite, gl2d::computeTextureAtlas(4, 1, center, 0));
 					}
-
 
 				//renderer2d.renderText(Ui::Box().xCenter().yBottom()(),
 				//	"1/2", font, { 1,1,1,1 }, 0.5);

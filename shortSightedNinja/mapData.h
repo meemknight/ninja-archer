@@ -349,7 +349,6 @@ struct BlockInfo
 	//top down left right
 	glm::vec4 directionalLight;
 
-	float alpha;
 	float heat;
 
 	glm::vec4 mainColor;

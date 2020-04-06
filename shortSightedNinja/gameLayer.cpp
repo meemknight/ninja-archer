@@ -72,6 +72,8 @@ struct LightSource
 
 std::vector <LightSource> wallLights;
 
+float playerLight = 5;
+
 void loadLevel()
 {
 	inventory.clear();
@@ -137,7 +139,7 @@ void loadLevel()
 	mapData.get(2, 10).type = Block::water3;
 	mapData.get(2, 10).type = '>';
 	mapData.get(1, 12).type = '>';
-	mapData.get(3, 8).type = Block::grassDecoration;
+	mapData.get(3, 8).type = Block::snowSolid2;
 	mapData.get(5, 8).type = Block::leavesRight;
 	mapData.get(7, 8).type = Block::leavesLeft;
 	mapData.get(9, 8).type = Block::vines1;
@@ -153,6 +155,8 @@ void loadLevel()
 	player.updateMove();
 	player.dimensions = { 7, 7 };
 	player.dying = 0;
+	playerLight = 5;
+	player.velocity = {};
 
 	wallLights.clear();
 	//setup light sources
@@ -220,6 +224,15 @@ bool gameLogic(float deltaTime)
 	if (platform::isKeyPressedOn('T'))
 	{
 		loadLevel();
+	}
+
+	if(player.dying)
+	{
+		playerLight -= deltaTime;
+		if(playerLight<1)
+		{
+			loadLevel();
+		}
 	}
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -346,7 +359,7 @@ bool gameLogic(float deltaTime)
 	mapData.clearColorData();
 
 	simuleteLightSpot(player.pos + glm::vec2(player.dimensions.x/2, player.dimensions.y / 2),
-		5, mapData, arrows, pickups, lightTexture, 0);
+		playerLight, mapData, arrows, pickups, lightTexture, 0);
 
 #pragma region inventory
 

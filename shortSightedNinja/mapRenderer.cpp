@@ -196,6 +196,7 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData,
 
 				auto &data = mapData.get(w, h);
 				
+				//always
 				if (data.type == Block::waterFallBegin || data.type == Block::waterFallEnd
 					|| data.type == Block::torceTopBrickLit
 					|| data.type == Block::torceTopLeavesLit
@@ -203,8 +204,8 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData,
 					)
 				{
 					data.animPos = curPos;
-				}//alyways
-				else if (
+				}
+				else if (//player
 					data.type == Block::grassDecoration ||
 					data.type == Block::leavesRight ||
 					data.type == Block::leavesLeft ||
@@ -215,7 +216,10 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData,
 					data.type == Block::grassDecoration2||
 					data.type == Block::grassDecoration3 ||
 					data.type == Block::water3||
-					data.type == Block::water1
+					data.type == Block::water1 ||
+					data.type == Block::snowSolid2 ||
+					data.type == Block::snowSolid9 ||
+					data.type == Block::snowDecoration2
 					
 					)
 				{

@@ -201,6 +201,10 @@ void Entity::applyGravity(float deltaTime)
 
 void Entity::applyVelocity(float deltaTime)
 {
+	if(dying)
+	{
+		return;
+	}
 
 	if (notGrabTime <= 0) { notGrabTime = 0; }
 	else
@@ -302,8 +306,7 @@ void Entity::checkWall(MapData & mapData, int move)
 	int maxY = minY + 1;
 	int rightX = floor((pos.x + dimensions.x) / BLOCK_SIZE);
 	int leftX = floor((pos.x-2) / BLOCK_SIZE);
-
-
+	if (leftX < 0) { return; }
 	//for(int y= minY; y<maxY; y++)
 	//{
 	if(isColidable(mapData.get(rightX, minY).type) && move > 0)
@@ -314,7 +317,10 @@ void Entity::checkWall(MapData & mapData, int move)
 			{
 				pos.y = minY * BLOCK_SIZE;
 			}
+			pos.x = (rightX - 1)*BLOCK_SIZE;
 			wallGrab = 1;
+			velocity.x = 0;
+			velocity.y = 0;
 		}
 	}
 	if (isColidable(mapData.get(leftX, minY).type) && move < 0)
@@ -325,7 +331,10 @@ void Entity::checkWall(MapData & mapData, int move)
 			{
 				pos.y = minY * BLOCK_SIZE;
 			}
+			pos.x = (leftX + 1)*BLOCK_SIZE;
 			wallGrab = -1;
+			velocity.x = 0;
+			velocity.y = 0;
 		}
 	}
 	//}

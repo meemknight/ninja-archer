@@ -50,7 +50,6 @@ struct Entity
 			movingRight = 1;
 		}
 
-
 		lastPos = pos; 
 	}
 	

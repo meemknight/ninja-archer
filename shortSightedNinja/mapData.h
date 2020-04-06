@@ -294,7 +294,9 @@ inline bool isColidable(unsigned char b)
 		b == Block::blueNoSolid7 ||
 		b == Block::blueNoSolid8 ||
 		b == Block::blueNoSolidFence ||
-		b == Block::fenceNoSolid
+		b == Block::fenceNoSolid ||
+		b == Block::snowSolid2||
+		b == Block::snowSolid9
 		) {
 		return 0;
 	}
@@ -359,7 +361,7 @@ struct BlockInfo
 	unsigned char type;
 	bool playerEntered = 0;
 	bool playerLeft = 0;
-	bool leftAnim = 0;
+	bool leftAnim = 1;
 
 	void resetColors();
 };

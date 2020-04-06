@@ -7,8 +7,8 @@ float jumpSpeed = 22;
 float jumpFromWallSpeed = 22;
 float velocityClamp = 30;
 float drag = 0.15f;
-float strafeSpeed = 11;
-float strafeSpeedMove = 10;
+float strafeSpeed = 10;
+float strafeSpeedMove = 11;
 float runSpeed = 14;
 float airRunSpeed = 10;
 float grabMargin = 0.25f;
@@ -166,6 +166,7 @@ void Entity::strafe(int dir)
 void Entity::run(float speed)
 {
 	pos.x += speed * runSpeed * BLOCK_SIZE;
+	moving = (bool)speed;
 }
 
 void Entity::airRun(float speed)
@@ -335,6 +336,41 @@ void Entity::jump()
 	velocity.y = -jumpSpeed * BLOCK_SIZE;
 }
 
+gl2d::TextureAtlas playerAtlas(4, 4);
+
+void Entity::draw(gl2d::Renderer2D & renderer2d, float deltaTime, gl2d::Texture characterSprite)
+{
+	currentCount += deltaTime;
+	while(currentCount >= frameDuration)
+	{
+		currentCount -= frameDuration;
+		currentFrame++;
+	}
+
+	currentFrame %= 4;
+
+	int state = 0;
+
+	if (wallGrab != 0)
+	{
+		state = 3;
+	}else
+	if(!grounded)
+	{
+		state = 2;
+	}else if(moving)
+	{
+		state = 1;
+	}
+
+	moving = 0;
+
+
+	renderer2d.renderRectangle({ pos - glm::vec2(0,0),  8, 8 }, {}, 0, characterSprite,
+		playerAtlas.get(currentFrame, state, !movingRight));
+
+}
+
 void Entity::jumpFromWall()
 {
 	notGrabTime = notGrabTimeVal;
@@ -424,9 +460,8 @@ void Arrow::draw(gl2d::Renderer2D & renderer, gl2d::Texture t)
 		dim = liveTime;
 		dim = std::max(dim, 0.f);
 	}
-	
-	
-	renderer.renderRectangle({ pos.x - BLOCK_SIZE, pos.y - (BLOCK_SIZE / 2.f),BLOCK_SIZE, BLOCK_SIZE }, { light,light,light,light*dim }, { BLOCK_SIZE/2,0 }, angle, t, ta.get(type,0));
+
+	renderer.renderRectangle({ pos.x - BLOCK_SIZE, pos.y - (BLOCK_SIZE / 2.f),BLOCK_SIZE, BLOCK_SIZE }, { 1,1,1,light*dim }, { BLOCK_SIZE/2,0 }, angle, t, ta.get(type,0));
 }
 
 void Arrow::move(float deltaTime)
@@ -477,61 +512,46 @@ void Arrow::checkCollision(MapData &mapData)
 		{
 			auto t = mapData.get(curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE).type;
 
-			if(t==Block::redTarget)
+			if(t==Block::targetRed)
 			{
 				for(int i=0;i<mapData.w * mapData.h; i++)
 				{
-					if(mapData.data[i].type == Block::redBlock)
+					if(isRedSolid(mapData.data[i].type))
 					{
 						mapData.data[i].type++;
-					}else if (mapData.data[i].type == Block::redNo)
+					}else if (isRedNoSolid(mapData.data[i].type))
 					{
 						mapData.data[i].type--;
 					}
 				}
 				mapData.setNeighbors();
 
-			}else if (t == Block::blueTarget)
+			}else if (t == Block::targetBlue)
 			{
 				for (int i = 0; i < mapData.w * mapData.h; i++)
 				{
-					if (mapData.data[i].type == Block::blueBlock)
+					if (isBlueSolid( mapData.data[i].type))
 					{
 						mapData.data[i].type++;
 					}
-					else if (mapData.data[i].type == Block::blueNo)
+					else if (isBlueNoSolid(mapData.data[i].type))
 					{
 						mapData.data[i].type--;
 					}
 				}
 				mapData.setNeighbors();
 			}
-			else if (t == Block::greenTarget)
-			{
-				for (int i = 0; i < mapData.w * mapData.h; i++)
-				{
-					if (mapData.data[i].type == Block::greenBlock)
-					{
-						mapData.data[i].type++;
-					}
-					else if (mapData.data[i].type == Block::greenNo)
-					{
-						mapData.data[i].type--;
-					}
-				}
-				mapData.setNeighbors();
-			}
-			else if (t == Block::keyHole)
+			else if (t == Block::targetKey)
 			{
 				if(type == Arrow::ArrowTypes::keyArrow)
 				{
 					for (int i = 0; i < mapData.w * mapData.h; i++)
 					{
-						if (mapData.data[i].type == Block::yellowBlock)
+						if (mapData.data[i].type == Block::fenceSolid)
 						{
 							mapData.data[i].type++;
 						}
-						else if (mapData.data[i].type == Block::yellowNo)
+						else if (mapData.data[i].type == Block::fenceNoSolid)
 						{
 							mapData.data[i].type--;
 						}
@@ -617,12 +637,11 @@ void Pickup::draw(gl2d::Renderer2D & renderer2d, gl2d::Texture arrowTexture, flo
 
 		levitate *= 0.8;
 
-		renderer2d.renderRectangle({ pos.x*BLOCK_SIZE,(pos.y - levitate)*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { light, light, light, 1 }, {}, 45,
+		renderer2d.renderRectangle({ pos.x*BLOCK_SIZE,(pos.y - levitate)*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 1, 1, 1, light }, {}, 45,
 			arrowTexture, ta.get(type, 0));
 	}else
 	{
 		cullDown -= deltaTime;
 	}
-
 	
 }

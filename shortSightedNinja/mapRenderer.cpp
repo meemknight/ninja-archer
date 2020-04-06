@@ -187,8 +187,10 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData)
 
 				auto color = g.mainColor;
 
-				color.g *= g.heat;
-				color.b *= g.heat;
+				//color.g *= g.heat;
+				//color.b *= g.heat;
+
+				color = { 1,1,1,color.r };
 
 				addBlock(renderer.toScreen({ w*BLOCK_SIZE,h*BLOCK_SIZE,BLOCK_SIZE,BLOCK_SIZE }), 
 					spriteAtlas.get(mapData.get(w, h).type- Block::none-1,0)

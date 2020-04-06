@@ -3,6 +3,7 @@
 #include "mapData.h"
 #include "mapRenderer.h"
 
+
 struct Entity
 {
 	glm::vec2 pos;
@@ -17,11 +18,17 @@ struct Entity
 	bool grounded;
 	bool movingRight;
 
+	float frameDuration = 0.10f;
+	float currentCount = 0;
+	int currentFrame = 0;
+
 	void checkCollisionBrute(glm::vec2 &pos, glm::vec2 lastPos, MapData &mapData,
 	bool &upTouch, bool &downTouch, bool &leftTouch, bool &rightTouch);
 	void resolveConstrains(MapData &mapData);
 
 	float notGrabTime = 0;
+
+	bool moving = 0;
 
 	void updateMove() 
 	{
@@ -61,6 +68,8 @@ struct Entity
 	void checkWall(MapData &mapData, int move);
 
 	void jump();
+
+	void draw(gl2d::Renderer2D &renderer, float deltaTime, gl2d::Texture characterSprite);
 
 	void jumpFromWall();
 

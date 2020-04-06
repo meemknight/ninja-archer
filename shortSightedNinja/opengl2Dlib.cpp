@@ -972,17 +972,24 @@ namespace gl2d
 		this->id = id;
 	}
 
-	void Texture::create1PxSquare()
+	void Texture::create1PxSquare(const char *b)
 	{
-		const char buff[] =
+		if(b==nullptr)
 		{
-			0xff,
-			0xff,
-			0xff,
-			0xff
-		};
+			const char buff[] =
+			{
+				0xff,
+				0xff,
+				0xff,
+				0xff
+			};
 
-		createFromBuffer(buff, 1, 1);
+			createFromBuffer(buff, 1, 1);
+		}else
+		{
+			createFromBuffer(b, 1, 1);
+		}
+	
 	}
 
 	void Texture::createFromFileData(const unsigned char * image_file_data, const size_t image_file_size)

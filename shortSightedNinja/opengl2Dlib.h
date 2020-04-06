@@ -74,7 +74,7 @@ namespace gl2d
 
 		//Note: This function expects a buffer of bytes in GL_RGBA format
 		void createFromBuffer(const char* image_data, const int width, const int height);
-		void create1PxSquare();
+		void create1PxSquare(const char *b = 0);
 		void createFromFileData(const unsigned char* image_file_data, const size_t image_file_size);
 
 		void loadFromFile(const char *fileName);
@@ -212,6 +212,14 @@ namespace gl2d
 
 		//converts pixels to screen (top left) (bottom right)
 		glm::vec4 toScreen(const glm::vec4 &transform);
+
+		inline void clearDrawData()
+		{
+			spritePositionsCount = 0;
+			spriteColorsCount = 0;
+			spriteTexturesCount = 0;
+			texturePositionsCount = 0;
+		}
 
 		// The origin will be the bottom left corner since it represents the line for the text to be drawn
 		//Pacing and lineSpace are influenced by size

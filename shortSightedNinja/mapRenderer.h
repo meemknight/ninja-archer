@@ -6,8 +6,17 @@
 #include "Shader.h"
 #include "mapData.h"
 
-#define BLOCK_SIZE 16
-#define BLOCK_COUNT 32
+#define BLOCK_SIZE 8
+#define BLOCK_COUNT 160
+
+#define BACKGROUND_R 33
+#define BACKGROUND_G 38
+#define BACKGROUND_B 63
+
+#define BACKGROUNDF_R ((float)33 / (float)0xff)
+#define BACKGROUNDF_G ((float)38 / (float)0xff)
+#define BACKGROUNDF_B ((float)63 / (float)0xff)
+
 
 struct MapRenderer
 {

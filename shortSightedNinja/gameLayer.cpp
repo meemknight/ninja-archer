@@ -74,6 +74,9 @@ std::vector <LightSource> wallLights;
 
 bool initGame()
 {
+	
+	glClearColor(BACKGROUNDF_R, BACKGROUNDF_G, BACKGROUNDF_B ,1.f);
+
 	//this vector should always have all arrows in order (and all of them there)
 	inventory.push_back({ 0,3,5 });
 	inventory.push_back({ 1,4,5 });
@@ -87,12 +90,20 @@ bool initGame()
 	//if (music.openFromFile("ding.flac"))
 	//music.play();
 	ShaderProgram sp{ "blocks.vert","blocks.frag" };
-	sprites.loadFromFile("sprites.png");
+	sprites.loadFromFile("sprites2.png");
 	characterSprite.loadFromFile("character3.png");
 	targetSprite.loadFromFile("target.png");
 	arrowSprite.loadFromFile("arrow.png");
 	lightTexture.loadFromFile("light.png");
-	backgroundTexture.loadFromFile("background.jpg");
+	//backgroundTexture.loadFromFile("background.jpg");
+	const char buff[] =
+	{
+		BACKGROUND_R,
+		BACKGROUND_G,
+		BACKGROUND_B,
+		0xff
+	};
+	backgroundTexture.create1PxSquare(buff);
 	backGroundFBO.create(40 * BLOCK_SIZE, 40 * BLOCK_SIZE);
 
 	font.createFromFile("font.ttf");
@@ -107,51 +118,51 @@ bool initGame()
 	pickups.push_back({ 4, 4, 1 });
 
 	mapData.create(40, 40, 
-		"!!!!!!!!!                             !!"
-		"!!!!!!!!!!!!!!!2           !          !!"
-		"!!!!!!!!!!!!!              '          !!"
-		"!!!                 +      *        (!!!"
-		"!!!                 +      *        !!!!"
-		"!!!!!!!!#######$           !      ,,!!!!"
-		"!!!!!!!!3333333333333333333!        33!!"
-		"!!!!!!333333333333333333333!        33!!"
-		"!!3333333333333333333333333!!!!3333333!!"
-		"!!3353336333!!!!!!!!!!!!!!!!!!33333333!!"
-		"!!3333333333333333333333333333331111!!!!"
-		"!!!!!!!!!!33333333333333233333331333!!!!"
-		"!!3333333333333333333333!33333331333!!!!"
-		"!!3353335333533353333333!!!!!!!!!!!!!!!!"
-		"!!333333333333333333333333333333333333!!"
-		"!!!!!!!!!!!!!!!!!!!!!!!!!             !!"
-		"!!          !         !        !      !!"
-		"!!    !!!        !!!       !!!      !!!!"
-		"!!      !          !         !        !!"
-		"!!!!        !!!       !!!      !!!    !!"
-		"!!   !  !       !  !      !  !     !  !!"
-		"!!!!!!  !!  !!!!!  !! !!!!!  !!!!!!!  !!"
-		"!!                                    !!"
-		"!!                                    !!"
-		"!!  !!  ! !!!  !!  ! !!  !!  ! !  !!  !!"
-		"!!                                    !!"
-		"!!          !         !        !      !!"
-		"!!    !!!        !!!       !!!      !!!!"
-		"!!      !          !         !        !!"
-		"!!!!        !!!       !!!      !!!    !!"
-		"!!   !  !       !  !      !  !     !  !!"
-		"!!!!!!  !!  !!!!!  !! !!!!!  !!!!!!!  !!"
-		"!!                                    !!"
-		"!!                                    !!"
-		"!!  !!  ! !!!  !!  ! !!  !!  ! !  !!  !!"
-		"!!                                    !!"
-		"!!          !         !        !      !!"
-		"!!    !!!        !!!       !!!      !!!!"
-		"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-		"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh<h"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh<h"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh<h"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh<h"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh<h"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh<h"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh<h"
+		"hhhhhhhhhhhhhhhhhshhhhhshhhhhshhhhhshh<h"
+		"hhhhhhhhhhhhhhhhhrhhhhhrhhhhhrhhhhhrhh<h"
+		">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
 	);
 
 	player.pos = { BLOCK_SIZE*4, BLOCK_SIZE*4 };
 	player.updateMove();
-	player.dimensions = { 20, 30 };
+	player.dimensions = { 8, 8 };
 
 	//todo remove
 	mapData.ConvertTileMapToPolyMap();
@@ -297,7 +308,7 @@ bool gameLogic(float deltaTime)
 	mapData.clearColorData();
 
 	simuleteLightSpot(player.pos + glm::vec2(player.dimensions.x/2, player.dimensions.y / 2),
-		12, mapData, arrows, pickups, stencilRenderer2d, lightTexture, 0);
+		5, mapData, arrows, pickups, stencilRenderer2d, lightTexture, 0);
 
 #pragma region inventory
 
@@ -428,15 +439,16 @@ bool gameLogic(float deltaTime)
 
 #pragma region drawStencil
 
-	stencilRenderer2d.flushFBO(backGroundFBO);
-	
-	backgroundRenderer2d.renderRectangle({ 0,0, mapData.w*BLOCK_SIZE, mapData.h*BLOCK_SIZE }, {}, 0, backgroundTexture);
-	glUseProgram(backgroundRenderer2d.currentShader.id);
-	glUniform1i(maskSamplerUniform, 1);
-	backGroundFBO.texture.bind(1);
-	backgroundRenderer2d.flush();
-	
-	backGroundFBO.clear();
+	stencilRenderer2d.clearDrawData();
+	//stencilRenderer2d.flushFBO(backGroundFBO);
+	//
+	//backgroundRenderer2d.renderRectangle({ 0,0, mapData.w*BLOCK_SIZE, mapData.h*BLOCK_SIZE }, {}, 0, backgroundTexture);
+	//glUseProgram(backgroundRenderer2d.currentShader.id);
+	//glUniform1i(maskSamplerUniform, 1);
+	//backGroundFBO.texture.bind(1);
+	//backgroundRenderer2d.flush();
+	//
+	//backGroundFBO.clear();
 #pragma endregion
 
 #pragma region target
@@ -487,7 +499,7 @@ bool gameLogic(float deltaTime)
 					}
 				}
 
-				renderer2d.renderRectangle({ pos, 3,3 }, color);
+				renderer2d.renderRectangle({ pos, 1,1 }, color);
 			}
 		}
 		
@@ -522,10 +534,7 @@ bool gameLogic(float deltaTime)
 #pragma endregion
 
 
-	gl2d::TextureAtlas playerAtlas(1, 1);
-
-	renderer2d.renderRectangle({ player.pos - glm::vec2(2,0),  30, 30  }, {}, 0, characterSprite,
-		playerAtlas.get(0, 0, !player.movingRight));
+	player.draw(renderer2d, deltaTime, characterSprite);
 
 #pragma region arrows
 	for(auto i=0; i<arrows.size(); i++)

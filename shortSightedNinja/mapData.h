@@ -2,13 +2,154 @@
 #include "glm/vec4.hpp"
 #include <vector>
 
-/*
-enum Block : char
+namespace Block 
 {
-	none = ' ',
-};
-*/
+	enum : char
+	{
+		none = 0,
+		bareer,
+		solidBrick1,
+		solidBrick2,
+		solidBrick3,
+		solidBrick4,
+		solidBrick5,
+		solidBrick6,
+		grass1,
+		grass2,
+		grass3,
+		grass4,
+		grass5,
+		grass6,
+		grass7,
+		grass8,
+		grass9,
+		grass10,
+		grass11,
+		grass12,
+		grass13,
+		redSolid1,
+		redNoSolid1,
+		redSolid2,
+		redNoSolid2,
+		redSolid3,
+		redNoSolid3,
+		redSolid4,
+		redNoSolid4,
+		redSolid5,
+		redNoSolid5,
+		redSolid6,
+		redNoSolid6,
+		redSolid7,
+		redNoSolid7,
+		redSolid8,
+		redNoSolid8,
+		redSolidFence,
+		redNoSolidFence,
+		blueSolid1,
+		blueNoSolid1,
+		blueSolid2,
+		blueNoSolid2,
+		blueSolid3,
+		blueNoSolid3,
+		blueSolid4,
+		blueNoSolid4,
+		blueSolid5,
+		blueNoSolid5,
+		blueSolid6,
+		blueNoSolid6,
+		blueSolid7,
+		blueNoSolid7,
+		blueSolid8,
+		blueNoSolid8,
+		blueSolidFence,
+		blueNoSolidFence,
+		brickSolid1,
+		brickSolid2,
+		brickSolid3,
+		brickSolid4,
+		brickSolid5,
+		brickSolid6,
+		brickSolid7,
+		brickSolid8,
+		brickSolid9,
+		brickSolid10,
+		waterSolid1,
+		waterSolid2,
+		waterSolid3,
+		waterSolid4,
+		stoneSolid1,
+		stoneSolid2,
+		stoneSolid3,
+		stoneSolid4,
+		stoneSolid5,
+		stoneSolid6,
+		stoneSolid7,
+		stoneSolid8,
+		stoneSolid9,
+		stoneSolid10, //rock
+		woodSolid1,
+		woodSolid2,
+		woodSolid3,
+		woodSolid4,
+		woodSolid5,
+		woodSolid6,
+		woodSolid7,
+		woodSolid8,
+		woodSolid9,
+		woodSolid10,
+		woodSolid11, // crates
+		fenceSolid,
+		fenceNoSolid,
+		snowSolid1,
+		snowSolid2,
+		snowSolid3,
+		snowSolid4,
+		snowSolid5,
+		snowSolid6,
+		snowSolid7,
+		snowSolid8,
+		snowSolid9,
+		chainDecoration, /////////////////////////////start walls
+		brickDecoration1,
+		brickDecoration2,
+		brickDecoration3,
+		brickDecoration4,
+		brickDecoration5,
+		grass,
+		leavesRight,
+		leavesLeft,
+		vines1,
+		vines2,
+		torceBottom,
+		torceTopBrickUnlit,
+		torceTopBrickLit,
+		torceTopLeavesUnlit,
+		torceTopLeavesLit,
+		leavesDecoration1,
+		leavesDecoration2,
+		leavesDecoration3,
+		leavesDecoration4,
+		windowDecoration,
+		trunk1,
+		trunk2,
+		sign,
+		waterFall,
+		waterFallBegin,
+		waterFallEnd,
+		water1,
+		water2,
+		water3,
+		targetRed,
+		targetBlue,
+		woodDecoration1,
+		woodDecoration2,
+		targetKey,
+		snowDecoration1,
+		snowDecoration2,
+	};
+}
 
+/*
 enum Block : char
 {
 	none = ' ',
@@ -44,36 +185,123 @@ enum Block : char
 	pole,
 	lastBlock,
 };
+*/
 
 inline bool isAir(char b)
 {
-	return b == none;
+	return b == Block::none;
+}
+
+inline bool isRedSolid(char b)
+{
+	if (
+		b == Block::redSolid1 ||
+		b == Block::redSolid2 ||
+		b == Block::redSolid3 ||
+		b == Block::redSolid4 ||
+		b == Block::redSolid5 ||
+		b == Block::redSolid6 ||
+		b == Block::redSolid7 ||
+		b == Block::redSolid8 ||
+		b == Block::redSolidFence
+		) 
+	{ return 1; }
+	else { return 0; }
+}
+
+inline bool isRedNoSolid(char b)
+{
+	if (
+		b == Block::redNoSolid1 ||
+		b == Block::redNoSolid2 ||
+		b == Block::redNoSolid3 ||
+		b == Block::redNoSolid4 ||
+		b == Block::redNoSolid5 ||
+		b == Block::redNoSolid6 ||
+		b == Block::redNoSolid7 ||
+		b == Block::redNoSolid8 ||
+		b == Block::redNoSolidFence
+		)
+	{
+		return 1;
+	}
+	else { return 0; }
+}
+
+
+inline bool isBlueSolid(char b)
+{
+	if (
+		b == Block::blueSolid1 ||
+		b == Block::blueSolid2 ||
+		b == Block::blueSolid3 ||
+		b == Block::blueSolid4 ||
+		b == Block::blueSolid5 ||
+		b == Block::blueSolid6 ||
+		b == Block::blueSolid7 ||
+		b == Block::blueSolid8 ||
+		b == Block::blueSolidFence
+		)
+	{
+		return 1;
+	}
+	else { return 0; }
+}
+
+inline bool isBlueNoSolid(char b)
+{
+	if (
+		b == Block::blueNoSolid1 ||
+		b == Block::blueNoSolid2 ||
+		b == Block::blueNoSolid3 ||
+		b == Block::blueNoSolid4 ||
+		b == Block::blueNoSolid5 ||
+		b == Block::blueNoSolid6 ||
+		b == Block::blueNoSolid7 ||
+		b == Block::blueNoSolid8 ||
+		b == Block::blueNoSolidFence
+		)
+	{
+		return 1;
+	}
+	else { return 0; }
 }
 
 inline bool isColidable(char b)
 {
-	
-	if(b == redNo ||
-		b == blueNo ||
-		b == greenNo ||
-		b == yellowNo||
-		b == dirtBackground ||
-		b == stoneBackground ||
-		b == dirtTorch ||
-		b == stoneTorch ||
-		b == stoneLitTorch ||
-		b == dirtLitTorch ||
-		b == brickLitTorch ||
-		b == brickTorch ||
-		b == brickBackground ||
-		b == litTorch ||
-		b == unlitTorch ||
-		b == pole
+
+	if (
+		b == Block::none ||
+		b == Block::redNoSolid1 ||
+		b == Block::redNoSolid2 ||
+		b == Block::redNoSolid3 ||
+		b == Block::redNoSolid4 ||
+		b == Block::redNoSolid5 ||
+		b == Block::redNoSolid6 ||
+		b == Block::redNoSolid7 ||
+		b == Block::redNoSolid8 ||
+		b == Block::redNoSolidFence ||
+		b == Block::blueNoSolid1 ||
+		b == Block::blueNoSolid2 ||
+		b == Block::blueNoSolid3 ||
+		b == Block::blueNoSolid4 ||
+		b == Block::blueNoSolid5 ||
+		b == Block::blueNoSolid6 ||
+		b == Block::blueNoSolid7 ||
+		b == Block::blueNoSolid8 ||
+		b == Block::blueNoSolidFence ||
+		b == Block::fenceNoSolid
 		) {
 		return 0;
 	}
 
-	return b != none;
+	if(b < Block::chainDecoration)
+	{
+		return 1;
+	}else
+	{
+		return 0;
+	}
 
 }
 
@@ -84,12 +312,13 @@ inline bool isOpaque(char b)
 
 inline bool isLitTorch(char b)
 {
-	return b == dirtLitTorch | b == brickLitTorch | b == stoneLitTorch | b==litTorch;
+	return b == Block::torceTopBrickLit || b == Block::torceTopLeavesLit;
 }
 
 inline bool unLitTorch(char b)
 {
-	return b == dirtTorch | b == brickTorch | b == stoneTorch | b == unlitTorch;
+	return b == Block::torceTopBrickUnlit || b == Block::torceTopLeavesUnlit;
+
 }
 
 struct Edge

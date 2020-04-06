@@ -2,6 +2,13 @@
 #include "glm/vec4.hpp"
 #include <vector>
 
+/*
+enum Block : char
+{
+	none = ' ',
+};
+*/
+
 enum Block : char
 {
 	none = ' ',

@@ -4,15 +4,16 @@
 
 float gravitationalAcceleration = 64;
 float jumpSpeed = 22;
-float jumpFromWallSpeed = 20;
+float jumpFromWallSpeed = 22;
 float velocityClamp = 30;
 float drag = 0.15f;
-float strafeSpeed = 10;
+float strafeSpeed = 11;
+float strafeSpeedMove = 10;
 float runSpeed = 14;
 float airRunSpeed = 10;
 float grabMargin = 0.25f;
 float notGrabTimeVal = 0.4;
-bool snapWallGrab = 1;
+bool snapWallGrab = 0;
 
 float arrowSpeed = 25;
 
@@ -171,14 +172,14 @@ void Entity::airRun(float speed)
 {
 	if(speed > 0)
 	{
-		if(velocity.x < -20)
+		if(velocity.x < -strafeSpeedMove * BLOCK_SIZE)
 		{
 			return;
 		}
 	}else 
 	if (speed < 0)
 	{
-		if (velocity.x > 20)
+		if (velocity.x > strafeSpeedMove * BLOCK_SIZE)
 		{
 			return;
 		}
@@ -285,6 +286,10 @@ void Entity::checkWall(MapData & mapData, int move)
 	int minY = floor((pos.y /BLOCK_SIZE)+0.1f);
 	float dist = (pos.y / BLOCK_SIZE) + 0.1f - floor((pos.y / BLOCK_SIZE) + 0.1f);
 	
+	if(minY <0)
+	{
+		return;
+	}
 
 	if(dist > grabMargin)
 	{
@@ -300,7 +305,7 @@ void Entity::checkWall(MapData & mapData, int move)
 	//{
 	if(isColidable(mapData.get(rightX, minY).type) && move > 0)
 	{
-		if ((minY == 0 || !isColidable(mapData.get(rightX, minY - 1).type)))
+		//if ((minY == 0 || !isColidable(mapData.get(rightX, minY - 1).type)))
 		{
 			if(snapWallGrab)
 			{
@@ -311,7 +316,7 @@ void Entity::checkWall(MapData & mapData, int move)
 	}
 	if (isColidable(mapData.get(leftX, minY).type) && move < 0)
 	{
-		if (minY == 0 || !isColidable(mapData.get(leftX, minY - 1).type))
+		//if (minY == 0 || !isColidable(mapData.get(leftX, minY - 1).type))
 		{
 			if (snapWallGrab)
 			{

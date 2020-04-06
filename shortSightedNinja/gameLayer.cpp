@@ -88,7 +88,7 @@ bool initGame()
 	//music.play();
 	ShaderProgram sp{ "blocks.vert","blocks.frag" };
 	sprites.loadFromFile("sprites.png");
-	characterSprite.loadFromFile("character.png");
+	characterSprite.loadFromFile("character3.png");
 	targetSprite.loadFromFile("target.png");
 	arrowSprite.loadFromFile("arrow.png");
 	lightTexture.loadFromFile("light.png");
@@ -108,15 +108,15 @@ bool initGame()
 
 	mapData.create(40, 40, 
 		"!!!!!!!!!                             !!"
-		"!!!!!!!!!!!!!!!2                      !!"
+		"!!!!!!!!!!!!!!!2           !          !!"
 		"!!!!!!!!!!!!!              '          !!"
 		"!!!                 +      *        (!!!"
 		"!!!                 +      *        !!!!"
-		"!!!!!!!!#######$***********!!!!,,,,,!!!!"
-		"!!!!!!!!33333333       +      -3333333!!"
-		"!!!!!!3333333333       +     --3333333!!"
-		"!!333333333333!!!!!!!!!!!!!!!!!3333333!!"
-		"!!3353336333!!!33333333333333333333333!!"
+		"!!!!!!!!#######$           !      ,,!!!!"
+		"!!!!!!!!3333333333333333333!        33!!"
+		"!!!!!!333333333333333333333!        33!!"
+		"!!3333333333333333333333333!!!!3333333!!"
+		"!!3353336333!!!!!!!!!!!!!!!!!!33333333!!"
 		"!!3333333333333333333333333333331111!!!!"
 		"!!!!!!!!!!33333333333333233333331333!!!!"
 		"!!3333333333333333333333!33333331333!!!!"
@@ -223,13 +223,13 @@ bool gameLogic(float deltaTime)
 		}
 		else if (player.wallGrab == 1)
 		{
-			//player.strafe(-1);
+			player.strafe(-1);
 			player.jumpFromWall();
 			player.wallGrab = 0;
 		}
 		else if (player.wallGrab == -1)
 		{
-			//player.strafe(1);
+			player.strafe(1);
 			player.jumpFromWall();
 			player.wallGrab = 0;
 		}
@@ -524,7 +524,7 @@ bool gameLogic(float deltaTime)
 
 	gl2d::TextureAtlas playerAtlas(1, 1);
 
-	renderer2d.renderRectangle({ player.pos - glm::vec2(2,0),  24, 30  }, {}, 0, characterSprite,
+	renderer2d.renderRectangle({ player.pos - glm::vec2(2,0),  30, 30  }, {}, 0, characterSprite,
 		playerAtlas.get(0, 0, !player.movingRight));
 
 #pragma region arrows

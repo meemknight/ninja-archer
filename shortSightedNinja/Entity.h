@@ -33,6 +33,16 @@ struct Entity
 			movingRight = 0;
 		}
 
+		if(wallGrab == -1)
+		{
+			movingRight = 0;
+		}
+		if (wallGrab == 1)
+		{
+			movingRight = 1;
+		}
+
+
 		lastPos = pos; 
 	}
 	

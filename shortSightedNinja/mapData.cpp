@@ -10,11 +10,20 @@ void MapData::create(int w, int h, const char* d = 0)
 
 	data = new BlockInfo[w * h];
 
-	if(d)
+	if (d)
 	{
-		for(int i=0; i<w*h; i++)
+		for (int i = 0; i < w * h; i++)
 		{
 			data[i].type = d[i];
+			data[i].mainColor = glm::vec4(1, 1, 1, 1);
+
+		}
+	}
+	else
+	{
+		for (int i = 0; i < w * h; i++)
+		{
+			data[i].type = Block::none;
 			data[i].mainColor = glm::vec4(1, 1, 1, 1);
 
 		}
@@ -24,16 +33,16 @@ void MapData::create(int w, int h, const char* d = 0)
 	//todo setup neighbours
 }
 
-BlockInfo & MapData::get(int x, int y)
+BlockInfo& MapData::get(int x, int y)
 {
 	return data[x + this->w * y];
 }
 
 void MapData::clearColorData()
 {
-	if(data)
+	if (data)
 	{
-		for (int i = 0; i < w*h; i++)
+		for (int i = 0; i < w * h; i++)
 		{
 			data[i].mainColor = { 0,0,0,0 };
 			data[i].sideColors = { 0,0,0,0 };
@@ -43,7 +52,7 @@ void MapData::clearColorData()
 
 void MapData::cleanup()
 {
-	if(data)
+	if (data)
 	{
 		delete[] data;
 	}
@@ -79,21 +88,21 @@ void BlockInfo::resetColors()
 
 void MapData::setNeighbors()
 {
-	for(int y=0; y<h; y++)
+	for (int y = 0; y < h; y++)
 	{
-		for(int x=0; x<w; x++)
+		for (int x = 0; x < w; x++)
 		{
-			auto &n = get(x, y).neighbors;
+			auto& n = get(x, y).neighbors;
 			n = 0;
 
 			if (y > 0) // top
 			{
-				if(isOpaque(get(x,y-1).type))
+				if (isOpaque(get(x, y - 1).type))
 				{
 					n |= 0b0000'1000;
 				}
 			}
-			if (y < h-1) // bottom
+			if (y < h - 1) // bottom
 			{
 				if (isOpaque(get(x, y + 1).type))
 				{
@@ -102,14 +111,14 @@ void MapData::setNeighbors()
 			}
 			if (x > 0) // left
 			{
-				if (isOpaque(get(x-1, y).type))
+				if (isOpaque(get(x - 1, y).type))
 				{
 					n |= 0b0000'0010;
 				}
 			}
 			if (x < w - 1) // bottom
 			{
-				if (isOpaque(get(x+1, y).type))
+				if (isOpaque(get(x + 1, y).type))
 				{
 					n |= 0b0000'0001;
 				}
@@ -275,10 +284,10 @@ void MapData::CalculateVisibilityPolygon(float ox, float oy, float radius)
 {
 	vecVisibilityPolygonPoints.clear();
 
-	for(auto &e1 : vecEdges)
+	for (auto& e1 : vecEdges)
 	{
 		// Take the start point, then the end point
-		for(int i = 0; i < 2; i++)
+		for (int i = 0; i < 2; i++)
 		{
 			float rdx = (i == 0 ? e1.sx : e1.ex) - ox;
 			float rdy = (i == 0 ? e1.sy : e1.ey) - oy;

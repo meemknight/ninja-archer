@@ -6,8 +6,8 @@
 #include "Shader.h"
 #include "mapData.h"
 
-#define BLOCK_SIZE 16
-#define BLOCK_COUNT 16
+#define BLOCK_SIZE 8
+#define BLOCK_COUNT 160
 
 struct MapRenderer
 {

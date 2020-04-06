@@ -43,7 +43,7 @@ void main()
 	lightBoost = min(lightBoost, 1);
 	lightBoost *= 0.3;
 
-	color = mainColor  * vec4(texture2D(u_sprites,v_texCoord).xyz,1);
+	color = mainColor  * vec4(texture2D(u_sprites,v_texCoord).xyzw);
 	
 	color.rgb = rgbTohsv(color.rgb);
 

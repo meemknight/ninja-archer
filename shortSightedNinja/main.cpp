@@ -367,19 +367,22 @@ namespace platform
 		return GetAsyncKeyState(key) & 0x8000;
 	}
 
-	int isLMouseButtonPressed()
-	{
-		return lbuttonPressed;
-	}
-
 	int isRMouseButtonPressed()
 	{
 		return rbuttonPressed;
 	}
 
+	int isLMouseButtonPressed()
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		return (!io.WantCaptureMouse) && lbuttonPressed;
+	}
+
 	int isLMouseHeld()
 	{
-		return lbutton;
+		ImGuiIO& io = ImGui::GetIO();
+
+		return (!io.WantCaptureMouse) && lbutton;
 	}
 
 	int isRMouseHeld()

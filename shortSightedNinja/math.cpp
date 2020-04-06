@@ -25,7 +25,6 @@ void drawLine(glm::vec2 x, glm::vec2 y, glm::vec3 color, float width)
 
 }
 
-
 void simulateLight(glm::vec2 pos, float radius, MapData &mapData, std::vector<glm::vec2> &triangles)
 {
 	triangles.clear();

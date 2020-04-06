@@ -6,18 +6,16 @@
 #include "math.h"
 #include "Entity.h"
 #include "input.h"
+#include <fstream>
+#include "imgui.h"
 
-extern float gravitationalAcceleration;
-extern float jumpSpeed;
-extern float jumpFromWallSpeed;
-extern float velocityClamp;
-//extern float drag;
-//extern float strafeSpeed = 10;
-extern float runSpeed;
-extern float airRunSpeed;
-extern float grabMargin;
-extern float notGrabTimeVal;
-extern bool snapWallGrab;
+#define BACKGROUND_R 33
+#define BACKGROUND_G 38
+#define BACKGROUND_B 63
+
+#define BACKGROUNDF_R ((float)33 / (float)0xff)
+#define BACKGROUNDF_G ((float)38 / (float)0xff)
+#define BACKGROUNDF_B ((float)63 / (float)0xff)
 
 extern gl2d::internal::ShaderProgram maskShader;
 extern GLint maskSamplerUniform;
@@ -28,20 +26,23 @@ gl2d::Renderer2D backgroundRenderer2d;
 //sf::Music music;
 MapRenderer mapRenderer;
 MapData mapData;
-Entity player;
-
-#include "imgui.h"
 
 gl2d::Texture sprites;
-gl2d::Texture characterSprite;
-gl2d::Texture targetSprite;
 gl2d::Texture arrowSprite;
-gl2d::Texture lightTexture;
 
 gl2d::FrameBuffer backGroundFBO;
 gl2d::Texture backgroundTexture;
 
 std::vector<Arrow> arrows;
+
+unsigned char currentBlock = 2;
+
+int mapWidth, mapHeight;
+char mapName[256] = {};
+char* map = nullptr;
+
+bool collidable = true;
+bool nonCollidable = true;
 
 bool initGame()
 {
@@ -52,11 +53,8 @@ bool initGame()
 	//if (music.openFromFile("ding.flac"))
 	//music.play();
 	ShaderProgram sp{ "blocks.vert","blocks.frag" };
-	sprites.loadFromFile("sprites.png");
-	characterSprite.loadFromFile("character.png");
-	targetSprite.loadFromFile("target.png");
+	sprites.loadFromFile("sprites2.png");
 	arrowSprite.loadFromFile("arrow.png");
-	lightTexture.loadFromFile("light.png");
 	backgroundTexture.loadFromFile("background.jpg");
 	backGroundFBO.create(40 * BLOCK_SIZE, 40 * BLOCK_SIZE);
 
@@ -67,57 +65,14 @@ bool initGame()
 	mapRenderer.leftTexture.loadFromFile("left.png");
 	mapRenderer.rightTexture.loadFromFile("right.png");
 
-	mapData.create(40, 40, 
-		"!!!!!!!!!                             !!"
-		"!!!!!!!!!!!!!!!!                      !!"
-		"!!!!!!!!!!!!!              !          !!"
-		"!!!                                 !!!!"
-		"!!!                                 !!!!"
-		"!!!!!!!!!!!!!!!!           !!!!!!!!!!!!!"
-		"!!!!!!!!               !      !       !!"
-		"!!!!!!                 !     !!       !!"
-		"!!            !!!!!!!!!!!!!!!!!       !!"
-		"!!          !!!                       !!"
-		"!!                                  !!!!"
-		"!!!!!!!!!!              !           !!!!"
-		"!!                      !           !!!!"
-		"!!            !!!!!!!!!!!!!!!!!!!!!!!!!!"
-		"!!  !!  ! !!!  !!  ! !!  !!  ! !  !!  !!"
-		"!!                                    !!"
-		"!!          !         !        !      !!"
-		"!!    !!!        !!!       !!!      !!!!"
-		"!!      !          !         !        !!"
-		"!!!!        !!!       !!!      !!!    !!"
-		"!!   !  !       !  !      !  !     !  !!"
-		"!!!!!!  !!  !!!!!  !! !!!!!  !!!!!!!  !!"
-		"!!                                    !!"
-		"!!                                    !!"
-		"!!  !!  ! !!!  !!  ! !!  !!  ! !  !!  !!"
-		"!!                                    !!"
-		"!!          !         !        !      !!"
-		"!!    !!!        !!!       !!!      !!!!"
-		"!!      !          !         !        !!"
-		"!!!!        !!!       !!!      !!!    !!"
-		"!!   !  !       !  !      !  !     !  !!"
-		"!!!!!!  !!  !!!!!  !! !!!!!  !!!!!!!  !!"
-		"!!                                    !!"
-		"!!                                    !!"
-		"!!  !!  ! !!!  !!  ! !!  !!  ! !  !!  !!"
-		"!!                                    !!"
-		"!!          !         !        !      !!"
-		"!!    !!!        !!!       !!!      !!!!"
-		"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-		"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-	);
+	mapData.create(40, 40, map);
 
-	player.pos = { BLOCK_SIZE*4, BLOCK_SIZE*4 };
-	player.updateMove();
-	player.dimensions = { 24, 30 };
-
-	//todo remove
 	mapData.ConvertTileMapToPolyMap();
 
-	arrows.reserve(10);
+	mapWidth = mapData.w;
+	mapHeight = mapData.h;
+
+	glClearColor(BACKGROUNDF_R, BACKGROUNDF_G, BACKGROUNDF_B, 1.f);
 
 	return true;
 }
@@ -125,34 +80,17 @@ bool initGame()
 bool gameLogic(float deltaTime)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	int w, h;
-	w = getWindowSizeX();
-	h = getWindowSizeY();
+	int w = getWindowSizeX();
+	int h = getWindowSizeY();
 
 	glViewport(0, 0, w, h);
 	renderer2d.updateWindowMetrics(w, h);
-	stencilRenderer2d.updateWindowMetrics(backGroundFBO.texture.GetSize().x, 
-		backGroundFBO.texture.GetSize().y);
+	/*stencilRenderer2d.updateWindowMetrics(backGroundFBO.texture.GetSize().x,
+		backGroundFBO.texture.GetSize().y);*/
 	backgroundRenderer2d.updateWindowMetrics(w, h);
 
-	//renderer2d.renderRectangle({ 100,100,100,100 }, Colors_Green);
-	//renderer2d.flush();
 
-
-	//renderer2d.currentCamera.position = { -500,-100 };
-
-	if (player.wallGrab == 0)
-	{
-		if (player.grounded)
-		{
-			player.run(deltaTime * input::getMoveDir());
-		}
-		else
-		{
-			player.airRun(deltaTime * input::getMoveDir());
-		}
-	}
-
+#pragma region Camera Movement
 	if (platform::isKeyHeld('Q'))
 	{
 		renderer2d.currentCamera.zoom -= deltaTime;
@@ -161,125 +99,107 @@ bool gameLogic(float deltaTime)
 	{
 		renderer2d.currentCamera.zoom += deltaTime;
 	}
-
-
-	if (input::isKeyPressedOn(input::Buttons::jump))
+	if (platform::isKeyHeld('D'))
 	{
-		if (player.wallGrab == 0)
-		{
-			if (player.grounded)
-			{
-				player.jump();
-			}
-
-		}
-		else if (player.wallGrab == 1)
-		{
-			//player.strafe(-1);
-			player.jumpFromWall();
-			player.wallGrab = 0;
-		}
-		else if (player.wallGrab == -1)
-		{
-			//player.strafe(1);
-			player.jumpFromWall();
-			player.wallGrab = 0;
-		}
+		renderer2d.currentCamera.position.x += deltaTime * 120;
 	}
-
-	if (input::isKeyReleased(input::Buttons::jump))
+	if (platform::isKeyHeld('A'))
 	{
-		if (player.velocity.y < 0)
-		{
-			player.velocity.y *= 0.4;
-		}
+		renderer2d.currentCamera.position.x -= deltaTime * 120;
 	}
-
-	if (input::isKeyHeld(input::Buttons::down))
+	if (platform::isKeyHeld('W'))
 	{
-		player.wallGrab = 0;
+		renderer2d.currentCamera.position.y -= deltaTime * 120;
 	}
-
-	if(input::isKeyPressedOn(input::Buttons::shoot))
+	if (platform::isKeyHeld('S'))
 	{
-		Arrow a;
-		a.pos = player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2);
-		a.shootDir = input::getShootDir({ w / 2,h / 2 });
-		//a.pos.x += a.shootDir.x * BLOCK_SIZE * 0.9;
-		//a.pos.y += a.shootDir.y * BLOCK_SIZE * 0.9;
-		arrows.push_back(a);
+		renderer2d.currentCamera.position.y += deltaTime * 120;
 	}
+#pragma endregion
 
-	//todo add player dimensions
-	renderer2d.currentCamera.follow(player.pos + (player.dimensions / 2.f), deltaTime * 120, 30, renderer2d.windowW, renderer2d.windowH);
-	//stencilRenderer2d.currentCamera = renderer2d.currentCamera;
 	backgroundRenderer2d.currentCamera = renderer2d.currentCamera;
-
-	player.applyGravity(deltaTime);
-	player.applyVelocity(deltaTime);
-
-	player.resolveConstrains(mapData);
-	player.checkGrounded(mapData);
-	player.checkWall(mapData, input::getMoveDir());
-	player.updateMove();
-
-	//mapRenderer.addBlock(renderer2d.toScreen({ 100,100,100,100 }), { 0,1,1,0 }, {1,1,1,1});
-	//mapRenderer.render();
 
 	mapData.clearColorData();
 
-	simuleteLightSpot(player.pos + glm::vec2(player.dimensions.x/2, player.dimensions.y / 2),
-		10, mapData, arrows, stencilRenderer2d, lightTexture);
+#pragma region Adding Blocks Into the World
 
-#pragma region drawStencil
-
-	stencilRenderer2d.flushFBO(backGroundFBO);
-	
-	backgroundRenderer2d.renderRectangle({ 0,0, mapData.w*BLOCK_SIZE, mapData.h*BLOCK_SIZE }, {}, 0, backgroundTexture);
-	glUseProgram(backgroundRenderer2d.currentShader.id);
-	glUniform1i(maskSamplerUniform, 1);
-	backGroundFBO.texture.bind(1);
-	backgroundRenderer2d.flush();
-	
-	backGroundFBO.clear();
-#pragma endregion
-
-	mapRenderer.drawFromMapData(renderer2d, mapData);
-
-	gl2d::TextureAtlas playerAtlas(1, 1);
-
-	renderer2d.renderRectangle({ player.pos, player.dimensions }, {}, 0, characterSprite,
-		playerAtlas.get(0, 0, !player.movingRight));
-
-#pragma region arrows
-	for(auto i=arrows.begin(); i<arrows.end(); i++)
+	//todo bug: buttonWasPressed works like buttonIsPressed
+	if (platform::isLMouseHeld())
 	{
-		if(i->leftMap(mapData.w, mapData.h))
-		{
-			arrows.erase(i);
-			continue;
-		}
+		glm::vec2 mousePos;
+		mousePos.x = platform::getRelMousePosition().x + renderer2d.currentCamera.position.x;
+		mousePos.y = platform::getRelMousePosition().y + renderer2d.currentCamera.position.y;
 
-		i->move(deltaTime * BLOCK_SIZE);
-		i->draw(renderer2d, arrowSprite);
-		i->checkCollision(mapData);
-		i->light = 0;
+		mousePos = gl2d::scaleAroundPoint(mousePos, renderer2d.currentCamera.position +
+			glm::vec2{ renderer2d.windowW / 2, renderer2d.windowH / 2 }, 1.f / renderer2d.currentCamera.zoom);
+
+		mapData.get((mousePos.x) / BLOCK_SIZE, (mousePos.y) / BLOCK_SIZE).type = currentBlock;
 	}
-	
+
+	if (platform::isRMouseHeld())
+	{
+		glm::vec2 mousePos;
+		mousePos.x = platform::getRelMousePosition().x + renderer2d.currentCamera.position.x;
+		mousePos.y = platform::getRelMousePosition().y + renderer2d.currentCamera.position.y;
+
+		mousePos = gl2d::scaleAroundPoint(mousePos, renderer2d.currentCamera.position +
+			glm::vec2{ renderer2d.windowW / 2, renderer2d.windowH / 2 }, 1.f / renderer2d.currentCamera.zoom);
+
+		mapData.get((mousePos.x) / BLOCK_SIZE, (mousePos.y) / BLOCK_SIZE).type = Block::none;
+	}
+
+
 #pragma endregion
 
+#pragma region Render the blocks
+	for (int x = 0; x < mapData.w; x++)
+	{
+		for (int y = 0; y < mapData.h; y++)
+		{
+			if (collidable) {
+				if (isColidable(mapData.get(x, y).type))
+				{
+					mapData.get(x, y).mainColor = { 1,1,1,1 };
+				}
+			}
+			else
+			{
+				if (isColidable(mapData.get(x, y).type))
+				{
+					mapData.get(x, y).mainColor = { 1,1,1,0.2 };
+				}
 
-	glm::vec2 cursorPos = input::getShootDir({ w / 2,h / 2 });
-	cursorPos *= BLOCK_SIZE * 2;
-	cursorPos += player.pos;
-	cursorPos += glm::vec2{player.dimensions.x / 2, player.dimensions.y /2};
+			}
 
-	renderer2d.renderRectangle({ cursorPos, 14, 14 }, { 1,0,0,0.4 }, {}, 0, targetSprite);
+			if (nonCollidable)
+			{
+				if (!isColidable(mapData.get(x, y).type))
+				{
+					mapData.get(x, y).mainColor = { 1,1,1,1 };
+				}
+			}
+			else
+			{
+				if (!isColidable(mapData.get(x, y).type))
+				{
+					mapData.get(x, y).mainColor = { 1,1,1,0.2 };
+				}
+			}
+		}
+	}
+	mapRenderer.drawFromMapData(renderer2d, mapData);
+#pragma endregion
+
+#pragma region Render Map Margins
+	renderer2d.renderRectangle({ 0,0, mapData.w * BLOCK_SIZE, -10 }, Colors_Turqoise);
+	renderer2d.renderRectangle({ 0,0,-10, mapData.h * BLOCK_SIZE }, Colors_Turqoise);
+	renderer2d.renderRectangle({ 0,mapData.h * BLOCK_SIZE, mapData.w * BLOCK_SIZE, 10 }, Colors_Turqoise);
+	renderer2d.renderRectangle({ mapData.w * BLOCK_SIZE,0,10,mapData.h * BLOCK_SIZE }, Colors_Turqoise);
+#pragma endregion
 
 	renderer2d.flush();
 
 	return true;
-
 }
 
 void closeGame()
@@ -287,69 +207,166 @@ void closeGame()
 	//music.stop();
 }
 
+
 void imguiFunc(float deltaTime)
 {
+	ImGui::Begin("Map settings");
 
-	static bool active = 0;
-	static glm::vec4 color;
+#pragma region Open Map
+	if (ImGui::Button("Open Map"))
+	{
+		std::ifstream inputFile("test.level");
 
-	//todo delta time
-	/*
-	extern float gravitationalAcceleration;
-extern float jumpSpeed;
-extern float jumpFromWallSpeed;
-extern float velocityClamp;
-//extern float drag;
-//extern float strafeSpeed = 10;
-extern float runSpeed;
-extern float airRunSpeed;
-extern float grabMargin;
-extern float notGrabTimeVal;
-extern bool snapWallGrab;
-	*/
+		inputFile >> mapWidth >> mapHeight;
 
-	//ImGui::Begin("delta");
-	//ImGui::Text(std::to_string(1.f/(deltaTime/1000.f)).c_str());
-	//ImGui::End();
+		char blocks[2500];
+		int it = 0;
+		std::string current;
 
-	ImGui::Begin("Move settings");
-	ImGui::SliderFloat("gravitationalAcceleration", &gravitationalAcceleration, 30, 100);
-	ImGui::SliderFloat("jumpSpeed", &jumpSpeed, 1, 50);
-	ImGui::SliderFloat("jumpFromWallSpeed", &jumpFromWallSpeed, 1, 50);
-	ImGui::SliderFloat("velocityClamp", &velocityClamp, 10, 70);
-	ImGui::SliderFloat("runSpeed", &runSpeed, 1, 40);
-	ImGui::SliderFloat("airRunSpeed", &airRunSpeed, 1, 40);
-	ImGui::SliderFloat("grabMargin", &grabMargin, 0, 1);
-	ImGui::Checkbox("snapWallGrab", &snapWallGrab);
+		while (std::getline(inputFile, current))
+		{
+			for (auto i = 0; i < current.length(); i++)
+			{
+				std::string aux;
+				while (current[i] != ',')
+				{
+					aux += current[i];
+					i++;
+				}
+				blocks[it++] = static_cast<char>(std::stoi(aux));
+			}
+		}
+		blocks[it] = NULL;
+
+		inputFile.close();
+
+		mapData.cleanup();
+		mapData.create(mapWidth, mapHeight, blocks);
+		mapData.ConvertTileMapToPolyMap();
+	}
+	ImGui::NewLine();
+#pragma endregion
+
+#pragma region Empty Map
+	ImGui::InputInt("New Map Width", &mapWidth);
+	ImGui::InputInt("New Map Height", &mapHeight);
+
+	if (ImGui::Button("New Map"))
+	{
+		mapData.cleanup();
+		mapData.create(mapWidth, mapHeight, nullptr);
+	}
+	ImGui::NewLine();
+#pragma endregion
+
+#pragma region Save Map
+	static char name[250] = {};
+	ImGui::InputText("OutputFile Name", name, sizeof(name));
+	if (ImGui::Button("Save Map"))
+	{
+		char aux[250];
+		strcpy(aux, name);
+		strcat(aux, ".level");
+
+		std::ofstream outputFile(aux);
+		outputFile << mapWidth << std::endl << mapHeight << std::endl;
+		for (int x = 0; x < mapWidth; x++)
+		{
+			for (int y = 0; y < mapHeight; y++)
+			{
+				outputFile << static_cast<int>(mapData.get(y, x).type) << ",";
+			}
+			outputFile << "\n";
+		}
+		outputFile.close();
+	}
+	ImGui::NewLine();
+#pragma endregion
+
+#pragma region Block Selector
+
+
+	ImGui::Checkbox("Show Collidable Blocks", &collidable);
+	ImGui::Checkbox("Show Non-Collidable Blocks", &nonCollidable);
+
+	gl2d::TextureAtlas spriteAtlas(BLOCK_COUNT, 4);
+	unsigned char mCount = 1;
+	ImGui::BeginChild("Block Selector");
+
+	if (collidable && nonCollidable)
+	{
+		while (mCount < Block::lastBlock)
+		{
+			ImGui::PushID(mCount);
+			if (ImGui::ImageButton((void*)(intptr_t)sprites.id,
+				{ 60,60 }, { spriteAtlas.get(mCount - 1, 0).x, spriteAtlas.get(mCount - 1,0).y },
+				{ spriteAtlas.get(mCount - 1, 0).z, spriteAtlas.get(mCount - 1,0).w }))
+			{
+				currentBlock = mCount;
+				llog((int)currentBlock);
+			}
+			ImGui::PopID();
+
+			if (mCount % 5 != 0)
+				ImGui::SameLine();
+			mCount++;
+		}
+	}
+	else
+	{
+		if (collidable && !nonCollidable)
+		{
+			unsigned char localCount = 0;
+			while (mCount < Block::lastBlock)
+			{
+				if (isColidable(mCount))
+				{
+					ImGui::PushID(mCount);
+					if (ImGui::ImageButton((void*)(intptr_t)sprites.id,
+						{ 60,60 }, { spriteAtlas.get(mCount - 1, 0).x, spriteAtlas.get(mCount - 1,0).y },
+						{ spriteAtlas.get(mCount - 1, 0).z, spriteAtlas.get(mCount - 1,0).w }))
+					{
+						currentBlock = mCount;
+						llog((int)localCount);
+					}
+					ImGui::PopID();
+					
+					 if (localCount % 5 != 0)
+						ImGui::SameLine();
+					localCount++;
+				}
+				mCount++;
+			}
+		}
+
+		if (!collidable && nonCollidable)
+		{
+			unsigned char localCount = 0;
+			while (mCount < Block::lastBlock)
+			{
+				if (!isColidable(mCount))
+				{
+					ImGui::PushID(mCount);
+					if (ImGui::ImageButton((void*)(intptr_t)sprites.id,
+						{ 60,60 }, { spriteAtlas.get(mCount - 1, 0).x, spriteAtlas.get(mCount - 1,0).y },
+						{ spriteAtlas.get(mCount - 1, 0).z, spriteAtlas.get(mCount - 1,0).w }))
+					{
+						currentBlock = mCount;
+						llog((int)currentBlock);
+					}
+					ImGui::PopID();
+
+					 if (localCount % 5 != 0)
+						ImGui::SameLine();
+					localCount++;
+				}
+				mCount++;
+			}
+		}
+	}
+	ImGui::EndChild();
+
+#pragma endregion
 
 	ImGui::End();
-
-	//ImGui::Begin("My First Tool", &active, ImGuiWindowFlags_MenuBar);
-	//if (ImGui::BeginMenuBar())
-	//{
-	//	if (ImGui::BeginMenu("File"))
-	//	{
-	//		if (ImGui::MenuItem("Open..", "Ctrl+O")) { /* Do stuff */ }
-	//		if (ImGui::MenuItem("Save", "Ctrl+S")) { /* Do stuff */ }
-	//		if (ImGui::MenuItem("Close", "Ctrl+W")) { active = false; }
-	//		ImGui::EndMenu();
-	//	}
-	//	ImGui::EndMenuBar();
-	//}
-	//
-	//// Edit a color (stored as ~4 floats)
-	//ImGui::ColorEdit4("Color", &color[0]);
-	//
-	//// Plot some values
-	//const float my_values[] = { 0.2f, 0.1f, 1.0f, 0.5f, 0.9f, 2.2f };
-	//ImGui::PlotLines("Frame Times", my_values, IM_ARRAYSIZE(my_values));
-	//
-	//// Display contents in a scrolling region
-	//ImGui::TextColored(ImVec4(1, 1, 0, 1), "Important Stuff");
-	//ImGui::BeginChild("Scrolling");
-	//for (int n = 0; n < 50; n++)
-	//	ImGui::Text("%04d: Some text", n);
-	//ImGui::EndChild();
-	//ImGui::End();
-
 }

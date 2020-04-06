@@ -136,7 +136,9 @@ void MapRenderer::render()
 	clearBlockDrawData();
 }
 
-void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData)
+float animDuration = 0.12;
+
+void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData, float deltaTime, int curPos)
 {
 	
 	glm::vec2 minPos = { 0,0 };
@@ -192,8 +194,70 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData)
 
 				color = { 1,1,1,color.r };
 
+				auto &data = mapData.get(w, h);
+				
+				if (data.type == Block::waterFallBegin || data.type == Block::waterFallEnd
+					|| data.type == Block::torceTopBrickLit
+					|| data.type == Block::torceTopLeavesLit
+					|| data.type == Block::water4
+					)
+				{
+					data.animPos = curPos;
+				}//alyways
+				else if (
+					data.type == Block::grassDecoration ||
+					data.type == Block::leavesRight ||
+					data.type == Block::leavesLeft ||
+					data.type == Block::vines1||
+					data.type == Block::vines2 ||
+					data.type == Block::snowDecoration1||
+					data.type == Block::waterFall ||
+					data.type == Block::grassDecoration2||
+					data.type == Block::grassDecoration3 ||
+					data.type == Block::water3||
+					data.type == Block::water1
+					
+					)
+				{
+
+					if(data.playerEntered)
+					{
+						if(data.playerLeft)
+						{
+							data.leftAnim = 0;
+							data.startAnim = 1;
+						}
+						data.playerLeft = 0;
+					}else
+					{
+						data.playerLeft = 1;
+						if(!data.leftAnim)
+						{
+							data.leftAnim = 1;
+							data.startAnim = 1;
+						}
+					}
+
+					if(data.startAnim == 1)
+					{
+						data.timePassed += deltaTime;
+						while(data.timePassed > animDuration)
+						{
+							data.timePassed -= animDuration;
+							data.animPos++;
+						}
+						if(data.animPos >3)
+						{
+							data.startAnim = 0;
+							data.animPos = 0;
+						}
+					}
+				}
+
+				data.playerEntered = 0;
+
 				addBlock(renderer.toScreen({ w*BLOCK_SIZE,h*BLOCK_SIZE,BLOCK_SIZE,BLOCK_SIZE }), 
-					spriteAtlas.get(mapData.get(w, h).type- Block::none-1,0)
+					spriteAtlas.get(data.type- Block::none-1, data.animPos)
 					,color , sideC);
 
 			}

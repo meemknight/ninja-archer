@@ -8,7 +8,7 @@ float jumpFromWallSpeed = 22;
 float velocityClamp = 30;
 float drag = 0.15f;
 float strafeSpeed = 10;
-float strafeSpeedMove = 11;
+float strafeSpeedMove = 10;
 float runSpeed = 14;
 float airRunSpeed = 10;
 float grabMargin = 0.25f;
@@ -185,6 +185,8 @@ void Entity::airRun(float speed)
 			return;
 		}
 	}
+	
+	if (speed) { velocity.x = 0; }
 
 	pos.x += speed * airRunSpeed * BLOCK_SIZE;
 }
@@ -336,7 +338,7 @@ void Entity::jump()
 	velocity.y = -jumpSpeed * BLOCK_SIZE;
 }
 
-gl2d::TextureAtlas playerAtlas(4, 4);
+gl2d::TextureAtlas playerAtlas(4, 6);
 
 void Entity::draw(gl2d::Renderer2D & renderer2d, float deltaTime, gl2d::Texture characterSprite)
 {
@@ -361,6 +363,11 @@ void Entity::draw(gl2d::Renderer2D & renderer2d, float deltaTime, gl2d::Texture 
 	}else if(moving)
 	{
 		state = 1;
+	}
+
+	if(dying)
+	{
+		state = 4;
 	}
 
 	moving = 0;

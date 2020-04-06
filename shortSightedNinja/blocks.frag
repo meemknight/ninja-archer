@@ -35,7 +35,7 @@ void main()
 {
 
 	vec4 mainColor = clamp(v_mainColor, vec4(0,0,0,0), vec4(1,1,1,1));
-
+	
 	float lightBoost = texture2D(u_up,v_texColorCoord).x * v_sideColor.x * texture2D(u_up,v_texColorCoord).w;
 	lightBoost = max(lightBoost, texture(u_down,v_texColorCoord).x * v_sideColor.y * texture2D(u_down,v_texColorCoord).w);
 	lightBoost = max(lightBoost, texture(u_left,v_texColorCoord).x * v_sideColor.z * texture2D(u_left,v_texColorCoord).w);
@@ -44,12 +44,14 @@ void main()
 	lightBoost = min(lightBoost, 1);
 	lightBoost *= 0.3;
 
-	color = mainColor  * vec4(texture2D(u_sprites,v_texCoord).xyzw);
-	
+	vec4 c =  texture(u_sprites,v_texCoord);
+	color = mainColor  * c;
+
 	color.rgb = rgbTohsv(color.rgb);
 
 	color.b += (lightBoost);
 	color.b = min(color.b, 1.f);
 
 	color.rgb = hsvTorgb(color.rgb);
+
 }

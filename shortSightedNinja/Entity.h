@@ -29,6 +29,7 @@ struct Entity
 	float notGrabTime = 0;
 
 	bool moving = 0;
+	bool dying = 0;
 
 	void updateMove() 
 	{

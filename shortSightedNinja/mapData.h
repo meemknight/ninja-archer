@@ -4,7 +4,7 @@
 
 namespace Block 
 {
-	enum : char
+	enum : unsigned char 
 	{
 		none = 0,
 		bareer,
@@ -115,7 +115,7 @@ namespace Block
 		brickDecoration3,
 		brickDecoration4,
 		brickDecoration5,
-		grass,
+		grassDecoration,
 		leavesRight,
 		leavesLeft,
 		vines1,
@@ -139,6 +139,7 @@ namespace Block
 		water1,
 		water2,
 		water3,
+		water4,
 		targetRed,
 		targetBlue,
 		woodDecoration1,
@@ -146,6 +147,9 @@ namespace Block
 		targetKey,
 		snowDecoration1,
 		snowDecoration2,
+		grassDecoration2,
+		grassDecoration3,
+		lastBlock,
 	};
 }
 
@@ -187,12 +191,12 @@ enum Block : char
 };
 */
 
-inline bool isAir(char b)
+inline bool isAir(unsigned char b)
 {
 	return b == Block::none;
 }
 
-inline bool isRedSolid(char b)
+inline bool isRedSolid(unsigned char b)
 {
 	if (
 		b == Block::redSolid1 ||
@@ -209,7 +213,7 @@ inline bool isRedSolid(char b)
 	else { return 0; }
 }
 
-inline bool isRedNoSolid(char b)
+inline bool isRedNoSolid(unsigned char b)
 {
 	if (
 		b == Block::redNoSolid1 ||
@@ -229,7 +233,7 @@ inline bool isRedNoSolid(char b)
 }
 
 
-inline bool isBlueSolid(char b)
+inline bool isBlueSolid(unsigned char b)
 {
 	if (
 		b == Block::blueSolid1 ||
@@ -248,7 +252,7 @@ inline bool isBlueSolid(char b)
 	else { return 0; }
 }
 
-inline bool isBlueNoSolid(char b)
+inline bool isBlueNoSolid(unsigned char b)
 {
 	if (
 		b == Block::blueNoSolid1 ||
@@ -267,7 +271,7 @@ inline bool isBlueNoSolid(char b)
 	else { return 0; }
 }
 
-inline bool isColidable(char b)
+inline bool isColidable(unsigned char b)
 {
 
 	if (
@@ -305,17 +309,17 @@ inline bool isColidable(char b)
 
 }
 
-inline bool isOpaque(char b)
+inline bool isOpaque(unsigned char b)
 {
 	return isColidable(b);
 }
 
-inline bool isLitTorch(char b)
+inline bool isLitTorch(unsigned char b)
 {
 	return b == Block::torceTopBrickLit || b == Block::torceTopLeavesLit;
 }
 
-inline bool unLitTorch(char b)
+inline bool unLitTorch(unsigned char b)
 {
 	return b == Block::torceTopBrickUnlit || b == Block::torceTopLeavesUnlit;
 
@@ -348,8 +352,14 @@ struct BlockInfo
 
 	glm::vec4 mainColor;
 	glm::vec4 sideColors;
-
-	char type;
+	
+	bool startAnim=0;
+	signed char animPos = 0;
+	float timePassed = 0;
+	unsigned char type;
+	bool playerEntered = 0;
+	bool playerLeft = 0;
+	bool leftAnim = 0;
 
 	void resetColors();
 };
@@ -377,7 +387,6 @@ struct MapData
 	void create(int w, int h, const char* d);
 	BlockInfo &get(int x, int y);
 
-	void ConvertTileMapToPolyMap();
 
 	void CalculateVisibilityPolygon(float ox, float oy, float radius);
 

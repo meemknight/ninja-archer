@@ -369,7 +369,15 @@ namespace platform
 
 	int isLMouseButtonPressed()
 	{
-		return lbuttonPressed;
+		ImGuiIO& io = ImGui::GetIO();
+		return (!io.WantCaptureMouse) && lbuttonPressed;
+	}
+
+	int isLMouseHeld()
+	{
+		ImGuiIO& io = ImGui::GetIO();
+	
+		return (!io.WantCaptureMouse) && lbutton;
 	}
 
 	int isRMouseButtonPressed()
@@ -377,10 +385,6 @@ namespace platform
 		return rbuttonPressed;
 	}
 
-	int isLMouseHeld()
-	{
-		return lbutton;
-	}
 
 	int isRMouseHeld()
 	{

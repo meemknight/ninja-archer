@@ -17,7 +17,6 @@
 #define BACKGROUNDF_G ((float)38 / (float)0xff)
 #define BACKGROUNDF_B ((float)63 / (float)0xff)
 
-
 struct MapRenderer
 {
 
@@ -59,7 +58,7 @@ struct MapRenderer
 	gl2d::Texture leftTexture;
 	gl2d::Texture rightTexture;
 	
-	void drawFromMapData(gl2d::Renderer2D &renderer ,MapData &mapData);
+	void drawFromMapData(gl2d::Renderer2D &renderer ,MapData &mapData, float deltaTime, int curPos);
 
 	GLint spritesUniform;
 	GLint upUniform;

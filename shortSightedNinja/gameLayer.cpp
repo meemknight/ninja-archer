@@ -24,7 +24,7 @@ extern gl2d::internal::ShaderProgram maskShader;
 extern GLint maskSamplerUniform;
 
 gl2d::Renderer2D renderer2d;
-gl2d::Renderer2D stencilRenderer2d;
+//gl2d::Renderer2D stencilRenderer2d;
 gl2d::Renderer2D backgroundRenderer2d;
 //sf::Music music;
 MapRenderer mapRenderer;
@@ -39,7 +39,7 @@ gl2d::Texture targetSprite;
 gl2d::Texture arrowSprite;
 gl2d::Texture lightTexture;
 
-gl2d::FrameBuffer backGroundFBO;
+//gl2d::FrameBuffer backGroundFBO;
 gl2d::Texture backgroundTexture;
 
 std::vector<Arrow> arrows;
@@ -72,52 +72,20 @@ struct LightSource
 
 std::vector <LightSource> wallLights;
 
-bool initGame()
+void loadLevel()
 {
-	
-	glClearColor(BACKGROUNDF_R, BACKGROUNDF_G, BACKGROUNDF_B ,1.f);
-
+	inventory.clear();
 	//this vector should always have all arrows in order (and all of them there)
 	inventory.push_back({ 0,3,5 });
 	inventory.push_back({ 1,4,5 });
 	inventory.push_back({ 2,5,5 });
 	inventory.push_back({ 3,3,5 });
 
-	renderer2d.create();
-	stencilRenderer2d.create();
-	backgroundRenderer2d.create();
-	backgroundRenderer2d.setShaderProgram(maskShader);
-	//if (music.openFromFile("ding.flac"))
-	//music.play();
-	ShaderProgram sp{ "blocks.vert","blocks.frag" };
-	sprites.loadFromFile("sprites2.png");
-	characterSprite.loadFromFile("character3.png");
-	targetSprite.loadFromFile("target.png");
-	arrowSprite.loadFromFile("arrow.png");
-	lightTexture.loadFromFile("light.png");
-	//backgroundTexture.loadFromFile("background.jpg");
-	const char buff[] =
-	{
-		BACKGROUND_R,
-		BACKGROUND_G,
-		BACKGROUND_B,
-		0xff
-	};
-	backgroundTexture.create1PxSquare(buff);
-	backGroundFBO.create(40 * BLOCK_SIZE, 40 * BLOCK_SIZE);
-
-	font.createFromFile("font.ttf");
-
-	mapRenderer.init(sp);
-	mapRenderer.sprites = sprites;
-	mapRenderer.upTexture.loadFromFile("top.png");
-	mapRenderer.downTexture.loadFromFile("bottom.png");
-	mapRenderer.leftTexture.loadFromFile("left.png");
-	mapRenderer.rightTexture.loadFromFile("right.png");
+	renderer2d.currentCamera.zoom = 5.1;
 
 	pickups.push_back({ 4, 4, 1 });
 
-	mapData.create(40, 40, 
+	mapData.create(40, 40,
 		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh<h"
 		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh<h"
 		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh<h"
@@ -160,30 +128,100 @@ bool initGame()
 		"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"
 	);
 
-	player.pos = { BLOCK_SIZE*4, BLOCK_SIZE*4 };
+	mapData.get(1, 6).type = Block::waterFallBegin;
+	mapData.get(1, 7).type = Block::waterFall;
+	mapData.get(1, 8).type = Block::waterFallEnd;
+	mapData.get(1, 9).type = Block::water4;
+	mapData.get(1, 10).type = Block::water3;
+	mapData.get(2, 9).type = Block::water1;
+	mapData.get(2, 10).type = Block::water3;
+	mapData.get(2, 10).type = '>';
+	mapData.get(1, 12).type = '>';
+	mapData.get(3, 8).type = Block::grassDecoration;
+	mapData.get(5, 8).type = Block::leavesRight;
+	mapData.get(7, 8).type = Block::leavesLeft;
+	mapData.get(9, 8).type = Block::vines1;
+	mapData.get(11, 8).type = Block::vines2;
+	mapData.get(13, 8).type = Block::snowDecoration1;
+	mapData.get(15, 8).type = Block::snowDecoration2;
+	mapData.get(17, 8).type = Block::grassDecoration2;
+	mapData.get(19, 8).type = Block::grassDecoration3;
+
+	mapData.setNeighbors();
+
+	player.pos = { BLOCK_SIZE * 4, BLOCK_SIZE * 4 };
 	player.updateMove();
-	player.dimensions = { 8, 8 };
+	player.dimensions = { 7, 7 };
+	player.dying = 0;
 
-	//todo remove
-	mapData.ConvertTileMapToPolyMap();
-
-	arrows.reserve(10);
-
+	wallLights.clear();
 	//setup light sources
-	for(int y=0; y<mapData.h; y++)
+	for (int y = 0; y < mapData.h; y++)
 		for (int x = 0; x < mapData.w; x++)
 		{
-			if(isLitTorch(mapData.get(x,y).type))
+			if (isLitTorch(mapData.get(x, y).type))
 			{
-				wallLights.push_back({ {x,y}, 0});
+				wallLights.push_back({ {x,y}, 0 });
 			}
 		}
+}
+
+
+bool initGame()
+{
+	
+	glClearColor(BACKGROUNDF_R, BACKGROUNDF_G, BACKGROUNDF_B ,1.f);
+
+
+	renderer2d.create();
+	//stencilRenderer2d.create();
+	backgroundRenderer2d.create();
+	backgroundRenderer2d.setShaderProgram(maskShader);
+	//if (music.openFromFile("ding.flac"))
+	//music.play();
+	ShaderProgram sp{ "blocks.vert","blocks.frag" };
+
+	mapRenderer.init(sp);
+	sprites.loadFromFile("sprites2.png");
+
+	mapRenderer.sprites = sprites;
+	mapRenderer.upTexture.loadFromFile("top.png");
+	mapRenderer.downTexture.loadFromFile("bottom.png");
+	mapRenderer.leftTexture.loadFromFile("left.png");
+	mapRenderer.rightTexture.loadFromFile("right.png");
+
+	characterSprite.loadFromFile("character3.png");
+	targetSprite.loadFromFile("target.png");
+	arrowSprite.loadFromFile("arrow.png");
+	lightTexture.loadFromFile("light.png");
+	//backgroundTexture.loadFromFile("background.jpg");
+	const char buff[] =
+	{
+		BACKGROUND_R,
+		BACKGROUND_G,
+		BACKGROUND_B,
+		0xff
+	};
+	backgroundTexture.create1PxSquare(buff);
+
+	//backGroundFBO.create(40 * BLOCK_SIZE, 40 * BLOCK_SIZE);
+
+	font.createFromFile("font.ttf");
+	
+	arrows.reserve(10);
+
+	loadLevel();
 
 	return true;
 }
 
 bool gameLogic(float deltaTime)
 {
+	if (platform::isKeyPressedOn('T'))
+	{
+		loadLevel();
+	}
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	int w, h;
 	w = getWindowSizeX();
@@ -191,8 +229,8 @@ bool gameLogic(float deltaTime)
 
 	glViewport(0, 0, w, h);
 	renderer2d.updateWindowMetrics(w, h);
-	stencilRenderer2d.updateWindowMetrics(backGroundFBO.texture.GetSize().x, 
-		backGroundFBO.texture.GetSize().y);
+	//stencilRenderer2d.updateWindowMetrics(backGroundFBO.texture.GetSize().x, 
+	//	backGroundFBO.texture.GetSize().y);
 	backgroundRenderer2d.updateWindowMetrics(w, h);
 
 	//renderer2d.renderRectangle({ 100,100,100,100 }, Colors_Green);
@@ -222,6 +260,7 @@ bool gameLogic(float deltaTime)
 		renderer2d.currentCamera.zoom += deltaTime;
 	}
 
+
 	if (input::isKeyPressedOn(input::Buttons::jump))
 	{
 		if (player.wallGrab == 0)
@@ -230,7 +269,6 @@ bool gameLogic(float deltaTime)
 			{
 				player.jump();
 			}
-
 		}
 		else if (player.wallGrab == 1)
 		{
@@ -308,7 +346,7 @@ bool gameLogic(float deltaTime)
 	mapData.clearColorData();
 
 	simuleteLightSpot(player.pos + glm::vec2(player.dimensions.x/2, player.dimensions.y / 2),
-		5, mapData, arrows, pickups, stencilRenderer2d, lightTexture, 0);
+		5, mapData, arrows, pickups, lightTexture, 0);
 
 #pragma region inventory
 
@@ -350,8 +388,8 @@ bool gameLogic(float deltaTime)
 		minX = (player.pos.x) / BLOCK_SIZE;
 		maxX = (player.pos.x +player.dimensions.x) / BLOCK_SIZE;
 
-		minY = (player.pos.y) / BLOCK_SIZE;
-		maxY = (player.pos.y + player.dimensions.y) / BLOCK_SIZE;
+		minY = (player.pos.y) / BLOCK_SIZE - 1;
+		maxY = (player.pos.y + player.dimensions.y-1) / BLOCK_SIZE;
 
 		minX = std::max(0, minX);
 		minY = std::max(0, minY);
@@ -366,6 +404,13 @@ bool gameLogic(float deltaTime)
 				{
 					mapData.get(x, y).type++;
 					wallLights.push_back({{ x,y }});
+				}
+
+				mapData.get(x, y).playerEntered = 1;
+
+				if(mapData.get(x,y).type == Block::water3)
+				{
+					player.dying = 1;
 				}
 			}
 		}
@@ -404,7 +449,7 @@ bool gameLogic(float deltaTime)
 		}
 
 		simuleteLightSpot({ i.pos.x*BLOCK_SIZE + BLOCK_SIZE/2,i.pos.y*BLOCK_SIZE + BLOCK_SIZE/2 },
-			r, mapData, arrows, pickups, stencilRenderer2d, lightTexture, intensity);
+			r, mapData, arrows, pickups, lightTexture, intensity);
 	
 	}
 
@@ -427,7 +472,7 @@ bool gameLogic(float deltaTime)
 			if(r > 0)
 			{
 				simuleteLightSpot({ i.pos },
-					r, mapData, arrows, pickups, stencilRenderer2d, lightTexture, 0.1);
+					r, mapData, arrows, pickups, lightTexture, 0.1);
 			}
 			
 		}
@@ -439,7 +484,8 @@ bool gameLogic(float deltaTime)
 
 #pragma region drawStencil
 
-	stencilRenderer2d.clearDrawData();
+	//todo remove
+	//stencilRenderer2d.clearDrawData();
 	//stencilRenderer2d.flushFBO(backGroundFBO);
 	//
 	//backgroundRenderer2d.renderRectangle({ 0,0, mapData.w*BLOCK_SIZE, mapData.h*BLOCK_SIZE }, {}, 0, backgroundTexture);
@@ -506,7 +552,19 @@ bool gameLogic(float deltaTime)
 	}
 #pragma endregion
 
-	mapRenderer.drawFromMapData(renderer2d, mapData);
+	{
+		static int animPos;
+		static float timePassed;
+		timePassed += deltaTime;
+		while (timePassed > 0.17)
+		{
+			timePassed -= 0.17;
+			animPos++;
+		}
+		animPos %= 4;
+
+		mapRenderer.drawFromMapData(renderer2d, mapData, deltaTime, animPos);
+	}
 
 #pragma region pickups
 	for (auto &i : pickups)
@@ -584,6 +642,11 @@ bool gameLogic(float deltaTime)
 
 					leftCount = actualInventorty[left].count;
 					left = actualInventorty[left].type;
+				}
+
+				if(actualInventorty.size()==1)
+				{
+					left = -1;
 				}
 				
 				int center = currentArrow;
@@ -694,18 +757,33 @@ extern bool snapWallGrab;
 	//ImGui::Text(std::to_string(1.f/(deltaTime/1000.f)).c_str());
 	//ImGui::End();
 
-	ImGui::Begin("Move settings");
-	ImGui::SliderFloat("gravitationalAcceleration", &gravitationalAcceleration, 30, 100);
-	ImGui::SliderFloat("jumpSpeed", &jumpSpeed, 1, 50);
-	ImGui::SliderFloat("jumpFromWallSpeed", &jumpFromWallSpeed, 1, 50);
-	ImGui::SliderFloat("velocityClamp", &velocityClamp, 10, 70);
-	ImGui::SliderFloat("runSpeed", &runSpeed, 1, 40);
-	ImGui::SliderFloat("airRunSpeed", &airRunSpeed, 1, 40);
-	ImGui::SliderFloat("grabMargin", &grabMargin, 0, 1);
-	ImGui::Checkbox("snapWallGrab", &snapWallGrab);
-
-	ImGui::End();
-
+	//ImGui::Begin("Move settings");
+	//ImGui::SliderFloat("gravitationalAcceleration", &gravitationalAcceleration, 30, 100);
+	//ImGui::SliderFloat("jumpSpeed", &jumpSpeed, 1, 50);
+	//ImGui::SliderFloat("jumpFromWallSpeed", &jumpFromWallSpeed, 1, 50);
+	//ImGui::SliderFloat("velocityClamp", &velocityClamp, 10, 70);
+	//ImGui::SliderFloat("runSpeed", &runSpeed, 1, 40);
+	//ImGui::SliderFloat("airRunSpeed", &airRunSpeed, 1, 40);
+	//ImGui::SliderFloat("grabMargin", &grabMargin, 0, 1);
+	//ImGui::Checkbox("snapWallGrab", &snapWallGrab);
+	//
+	//gl2d::TextureAtlas spriteAtlas(BLOCK_COUNT, 4);
+	//
+	//int mCount = 0;
+	//while(mCount < (int)Block::lastBlock)
+	//{
+	//	
+	//		ImGui::Image((void*)(intptr_t)sprites.id,
+	//			{ 120,120 }, { spriteAtlas.get(mCount, 0).x, spriteAtlas.get(mCount,0).y }, { spriteAtlas.get(mCount, 0).z, spriteAtlas.get(mCount,0).w }, { 1,1,1,1 }, { 1,0,0,1 });
+	//		
+	//	if(mCount %5 != 0)
+	//	ImGui::SameLine();
+	//	
+	//	mCount++;
+	//}
+	//	
+	//ImGui::End();
+	//
 	//ImGui::Begin("My First Tool", &active, ImGuiWindowFlags_MenuBar);
 	//if (ImGui::BeginMenuBar())
 	//{

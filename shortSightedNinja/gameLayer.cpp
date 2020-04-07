@@ -45,6 +45,7 @@ bool showBoxes = false;
 bool showDangers = false;
 bool simulateLights = false;
 bool simulateUnlitLights = false;
+bool highlightCheckPoints = false;
 
 bool initGame()
 {
@@ -132,7 +133,20 @@ bool gameLogic(float deltaTime)
 		
 		}else
 		{
+			if(currentBlock == Block::flagUp)
+			{
+				for (int x = 0; x < mapData.w; x++)
+					for (int y = 0; y < mapData.h; y++)
+					{
+						if(mapData.get(x, y).type == Block::flagUp)
+						{
+							mapData.get(x, y).type = Block::flagDown;
+						}
+					}
+			}
+
 			mapData.get((mousePos.x) / BLOCK_SIZE, (mousePos.y) / BLOCK_SIZE).type = currentBlock;
+
 		}
 
 	}
@@ -178,6 +192,7 @@ bool gameLogic(float deltaTime)
 					simuleteLightSpot({ x*BLOCK_SIZE + BLOCK_SIZE / 2,y*BLOCK_SIZE + BLOCK_SIZE / 2 },
 						5, mapData);
 				}
+
 			}
 	}else
 	{
@@ -238,7 +253,6 @@ bool gameLogic(float deltaTime)
 	renderer2d.renderRectangle({ mapData.w * BLOCK_SIZE,0,10,mapData.h * BLOCK_SIZE }, Colors_Turqoise);
 #pragma endregion
 
-	if(showBoxes || showDangers)
 	{
 		for(int y=0;y<mapData.h;y++)
 		{
@@ -252,6 +266,15 @@ bool gameLogic(float deltaTime)
 					renderer2d.renderRectangle({ x*BLOCK_SIZE, y*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 1,0.2,0.2,0.9 });
 				}
 
+				if ((mapData.get(x, y).type == Block::flagDown) && highlightCheckPoints)
+				{
+					renderer2d.renderRectangle({ x*BLOCK_SIZE, y*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 0,1,0.6,0.7 });
+				}
+
+				if ((mapData.get(x, y).type == Block::flagUp) && highlightCheckPoints)
+				{
+					renderer2d.renderRectangle({ x*BLOCK_SIZE, y*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 0,1,0.2,0.9 });
+				}
 			}
 
 		}
@@ -344,6 +367,7 @@ void imguiFunc(float deltaTime)
 		}
 		outputFile.close();
 	}
+
 	ImGui::NewLine();
 #pragma endregion
 
@@ -353,9 +377,11 @@ void imguiFunc(float deltaTime)
 	ImGui::Checkbox("Show Collidable Blocks", &collidable);
 	ImGui::Checkbox("Show Non-Collidable Blocks", &nonCollidable);
 	ImGui::Checkbox("Highlight Boxes", &showBoxes);
-	ImGui::Checkbox("Highlight Dangers", &showDangers);
-	ImGui::Checkbox("Simulate Lights", &simulateLights);
-	ImGui::Checkbox("Simulate Unlit Lights", &simulateUnlitLights);
+
+	ImGui::Checkbox("Highlight Dangers", &showDangers); ImGui::SameLine();
+	ImGui::Checkbox("Simulate Lights", &simulateLights); ImGui::SameLine();
+	ImGui::Checkbox("Simulate Unlit Lights", &simulateUnlitLights); ImGui::SameLine();
+	ImGui::Checkbox("Highlight Check points", &highlightCheckPoints); 
 
 	gl2d::TextureAtlas spriteAtlas(BLOCK_COUNT, 4);
 	unsigned char mCount = 1;

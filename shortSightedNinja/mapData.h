@@ -182,6 +182,8 @@ namespace Block
 		signDecoration2,
 		signDecoration3,
 		grassDecoration4,
+		flagDown,
+		flagUp,
 		lastBlock,
 	};
 };

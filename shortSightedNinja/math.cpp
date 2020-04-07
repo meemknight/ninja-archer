@@ -52,19 +52,19 @@ void simuleteLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vect
 	}
 
 	{
-		float r = radius + 4;
+		float r = radius ;
 		float maxDist = r * r *BLOCK_SIZE * BLOCK_SIZE;
 		for (auto &i : pickups)
 		{
-			float x = pos.x - i.pos.x;
-			float y = pos.y - i.pos.y;
+			float x = pos.x - i.pos.x*BLOCK_SIZE;
+			float y = pos.y - i.pos.y*BLOCK_SIZE;
 			float dist = x * x + y * y;
 
 			float perc = dist / maxDist;
 			float l = (1 - perc);
 
 			if (l < 0) { l = 0; }
-			l = pow(l,0.2);
+			l = pow(l,0.9);
 
 			i.light = std::max(i.light, l);
 		}

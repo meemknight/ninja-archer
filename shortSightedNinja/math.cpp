@@ -130,6 +130,11 @@ void simuleteLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vect
 						left = glm::dot(normalVect, dirVect) * (1 - perc);
 					}
 
+					top = sqrt(top);
+					bottom = sqrt(top);
+					left = sqrt(left);
+					right = sqrt(right);
+
 					mapData.get(xPos, yPos).sideColors = glm::max(mapData.get(xPos, yPos).sideColors,
 						glm::vec4{ top,bottom,left,right });
 

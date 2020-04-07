@@ -1008,6 +1008,66 @@ namespace gl2d
 		free((void*)decodedImage);
 	}
 
+	void Texture::createFromFileDataWithPixelPadding(const unsigned char * image_file_data, const size_t image_file_size, int blockSize)
+	{
+		stbi_set_flip_vertically_on_load(true);
+
+		int width = 0;
+		int height = 0;
+		int channels = 0;
+
+		const unsigned char* decodedImage = stbi_load_from_memory(image_file_data, image_file_size, &width, &height, &channels, 4);
+
+		int newW = width + (width / blockSize);
+		int newH = height + (height / blockSize);
+
+		unsigned char *newData = new unsigned char[newW * newH*4];
+
+		int newDataCursor=0;
+		int dataCursor=0;
+
+		for (int y = 0; y < newH; y++)
+		{
+
+			if(y%(blockSize+1) == blockSize)
+			{
+				for (int x = 0; x < newW; x++)
+				{
+					newData[newDataCursor++] = 0;
+					newData[newDataCursor++] = 0;
+					newData[newDataCursor++] = 0;
+					newData[newDataCursor++] = 0;
+				}
+			}else
+			{
+				for (int x = 0; x < newW; x++)
+				{
+					if(x%(blockSize+1) == blockSize)
+					{
+						newData[newDataCursor++] = 0;
+						newData[newDataCursor++] = 0;
+						newData[newDataCursor++] = 0;
+						newData[newDataCursor++] = 0;
+					}else
+					{
+						newData[newDataCursor++] = decodedImage[dataCursor++];
+						newData[newDataCursor++] = decodedImage[dataCursor++];
+						newData[newDataCursor++] = decodedImage[dataCursor++];
+						newData[newDataCursor++] = decodedImage[dataCursor++];
+					}
+
+				}
+			}
+			
+		}
+
+		createFromBuffer((const char*)newData, newW, newH);
+
+		//Replace stbi allocators
+		free((void*)decodedImage);
+		delete[] newData;
+	}
+
 	void Texture::loadFromFile(const char * fileName)
 	{
 		std::ifstream file(fileName, std::ios::binary);
@@ -1030,6 +1090,33 @@ namespace gl2d
 		file.close();
 
 		createFromFileData(fileData, fileSize);
+
+		delete[] fileData;
+
+	}
+
+	void Texture::loadFromFileWithPixelPadding(const char * fileName, int blockSize)
+	{
+		std::ifstream file(fileName, std::ios::binary);
+
+		if (!file.is_open())
+		{
+			char c[256] = { 0 };
+			strcat_s(c, "error openning: ");
+			strcat_s(c + strlen(c), 200, fileName);
+			errorFunc(c);
+			return;
+		}
+
+		int fileSize = 0;
+		file.seekg(0, std::ios::end);
+		fileSize = file.tellg();
+		file.seekg(0, std::ios::beg);
+		unsigned char * fileData = new unsigned char[fileSize];
+		file.read((char*)fileData, fileSize);
+		file.close();
+
+		createFromFileDataWithPixelPadding(fileData, fileSize, blockSize);
 
 		delete[] fileData;
 
@@ -1158,6 +1245,26 @@ namespace gl2d
 			return { x * xSize, 1 - (y * ySize), (x + 1) * xSize, 1.f - ((y + 1) * ySize) };
 		}
 
+	}
+
+	glm::vec4 computeTextureAtlasWithPadding(int mapXsize, int mapYsize,
+		int xCount, int yCount, int x, int y, bool flip)
+	{
+		float xSize = 1.f / xCount;
+		float ySize = 1.f / yCount;
+
+		float Xpadding = 1.f / mapXsize;
+		float Ypadding = 1.f /mapYsize;
+
+		//todo
+		if (flip)
+		{
+			return { (x + 1) * xSize - Xpadding, 1 - (y * ySize) - Ypadding, (x)* xSize, 1.f - ((y + 1) * ySize) };
+		}
+		else
+		{
+			return { x * xSize, 1 - (y * ySize) - Ypadding, (x + 1) * xSize - Xpadding, 1.f - ((y + 1) * ySize) };
+		}
 	}
 
 }

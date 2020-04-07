@@ -369,39 +369,38 @@ namespace platform
 		return { p.x, p.y };
 	}
 
-
 	int isKeyHeld(int key)
 	{
-		return GetAsyncKeyState(key);
+		return GetAsyncKeyState(key)&& platform::isFocused();
 	}
 
 	int isKeyPressedOn(int key)
 	{
-		return GetAsyncKeyState(key) & 0x8000;
+		return ( GetAsyncKeyState(key) & 0x8000) &&platform::isFocused();
 	}
 
 	int isLMouseButtonPressed()
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		return (!io.WantCaptureMouse) && lbuttonPressed;
+		return (!io.WantCaptureMouse) && lbuttonPressed && platform::isFocused();
 	}
 
 	int isLMouseHeld()
 	{
 		ImGuiIO& io = ImGui::GetIO();
 	
-		return (!io.WantCaptureMouse) && lbutton;
+		return (!io.WantCaptureMouse) && lbutton && platform::isFocused();
 	}
 
 	int isRMouseButtonPressed()
 	{
-		return rbuttonPressed;
+		return rbuttonPressed && platform::isFocused();
 	}
 
 
 	int isRMouseHeld()
 	{
-		return rbutton;
+		return rbutton && platform::isFocused();
 	}
 
 	void showMouse(bool show)

@@ -3,7 +3,6 @@
 #undef min
 #undef max
 
-gl2d::TextureAtlas spriteAtlas(BLOCK_COUNT, 4);
 
 void MapRenderer::init(ShaderProgram s)
 {
@@ -272,6 +271,11 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData,
 				}
 
 				data.playerEntered = 0;
+
+				int wt = sprites.GetSize().x;
+				int ht = sprites.GetSize().y;
+
+				gl2d::TextureAtlasPadding spriteAtlas(BLOCK_COUNT, 4, wt, ht);
 
 				addBlock(renderer.toScreen({ w*BLOCK_SIZE,h*BLOCK_SIZE,BLOCK_SIZE,BLOCK_SIZE }), 
 					spriteAtlas.get(data.type- Block::none-1, data.animPos)

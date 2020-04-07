@@ -160,6 +160,10 @@ namespace input
 
 		bool getisKeyHeldDirect(int b, const XINPUT_STATE *s)
 		{
+			if(!platform::isFocused())
+			{
+				return 0;
+			}
 
 			bool val = 0;
 

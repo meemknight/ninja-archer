@@ -76,8 +76,11 @@ namespace gl2d
 		void createFromBuffer(const char* image_data, const int width, const int height);
 		void create1PxSquare(const char *b = 0);
 		void createFromFileData(const unsigned char* image_file_data, const size_t image_file_size);
+		void createFromFileDataWithPixelPadding(const unsigned char* image_file_data, 
+			const size_t image_file_size, int blockSize);
 
 		void loadFromFile(const char *fileName);
+		void loadFromFileWithPixelPadding(const char *fileName, int blockSize);
 
 		void bind(const unsigned int sample = 0);
 		void unbind();
@@ -279,6 +282,8 @@ namespace gl2d
 
 	glm::vec4 computeTextureAtlas(int xCount, int yCount, int x, int y, bool flip = 0);
 
+	glm::vec4 computeTextureAtlasWithPadding(int mapXsize, int mapYsize, int xCount, int yCount, int x, int y, bool flip = 0);
+
 	struct TextureAtlas
 	{
 		TextureAtlas() {};
@@ -290,6 +295,23 @@ namespace gl2d
 		glm::vec4 get(int x, int y, bool flip = 0)
 		{
 			return computeTextureAtlas(xCount, yCount, x, y, flip);
+		}
+	};
+
+	struct TextureAtlasPadding
+	{
+		TextureAtlasPadding() {};
+		TextureAtlasPadding(int x, int y, int xSize, int ySize) :xCount(x), yCount(y) 
+		,xSize(xSize), ySize(ySize){};
+
+		int xCount;
+		int yCount;
+		int xSize;
+		int ySize;
+
+		glm::vec4 get(int x, int y, bool flip = 0)
+		{
+			return computeTextureAtlasWithPadding(xSize, ySize, xCount, yCount, x, y, flip);
 		}
 	};
 

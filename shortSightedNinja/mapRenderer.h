@@ -6,9 +6,6 @@
 #include "Shader.h"
 #include "mapData.h"
 
-#define BLOCK_SIZE 8
-#define BLOCK_COUNT 180
-
 #define BACKGROUND_R 33
 #define BACKGROUND_G 38
 #define BACKGROUND_B 63

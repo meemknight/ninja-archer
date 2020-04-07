@@ -22,6 +22,8 @@ struct Entity
 	float currentCount = 0;
 	int currentFrame = 0;
 
+	float idleTime = 0;
+
 	void checkCollisionBrute(glm::vec2 &pos, glm::vec2 lastPos, MapData &mapData,
 	bool &upTouch, bool &downTouch, bool &leftTouch, bool &rightTouch);
 	void resolveConstrains(MapData &mapData);

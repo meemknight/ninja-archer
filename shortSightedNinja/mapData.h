@@ -2,6 +2,9 @@
 #include "glm/vec4.hpp"
 #include <vector>
 
+#define BLOCK_SIZE 8
+#define BLOCK_COUNT 188
+
 namespace Block 
 {
 	enum : unsigned char 
@@ -111,8 +114,8 @@ namespace Block
 		snowSolid7,
 		snowSolid8,
 		snowSolid9,
-		unfinished1,
-		unfinished2,
+		stoneSolid11,
+		stoneSolid12,
 		unfinished3,
 		unfinished4,
 		unfinished5,
@@ -184,6 +187,11 @@ namespace Block
 		grassDecoration4,
 		flagDown,
 		flagUp,
+		woddenArrow,
+		fireArrow,
+		slimeArrow,
+		keyArrow,
+		levelExit,
 		lastBlock,
 	};
 };

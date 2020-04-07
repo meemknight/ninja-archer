@@ -355,10 +355,12 @@ void Entity::jump()
 	velocity.y = -jumpSpeed * BLOCK_SIZE;
 }
 
-gl2d::TextureAtlas playerAtlas(4, 6);
 
 void Entity::draw(gl2d::Renderer2D & renderer2d, float deltaTime, gl2d::Texture characterSprite)
 {
+	auto s = characterSprite.GetSize();
+	gl2d::TextureAtlasPadding playerAtlas(4, 6, s.x,s.y);
+
 	currentCount += deltaTime;
 	while(currentCount >= frameDuration)
 	{
@@ -386,9 +388,20 @@ void Entity::draw(gl2d::Renderer2D & renderer2d, float deltaTime, gl2d::Texture 
 	{
 		state = 4;
 	}
-
 	moving = 0;
 
+	//idle animation
+	if (state == 0)
+	{
+		idleTime += deltaTime;
+		if (((int)idleTime/10)%2==1)
+		{
+			state = 5;
+		}
+	}else
+	{
+		idleTime = 0;
+	}
 
 	renderer2d.renderRectangle({ pos - glm::vec2(0,0),  8, 8 }, {}, 0, characterSprite,
 		playerAtlas.get(currentFrame, state, !movingRight));

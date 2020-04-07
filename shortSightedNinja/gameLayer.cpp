@@ -21,8 +21,6 @@ extern gl2d::internal::ShaderProgram maskShader;
 extern GLint maskSamplerUniform;
 
 gl2d::Renderer2D renderer2d;
-gl2d::Renderer2D stencilRenderer2d;
-gl2d::Renderer2D backgroundRenderer2d;
 //sf::Music music;
 MapRenderer mapRenderer;
 MapData mapData;
@@ -48,9 +46,6 @@ bool showBoxes = false;
 bool initGame()
 {
 	renderer2d.create();
-	stencilRenderer2d.create();
-	backgroundRenderer2d.create();
-	backgroundRenderer2d.setShaderProgram(maskShader);
 	//if (music.openFromFile("ding.flac"))
 	//music.play();
 	ShaderProgram sp{ "blocks.vert","blocks.frag" };
@@ -67,8 +62,6 @@ bool initGame()
 	mapRenderer.rightTexture.loadFromFile("right.png");
 
 	mapData.create(40, 40, map);
-
-	mapData.ConvertTileMapToPolyMap();
 
 	mapWidth = mapData.w;
 	mapHeight = mapData.h;
@@ -88,7 +81,6 @@ bool gameLogic(float deltaTime)
 	renderer2d.updateWindowMetrics(w, h);
 	/*stencilRenderer2d.updateWindowMetrics(backGroundFBO.texture.GetSize().x,
 		backGroundFBO.texture.GetSize().y);*/
-	backgroundRenderer2d.updateWindowMetrics(w, h);
 
 
 #pragma region Camera Movement
@@ -117,8 +109,6 @@ bool gameLogic(float deltaTime)
 		renderer2d.currentCamera.position.y += deltaTime * 120;
 	}
 #pragma endregion
-
-	backgroundRenderer2d.currentCamera = renderer2d.currentCamera;
 
 	mapData.clearColorData();
 
@@ -275,7 +265,6 @@ void imguiFunc(float deltaTime)
 
 		mapData.cleanup();
 		mapData.create(mapWidth, mapHeight, blocks);
-		mapData.ConvertTileMapToPolyMap();
 	}
 	ImGui::NewLine();
 #pragma endregion

@@ -115,7 +115,7 @@ namespace Block
 		brickDecoration3,
 		brickDecoration4,
 		brickDecoration5,
-		grass,
+		grassDecoration,
 		leavesRight,
 		leavesLeft,
 		vines1,
@@ -139,6 +139,7 @@ namespace Block
 		water1,
 		water2,
 		water3,
+		water4,
 		targetRed,
 		targetBlue,
 		woodDecoration1,
@@ -146,6 +147,8 @@ namespace Block
 		targetKey,
 		snowDecoration1,
 		snowDecoration2,
+		grassDecoration2,
+		grassDecoration3,
 		lastBlock,
 	};
 }
@@ -293,7 +296,9 @@ inline bool isColidable(unsigned char b)
 		b == Block::blueNoSolid7 ||
 		b == Block::blueNoSolid8 ||
 		b == Block::blueNoSolidFence ||
-		b == Block::fenceNoSolid
+		b == Block::fenceNoSolid ||
+		b == Block::snowSolid2 ||
+		b == Block::snowSolid9
 		) {
 		return 0;
 	}
@@ -347,16 +352,18 @@ struct BlockInfo
 	//top down left right
 	glm::vec4 directionalLight;
 
-	float alpha = 1;
 	float heat;
 
 	glm::vec4 mainColor;
 	glm::vec4 sideColors;
 
-
+	bool startAnim = 0;
 	signed char animPos = 0;
 	float timePassed = 0;
 	unsigned char type;
+	bool playerEntered = 0;
+	bool playerLeft = 0;
+	bool leftAnim = 1;
 
 	void resetColors();
 };
@@ -384,7 +391,6 @@ struct MapData
 	void create(int w, int h, const char* d);
 	BlockInfo& get(int x, int y);
 
-	void ConvertTileMapToPolyMap();
 
 	void CalculateVisibilityPolygon(float ox, float oy, float radius);
 

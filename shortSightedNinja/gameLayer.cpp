@@ -43,6 +43,7 @@ char* map = nullptr;
 
 bool collidable = true;
 bool nonCollidable = true;
+bool showBoxes = false;
 
 bool initGame()
 {
@@ -133,7 +134,15 @@ bool gameLogic(float deltaTime)
 		mousePos = gl2d::scaleAroundPoint(mousePos, renderer2d.currentCamera.position +
 			glm::vec2{ renderer2d.windowW / 2, renderer2d.windowH / 2 }, 1.f / renderer2d.currentCamera.zoom);
 
-		mapData.get((mousePos.x) / BLOCK_SIZE, (mousePos.y) / BLOCK_SIZE).type = currentBlock;
+		if((mousePos.x) / BLOCK_SIZE<0 || (mousePos.x) / BLOCK_SIZE >= mapData.w
+			|| (mousePos.y) / BLOCK_SIZE <0 || (mousePos.y) / BLOCK_SIZE >= mapData.h)
+		{
+		
+		}else
+		{
+			mapData.get((mousePos.x) / BLOCK_SIZE, (mousePos.y) / BLOCK_SIZE).type = currentBlock;
+		}
+
 	}
 
 	if (platform::isRMouseHeld())
@@ -144,8 +153,16 @@ bool gameLogic(float deltaTime)
 
 		mousePos = gl2d::scaleAroundPoint(mousePos, renderer2d.currentCamera.position +
 			glm::vec2{ renderer2d.windowW / 2, renderer2d.windowH / 2 }, 1.f / renderer2d.currentCamera.zoom);
+		if ((mousePos.x) / BLOCK_SIZE < 0 || (mousePos.x) / BLOCK_SIZE >= mapData.w
+			|| (mousePos.y) / BLOCK_SIZE < 0 || (mousePos.y) / BLOCK_SIZE >= mapData.h)
+		{
 
-		mapData.get((mousePos.x) / BLOCK_SIZE, (mousePos.y) / BLOCK_SIZE).type = Block::none;
+		}
+		else
+		{
+			mapData.get((mousePos.x) / BLOCK_SIZE, (mousePos.y) / BLOCK_SIZE).type = Block::none;
+		}
+
 	}
 
 
@@ -196,6 +213,22 @@ bool gameLogic(float deltaTime)
 	renderer2d.renderRectangle({ 0,mapData.h * BLOCK_SIZE, mapData.w * BLOCK_SIZE, 10 }, Colors_Turqoise);
 	renderer2d.renderRectangle({ mapData.w * BLOCK_SIZE,0,10,mapData.h * BLOCK_SIZE }, Colors_Turqoise);
 #pragma endregion
+
+	if(showBoxes)
+	{
+		for(int y=0;y<mapData.h;y++)
+		{
+			for (int x = 0; x < mapData.w; x++)
+			{
+				if(isColidable(mapData.get(x,y).type))
+				{
+					renderer2d.renderRectangle({ x*BLOCK_SIZE, y*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 0.5,0.1,0.5,0.2 });
+				}
+			}
+
+		}
+	
+	}
 
 	renderer2d.flush();
 
@@ -288,6 +321,7 @@ void imguiFunc(float deltaTime)
 
 	ImGui::Checkbox("Show Collidable Blocks", &collidable);
 	ImGui::Checkbox("Show Non-Collidable Blocks", &nonCollidable);
+	ImGui::Checkbox("Show Boxes", &showBoxes);
 
 	gl2d::TextureAtlas spriteAtlas(BLOCK_COUNT, 4);
 	unsigned char mCount = 1;

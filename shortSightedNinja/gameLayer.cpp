@@ -235,13 +235,18 @@ void imguiFunc(float deltaTime)
 	ImGui::Begin("Map settings");
 
 #pragma region Open Map
+	static char name[256] = {};
+	ImGui::InputText("OutputFile Name", name, sizeof(name));
 	if (ImGui::Button("Open Map"))
 	{
-		std::ifstream inputFile("test.level");
+		char aux[256];
+		strcpy(aux, name);
+		strcat(aux, ".level");
+		std::ifstream inputFile(aux);
 
 		inputFile >> mapWidth >> mapHeight;
 
-		char blocks[2500];
+		char blocks[120 * 120];
 		int it = 0;
 		std::string current;
 
@@ -281,21 +286,20 @@ void imguiFunc(float deltaTime)
 #pragma endregion
 
 #pragma region Save Map
-	static char name[250] = {};
-	ImGui::InputText("OutputFile Name", name, sizeof(name));
+	
 	if (ImGui::Button("Save Map"))
 	{
-		char aux[250];
+		char aux[256];
 		strcpy(aux, name);
 		strcat(aux, ".level");
 
 		std::ofstream outputFile(aux);
 		outputFile << mapWidth << std::endl << mapHeight << std::endl;
-		for (int x = 0; x < mapWidth; x++)
+		for (int y = 0; y < mapHeight; y++)
 		{
-			for (int y = 0; y < mapHeight; y++)
+			for (int x = 0; x < mapWidth; x++)
 			{
-				outputFile << static_cast<int>(mapData.get(y, x).type) << ",";
+				outputFile << static_cast<int>(mapData.get(x, y).type) << ",";
 			}
 			outputFile << "\n";
 		}

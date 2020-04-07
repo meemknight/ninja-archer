@@ -43,6 +43,8 @@ bool collidable = true;
 bool nonCollidable = true;
 bool showBoxes = false;
 bool showDangers = false;
+bool simulateLights = false;
+bool simulateUnlitLights = false;
 
 bool initGame()
 {
@@ -159,41 +161,73 @@ bool gameLogic(float deltaTime)
 #pragma endregion
 
 #pragma region Render the blocks
+
+	if(simulateLights || simulateUnlitLights)
+	{
+		for (int x = 0; x < mapData.w; x++)
+			for (int y = 0; y < mapData.h; y++)
+			{
+				if(isLitTorch(mapData.get(x,y).type) && simulateLights)
+				{
+					simuleteLightSpot({ x*BLOCK_SIZE + BLOCK_SIZE / 2,y*BLOCK_SIZE + BLOCK_SIZE / 2 },
+						5, mapData);
+				}
+
+				if(unLitTorch(mapData.get(x, y).type) && simulateUnlitLights)
+				{
+					simuleteLightSpot({ x*BLOCK_SIZE + BLOCK_SIZE / 2,y*BLOCK_SIZE + BLOCK_SIZE / 2 },
+						5, mapData);
+				}
+			}
+	}else
+	{
+		for (int x = 0; x < mapData.w; x++)
+			for (int y = 0; y < mapData.h; y++)
+			{
+				mapData.get(x, y).mainColor = { 1,1,1,1 };
+			}
+	}
+
 	for (int x = 0; x < mapData.w; x++)
 	{
 		for (int y = 0; y < mapData.h; y++)
 		{
+			auto light = mapData.get(x, y).mainColor.w;
+			mapData.get(x, y).mainColor.w = 0;
 			if (collidable) {
 				if (isColidable(mapData.get(x, y).type))
 				{
-					mapData.get(x, y).mainColor = { 1,1,1,1 };
+					mapData.get(x, y).mainColor.w = 1;
 				}
 			}
 			else
 			{
 				if (isColidable(mapData.get(x, y).type))
 				{
-					mapData.get(x, y).mainColor = { 1,1,1,0.2 };
+					mapData.get(x, y).mainColor.w = 0.2;
 				}
-
+	
 			}
 
 			if (nonCollidable)
 			{
 				if (!isColidable(mapData.get(x, y).type))
 				{
-					mapData.get(x, y).mainColor = { 1,1,1,1 };
+					mapData.get(x, y).mainColor.w = 1;
 				}
 			}
 			else
 			{
 				if (!isColidable(mapData.get(x, y).type))
 				{
-					mapData.get(x, y).mainColor = { 1,1,1,0.2 };
+					mapData.get(x, y).mainColor.w = 0.2;
 				}
 			}
+
+			//mapData.get(x, y).mainColor.w *= light;
 		}
 	}
+
 	mapRenderer.drawFromMapData(renderer2d, mapData);
 #pragma endregion
 
@@ -320,6 +354,8 @@ void imguiFunc(float deltaTime)
 	ImGui::Checkbox("Show Non-Collidable Blocks", &nonCollidable);
 	ImGui::Checkbox("Highlight Boxes", &showBoxes);
 	ImGui::Checkbox("Highlight Dangers", &showDangers);
+	ImGui::Checkbox("Simulate Lights", &simulateLights);
+	ImGui::Checkbox("Simulate Unlit Lights", &simulateUnlitLights);
 
 	gl2d::TextureAtlas spriteAtlas(BLOCK_COUNT, 4);
 	unsigned char mCount = 1;

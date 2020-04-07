@@ -188,8 +188,6 @@ void simuleteLightSpot(glm::vec2 pos, float radius, MapData & mapData)
 
 }
 
-
-
 /////////////////
 //(0,0)  -> (16, 0)
 //

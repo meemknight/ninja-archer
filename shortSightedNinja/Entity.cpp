@@ -525,58 +525,63 @@ void Arrow::checkCollision(MapData &mapData)
 		}
 		auto t = mapData.get(curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE).type;
 
-		if (t == Block::targetRed)
+		if (!stuckInWall)
 		{
-			stuckInWall = 1;
-			for (int i = 0; i < mapData.w * mapData.h; i++)
-			{
-				if (isRedSolid(mapData.data[i].type))
-				{
-					mapData.data[i].type++;
-				}
-				else if (isRedNoSolid(mapData.data[i].type))
-				{
-					mapData.data[i].type--;
-				}
-			}
-			mapData.setNeighbors();
 
-		}
-		else if (t == Block::targetBlue)
-		{
-			stuckInWall = 1;
-			for (int i = 0; i < mapData.w * mapData.h; i++)
-			{
-				if (isBlueSolid(mapData.data[i].type))
-				{
-					mapData.data[i].type++;
-				}
-				else if (isBlueNoSolid(mapData.data[i].type))
-				{
-					mapData.data[i].type--;
-				}
-			}
-			mapData.setNeighbors();
-		}
-		else if (t == Block::targetKey)
-		{
-			if (type == Arrow::ArrowTypes::keyArrow)
+
+			if (t == Block::targetRed)
 			{
 				stuckInWall = 1;
 				for (int i = 0; i < mapData.w * mapData.h; i++)
 				{
-					if (mapData.data[i].type == Block::fenceSolid)
+					if (isRedSolid(mapData.data[i].type))
 					{
 						mapData.data[i].type++;
 					}
-					else if (mapData.data[i].type == Block::fenceNoSolid)
+					else if (isRedNoSolid(mapData.data[i].type))
+					{
+						mapData.data[i].type--;
+					}
+				}
+				mapData.setNeighbors();
+
+			}
+			else if (t == Block::targetBlue)
+			{
+				stuckInWall = 1;
+				for (int i = 0; i < mapData.w * mapData.h; i++)
+				{
+					if (isBlueSolid(mapData.data[i].type))
+					{
+						mapData.data[i].type++;
+					}
+					else if (isBlueNoSolid(mapData.data[i].type))
 					{
 						mapData.data[i].type--;
 					}
 				}
 				mapData.setNeighbors();
 			}
+			else if (t == Block::targetKey)
+			{
+				if (type == Arrow::ArrowTypes::keyArrow)
+				{
+					stuckInWall = 1;
+					for (int i = 0; i < mapData.w * mapData.h; i++)
+					{
+						if (mapData.data[i].type == Block::fenceSolid)
+						{
+							mapData.data[i].type++;
+						}
+						else if (mapData.data[i].type == Block::fenceNoSolid)
+						{
+							mapData.data[i].type--;
+						}
+					}
+					mapData.setNeighbors();
+				}
 
+			}
 		}
 
 		if(isColidable(mapData.get(curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE).type))

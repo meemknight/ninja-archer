@@ -50,8 +50,7 @@ bool initGame()
 	//music.play();
 	ShaderProgram sp{ "blocks.vert","blocks.frag" };
 	sprites.loadFromFile("sprites2.png");
-	arrowSprite.loadFromFile("arrow.png");
-	backgroundTexture.loadFromFile("background.jpg");
+	//arrowSprite.loadFromFile("arrow.png");
 	backGroundFBO.create(40 * BLOCK_SIZE, 40 * BLOCK_SIZE);
 
 	mapRenderer.init(sp);

@@ -200,7 +200,13 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData,
 				if (data.type == Block::waterFallBegin || data.type == Block::waterFallEnd
 					|| data.type == Block::torceTopBrickLit
 					|| data.type == Block::torceTopLeavesLit
+					|| data.type == Block::litLantern
 					|| data.type == Block::water4
+					|| data.type == Block::water5
+					|| data.type == Block::water6
+					|| data.type == Block::water7
+					|| data.type == Block::water9
+					|| data.type == Block::water10
 					)
 				{
 					data.animPos = curPos;
@@ -219,7 +225,11 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData,
 					data.type == Block::water1 ||
 					data.type == Block::snowSolid2 ||
 					data.type == Block::snowSolid9 ||
-					data.type == Block::snowDecoration2
+					data.type == Block::snowDecoration2||
+					data.type == Block::grassDecoration4 ||
+					data.type == Block::webDecoration1 ||
+					data.type == Block::webDecoration2 ||
+					data.type == Block::friendlyWater
 					
 					)
 				{

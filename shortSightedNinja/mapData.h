@@ -77,6 +77,8 @@ namespace Block
 		waterSolid2,
 		waterSolid3,
 		waterSolid4,
+		waterSolid5,
+		waterSolid6,
 		stoneSolid1,
 		stoneSolid2,
 		stoneSolid3,
@@ -109,6 +111,22 @@ namespace Block
 		snowSolid7,
 		snowSolid8,
 		snowSolid9,
+		unfinished1,
+		unfinished2,
+		unfinished3,
+		unfinished4,
+		unfinished5,
+		unfinished6,
+		unfinished7,
+		unfinished8,
+		unfinished9,
+		unfinished10,
+		unfinished11,
+		unfinished12,
+		unfinished13,
+		unfinished14,
+		unfinished15,
+		unfinished16,
 		chainDecoration, /////////////////////////////start walls
 		brickDecoration1,
 		brickDecoration2,
@@ -140,6 +158,13 @@ namespace Block
 		water2,
 		water3,
 		water4,
+		friendlyWater,
+		water5,
+		water6,
+		water7,
+		water8,
+		water9,
+		water10,
 		targetRed,
 		targetBlue,
 		woodDecoration1,
@@ -149,8 +174,21 @@ namespace Block
 		snowDecoration2,
 		grassDecoration2,
 		grassDecoration3,
+		unlitLantern,
+		litLantern,
+		webDecoration1,
+		webDecoration2,
+		signDecoration1,
+		signDecoration2,
+		signDecoration3,
+		grassDecoration4,
 		lastBlock,
 	};
+};
+
+inline bool isUnfinished(unsigned char b)
+{
+	return b >= Block::unfinished1 &&b <= Block::unfinished16;
 }
 
 /*
@@ -321,14 +359,15 @@ inline bool isOpaque(unsigned char b)
 
 inline bool isLitTorch(unsigned char b)
 {
-	return b == Block::torceTopBrickLit || b == Block::torceTopLeavesLit;
+	return b == Block::torceTopBrickLit || b == Block::torceTopLeavesLit || b == Block::litLantern;
 }
 
 inline bool unLitTorch(unsigned char b)
 {
-	return b == Block::torceTopBrickUnlit || b == Block::torceTopLeavesUnlit;
+	return b == Block::torceTopBrickUnlit || b == Block::torceTopLeavesUnlit || b == Block::unlitLantern;
 
 }
+
 
 struct Edge
 {

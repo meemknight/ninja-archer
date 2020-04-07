@@ -42,6 +42,7 @@ char* map = nullptr;
 bool collidable = true;
 bool nonCollidable = true;
 bool showBoxes = false;
+bool showDangers = false;
 
 bool initGame()
 {
@@ -203,16 +204,20 @@ bool gameLogic(float deltaTime)
 	renderer2d.renderRectangle({ mapData.w * BLOCK_SIZE,0,10,mapData.h * BLOCK_SIZE }, Colors_Turqoise);
 #pragma endregion
 
-	if(showBoxes)
+	if(showBoxes || showDangers)
 	{
 		for(int y=0;y<mapData.h;y++)
 		{
 			for (int x = 0; x < mapData.w; x++)
 			{
-				if(isColidable(mapData.get(x,y).type))
+				if(isColidable(mapData.get(x,y).type) && showBoxes)
 				{
 					renderer2d.renderRectangle({ x*BLOCK_SIZE, y*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 0.5,0.1,0.5,0.2 });
+				}else if(mapData.get(x,y).type == Block::water3 && showDangers)
+				{
+					renderer2d.renderRectangle({ x*BLOCK_SIZE, y*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 1,0.2,0.2,0.9 });
 				}
+
 			}
 
 		}
@@ -313,7 +318,8 @@ void imguiFunc(float deltaTime)
 
 	ImGui::Checkbox("Show Collidable Blocks", &collidable);
 	ImGui::Checkbox("Show Non-Collidable Blocks", &nonCollidable);
-	ImGui::Checkbox("Show Boxes", &showBoxes);
+	ImGui::Checkbox("Highlight Boxes", &showBoxes);
+	ImGui::Checkbox("Highlight Dangers", &showDangers);
 
 	gl2d::TextureAtlas spriteAtlas(BLOCK_COUNT, 4);
 	unsigned char mCount = 1;
@@ -321,20 +327,28 @@ void imguiFunc(float deltaTime)
 
 	if (collidable && nonCollidable)
 	{
+		unsigned char localCount = 0;
 		while (mCount < Block::lastBlock)
 		{
-			ImGui::PushID(mCount);
-			if (ImGui::ImageButton((void*)(intptr_t)sprites.id,
-				{ 60,60 }, { spriteAtlas.get(mCount - 1, 0).x, spriteAtlas.get(mCount - 1,0).y },
-				{ spriteAtlas.get(mCount - 1, 0).z, spriteAtlas.get(mCount - 1,0).w }))
+			if (!isUnfinished(mCount))
 			{
-				currentBlock = mCount;
-				llog((int)currentBlock);
-			}
-			ImGui::PopID();
+				ImGui::PushID(mCount);
+				if (ImGui::ImageButton((void*)(intptr_t)sprites.id,
+					{ 40,40 }, { spriteAtlas.get(mCount - 1, 0).x, spriteAtlas.get(mCount - 1,0).y },
+					{ spriteAtlas.get(mCount - 1, 0).z, spriteAtlas.get(mCount - 1,0).w }))
+				{
+					currentBlock = mCount;
+					llog((int)currentBlock);
+				}
+				ImGui::PopID();
 
-			if (mCount % 5 != 0)
-				ImGui::SameLine();
+				if (localCount % 8 != 0)
+				{
+					ImGui::SameLine();
+				}
+				localCount++;
+			}
+			
 			mCount++;
 		}
 	}
@@ -345,11 +359,11 @@ void imguiFunc(float deltaTime)
 			unsigned char localCount = 0;
 			while (mCount < Block::lastBlock)
 			{
-				if (isColidable(mCount))
+				if (isColidable(mCount) && !isUnfinished(mCount))
 				{
 					ImGui::PushID(mCount);
 					if (ImGui::ImageButton((void*)(intptr_t)sprites.id,
-						{ 60,60 }, { spriteAtlas.get(mCount - 1, 0).x, spriteAtlas.get(mCount - 1,0).y },
+						{ 40,40 }, { spriteAtlas.get(mCount - 1, 0).x, spriteAtlas.get(mCount - 1,0).y },
 						{ spriteAtlas.get(mCount - 1, 0).z, spriteAtlas.get(mCount - 1,0).w }))
 					{
 						currentBlock = mCount;
@@ -357,7 +371,7 @@ void imguiFunc(float deltaTime)
 					}
 					ImGui::PopID();
 					
-					 if (localCount % 5 != 0)
+					 if (localCount % 8 != 0)
 						ImGui::SameLine();
 					localCount++;
 				}
@@ -370,11 +384,11 @@ void imguiFunc(float deltaTime)
 			unsigned char localCount = 0;
 			while (mCount < Block::lastBlock)
 			{
-				if (!isColidable(mCount))
+				if (!isColidable(mCount) &&!isUnfinished(mCount))
 				{
 					ImGui::PushID(mCount);
 					if (ImGui::ImageButton((void*)(intptr_t)sprites.id,
-						{ 60,60 }, { spriteAtlas.get(mCount - 1, 0).x, spriteAtlas.get(mCount - 1,0).y },
+						{ 40,40 }, { spriteAtlas.get(mCount - 1, 0).x, spriteAtlas.get(mCount - 1,0).y },
 						{ spriteAtlas.get(mCount - 1, 0).z, spriteAtlas.get(mCount - 1,0).w }))
 					{
 						currentBlock = mCount;
@@ -382,7 +396,7 @@ void imguiFunc(float deltaTime)
 					}
 					ImGui::PopID();
 
-					 if (localCount % 5 != 0)
+					 if (localCount % 8 != 0)
 						ImGui::SameLine();
 					localCount++;
 				}

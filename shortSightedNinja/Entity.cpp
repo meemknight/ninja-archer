@@ -89,7 +89,6 @@ void Entity::resolveConstrains(MapData & mapData)
 	}
 	return;
 	*/
-
 	
 	bool upTouch = 0;
 	bool downTouch = 0;
@@ -148,6 +147,9 @@ void Entity::resolveConstrains(MapData & mapData)
 	
 	end:
 	
+	if (pos.x < 0) { pos.x = 0; }
+	if (pos.x + dimensions.x > (mapData.w+1) * BLOCK_SIZE ) { pos.x = ((mapData.w + 1) * BLOCK_SIZE )-dimensions.x; }
+
 	if (upTouch)
 	{
 		if (velocity.y < 0)
@@ -165,12 +167,18 @@ void Entity::strafe(int dir)
 
 void Entity::run(float speed)
 {
+
 	pos.x += speed * runSpeed * BLOCK_SIZE;
 	moving = (bool)speed;
 }
 
 void Entity::airRun(float speed)
 {
+	if (dying)
+	{
+		speed *= 0.5;
+	}
+
 	if(speed > 0)
 	{
 		if(velocity.x < -strafeSpeedMove * BLOCK_SIZE)
@@ -492,7 +500,7 @@ void Arrow::move(float deltaTime)
 }
 
 
-void Arrow::checkCollision(MapData &mapData)
+void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool grayTouch)
 {
 	if(stuckInWall)
 	{
@@ -528,57 +536,69 @@ void Arrow::checkCollision(MapData &mapData)
 		if (!stuckInWall)
 		{
 
-
 			if (t == Block::targetRed)
 			{
 				stuckInWall = 1;
-				for (int i = 0; i < mapData.w * mapData.h; i++)
+				if(!redTouch)
 				{
-					if (isRedSolid(mapData.data[i].type))
+					for (int i = 0; i < mapData.w * mapData.h; i++)
 					{
-						mapData.data[i].type++;
+						if (isRedSolid(mapData.data[i].type))
+						{
+							mapData.data[i].type++;
+						}
+						else if (isRedNoSolid(mapData.data[i].type))
+						{
+							mapData.data[i].type--;
+						}
 					}
-					else if (isRedNoSolid(mapData.data[i].type))
-					{
-						mapData.data[i].type--;
-					}
+					mapData.setNeighbors();
 				}
-				mapData.setNeighbors();
+			
 
 			}
 			else if (t == Block::targetBlue)
 			{
 				stuckInWall = 1;
-				for (int i = 0; i < mapData.w * mapData.h; i++)
+			
+				if(!blueTouch)
 				{
-					if (isBlueSolid(mapData.data[i].type))
+					for (int i = 0; i < mapData.w * mapData.h; i++)
 					{
-						mapData.data[i].type++;
+						if (isBlueSolid(mapData.data[i].type))
+						{
+							mapData.data[i].type++;
+						}
+						else if (isBlueNoSolid(mapData.data[i].type))
+						{
+							mapData.data[i].type--;
+						}
 					}
-					else if (isBlueNoSolid(mapData.data[i].type))
-					{
-						mapData.data[i].type--;
-					}
+					mapData.setNeighbors();
 				}
-				mapData.setNeighbors();
+			
 			}
 			else if (t == Block::targetKey)
 			{
 				if (type == Arrow::ArrowTypes::keyArrow)
 				{
 					stuckInWall = 1;
-					for (int i = 0; i < mapData.w * mapData.h; i++)
+					if(!grayTouch)
 					{
-						if (mapData.data[i].type == Block::fenceSolid)
+						for (int i = 0; i < mapData.w * mapData.h; i++)
 						{
-							mapData.data[i].type++;
+							if (mapData.data[i].type == Block::fenceSolid)
+							{
+								mapData.data[i].type++;
+							}
+							else if (mapData.data[i].type == Block::fenceNoSolid)
+							{
+								mapData.data[i].type--;
+							}
 						}
-						else if (mapData.data[i].type == Block::fenceNoSolid)
-						{
-							mapData.data[i].type--;
-						}
+						mapData.setNeighbors();
 					}
-					mapData.setNeighbors();
+					
 				}
 
 			}

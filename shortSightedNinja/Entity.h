@@ -99,7 +99,7 @@ struct Arrow
 
 	void move(float deltaTime);
 
-	void checkCollision(MapData &mapData);
+	void checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool grayTouch);
 	
 	bool leftMap(int w, int h);
 

@@ -12,7 +12,7 @@ float strafeSpeedMove = 10;
 float runSpeed = 14;
 float airRunSpeed = 10;
 float grabMargin = 0.25f;
-float notGrabTimeVal = 0.4;
+float notGrabTimeVal = 0.2;
 bool snapWallGrab = 0;
 
 float arrowSpeed = 25;

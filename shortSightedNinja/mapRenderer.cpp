@@ -207,6 +207,7 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData,
 					|| data.type == Block::water7
 					|| data.type == Block::water9
 					|| data.type == Block::water10
+					|| data.type == Block::flagUp
 					)
 				{
 					data.animPos = curPos;
@@ -229,7 +230,9 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData,
 					data.type == Block::grassDecoration4 ||
 					data.type == Block::webDecoration1 ||
 					data.type == Block::webDecoration2 ||
-					data.type == Block::friendlyWater
+					data.type == Block::friendlyWater ||
+					data.type == Block::woodDecoration1 ||
+					data.type == Block::flagDown
 					
 					)
 				{

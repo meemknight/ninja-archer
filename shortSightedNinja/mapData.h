@@ -182,6 +182,8 @@ namespace Block
 		signDecoration2,
 		signDecoration3,
 		grassDecoration4,
+		flagDown,
+		flagUp,
 		lastBlock,
 	};
 };
@@ -402,11 +404,7 @@ struct BlockInfo
 #define SOUTH 1
 #define EAST 2
 #define WEST 3
-struct VisibilityPolygonPoints
-{
-	float angle;
-	float x, y;
-};
+
 struct MapData
 {
 	BlockInfo *data;
@@ -416,12 +414,10 @@ struct MapData
 
 	std::vector<Edge> vecEdges;
 	
-	std::vector<VisibilityPolygonPoints> vecVisibilityPolygonPoints;
 
 	void create(int w, int h, const char* d);
 	BlockInfo &get(int x, int y);
 
-	void CalculateVisibilityPolygon(float ox, float oy, float radius);
 
 	void clearColorData();
 	

@@ -388,7 +388,6 @@ struct MapData
 	void create(int w, int h, const char* d);
 	BlockInfo &get(int x, int y);
 
-
 	void CalculateVisibilityPolygon(float ox, float oy, float radius);
 
 	void clearColorData();

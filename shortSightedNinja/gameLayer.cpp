@@ -329,7 +329,7 @@ bool gameLogic(float deltaTime)
 		{
 			if(i.type == actualInventorty[currentArrow].type)
 			{
-				i.count--;
+				//i.count--;
 				break;
 			}
 		}

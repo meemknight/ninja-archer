@@ -207,6 +207,7 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData,
 					|| data.type == Block::water9
 					|| data.type == Block::water10
 					|| data.type == Block::flagUp
+					|| data.type == Block::torchLitWood
 					)
 				{
 					data.animPos = curPos;

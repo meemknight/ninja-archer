@@ -224,7 +224,14 @@ void Entity::applyGravity(float deltaTime)
 {
 	if(wallGrab == 0)
 	{
-		velocity.y += deltaTime * gravitationalAcceleration * BLOCK_SIZE;
+		if(iswebs)
+		{
+			velocity.y += deltaTime * gravitationalAcceleration * BLOCK_SIZE * 0.2;
+		}else
+		{
+			velocity.y += deltaTime * gravitationalAcceleration * BLOCK_SIZE;
+		}
+			
 	}
 }
 
@@ -639,11 +646,10 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 
 		if (!stuckInWall)
 		{
-			if (t == Block::targetRed)
+			if (t == Block::webBlock)
 			{
 				stuckInWall = 1;
 			}
-
 
 			if (t == Block::targetRed)
 			{

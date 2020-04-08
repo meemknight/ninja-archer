@@ -1,9 +1,10 @@
 #pragma once
 #include "glm/vec4.hpp"
+#include "glm/vec2.hpp"
 #include <vector>
 
 #define BLOCK_SIZE 8
-#define BLOCK_COUNT 204
+#define BLOCK_COUNT 212
 
 namespace Block 
 {
@@ -118,11 +119,11 @@ namespace Block
 		stoneSolid12,
 		rockCracked,
 		tikiTotem,
-		unfinished5,
-		unfinished6,
-		unfinished7,
-		unfinished8,
-		unfinished9,
+		woodSolid12,
+		woodSolid13,
+		woodSolid14,
+		bridge1,
+		bridge2,
 		unfinished10,
 		unfinished11,
 		unfinished12,
@@ -201,6 +202,22 @@ namespace Block
 		tikiDecoration3,
 		skullDecoration,
 		bombArrow,
+		woddenDecoration1,
+		woddenDecoration2,
+		woddenDecoration3,
+		woddenDecoration4,
+		woddenDecoration5,
+		woddenDecoration6,
+		woddenDecoration7,
+		musicGreen,
+		musicRed,
+		musicTiki,
+		musicSnow,
+		musicCave,
+		leavesDecoration,
+		tikiPole,
+		torchUnlitWood,
+		torchLitWood,
 		lastBlock,
 	};
 };
@@ -209,6 +226,23 @@ namespace Block
 inline bool isAir(unsigned short b)
 {
 	return b == Block::none;
+}
+
+inline bool isWaterMusicSource(unsigned short b)
+{
+	if(
+		b == Block::waterFallBegin ||
+		b == Block::waterFallEnd ||
+		b == Block::water7 ||
+		b == Block::water4
+		) 
+		{
+		return true;
+		}
+		else
+		{
+			return 0;
+		}
 }
 
 inline bool isRedSolid(unsigned short b)
@@ -333,20 +367,17 @@ inline bool isOpaque(unsigned short  b)
 
 inline bool isLitTorch(unsigned short b)
 {
-	return b == Block::torceTopBrickLit || b == Block::torceTopLeavesLit || b == Block::litLantern;
+	return b == Block::torceTopBrickLit || b == Block::torceTopLeavesLit || b == Block::litLantern
+		|| b == Block::torchLitWood;
 }
 
 inline bool unLitTorch(unsigned short  b)
 {
-	return b == Block::torceTopBrickUnlit || b == Block::torceTopLeavesUnlit || b == Block::unlitLantern;
+	return b == Block::torceTopBrickUnlit || b == Block::torceTopLeavesUnlit || b == Block::unlitLantern
+		|| b == Block::torchUnlitWood;
 
 }
 
-struct Edge
-{
-	float sx, sy;
-	float ex, ey;
-};
 
 struct BlockInfo
 {
@@ -384,13 +415,22 @@ struct BlockInfo
 
 struct MapData
 {
+	std::vector<glm::vec2> waterPos;
+	std::vector<glm::vec2> greenSoundPos;
+	std::vector<glm::vec2> redSoundPos;
+	std::vector<glm::vec2> tikiSoundPos;
+	std::vector<glm::vec2> snowSoundPos;
+	std::vector<glm::vec2> caveSoundPos;
+	float getWaterPercentage(glm::vec2 pos);
+	float getGreenPercentage(glm::vec2 pos);
+	float getTikiPercentage(glm::vec2 pos);
+	float getsnowPercentage(glm::vec2 pos);
+	float getCavePercentage(glm::vec2 pos);
+
 	BlockInfo *data;
 
 	int w;
-	int h;
-
-	std::vector<Edge> vecEdges;
-	
+	int h;	
 
 	void create(int w, int h, unsigned short* d);
 	BlockInfo &get(int x, int y);

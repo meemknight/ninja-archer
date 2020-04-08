@@ -236,6 +236,7 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData,
 					data.type == Block::tikiDecoration1 ||
 					data.type == Block::tikiDecoration2 ||
 					data.type == Block::tikiDecoration3 ||
+					data.type == Block::webBlock ||
 					data.type == Block::skullDecoration
 					
 					)

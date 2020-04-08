@@ -99,6 +99,7 @@ struct Arrow
 		fireArrow,
 		slimeArrow,
 		keyArrow,
+		bombArrow,
 		lastArror,
 	}type = normalArrow;
 
@@ -124,6 +125,7 @@ struct Arrow
 
 	bool hitOnce = 0;
 	bool stuckInWall = 0;
+	bool shownAnim = 0;
 };
 
 struct Pickup

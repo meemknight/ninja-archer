@@ -27,7 +27,12 @@ extern GLint maskSamplerUniform;
 gl2d::Renderer2D renderer2d;
 //gl2d::Renderer2D stencilRenderer2d;
 gl2d::Renderer2D backgroundRenderer2d;
-//sf::Music music;
+
+sf::SoundBuffer pickupSoundbuffer;
+sf::Sound soundPlayer;
+sf::Music waterPlayer;
+sf::Music greenPlayer;
+
 MapRenderer mapRenderer;
 MapData mapData;
 Entity player;
@@ -38,7 +43,6 @@ gl2d::Texture sprites;
 gl2d::Texture characterSprite;
 gl2d::Texture arrowSprite;
 gl2d::Texture particlesSprite;
-
 
 std::vector<Arrow> arrows;
 
@@ -65,7 +69,6 @@ struct ArrowItem
 std::vector <ArrowItem> inventory;
 std::vector <ArrowItem> actualInventorty;
 
-
 std::vector <LightSource> wallLights;
 
 float playerLight = 6;
@@ -75,10 +78,11 @@ void loadLevel()
 {
 	inventory.clear();
 	//this vector should always have all arrows in order (and all of them there)
-	inventory.push_back({ 0,0,3 });
-	inventory.push_back({ 1,0,3 });
-	inventory.push_back({ 2,0,3 });
-	inventory.push_back({ 3,0,3 });
+	inventory.push_back({ 0,3,3 });
+	inventory.push_back({ 1,3,3 });
+	inventory.push_back({ 2,3,3 });
+	inventory.push_back({ 3,3,3 });
+	inventory.push_back({ 4,3,3 });
 
 	renderer2d.currentCamera.zoom = 5.1;
 
@@ -167,6 +171,11 @@ void loadLevel()
 				pickups.push_back({ x, y, 3 });
 				mapData.get(x, y).type = Block::none;
 
+			}if (mapData.get(x, y).type == Block::bombArrow)
+			{
+				pickups.push_back({ x, y, 4 });
+				mapData.get(x, y).type = Block::none;
+
 			}
 		}
 
@@ -212,6 +221,7 @@ void respawn()
 
 }
 
+
 bool initGame()
 {
 	srand(time(0));
@@ -227,7 +237,7 @@ bool initGame()
 	ShaderProgram sp{ "resources//blocks.vert","resources//blocks.frag" };
 
 	mapRenderer.init(sp);
-	sprites.loadFromFileWithPixelPadding("resources//sprites2.png", BLOCK_SIZE);
+	sprites.loadFromFileWithPixelPadding("resources//sprites.png", BLOCK_SIZE);
 
 	mapRenderer.sprites = sprites;
 	mapRenderer.upTexture.loadFromFile("resources//top.png");
@@ -235,7 +245,7 @@ bool initGame()
 	mapRenderer.leftTexture.loadFromFile("resources//left.png");
 	mapRenderer.rightTexture.loadFromFile("resources//right.png");
 
-	characterSprite.loadFromFileWithPixelPadding("resources//character3.png", 8);
+	characterSprite.loadFromFileWithPixelPadding("resources//character.png", 8);
 	//todo replace with padding
 	arrowSprite.loadFromFile("resources//arrow.png");
 	particlesSprite.loadFromFileWithPixelPadding("resources//particles.png", 8);
@@ -249,6 +259,22 @@ bool initGame()
 	};
 
 	arrows.reserve(10);
+
+
+	{//music
+		pickupSoundbuffer.loadFromFile("resources//pick_up.wav");
+		waterPlayer.openFromFile("resources//water.wav");
+		waterPlayer.play();
+		waterPlayer.setLoop(1);
+
+		greenPlayer.openFromFile("resources//rainForest.wav");
+		greenPlayer.play();
+		greenPlayer.setLoop(1);
+
+
+		soundPlayer.setVolume(50);
+	}
+
 
 	loadLevel();
 
@@ -270,6 +296,14 @@ bool gameLogic(float deltaTime)
 			respawn();
 		}
 	}
+
+#pragma region music
+
+	waterPlayer.setVolume(mapData.getWaterPercentage(player.pos));
+	greenPlayer.setVolume(mapData.getGreenPercentage(player.pos));
+	ilog(mapData.getWaterPercentage(player.pos));
+#pragma endregion
+
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	int w, h;
@@ -685,10 +719,14 @@ bool gameLogic(float deltaTime)
 		i.draw(renderer2d, arrowSprite, deltaTime);
 		i.light = 0;
 
-		if(i.colidePlayer(player))
+		if(i.colidePlayer(player) && i.cullDown <=0)
 		{
 			i.cullDown = arrowPickupCullDown;
 			inventory[i.type].count = inventory[i.type].maxCount;
+			soundPlayer.stop();
+			soundPlayer.setBuffer(pickupSoundbuffer);
+			soundPlayer.play();
+
 		}
 	}
 	
@@ -724,7 +762,15 @@ bool gameLogic(float deltaTime)
 		a.checkCollision(mapData, isInRedBlock, isInBlueBlock, isInGrayBlock);
 		a.light = 0;
 
+
+
+		if(!a.shownAnim)
 		{
+			if(a.stuckInWall)
+			{
+				a.shownAnim = 1;
+			}
+
 			int x, y;
 			x = a.pos.x / BLOCK_SIZE;
 			y = a.pos.y / BLOCK_SIZE;
@@ -805,11 +851,12 @@ bool gameLogic(float deltaTime)
 						renderer2d.renderRectangle(
 							Ui::Box().xLeft(i*8).yCenter().yDimensionPercentage(0.7f).xAspectRatio(1)
 							, { 0.4*dim,0.4*dim,0.4*dim,1 }
-						, {}, 45, arrowSprite, gl2d::computeTextureAtlas(4, 1, left, 0));
+						, {}, 45, arrowSprite, gl2d::computeTextureAtlas(Arrow::lastArror, 1, left, 0));
 						dim += 0.1;
 					}
 				}
 			
+
 				if(right!=-1)
 				{
 					float dim = 0.2;
@@ -818,7 +865,7 @@ bool gameLogic(float deltaTime)
 						renderer2d.renderRectangle(
 							Ui::Box().xRight(i*8).yCenter().yDimensionPercentage(0.7f).xAspectRatio(1)
 							, { 0.4*dim,0.4*dim,0.4*dim,1 }
-						, {}, 45, arrowSprite, gl2d::computeTextureAtlas(4, 1, right, 0));
+						, {}, 45, arrowSprite, gl2d::computeTextureAtlas(Arrow::lastArror, 1, right, 0));
 						dim += 0.1;
 					}
 				}
@@ -833,7 +880,7 @@ bool gameLogic(float deltaTime)
 						renderer2d.renderRectangle(
 							Ui::Box().xCenter(i*10).yCenter().yDimensionPercentage(0.9f).xAspectRatio(1),
 								{ dim,dim,dim,1 },
-							 {}, 45, arrowSprite, gl2d::computeTextureAtlas(4, 1, center, 0));
+							 {}, 45, arrowSprite, gl2d::computeTextureAtlas(Arrow::lastArror, 1, center, 0));
 						dim += 0.1;
 					}
 

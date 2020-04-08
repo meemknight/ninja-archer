@@ -224,13 +224,8 @@ void Entity::applyGravity(float deltaTime)
 {
 	if(wallGrab == 0)
 	{
-		if(iswebs)
-		{
-			velocity.y += deltaTime * gravitationalAcceleration * BLOCK_SIZE * 0.2;
-		}else
-		{
+	
 			velocity.y += deltaTime * gravitationalAcceleration * BLOCK_SIZE;
-		}
 			
 	}
 }
@@ -265,6 +260,11 @@ void Entity::applyVelocity(float deltaTime)
 	}else
 	{
 		velocity.x += velocity.x * (-drag * deltaTime * BLOCK_SIZE);
+	}
+
+	if(iswebs)
+	{
+		velocity.y += velocity.y * (-drag * deltaTime * BLOCK_SIZE*4);
 	}
 
 	if(grounded || wallGrab)
@@ -575,10 +575,13 @@ glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 s
 	end:
 	return pos;
 }
-gl2d::TextureAtlas ta(4, 1);
+
 
 void Arrow::draw(gl2d::Renderer2D & renderer, gl2d::Texture t)
 {
+	gl2d::TextureAtlas ta(5, 1);
+
+
 	float angle = 0;
 	
 	angle = std::asin(-shootDir.y);
@@ -649,6 +652,7 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 			if (t == Block::webBlock)
 			{
 				stuckInWall = 1;
+				hitOnce = 1;
 			}
 
 			if (t == Block::targetRed)
@@ -739,6 +743,39 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 					}
 					
 				}
+				
+
+			}
+			else if (t == Block::rockCracked)
+			{
+				if (type == Arrow::ArrowTypes::bombArrow)
+				{
+					auto &m = mapData.get(curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE);
+
+					stuckInWall = 1;
+					m.type = Block::none;
+					mapData.setNeighbors();
+
+					int minX = (curPos.x / BLOCK_SIZE) - 1;
+					int maxX = (curPos.x / BLOCK_SIZE) + 1;
+					int minY = (curPos.y / BLOCK_SIZE) - 1;
+					int maxY = (curPos.y / BLOCK_SIZE) + 1;
+
+					minX = std::max(0, minX);
+					minY = std::max(0, minY);
+					maxX = std::min(mapData.w, maxX);
+					maxY = std::min(mapData.h, maxY);
+
+					for(int y=minY; y<=maxY; y++)
+						for (int x = minX; x <= maxX; x++)
+						{
+							if(mapData.get(x,y).type == Block::rockCracked)
+							{
+								mapData.get(x, y).type = Block::none;
+							}
+						}
+
+				}
 
 			}
 			else if (unLitTorch(t))
@@ -822,6 +859,8 @@ bool Pickup::colidePlayer(Entity &player)
 
 void Pickup::draw(gl2d::Renderer2D & renderer2d, gl2d::Texture arrowTexture, float deltaTime)
 {
+
+	gl2d::TextureAtlas ta(5, 1);
 
 	float levitate = cos((animPos += deltaTime) / 0.7f);
 

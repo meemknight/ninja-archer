@@ -308,7 +308,7 @@ void imguiFunc(float deltaTime)
 
 		inputFile >> mapWidth >> mapHeight;
 
-		char blocks[120 * 120];
+		char blocks[500 * 500];
 		int it = 0;
 		std::string current;
 
@@ -341,8 +341,17 @@ void imguiFunc(float deltaTime)
 
 	if (ImGui::Button("New Map"))
 	{
+		MapData temp;
+		temp.create(mapWidth, mapHeight, nullptr);
+
+		for (int x = 0; x < mapWidth && x < mapData.w; x++)
+			for(int y=0; y<mapHeight && y <mapData.h; y++)
+			{
+				temp.get(x, y) = mapData.get(x, y);
+			}
+	
 		mapData.cleanup();
-		mapData.create(mapWidth, mapHeight, nullptr);
+		mapData = temp;
 	}
 	ImGui::NewLine();
 #pragma endregion

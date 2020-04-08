@@ -2,13 +2,12 @@
 #include "glm/vec4.hpp"
 #include <vector>
 
-
 #define BLOCK_SIZE 8
-#define BLOCK_COUNT 188
+#define BLOCK_COUNT 204
 
 namespace Block
 {
-	enum : unsigned char
+	enum : unsigned short
 	{
 		none = 0,
 		bareer,
@@ -117,8 +116,8 @@ namespace Block
 		snowSolid9,
 		stoneSolid11,
 		stoneSolid12,
-		unfinished3,
-		unfinished4,
+		rockCracked,
+		tikiTotem,
 		unfinished5,
 		unfinished6,
 		unfinished7,
@@ -193,13 +192,23 @@ namespace Block
 		slimeArrow,
 		keyArrow,
 		levelExit,
+		webDecoration3,
+		signDecoration4,
+		signDecoration5,
+		webBlock,
+		tikiDecoration1,
+		tikiDecoration2,
+		tikiDecoration3,
+		skullDecoration,
+		bombArrow,
 		lastBlock,
 	};
 };
 
+
 inline bool isUnfinished(unsigned char b)
 {
-	return b >= Block::unfinished3 &&b <= Block::unfinished16;
+	return b >= Block::unfinished5 &&b <= Block::unfinished16;
 }
 
 /*

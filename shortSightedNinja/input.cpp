@@ -39,11 +39,12 @@ namespace input
 
 	}
 
-	int bindings[Buttons::buttonsCount] = { 0, 'S', 'A', 'D', VK_SPACE, 0, 'W' };
+	int bindings[Buttons::buttonsCount] = { 0, 'S', 'A', 'D', VK_SPACE, 0, 'W', 'Q', 'E' };
 	WORD bindingsController[Buttons::buttonsCount] = { 0, XINPUT_GAMEPAD_DPAD_DOWN
-		, XINPUT_GAMEPAD_DPAD_LEFT, XINPUT_GAMEPAD_DPAD_RIGHT, XINPUT_GAMEPAD_A, 0, XINPUT_GAMEPAD_DPAD_UP };
-	float deadZone = 0.15f;
-	float moveSensitivity = 0.30f;
+		, XINPUT_GAMEPAD_DPAD_LEFT, XINPUT_GAMEPAD_DPAD_RIGHT, XINPUT_GAMEPAD_A, 0, XINPUT_GAMEPAD_DPAD_UP,
+	XINPUT_GAMEPAD_LEFT_SHOULDER, XINPUT_GAMEPAD_RIGHT_SHOULDER };
+	float deadZone = 0.12f;
+	float moveSensitivity = 0.20f;
 
 	int buttonsHeld[Buttons::buttonsCount] = {};
 	int buttonsPressed[Buttons::buttonsCount] = {};
@@ -93,7 +94,7 @@ namespace input
 			read = 0;
 		}
 
-		if(read)
+		if (read)
 		{
 			const XINPUT_GAMEPAD *pad = &s.Gamepad;
 			float retValX = pad->sThumbRX / (float)SHRT_MAX;
@@ -105,20 +106,16 @@ namespace input
 			retValY = std::max(-1.f, retValY);
 			retValY = std::min(1.f, retValY);
 
-			if (abs(retValX) < deadZone)
+			if (abs(retValX) < deadZone && abs(retValY) < deadZone)
 			{
-				retValX = 0.f;
-			}
-			if (abs(retValY) < deadZone)
-			{
-				retValY = 0.f;
-			}
 
-			if (retValX != 0 || retValY != 0)
+			}
+			else
 			{
 				lastShootDir = { retValX, retValY };
 				lastShootDir = glm::normalize(lastShootDir);
 			}
+			
 		
 		}
 
@@ -163,6 +160,10 @@ namespace input
 
 		bool getisKeyHeldDirect(int b, const XINPUT_STATE *s)
 		{
+			if(!platform::isFocused())
+			{
+				return 0;
+			}
 
 			bool val = 0;
 
@@ -220,7 +221,7 @@ namespace input
 						retValY = 0.f;
 					}
 
-					val = retValY < -moveSensitivity;
+					val = retValY < (-moveSensitivity * 2.8);
 					val = val | (pad->wButtons & bindingsController[b]);
 				}else if (b == input::Buttons::up)
 				{

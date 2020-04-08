@@ -3,8 +3,6 @@
 #undef min
 #undef max
 
-gl2d::TextureAtlas spriteAtlas(BLOCK_COUNT, 4);
-
 void MapRenderer::init(ShaderProgram s)
 {
 	positionVector.reserve(200);
@@ -136,7 +134,9 @@ void MapRenderer::render()
 	clearBlockDrawData();
 }
 
-void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData)
+float animDuration = 0.12;
+
+void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData, float deltaTime, int curPos)
 {
 	
 	glm::vec2 minPos = { 0,0 };
@@ -169,19 +169,123 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData)
 	{
 		for(int w= minPos.x;w<maxPos.x; w++)
 		{
-			
-			if(mapData.get(w, h).type != Block::none && mapData.get(w,h).mainColor.w != 0)
+			auto &g = mapData.get(w, h);
+			if(g.type != Block::none && g.mainColor.w != 0)
 			{
-				glm::vec4 sideC = mapData.get(w, h).sideColors;
+				glm::vec4 sideC = g.sideColors;
 
-				if (mapData.get(w, h).hasNeighborTop()) { sideC.x = 0; }
-				if (mapData.get(w, h).hasNeighborDown()) { sideC.y = 0; }
-				if (mapData.get(w, h).hasNeighborLeft()) { sideC.z = 0; }
-				if (mapData.get(w, h).hasNeighborRight()) { sideC.w = 0; }
+				if(!isColidable(g.type))
+				{
+					sideC = {};
+				}else
+				{
+					if (g.hasNeighborTop()) { sideC.x = 0; }
+					if (g.hasNeighborDown()) { sideC.y = 0; }
+					if (g.hasNeighborLeft()) { sideC.z = 0; }
+					if (g.hasNeighborRight()) { sideC.w = 0; }
+				}
+
+				auto color = g.mainColor;
+
+				//color.g *= g.heat;
+				//color.b *= g.heat;
+
+				color = { 1,1,1,color.r };
+
+				auto &data = mapData.get(w, h);
+				
+				//always
+				if (data.type == Block::waterFallBegin || data.type == Block::waterFallEnd
+					|| data.type == Block::torceTopBrickLit
+					|| data.type == Block::torceTopLeavesLit
+					|| data.type == Block::litLantern
+					|| data.type == Block::water4
+					|| data.type == Block::water5
+					|| data.type == Block::water6
+					|| data.type == Block::water7
+					|| data.type == Block::water8
+					|| data.type == Block::water9
+					|| data.type == Block::water10
+					|| data.type == Block::flagUp
+					)
+				{
+					data.animPos = curPos;
+				}
+				else if (//player
+					data.type == Block::grassDecoration ||
+					data.type == Block::leavesRight ||
+					data.type == Block::leavesLeft ||
+					data.type == Block::vines1||
+					data.type == Block::vines2 ||
+					data.type == Block::snowDecoration1||
+					data.type == Block::waterFall ||
+					data.type == Block::grassDecoration2||
+					data.type == Block::grassDecoration3 ||
+					data.type == Block::water3||
+					data.type == Block::water1 ||
+					data.type == Block::snowSolid2 ||
+					data.type == Block::snowSolid9 ||
+					data.type == Block::snowDecoration2||
+					data.type == Block::grassDecoration4 ||
+					data.type == Block::webDecoration1 ||
+					data.type == Block::webDecoration2 ||
+					data.type == Block::friendlyWater ||
+					data.type == Block::woodDecoration1 ||
+					data.type == Block::flagDown ||
+					data.type == Block::webDecoration3 ||
+					data.type == Block::tikiDecoration1 ||
+					data.type == Block::tikiDecoration2 ||
+					data.type == Block::tikiDecoration3 ||
+					data.type == Block::webBlock ||
+					data.type == Block::skullDecoration
+					
+					)
+				{
+
+					if(data.playerEntered)
+					{
+						if(data.playerLeft)
+						{
+							data.leftAnim = 0;
+							data.startAnim = 1;
+						}
+						data.playerLeft = 0;
+					}else
+					{
+						data.playerLeft = 1;
+						if(!data.leftAnim)
+						{
+							data.leftAnim = 1;
+							data.startAnim = 1;
+						}
+					}
+
+					if(data.startAnim == 1)
+					{
+						data.timePassed += deltaTime;
+						while(data.timePassed > animDuration)
+						{
+							data.timePassed -= animDuration;
+							data.animPos++;
+						}
+						if(data.animPos >3)
+						{
+							data.startAnim = 0;
+							data.animPos = 0;
+						}
+					}
+				}
+
+				data.playerEntered = 0;
+
+				int wt = sprites.GetSize().x;
+				int ht = sprites.GetSize().y;
+
+				gl2d::TextureAtlasPadding spriteAtlas(BLOCK_COUNT, 4, wt, ht);
 
 				addBlock(renderer.toScreen({ w*BLOCK_SIZE,h*BLOCK_SIZE,BLOCK_SIZE,BLOCK_SIZE }), 
-					spriteAtlas.get(mapData.get(w, h).type- Block::none-1,0)
-					, mapData.get(w, h).mainColor, sideC);
+					spriteAtlas.get(data.type- Block::none-1, data.animPos)
+					,color , sideC);
 
 			}
 

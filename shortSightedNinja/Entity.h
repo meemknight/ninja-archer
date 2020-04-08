@@ -17,6 +17,7 @@ struct Entity
 	bool blueGrab=0;
 	bool grayGrab=0;
 	int wallGrab = 0;
+	int lastWallGrab = 0;
 
 	bool grounded;
 	bool movingRight;
@@ -40,6 +41,8 @@ struct Entity
 
 	bool moving = 0;
 	bool dying = 0;
+
+	bool iswebs;
 
 	void updateMove() 
 	{

@@ -3,11 +3,11 @@
 #include <vector>
 
 #define BLOCK_SIZE 8
-#define BLOCK_COUNT 188
+#define BLOCK_COUNT 204
 
 namespace Block 
 {
-	enum : unsigned char 
+	enum : unsigned short 
 	{
 		none = 0,
 		bareer,
@@ -116,8 +116,8 @@ namespace Block
 		snowSolid9,
 		stoneSolid11,
 		stoneSolid12,
-		unfinished3,
-		unfinished4,
+		rockCracked,
+		tikiTotem,
 		unfinished5,
 		unfinished6,
 		unfinished7,
@@ -193,54 +193,25 @@ namespace Block
 		keyArrow,
 		levelExit,
 		webDecoration3,
+		signDecoration4,
+		signDecoration5,
+		webBlock,
+		tikiDecoration1,
+		tikiDecoration2,
+		tikiDecoration3,
+		skullDecoration,
+		bombArrow,
 		lastBlock,
 	};
 };
 
-/*
-enum Block : char
-{
-	none = ' ',
-	dirt,
-	grassLeft,
-	gras,
-	grasRight,
-	stone,
-	brick,
-	redTarget,
-	blueTarget,
-	greenTarget,
-	redBlock,
-	redNo,
-	blueBlock,
-	blueNo,
-	greenBlock,
-	greenNo,
-	yellowBlock,
-	yellowNo,
-	keyHole,
-	dirtBackground,
-	stoneBackground,
-	dirtTorch,
-	dirtLitTorch,
-	stoneTorch,
-	stoneLitTorch,
-	brickTorch,
-	brickLitTorch,
-	brickBackground,
-	unlitTorch,
-	litTorch,
-	pole,
-	lastBlock,
-};
-*/
 
-inline bool isAir(unsigned char b)
+inline bool isAir(unsigned short b)
 {
 	return b == Block::none;
 }
 
-inline bool isRedSolid(unsigned char b)
+inline bool isRedSolid(unsigned short b)
 {
 	if (
 		b == Block::redSolid1 ||
@@ -257,7 +228,7 @@ inline bool isRedSolid(unsigned char b)
 	else { return 0; }
 }
 
-inline bool isRedNoSolid(unsigned char b)
+inline bool isRedNoSolid(unsigned short b)
 {
 	if (
 		b == Block::redNoSolid1 ||
@@ -277,7 +248,7 @@ inline bool isRedNoSolid(unsigned char b)
 }
 
 
-inline bool isBlueSolid(unsigned char b)
+inline bool isBlueSolid(unsigned short b)
 {
 	if (
 		b == Block::blueSolid1 ||
@@ -296,7 +267,7 @@ inline bool isBlueSolid(unsigned char b)
 	else { return 0; }
 }
 
-inline bool isBlueNoSolid(unsigned char b)
+inline bool isBlueNoSolid(unsigned short  b)
 {
 	if (
 		b == Block::blueNoSolid1 ||
@@ -315,7 +286,7 @@ inline bool isBlueNoSolid(unsigned char b)
 	else { return 0; }
 }
 
-inline bool isColidable(unsigned char b)
+inline bool isColidable(unsigned short b)
 {
 
 	if (
@@ -355,17 +326,17 @@ inline bool isColidable(unsigned char b)
 
 }
 
-inline bool isOpaque(unsigned char b)
+inline bool isOpaque(unsigned short  b)
 {
 	return isColidable(b);
 }
 
-inline bool isLitTorch(unsigned char b)
+inline bool isLitTorch(unsigned short b)
 {
 	return b == Block::torceTopBrickLit || b == Block::torceTopLeavesLit || b == Block::litLantern;
 }
 
-inline bool unLitTorch(unsigned char b)
+inline bool unLitTorch(unsigned short  b)
 {
 	return b == Block::torceTopBrickUnlit || b == Block::torceTopLeavesUnlit || b == Block::unlitLantern;
 
@@ -387,9 +358,6 @@ struct BlockInfo
 	//up down left right 0000 udlr;
 	unsigned char neighbors;
 
-	int edgeId[4];
-	bool edgeExist[4];
-
 	//top down left right
 	glm::vec4 directionalLight;
 
@@ -401,7 +369,7 @@ struct BlockInfo
 	bool startAnim=0;
 	signed char animPos = 0;
 	float timePassed = 0;
-	unsigned char type;
+	unsigned short  type;
 	bool playerEntered = 0;
 	bool playerLeft = 0;
 	bool leftAnim = 1;
@@ -424,7 +392,7 @@ struct MapData
 	std::vector<Edge> vecEdges;
 	
 
-	void create(int w, int h, const char* d);
+	void create(int w, int h, unsigned short* d);
 	BlockInfo &get(int x, int y);
 
 

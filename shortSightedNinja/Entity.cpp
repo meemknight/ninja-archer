@@ -17,8 +17,8 @@ float airRunSpeed = 10;
 float grabMargin = 0.25f;
 float notGrabTimeVal = 0.2;
 bool snapWallGrab = 0;
-float ghostJumpTime = 0.05;
-float blockTouchDownMargin = 1;
+float ghostJumpTime = 0.08;
+float blockTouchDownMargin = 3;
 
 float arrowSpeed = 25;
 
@@ -176,8 +176,13 @@ void Entity::strafe(int dir)
 
 void Entity::run(float speed)
 {
-
-	pos.x += speed * runSpeed * BLOCK_SIZE;
+	if(iswebs)
+	{
+		pos.x += speed * runSpeed * BLOCK_SIZE * 0.1;
+	}else
+	{
+		pos.x += speed * runSpeed * BLOCK_SIZE;
+	}
 	moving = (bool)speed;
 }
 
@@ -205,7 +210,14 @@ void Entity::airRun(float speed)
 	
 	if (speed) { velocity.x = 0; }
 
-	pos.x += speed * airRunSpeed * BLOCK_SIZE;
+	if(iswebs)
+	{
+		pos.x += speed * airRunSpeed * BLOCK_SIZE * 0.1;
+	}else
+	{
+		pos.x += speed * airRunSpeed * BLOCK_SIZE;
+	}
+
 }
 
 void Entity::applyGravity(float deltaTime)
@@ -240,7 +252,13 @@ void Entity::applyVelocity(float deltaTime)
 	pos += velocity * deltaTime;
 
 	//drag
-	velocity.x += velocity.x * (-drag * deltaTime * BLOCK_SIZE);
+	if(iswebs)
+	{
+		velocity.x += velocity.x * (-drag * deltaTime * BLOCK_SIZE *2);
+	}else
+	{
+		velocity.x += velocity.x * (-drag * deltaTime * BLOCK_SIZE);
+	}
 
 	if(grounded || wallGrab)
 	{
@@ -313,11 +331,6 @@ void Entity::checkWall(MapData & mapData, int move)
 		return;
 	}
 
-	if(notGrabTime > 0)
-	{
-		return;
-	}
-
 	if(grounded)
 	{
 		return;
@@ -336,13 +349,31 @@ void Entity::checkWall(MapData & mapData, int move)
 		return;
 	}
 	
+	bool checkRight = 0;
+	bool checkLeft = 0;
+
+	if (notGrabTime > 0)
+	{
+		if(lastWallGrab==-1)
+		{
+			checkRight = 1;
+		}else if(lastWallGrab==1)
+		{
+			checkLeft = 1;
+		}
+	}else
+	{
+		checkRight = 1;
+		checkLeft = 1;
+	}
+
 	int maxY = minY + 1;
 	int rightX = floor((pos.x + dimensions.x) / BLOCK_SIZE);
 	int leftX = floor((pos.x-2) / BLOCK_SIZE);
 	if (leftX < 0) { return; }
-	//for(int y= minY; y<maxY; y++)
-	//{
-	if(isColidable(mapData.get(rightX, minY).type) && move > 0)
+	
+
+	if(isColidable(mapData.get(rightX, minY).type) && move > 0 && checkRight)
 	{
 
 		if (isRedSolid(mapData.get(rightX, minY).type))
@@ -370,7 +401,9 @@ void Entity::checkWall(MapData & mapData, int move)
 			velocity.y = 0;
 		}
 	}
-	if (isColidable(mapData.get(leftX, minY).type) && move < 0)
+
+
+	if (isColidable(mapData.get(leftX, minY).type) && move < 0 && checkLeft)
 	{
 
 		if(isRedSolid(mapData.get(leftX, minY).type))
@@ -398,6 +431,7 @@ void Entity::checkWall(MapData & mapData, int move)
 		}
 	}
 	//}
+
 
 
 }
@@ -467,6 +501,7 @@ void Entity::draw(gl2d::Renderer2D & renderer2d, float deltaTime, gl2d::Texture 
 void Entity::jumpFromWall()
 {
 	notGrabTime = notGrabTimeVal;
+	lastWallGrab = wallGrab;
 	velocity.y = -jumpFromWallSpeed * BLOCK_SIZE;
 }
 
@@ -604,6 +639,11 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 
 		if (!stuckInWall)
 		{
+			if (t == Block::targetRed)
+			{
+				stuckInWall = 1;
+			}
+
 
 			if (t == Block::targetRed)
 			{

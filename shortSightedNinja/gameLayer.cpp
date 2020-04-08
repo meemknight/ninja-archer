@@ -87,7 +87,7 @@ void loadLevel()
 
 	//pickups.push_back({ 4, 4, 1 });
 
-	unsigned char data[] =
+	unsigned short data[] =
 	{ 
 	
 		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,9,9,9,9,9,9,9,9,9,20,0,127,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -175,9 +175,7 @@ void loadLevel()
 	
 	};
 
-	mapData.create(80, 80,
-		(char*)data
-	);
+	mapData.create(80, 80, data);
 
 	mapData.setNeighbors();
 
@@ -361,6 +359,7 @@ bool gameLogic(float deltaTime)
 			if (player.canJump)
 			{
 				player.jump();
+				player.canJump = 0;
 				jumpParticle.set(player.pos, 0, player.movingRight);
 			}
 		}
@@ -529,6 +528,7 @@ bool gameLogic(float deltaTime)
 		maxX = std::min(mapData.w, maxX);
 		maxY = std::min(mapData.h, maxY);
 
+		player.iswebs = 0;
 		for(int y=minY; y<=maxY;y++)
 		{
 			for (int x = minX; x <= maxX; x++)
@@ -570,6 +570,12 @@ bool gameLogic(float deltaTime)
 				{
 					isInGrayBlock = true;
 				}
+
+				if(g.type == Block::webBlock)
+				{
+					player.iswebs = true;
+				}
+
 			}
 		}
 	}

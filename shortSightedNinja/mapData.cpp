@@ -3,7 +3,7 @@
 #include "mapRenderer.h"
 #include <algorithm>
 
-void MapData::create(int w, int h, const char* d = 0)
+void MapData::create(int w, int h, const unsigned short* d = 0)
 {
 	this->w = w;
 	this->h = h;

@@ -37,7 +37,7 @@ unsigned char currentBlock = Block::blueNoSolid1;
 
 int mapWidth, mapHeight;
 char mapName[256] = {};
-char* map = nullptr;
+unsigned short* map = nullptr;
 
 bool collidable = true;
 bool nonCollidable = true;
@@ -359,7 +359,7 @@ void imguiFunc(float deltaTime)
 
 		inputFile >> mapWidth >> mapHeight;
 
-		char blocks[500 * 500];
+		unsigned short blocks[500 * 500];
 		int it = 0;
 		std::string current;
 

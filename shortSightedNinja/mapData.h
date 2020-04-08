@@ -444,7 +444,7 @@ struct MapData
 
 	std::vector<VisibilityPolygonPoints> vecVisibilityPolygonPoints;
 
-	void create(int w, int h, const char* d);
+	void create(int w, int h, const unsigned short* d);
 	BlockInfo& get(int x, int y);
 
 

@@ -2,6 +2,8 @@
 #include "glm/glm.hpp"
 #include <algorithm>
 #include "math.h"
+#include <time.h>
+#include <cstdlib>
 
 float gravitationalAcceleration = 64;
 float jumpSpeed = 22;
@@ -405,11 +407,12 @@ void Entity::jump()
 	velocity.y = -jumpSpeed * BLOCK_SIZE;
 }
 
+int randVal = 1;
 
 void Entity::draw(gl2d::Renderer2D & renderer2d, float deltaTime, gl2d::Texture characterSprite)
 {
 	auto s = characterSprite.GetSize();
-	gl2d::TextureAtlasPadding playerAtlas(4, 6, s.x,s.y);
+	gl2d::TextureAtlasPadding playerAtlas(4, 8, s.x,s.y);
 
 	currentCount += deltaTime;
 	while(currentCount >= frameDuration)
@@ -446,7 +449,10 @@ void Entity::draw(gl2d::Renderer2D & renderer2d, float deltaTime, gl2d::Texture 
 		idleTime += deltaTime;
 		if (((int)idleTime/10)%2==1)
 		{
-			state = 5;
+			state = 5 + randVal;
+		}else
+		{
+			randVal = rand() % 2;
 		}
 	}else
 	{

@@ -258,7 +258,8 @@ void respawn()
 
 bool initGame()
 {
-	
+	srand(time(0));
+
 	glClearColor(BACKGROUNDF_R, BACKGROUNDF_G, BACKGROUNDF_B ,1.f);
 
 	renderer2d.create();
@@ -446,6 +447,28 @@ bool gameLogic(float deltaTime)
 
 	player.updateMove();
 
+	{
+		static bool animateFall;
+		static float animReloadTime;
+		if (player.velocity.y >= 230 )
+		{
+			if(animateFall)
+			{
+				jumpParticle.set(player.pos, 2, player.movingRight);
+				animateFall = 0;
+				animReloadTime = 0.2;
+			}
+			animReloadTime -= deltaTime;
+			if (animReloadTime <= 0)
+			{
+				animateFall = 1;
+				animReloadTime = 0.92;
+			}
+		}else
+		{
+			animateFall = 1;
+		}
+	}
 	//mapRenderer.addBlock(renderer2d.toScreen({ 100,100,100,100 }), { 0,1,1,0 }, {1,1,1,1});
 	//mapRenderer.render();
 

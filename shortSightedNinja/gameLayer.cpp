@@ -360,6 +360,7 @@ bool gameLogic(float deltaTime)
 			if (player.canJump)
 			{
 				player.jump();
+				jumpParticle.set(player.pos, 0, player.movingRight);
 			}
 		}
 		else if (player.wallGrab == 1)
@@ -367,12 +368,16 @@ bool gameLogic(float deltaTime)
 			player.strafe(-1);
 			player.jumpFromWall();
 			player.wallGrab = 0;
+			jumpParticle.set(player.pos, 1, !player.movingRight);
+
 		}
 		else if (player.wallGrab == -1)
 		{
 			player.strafe(1);
 			player.jumpFromWall();
 			player.wallGrab = 0;
+			jumpParticle.set(player.pos, 1, !player.movingRight);
+
 		}
 	}
 
@@ -705,6 +710,8 @@ bool gameLogic(float deltaTime)
 	}
 
 #pragma endregion
+
+	jumpParticle.draw(renderer2d, deltaTime, particlesSprite);
 
 	player.draw(renderer2d, deltaTime, characterSprite);
 

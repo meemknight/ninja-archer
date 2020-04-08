@@ -29,6 +29,7 @@ gl2d::Renderer2D renderer2d;
 gl2d::Renderer2D backgroundRenderer2d;
 
 sf::SoundBuffer pickupSoundbuffer;
+sf::SoundBuffer leavesSoundbuffer;
 sf::Sound soundPlayer;
 sf::Music waterPlayer;
 sf::Music greenPlayer;

@@ -820,7 +820,6 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 		}
 	}
 
-
 }
 
 bool Arrow::leftMap(int w, int h)

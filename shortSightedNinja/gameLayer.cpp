@@ -33,7 +33,7 @@ gl2d::Texture backgroundTexture;
 
 std::vector<Arrow> arrows;
 
-unsigned char currentBlock = 2;
+unsigned char currentBlock = Block::blueNoSolid1;
 
 int mapWidth, mapHeight;
 char mapName[256] = {};
@@ -118,83 +118,134 @@ bool gameLogic(float deltaTime)
 #pragma region Adding Blocks Into the World
 
 	//todo bug: buttonWasPressed works like buttonIsPressed
-	if (platform::isLMouseHeld())
+	if (platform::isKeyHeld(VK_CONTROL))
 	{
-		glm::vec2 mousePos;
-		mousePos.x = platform::getRelMousePosition().x + renderer2d.currentCamera.position.x;
-		mousePos.y = platform::getRelMousePosition().y + renderer2d.currentCamera.position.y;
-
-		mousePos = gl2d::scaleAroundPoint(mousePos, renderer2d.currentCamera.position +
-			glm::vec2{ renderer2d.windowW / 2, renderer2d.windowH / 2 }, 1.f / renderer2d.currentCamera.zoom);
-
-		if((mousePos.x) / BLOCK_SIZE<0 || (mousePos.x) / BLOCK_SIZE >= mapData.w
-			|| (mousePos.y) / BLOCK_SIZE <0 || (mousePos.y) / BLOCK_SIZE >= mapData.h)
+		if (platform::isLMouseButtonPressed())
 		{
-		
-		}else
-		{
-			if(currentBlock == Block::flagUp)
+			glm::vec2 mousePos;
+			mousePos.x = platform::getRelMousePosition().x + renderer2d.currentCamera.position.x;
+			mousePos.y = platform::getRelMousePosition().y + renderer2d.currentCamera.position.y;
+
+			mousePos = gl2d::scaleAroundPoint(mousePos, renderer2d.currentCamera.position +
+				glm::vec2{ renderer2d.windowW / 2, renderer2d.windowH / 2 }, 1.f / renderer2d.currentCamera.zoom);
+			if (mousePos.x / BLOCK_SIZE < 0 || (mousePos.x) / BLOCK_SIZE >= mapData.w
+				|| mousePos.y / BLOCK_SIZE < 0 || (mousePos.y) / BLOCK_SIZE >= mapData.h)
 			{
-				for (int x = 0; x < mapData.w; x++)
-					for (int y = 0; y < mapData.h; y++)
-					{
-						if(mapData.get(x, y).type == Block::flagUp)
+
+			}
+			else
+			{
+				if (mapData.get(mousePos.x / BLOCK_SIZE, (mousePos.y) / BLOCK_SIZE).type != Block::none)
+					currentBlock = mapData.get(mousePos.x / BLOCK_SIZE, (mousePos.y) / BLOCK_SIZE).type;
+			}
+		}
+	}
+	else
+	{
+		if (platform::isLMouseHeld())
+		{
+			glm::vec2 mousePos;
+			mousePos.x = platform::getRelMousePosition().x + renderer2d.currentCamera.position.x;
+			mousePos.y = platform::getRelMousePosition().y + renderer2d.currentCamera.position.y;
+
+			mousePos = gl2d::scaleAroundPoint(mousePos, renderer2d.currentCamera.position +
+				glm::vec2{ renderer2d.windowW / 2, renderer2d.windowH / 2 }, 1.f / renderer2d.currentCamera.zoom);
+
+			if ((mousePos.x) / BLOCK_SIZE < 0 || (mousePos.x) / BLOCK_SIZE >= mapData.w
+				|| (mousePos.y) / BLOCK_SIZE < 0 || (mousePos.y) / BLOCK_SIZE >= mapData.h)
+			{
+
+			}
+			else
+			{
+				if (currentBlock == Block::flagUp)
+				{
+					for (int x = 0; x < mapData.w; x++)
+						for (int y = 0; y < mapData.h; y++)
 						{
-							mapData.get(x, y).type = Block::flagDown;
+							if (mapData.get(x, y).type == Block::flagUp)
+							{
+								mapData.get(x, y).type = Block::flagDown;
+							}
 						}
-					}
+				}
+
+				mapData.get(mousePos.x / BLOCK_SIZE, mousePos.y / BLOCK_SIZE).type = currentBlock;
+
 			}
 
-			mapData.get((mousePos.x) / BLOCK_SIZE, (mousePos.y) / BLOCK_SIZE).type = currentBlock;
-
 		}
-
-	}
-
-	if (platform::isRMouseHeld())
-	{
-		glm::vec2 mousePos;
-		mousePos.x = platform::getRelMousePosition().x + renderer2d.currentCamera.position.x;
-		mousePos.y = platform::getRelMousePosition().y + renderer2d.currentCamera.position.y;
-
-		mousePos = gl2d::scaleAroundPoint(mousePos, renderer2d.currentCamera.position +
-			glm::vec2{ renderer2d.windowW / 2, renderer2d.windowH / 2 }, 1.f / renderer2d.currentCamera.zoom);
-		if ((mousePos.x) / BLOCK_SIZE < 0 || (mousePos.x) / BLOCK_SIZE >= mapData.w
-			|| (mousePos.y) / BLOCK_SIZE < 0 || (mousePos.y) / BLOCK_SIZE >= mapData.h)
+		else if (platform::isRMouseHeld())
 		{
+			glm::vec2 mousePos;
+			mousePos.x = platform::getRelMousePosition().x + renderer2d.currentCamera.position.x;
+			mousePos.y = platform::getRelMousePosition().y + renderer2d.currentCamera.position.y;
+
+			mousePos = gl2d::scaleAroundPoint(mousePos, renderer2d.currentCamera.position +
+				glm::vec2{ renderer2d.windowW / 2, renderer2d.windowH / 2 }, 1.f / renderer2d.currentCamera.zoom);
+			if ((mousePos.x) / BLOCK_SIZE < 0 || (mousePos.x) / BLOCK_SIZE >= mapData.w
+				|| (mousePos.y) / BLOCK_SIZE < 0 || (mousePos.y) / BLOCK_SIZE >= mapData.h)
+			{
+
+			}
+			else
+			{
+				mapData.get((mousePos.x) / BLOCK_SIZE, (mousePos.y) / BLOCK_SIZE).type = Block::none;
+			}
 
 		}
 		else
 		{
-			mapData.get((mousePos.x) / BLOCK_SIZE, (mousePos.y) / BLOCK_SIZE).type = Block::none;
-		}
+			glm::vec2 mousePos;
+			mousePos.x = platform::getRelMousePosition().x + renderer2d.currentCamera.position.x;
+			mousePos.y = platform::getRelMousePosition().y + renderer2d.currentCamera.position.y;
 
+			mousePos = gl2d::scaleAroundPoint(mousePos, renderer2d.currentCamera.position +
+				glm::vec2{ renderer2d.windowW / 2, renderer2d.windowH / 2 }, 1.f / renderer2d.currentCamera.zoom);
+			if (mousePos.x / BLOCK_SIZE < 0 || (mousePos.x) / BLOCK_SIZE >= mapData.w
+				|| mousePos.y / BLOCK_SIZE < 0 || (mousePos.y) / BLOCK_SIZE >= mapData.h)
+			{
+
+			}
+			else
+			{
+				gl2d::TextureAtlas spriteAtlas(BLOCK_COUNT, 4);
+
+				renderer2d.renderRectangle({ (int)(mousePos.x / BLOCK_SIZE) * BLOCK_SIZE , (int)(mousePos.y / BLOCK_SIZE) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE },
+					{}, 0, sprites, { spriteAtlas.get(currentBlock - 1, 0).x, spriteAtlas.get(currentBlock - 1,0).y,
+					 spriteAtlas.get(currentBlock - 1, 0).z, spriteAtlas.get(currentBlock - 1,0).w });
+			}
+		}
 	}
+
+
+
 
 
 #pragma endregion
 
 #pragma region Render the blocks
 
-	if(simulateLights || simulateUnlitLights)
+	if (simulateLights || simulateUnlitLights)
 	{
 		for (int x = 0; x < mapData.w; x++)
 			for (int y = 0; y < mapData.h; y++)
 			{
-				if(isLitTorch(mapData.get(x,y).type) && simulateLights)
+				if (isLitTorch(mapData.get(x, y).type) && simulateLights)
 				{
-					simuleteLightSpot({ x*BLOCK_SIZE + BLOCK_SIZE / 2,y*BLOCK_SIZE + BLOCK_SIZE / 2 },
+					simuleteLightSpot({ x * BLOCK_SIZE + BLOCK_SIZE / 2,y * BLOCK_SIZE + BLOCK_SIZE / 2 },
 						5, mapData);
 				}
 
-				if(unLitTorch(mapData.get(x, y).type) && simulateUnlitLights)
+				if (unLitTorch(mapData.get(x, y).type) && simulateUnlitLights)
 				{
-					simuleteLightSpot({ x*BLOCK_SIZE + BLOCK_SIZE / 2,y*BLOCK_SIZE + BLOCK_SIZE / 2 },
+					simuleteLightSpot({ x * BLOCK_SIZE + BLOCK_SIZE / 2,y * BLOCK_SIZE + BLOCK_SIZE / 2 },
 						5, mapData);
 				}
 
 			}
-	}else
+	}
+	else
 	{
 		for (int x = 0; x < mapData.w; x++)
 			for (int y = 0; y < mapData.h; y++)
@@ -221,7 +272,7 @@ bool gameLogic(float deltaTime)
 				{
 					mapData.get(x, y).mainColor.w = 0.2;
 				}
-	
+
 			}
 
 			if (nonCollidable)
@@ -253,33 +304,33 @@ bool gameLogic(float deltaTime)
 	renderer2d.renderRectangle({ mapData.w * BLOCK_SIZE,0,10,mapData.h * BLOCK_SIZE }, Colors_Turqoise);
 #pragma endregion
 
+#pragma region ImGui Check Boxes
+	for (int y = 0; y < mapData.h; y++)
 	{
-		for(int y=0;y<mapData.h;y++)
+		for (int x = 0; x < mapData.w; x++)
 		{
-			for (int x = 0; x < mapData.w; x++)
+			if (isColidable(mapData.get(x, y).type) && showBoxes)
 			{
-				if(isColidable(mapData.get(x,y).type) && showBoxes)
-				{
-					renderer2d.renderRectangle({ x*BLOCK_SIZE, y*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 0.5,0.1,0.5,0.2 });
-				}else if(mapData.get(x,y).type == Block::water3 && showDangers)
-				{
-					renderer2d.renderRectangle({ x*BLOCK_SIZE, y*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 1,0.2,0.2,0.9 });
-				}
-
-				if ((mapData.get(x, y).type == Block::flagDown) && highlightCheckPoints)
-				{
-					renderer2d.renderRectangle({ x*BLOCK_SIZE, y*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 0,1,0.6,0.7 });
-				}
-
-				if ((mapData.get(x, y).type == Block::flagUp) && highlightCheckPoints)
-				{
-					renderer2d.renderRectangle({ x*BLOCK_SIZE, y*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 0,1,0.2,0.9 });
-				}
+				renderer2d.renderRectangle({ x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 0.5,0.1,0.5,0.2 });
+			}
+			else if (mapData.get(x, y).type == Block::water3 && showDangers)
+			{
+				renderer2d.renderRectangle({ x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 1,0.2,0.2,0.9 });
 			}
 
+			if ((mapData.get(x, y).type == Block::flagDown) && highlightCheckPoints)
+			{
+				renderer2d.renderRectangle({ x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 0,1,0.6,0.7 });
+			}
+
+			if ((mapData.get(x, y).type == Block::flagUp) && highlightCheckPoints)
+			{
+				renderer2d.renderRectangle({ x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 0,1,0.2,0.9 });
+			}
 		}
-	
+
 	}
+#pragma endregion
 
 	renderer2d.flush();
 
@@ -345,11 +396,11 @@ void imguiFunc(float deltaTime)
 		temp.create(mapWidth, mapHeight, nullptr);
 
 		for (int x = 0; x < mapWidth && x < mapData.w; x++)
-			for(int y=0; y<mapHeight && y <mapData.h; y++)
+			for (int y = 0; y < mapHeight && y < mapData.h; y++)
 			{
 				temp.get(x, y) = mapData.get(x, y);
 			}
-	
+
 		mapData.cleanup();
 		mapData = temp;
 	}
@@ -357,7 +408,7 @@ void imguiFunc(float deltaTime)
 #pragma endregion
 
 #pragma region Save Map
-	
+
 	if (ImGui::Button("Save Map"))
 	{
 		char aux[256];
@@ -390,7 +441,7 @@ void imguiFunc(float deltaTime)
 	ImGui::Checkbox("Highlight Dangers", &showDangers); ImGui::SameLine();
 	ImGui::Checkbox("Simulate Lights", &simulateLights); ImGui::SameLine();
 	ImGui::Checkbox("Simulate Unlit Lights", &simulateUnlitLights); ImGui::SameLine();
-	ImGui::Checkbox("Highlight Check points", &highlightCheckPoints); 
+	ImGui::Checkbox("Highlight Check points", &highlightCheckPoints);
 
 	gl2d::TextureAtlas spriteAtlas(BLOCK_COUNT, 4);
 	unsigned char mCount = 1;
@@ -419,7 +470,7 @@ void imguiFunc(float deltaTime)
 				}
 				localCount++;
 			}
-			
+
 			mCount++;
 		}
 	}
@@ -441,8 +492,8 @@ void imguiFunc(float deltaTime)
 						llog((int)localCount);
 					}
 					ImGui::PopID();
-					
-					 if (localCount % 8 != 0)
+
+					if (localCount % 8 != 0)
 						ImGui::SameLine();
 					localCount++;
 				}
@@ -455,7 +506,7 @@ void imguiFunc(float deltaTime)
 			unsigned char localCount = 0;
 			while (mCount < Block::lastBlock)
 			{
-				if (!isColidable(mCount) &&!isUnfinished(mCount))
+				if (!isColidable(mCount) && !isUnfinished(mCount))
 				{
 					ImGui::PushID(mCount);
 					if (ImGui::ImageButton((void*)(intptr_t)sprites.id,
@@ -467,7 +518,7 @@ void imguiFunc(float deltaTime)
 					}
 					ImGui::PopID();
 
-					 if (localCount % 8 != 0)
+					if (localCount % 8 != 0)
 						ImGui::SameLine();
 					localCount++;
 				}

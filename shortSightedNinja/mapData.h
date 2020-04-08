@@ -3,11 +3,11 @@
 #include <vector>
 
 #define BLOCK_SIZE 8
-#define BLOCK_COUNT 204
+#define BLOCK_COUNT 212
 
-namespace Block
+namespace Block 
 {
-	enum : unsigned short
+	enum : unsigned short 
 	{
 		none = 0,
 		bareer,
@@ -118,11 +118,11 @@ namespace Block
 		stoneSolid12,
 		rockCracked,
 		tikiTotem,
-		unfinished5,
-		unfinished6,
-		unfinished7,
-		unfinished8,
-		unfinished9,
+		woodSolid12,
+		woodSolid13,
+		woodSolid14,
+		bridge1,
+		bridge2,
 		unfinished10,
 		unfinished11,
 		unfinished12,
@@ -201,60 +201,39 @@ namespace Block
 		tikiDecoration3,
 		skullDecoration,
 		bombArrow,
+		woddenDecoration1,
+		woddenDecoration2,
+		woddenDecoration3,
+		woddenDecoration4,
+		woddenDecoration5,
+		woddenDecoration6,
+		woddenDecoration7,
+		musicGreen,
+		musicRed,
+		musicTiki,
+		musicSnow,
+		musicCave,
+		leavesDecoration,
+		tikiPole,
+		torchUnlitWood,
+		torchLitWood,
 		lastBlock,
 	};
 };
 
 
-inline bool isUnfinished(unsigned char b)
+inline bool isUnfinished(unsigned short b)
 {
-	return b >= Block::unfinished5 &&b <= Block::unfinished16;
+	return b >= Block::unfinished10 &&b <= Block::unfinished16;
 }
 
-/*
-enum Block : char
-{
-	none = ' ',
-	dirt,
-	grassLeft,
-	gras,
-	grasRight,
-	stone,
-	brick,
-	redTarget,
-	blueTarget,
-	greenTarget,
-	redBlock,
-	redNo,
-	blueBlock,
-	blueNo,
-	greenBlock,
-	greenNo,
-	yellowBlock,
-	yellowNo,
-	keyHole,
-	dirtBackground,
-	stoneBackground,
-	dirtTorch,
-	dirtLitTorch,
-	stoneTorch,
-	stoneLitTorch,
-	brickTorch,
-	brickLitTorch,
-	brickBackground,
-	unlitTorch,
-	litTorch,
-	pole,
-	lastBlock,
-};
-*/
 
-inline bool isAir(unsigned char b)
+inline bool isAir(unsigned short b)
 {
 	return b == Block::none;
 }
 
-inline bool isRedSolid(unsigned char b)
+inline bool isRedSolid(unsigned short b)
 {
 	if (
 		b == Block::redSolid1 ||
@@ -273,7 +252,7 @@ inline bool isRedSolid(unsigned char b)
 	else { return 0; }
 }
 
-inline bool isRedNoSolid(unsigned char b)
+inline bool isRedNoSolid(unsigned short b)
 {
 	if (
 		b == Block::redNoSolid1 ||
@@ -293,7 +272,7 @@ inline bool isRedNoSolid(unsigned char b)
 }
 
 
-inline bool isBlueSolid(unsigned char b)
+inline bool isBlueSolid(unsigned short b)
 {
 	if (
 		b == Block::blueSolid1 ||
@@ -377,17 +356,35 @@ inline bool isOpaque(unsigned char b)
 	return isColidable(b);
 }
 
-inline bool isLitTorch(unsigned char b)
+inline bool isLitTorch(unsigned short b)
 {
-	return b == Block::torceTopBrickLit || b == Block::torceTopLeavesLit || b == Block::litLantern;
+	return b == Block::torceTopBrickLit || b == Block::torceTopLeavesLit || b == Block::litLantern
+		|| b == Block::torchLitWood;
 }
 
-inline bool unLitTorch(unsigned char b)
+inline bool unLitTorch(unsigned short  b)
 {
-	return b == Block::torceTopBrickUnlit || b == Block::torceTopLeavesUnlit || b == Block::unlitLantern;
+	return b == Block::torceTopBrickUnlit || b == Block::torceTopLeavesUnlit || b == Block::unlitLantern
+		|| b == Block::torchUnlitWood;
 
 }
 
+inline bool isWaterMusicSource(unsigned short b)
+{
+	if (
+		b == Block::waterFallBegin ||
+		b == Block::waterFallEnd ||
+		b == Block::water7 ||
+		b == Block::water4
+		)
+	{
+		return true;
+	}
+	else
+	{
+		return 0;
+	}
+}
 
 struct Edge
 {

@@ -7,6 +7,7 @@
 #include "Entity.h"
 #include "input.h"
 #include "Ui.h"
+#include "Particle.h"
 
 extern float gravitationalAcceleration;
 extern float jumpSpeed;
@@ -36,9 +37,8 @@ Entity player;
 gl2d::Texture sprites;
 gl2d::Texture characterSprite;
 gl2d::Texture arrowSprite;
+gl2d::Texture particlesSprite;
 
-//gl2d::FrameBuffer backGroundFBO;
-gl2d::Texture backgroundTexture;
 
 std::vector<Arrow> arrows;
 
@@ -52,6 +52,8 @@ const float arrowPickupCullDown = 5;
 
 glm::ivec2 playerSpawnPos = {0,0};
 
+Particle jumpParticle;
+
 struct ArrowItem
 {
 	int type;
@@ -63,16 +65,10 @@ struct ArrowItem
 std::vector <ArrowItem> inventory;
 std::vector <ArrowItem> actualInventorty;
 
-struct LightSource
-{
-	static constexpr int animationStartTime = 2;
-	glm::ivec2 pos;
-	float animationDuration = animationStartTime;
-};
 
 std::vector <LightSource> wallLights;
 
-float playerLight = 5;
+float playerLight = 6;
 float torchLight = 5;
 
 void loadLevel()
@@ -283,8 +279,10 @@ bool initGame()
 	mapRenderer.rightTexture.loadFromFile("resources//right.png");
 
 	characterSprite.loadFromFileWithPixelPadding("resources//character3.png", 8);
+	//todo replace with padding
 	arrowSprite.loadFromFile("resources//arrow.png");
-	//backgroundTexture.loadFromFile("background.jpg");
+	particlesSprite.loadFromFileWithPixelPadding("resources//particles.png", 8);
+
 	const char buff[] =
 	{
 		BACKGROUND_R,
@@ -292,12 +290,7 @@ bool initGame()
 		BACKGROUND_B,
 		0xff
 	};
-	backgroundTexture.create1PxSquare(buff);
 
-	//backGroundFBO.create(40 * BLOCK_SIZE, 40 * BLOCK_SIZE);
-
-	//font.createFromFile("font.ttf");
-	
 	arrows.reserve(10);
 
 	loadLevel();
@@ -364,7 +357,7 @@ bool gameLogic(float deltaTime)
 	{
 		if (player.wallGrab == 0)
 		{
-			if (player.grounded)
+			if (player.canJump)
 			{
 				player.jump();
 			}
@@ -430,7 +423,7 @@ bool gameLogic(float deltaTime)
 	player.applyVelocity(deltaTime);
 
 	player.resolveConstrains(mapData);
-	player.checkGrounded(mapData);
+	player.checkGrounded(mapData, deltaTime);
 	
 	if (input::isKeyHeld(input::Buttons::down))
 	{
@@ -611,22 +604,6 @@ bool gameLogic(float deltaTime)
 	
 	}
 
-#pragma endregion
-
-
-#pragma region drawStencil
-
-	//todo remove
-	//stencilRenderer2d.clearDrawData();
-	//stencilRenderer2d.flushFBO(backGroundFBO);
-	//
-	//backgroundRenderer2d.renderRectangle({ 0,0, mapData.w*BLOCK_SIZE, mapData.h*BLOCK_SIZE }, {}, 0, backgroundTexture);
-	//glUseProgram(backgroundRenderer2d.currentShader.id);
-	//glUniform1i(maskSamplerUniform, 1);
-	//backGroundFBO.texture.bind(1);
-	//backgroundRenderer2d.flush();
-	//
-	//backGroundFBO.clear();
 #pragma endregion
 
 #pragma region target

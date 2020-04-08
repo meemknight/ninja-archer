@@ -1,6 +1,7 @@
 #include "Entity.h"
 #include "glm/glm.hpp"
 #include <algorithm>
+#include "math.h"
 
 float gravitationalAcceleration = 64;
 float jumpSpeed = 22;
@@ -14,11 +15,15 @@ float airRunSpeed = 10;
 float grabMargin = 0.25f;
 float notGrabTimeVal = 0.2;
 bool snapWallGrab = 0;
+float ghostJumpTime = 0.05;
+float blockTouchDownMargin = 1;
 
 float arrowSpeed = 25;
 
 #undef max;
 #undef min;
+
+extern std::vector <LightSource> wallLights;
 
 //pos and size
 bool aabb(glm::vec4 b1, glm::vec4 b2)
@@ -255,31 +260,47 @@ void Entity::applyVelocity(float deltaTime)
 
 }
 
-void Entity::checkGrounded(MapData &mapDat)
+void Entity::checkGrounded(MapData &mapDat, float deltaTime)
 {
 	grounded = 0;
+	canJump = 0;
 
 	if (pos.y < -dimensions.y)
 	{
 		return;
 	}
 
-	int minx = floor((pos.x + 1)/BLOCK_SIZE);
-	int maxx = floor((pos.x + dimensions.x - 1)/BLOCK_SIZE);
+	int minx = floor((pos.x + 1) / BLOCK_SIZE);
+	int maxx = floor((pos.x + dimensions.x - 1) / BLOCK_SIZE);
 
 	minx = std::max(minx, 0);
 	maxx = std::min(maxx, mapDat.w);
-	
-	for(int x=minx; x<=maxx; x++)
+
+	for (int x = minx; x <= maxx; x++)
 	{
-		if(isColidable(mapDat.get(x, floor((pos.y +dimensions.y + 0.1)/BLOCK_SIZE)).type))
+		if (isColidable(mapDat.get(x, floor((pos.y + dimensions.y + 0.1 + blockTouchDownMargin) / BLOCK_SIZE)).type))
 		{
 			grounded = 1;
+			canJump = 1;
+			hasTouchGround = 1;
 			break;
 		}
 	}
 
+	if(!grounded && hasTouchGround == 1) //activate countdown
+	{ 
+		timeLeftGrounded = ghostJumpTime;
+		canJump = 1;
+		hasTouchGround = 0;
+	}else if(timeLeftGrounded > 0)
+	{
+		timeLeftGrounded -= deltaTime;
+		canJump = 1;
+	}
+	
+
 }
+
 
 void Entity::checkWall(MapData & mapData, int move)
 {
@@ -523,7 +544,7 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 	glm::vec2 curPos = lastPos;
 	bool done = 0;
 
-	float affinity = 0.3;
+	float affinity = 0.02;
 
 	while(!done)
 	{
@@ -544,7 +565,7 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 			|| pos.y >(mapData.h)*BLOCK_SIZE) {
 			break;
 		}
-		auto t = mapData.get(curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE).type;
+		auto &t = mapData.get(curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE).type;
 
 		if (!stuckInWall)
 		{
@@ -612,6 +633,16 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 						mapData.setNeighbors();
 					}
 					
+				}
+
+			}
+			else if (unLitTorch(t))
+			{
+				if (type == Arrow::ArrowTypes::fireArrow)
+				{
+					//todo check bigger lights if added
+					t++;
+					wallLights.push_back({ { curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE } });
 				}
 
 			}

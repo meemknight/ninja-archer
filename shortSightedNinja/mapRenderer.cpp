@@ -3,7 +3,6 @@
 #undef min
 #undef max
 
-
 void MapRenderer::init(ShaderProgram s)
 {
 	positionVector.reserve(200);
@@ -204,6 +203,7 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData,
 					|| data.type == Block::water5
 					|| data.type == Block::water6
 					|| data.type == Block::water7
+					|| data.type == Block::water8
 					|| data.type == Block::water9
 					|| data.type == Block::water10
 					|| data.type == Block::flagUp

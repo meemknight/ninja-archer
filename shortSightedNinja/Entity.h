@@ -18,6 +18,11 @@ struct Entity
 	bool grounded;
 	bool movingRight;
 
+	//this are related
+	bool hasTouchGround;
+	bool canJump;
+	float timeLeftGrounded;
+
 	float frameDuration = 0.10f;
 	float currentCount = 0;
 	int currentFrame = 0;
@@ -65,7 +70,7 @@ struct Entity
 
 	void applyVelocity(float deltaTime);
 
-	void checkGrounded(MapData &mapDat);
+	void checkGrounded(MapData &mapDat, float deltaTime);
 
 	void checkWall(MapData &mapData, int move);
 

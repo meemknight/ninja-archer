@@ -192,6 +192,7 @@ namespace Block
 		slimeArrow,
 		keyArrow,
 		levelExit,
+		webDecoration3,
 		lastBlock,
 	};
 };

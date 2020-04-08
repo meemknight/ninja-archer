@@ -1,13 +1,12 @@
 #pragma once
 #include "glm/vec4.hpp"
 #include <vector>
-
 #define BLOCK_SIZE 8
-#define BLOCK_COUNT 212
+#define BLOCK_COUNT 424
 
-namespace Block 
+namespace Block
 {
-	enum : unsigned short 
+	enum : unsigned short
 	{
 		none = 0,
 		bareer,
@@ -123,13 +122,25 @@ namespace Block
 		woodSolid14,
 		bridge1,
 		bridge2,
-		unfinished10,
-		unfinished11,
-		unfinished12,
-		unfinished13,
-		unfinished14,
-		unfinished15,
-		unfinished16,
+#pragma region unfinished
+
+		unfinished1, unfinished2, unfinished3, unfinished4, unfinished5,
+		unfinished6, unfinished7, unfinished8, unfinished9, unfinished10,
+		unfinished11, unfinished12, unfinished13, unfinished14, unfinished15,
+		unfinished16, unfinished17, unfinished18, unfinished19, unfinished20,
+		unfinished21, unfinished22, unfinished23, unfinished24, unfinished25,
+		unfinished26, unfinished27, unfinished28, unfinished29, unfinished30,
+		unfinished31, unfinished32, unfinished33, unfinished34, unfinished35,
+		unfinished36, unfinished37, unfinished38, unfinished39, unfinished40,
+		unfinished41, unfinished42, unfinished43, unfinished44, unfinished45,
+		unfinished46, unfinished47, unfinished48, unfinished49, unfinished50,
+		unfinished51, unfinished52, unfinished53, unfinished54, unfinished55,
+		unfinished56, unfinished57, unfinished58, unfinished59, unfinished60,
+		unfinished61, unfinished62, unfinished63, unfinished64, unfinished65,
+		unfinished66, unfinished67, unfinished68, unfinished69, unfinished70,
+		unfinished71, unfinished72, unfinished73, unfinished74, unfinished75,
+#pragma endregion
+
 		chainDecoration, /////////////////////////////start walls
 		brickDecoration1,
 		brickDecoration2,
@@ -220,11 +231,9 @@ namespace Block
 		lastBlock,
 	};
 };
-
-
 inline bool isUnfinished(unsigned short b)
 {
-	return b >= Block::unfinished10 &&b <= Block::unfinished16;
+	return b >= Block::unfinished1 &&b <= Block::unfinished75;
 }
 
 
@@ -291,7 +300,7 @@ inline bool isBlueSolid(unsigned short b)
 	else { return 0; }
 }
 
-inline bool isBlueNoSolid(unsigned char b)
+inline bool isBlueNoSolid(unsigned short b)
 {
 	if (
 		b == Block::blueNoSolid1 ||
@@ -310,7 +319,7 @@ inline bool isBlueNoSolid(unsigned char b)
 	else { return 0; }
 }
 
-inline bool isColidable(unsigned char b)
+inline bool isColidable(unsigned short b)
 {
 
 	if (
@@ -351,7 +360,7 @@ inline bool isColidable(unsigned char b)
 
 }
 
-inline bool isOpaque(unsigned char b)
+inline bool isOpaque(unsigned short b)
 {
 	return isColidable(b);
 }
@@ -416,7 +425,7 @@ struct BlockInfo
 	bool startAnim = 0;
 	signed char animPos = 0;
 	float timePassed = 0;
-	unsigned char type;
+	unsigned short type;
 	bool playerEntered = 0;
 	bool playerLeft = 0;
 	bool leftAnim = 1;

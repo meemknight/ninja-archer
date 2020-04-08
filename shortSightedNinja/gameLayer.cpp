@@ -33,7 +33,7 @@ gl2d::Texture backgroundTexture;
 
 std::vector<Arrow> arrows;
 
-unsigned char currentBlock = Block::blueNoSolid1;
+unsigned short currentBlock = Block::blueNoSolid1;
 
 int mapWidth, mapHeight;
 char mapName[256] = {};
@@ -373,7 +373,7 @@ void imguiFunc(float deltaTime)
 					aux += current[i];
 					i++;
 				}
-				blocks[it++] = static_cast<char>(std::stoi(aux));
+				blocks[it++] = static_cast<unsigned short>(std::stoi(aux));
 			}
 		}
 		blocks[it] = NULL;
@@ -444,12 +444,12 @@ void imguiFunc(float deltaTime)
 	ImGui::Checkbox("Highlight Check points", &highlightCheckPoints);
 
 	gl2d::TextureAtlas spriteAtlas(BLOCK_COUNT, 4);
-	unsigned char mCount = 1;
+	unsigned short mCount = 1;
 	ImGui::BeginChild("Block Selector");
 
 	if (collidable && nonCollidable)
 	{
-		unsigned char localCount = 0;
+		unsigned short localCount = 0;
 		while (mCount < Block::lastBlock)
 		{
 			if (!isUnfinished(mCount))
@@ -478,7 +478,7 @@ void imguiFunc(float deltaTime)
 	{
 		if (collidable && !nonCollidable)
 		{
-			unsigned char localCount = 0;
+			unsigned short localCount = 0;
 			while (mCount < Block::lastBlock)
 			{
 				if (isColidable(mCount) && !isUnfinished(mCount))
@@ -503,7 +503,7 @@ void imguiFunc(float deltaTime)
 
 		if (!collidable && nonCollidable)
 		{
-			unsigned char localCount = 0;
+			unsigned short localCount = 0;
 			while (mCount < Block::lastBlock)
 			{
 				if (!isColidable(mCount) && !isUnfinished(mCount))

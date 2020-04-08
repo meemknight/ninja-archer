@@ -23,6 +23,8 @@ float arrowSpeed = 25;
 #undef max;
 #undef min;
 
+extern Entity player;
+
 extern std::vector <LightSource> wallLights;
 
 //pos and size
@@ -340,6 +342,20 @@ void Entity::checkWall(MapData & mapData, int move)
 	//{
 	if(isColidable(mapData.get(rightX, minY).type) && move > 0)
 	{
+
+		if (isRedSolid(mapData.get(rightX, minY).type))
+		{
+			redGrab = 1;
+		}
+		if (isBlueSolid(mapData.get(rightX, minY).type))
+		{
+			blueGrab = 1;
+		}
+		if (mapData.get(rightX, minY).type == Block::fenceSolid)
+		{
+			grayGrab = 1;
+		}
+
 		//if ((minY == 0 || !isColidable(mapData.get(rightX, minY - 1).type)))
 		{
 			if(snapWallGrab)
@@ -354,6 +370,19 @@ void Entity::checkWall(MapData & mapData, int move)
 	}
 	if (isColidable(mapData.get(leftX, minY).type) && move < 0)
 	{
+
+		if(isRedSolid(mapData.get(leftX, minY).type))
+		{
+			redGrab = 1;
+		}
+		if (isBlueSolid(mapData.get(leftX, minY).type))
+		{
+			blueGrab = 1;
+		}
+		if (mapData.get(leftX, minY).type == Block::fenceSolid)
+		{
+			grayGrab = 1;
+		}
 		//if (minY == 0 || !isColidable(mapData.get(leftX, minY - 1).type))
 		{
 			if (snapWallGrab)
@@ -575,6 +604,14 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 				stuckInWall = 1;
 				if(!redTouch)
 				{
+					if(player.redGrab)
+					{
+						player.redGrab = 0;
+						player.blueGrab = 0;
+						player.grayGrab = 0;
+						player.wallGrab = 0;
+					}
+
 					for (int i = 0; i < mapData.w * mapData.h; i++)
 					{
 						if (isRedSolid(mapData.data[i].type))
@@ -597,6 +634,14 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 			
 				if(!blueTouch)
 				{
+					if (player.blueGrab)
+					{
+						player.redGrab = 0;
+						player.blueGrab = 0;
+						player.grayGrab = 0;
+						player.wallGrab = 0;
+					}
+
 					for (int i = 0; i < mapData.w * mapData.h; i++)
 					{
 						if (isBlueSolid(mapData.data[i].type))
@@ -619,6 +664,14 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 					stuckInWall = 1;
 					if(!grayTouch)
 					{
+						if (player.grayGrab)
+						{
+							player.redGrab = 0;
+							player.blueGrab = 0;
+							player.grayGrab = 0;
+							player.wallGrab = 0;
+						}
+
 						for (int i = 0; i < mapData.w * mapData.h; i++)
 						{
 							if (mapData.data[i].type == Block::fenceSolid)

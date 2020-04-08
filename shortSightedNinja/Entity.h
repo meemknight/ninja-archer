@@ -13,6 +13,9 @@ struct Entity
 
 	glm::vec2 velocity;
 
+	bool redGrab=0;
+	bool blueGrab=0;
+	bool grayGrab=0;
 	int wallGrab = 0;
 
 	bool grounded;

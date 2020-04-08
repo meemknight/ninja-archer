@@ -368,6 +368,9 @@ bool gameLogic(float deltaTime)
 			player.strafe(-1);
 			player.jumpFromWall();
 			player.wallGrab = 0;
+			player.redGrab = 0;
+			player.grayGrab = 0;
+			player.blueGrab = 0;
 			jumpParticle.set(player.pos, 1, !player.movingRight);
 
 		}
@@ -376,6 +379,9 @@ bool gameLogic(float deltaTime)
 			player.strafe(1);
 			player.jumpFromWall();
 			player.wallGrab = 0;
+			player.redGrab = 0;
+			player.grayGrab = 0;
+			player.blueGrab = 0;
 			jumpParticle.set(player.pos, 1, !player.movingRight);
 
 		}

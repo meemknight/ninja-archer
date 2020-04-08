@@ -264,6 +264,7 @@ bool initGame()
 
 	{//music
 		pickupSoundbuffer.loadFromFile("resources//pick_up.wav");
+		pickupSoundbuffer.loadFromFile("resources//leaves.wav");
 		waterPlayer.openFromFile("resources//water.wav");
 		waterPlayer.play();
 		waterPlayer.setLoop(1);
@@ -568,6 +569,12 @@ bool gameLogic(float deltaTime)
 				{
 					player.iswebs = true;
 				}
+
+				//mihui
+
+				//soundPlayer.stop();
+				//soundPlayer.setBuffer(leavesSoundbuffer);
+				//soundPlayer.play();
 
 			}
 		}

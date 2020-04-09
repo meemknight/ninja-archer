@@ -94,27 +94,27 @@ bool gameLogic(float deltaTime)
 #pragma region Camera Movement
 	if (platform::isKeyHeld('Q'))
 	{
-		renderer2d.currentCamera.zoom -= deltaTime;
+		renderer2d.currentCamera.zoom -= deltaTime*3;
 	}
 	if (platform::isKeyHeld('E'))
 	{
-		renderer2d.currentCamera.zoom += deltaTime;
+		renderer2d.currentCamera.zoom += deltaTime*3;
 	}
 	if (platform::isKeyHeld('D'))
 	{
-		renderer2d.currentCamera.position.x += deltaTime * 120;
+		renderer2d.currentCamera.position.x += deltaTime * 220;
 	}
 	if (platform::isKeyHeld('A'))
 	{
-		renderer2d.currentCamera.position.x -= deltaTime * 120;
+		renderer2d.currentCamera.position.x -= deltaTime * 220;
 	}
 	if (platform::isKeyHeld('W'))
 	{
-		renderer2d.currentCamera.position.y -= deltaTime * 120;
+		renderer2d.currentCamera.position.y -= deltaTime * 220;
 	}
 	if (platform::isKeyHeld('S'))
 	{
-		renderer2d.currentCamera.position.y += deltaTime * 120;
+		renderer2d.currentCamera.position.y += deltaTime * 220;
 	}
 #pragma endregion
 

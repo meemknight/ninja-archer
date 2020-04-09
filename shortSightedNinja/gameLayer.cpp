@@ -32,6 +32,8 @@ gl2d::FrameBuffer backGroundFBO;
 gl2d::Texture backgroundTexture;
 
 std::vector<Arrow> arrows;
+std::vector<signData> signs;
+std::vector<doorData> doors;
 
 unsigned short currentBlock = Block::blueNoSolid1;
 
@@ -46,6 +48,9 @@ bool showDangers = false;
 bool simulateLights = false;
 bool simulateUnlitLights = false;
 bool highlightCheckPoints = false;
+bool editItems = false;
+char signStr[255] = {};
+int levelId = -2;
 
 bool initGame()
 {
@@ -116,11 +121,69 @@ bool gameLogic(float deltaTime)
 	mapData.clearColorData();
 
 #pragma region Adding Blocks Into the World
-
-	//todo bug: buttonWasPressed works like buttonIsPressed
-	if (platform::isKeyHeld(VK_CONTROL))
+	if (editItems)
 	{
 		if (platform::isLMouseButtonPressed())
+		{
+			glm::vec2 mousePos;
+			mousePos.x = platform::getRelMousePosition().x + renderer2d.currentCamera.position.x;
+			mousePos.y = platform::getRelMousePosition().y + renderer2d.currentCamera.position.y;
+
+			mousePos = gl2d::scaleAroundPoint(mousePos, renderer2d.currentCamera.position +
+				glm::vec2{ renderer2d.windowW / 2, renderer2d.windowH / 2 }, 1.f / renderer2d.currentCamera.zoom);
+			if (mousePos.x / BLOCK_SIZE < 0 || (mousePos.x) / BLOCK_SIZE >= mapData.w
+				|| mousePos.y / BLOCK_SIZE < 0 || (mousePos.y) / BLOCK_SIZE >= mapData.h)
+			{
+
+			}
+			else
+			{
+				auto block = mapData.get(mousePos.x / BLOCK_SIZE, mousePos.y / BLOCK_SIZE).type;
+
+				if (isSign(block))
+				{
+					auto it = std::find_if(signs.begin(), signs.end(),
+						[x = mousePos.x / BLOCK_SIZE, y = mousePos.y / BLOCK_SIZE](signData& d)
+					{ return d.pos.x == x && d.pos.y == y; });
+					if (it != signs.end())
+					{
+						std::string s(signStr);
+
+						it->text = s;
+					}
+					else
+					{
+						std::string s(signStr);
+						glm::ivec2 pos = { mousePos.x / BLOCK_SIZE, mousePos.y / BLOCK_SIZE };
+						signData d(pos, s);
+						signs.emplace_back(d);
+					}
+				}
+
+				if (isDoor(block))
+				{
+					auto it = std::find_if(doors.begin(), doors.end(),
+						[x = mousePos.x / BLOCK_SIZE, y = mousePos.y / BLOCK_SIZE](doorData& d)
+					{ return d.pos.x == x && d.pos.y == y; });
+
+					if (it != doors.end())
+					{
+						it->levelId = levelId;
+					}
+					else
+					{
+						glm::ivec2 pos = { mousePos.x / BLOCK_SIZE, mousePos.y / BLOCK_SIZE };
+						doorData d(pos, levelId);
+						doors.emplace_back(d);
+					}
+				}
+
+			}
+		}
+	}
+	else if (platform::isKeyHeld(VK_CONTROL))
+	{
+		if (platform::isLMouseButtonPressed() || platform::isRMouseButtonPressed())
 		{
 			glm::vec2 mousePos;
 			mousePos.x = platform::getRelMousePosition().x + renderer2d.currentCamera.position.x;
@@ -183,8 +246,8 @@ bool gameLogic(float deltaTime)
 
 			mousePos = gl2d::scaleAroundPoint(mousePos, renderer2d.currentCamera.position +
 				glm::vec2{ renderer2d.windowW / 2, renderer2d.windowH / 2 }, 1.f / renderer2d.currentCamera.zoom);
-			if ((mousePos.x) / BLOCK_SIZE < 0 || (mousePos.x) / BLOCK_SIZE >= mapData.w
-				|| (mousePos.y) / BLOCK_SIZE < 0 || (mousePos.y) / BLOCK_SIZE >= mapData.h)
+			if (mousePos.x / BLOCK_SIZE < 0 || (mousePos.x) / BLOCK_SIZE >= mapData.w
+				|| mousePos.y / BLOCK_SIZE < 0 || (mousePos.y) / BLOCK_SIZE >= mapData.h)
 			{
 
 			}
@@ -217,10 +280,6 @@ bool gameLogic(float deltaTime)
 			}
 		}
 	}
-
-
-
-
 
 #pragma endregion
 
@@ -318,14 +377,19 @@ bool gameLogic(float deltaTime)
 				renderer2d.renderRectangle({ x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 1,0.2,0.2,0.9 });
 			}
 
-			if ((mapData.get(x, y).type == Block::flagDown) && highlightCheckPoints)
+			if (mapData.get(x, y).type == Block::flagDown && highlightCheckPoints)
 			{
 				renderer2d.renderRectangle({ x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 0,1,0.6,0.7 });
 			}
 
-			if ((mapData.get(x, y).type == Block::flagUp) && highlightCheckPoints)
+			if (mapData.get(x, y).type == Block::flagUp && highlightCheckPoints)
 			{
 				renderer2d.renderRectangle({ x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 0,1,0.2,0.9 });
+			}
+
+			if (isSign(mapData.get(x, y).type && editItems))
+			{
+				// show signs
 			}
 		}
 
@@ -411,7 +475,7 @@ void imguiFunc(float deltaTime)
 
 	if (ImGui::Button("Save Map"))
 	{
-		char aux[256];
+		char aux[256] = {};
 		strcpy(aux, name);
 		strcat(aux, ".level");
 
@@ -425,6 +489,21 @@ void imguiFunc(float deltaTime)
 			}
 			outputFile << "\n";
 		}
+
+		outputFile << "\n\n";
+
+		for (auto& i : signs)
+		{
+			outputFile << "md.signDataVector.emplace_back( glm::ivec2{" << i.pos.x << ", " << i.pos.y << "}, \"" << i.text << "\");\n";
+		}
+
+		outputFile << "\n\n";
+
+		for (auto& i : doors)
+		{
+			outputFile << "md.exitDataVector.emplace_back(glm::ivec2{ " << i.pos.x << ", " << i.pos.y << " }, " << i.levelId << ");\n";
+		}
+
 		outputFile.close();
 	}
 
@@ -432,6 +511,10 @@ void imguiFunc(float deltaTime)
 #pragma endregion
 
 #pragma region Block Selector
+	ImGui::Checkbox("Edit items", &editItems);
+	ImGui::InputText("Sign Text", signStr, sizeof(signStr));
+
+	ImGui::InputInt("Next Level Id", &levelId);
 
 
 	ImGui::Checkbox("Show Collidable Blocks", &collidable);

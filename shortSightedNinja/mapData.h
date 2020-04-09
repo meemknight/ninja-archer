@@ -1,6 +1,8 @@
 #pragma once
 #include "glm/vec4.hpp"
 #include <vector>
+#include <glm/vec2.hpp>
+#include <string>
 #define BLOCK_SIZE 8
 #define BLOCK_COUNT 424
 
@@ -248,13 +250,16 @@ namespace Block
 		treeDecoration18,
 		webDecoration4,
 		webDecoration5,
+		brickDecoration6,
+		brickDecoration7,
 		lastBlock,
+
 	};
 };
 
 inline bool isUnfinished(unsigned short b)
 {
-	return b >= Block::unfinished1 &&b <= Block::unfinished75;
+	return b >= Block::unfinished1 && b <= Block::unfinished75;
 }
 
 
@@ -365,7 +370,7 @@ inline bool isColidable(unsigned short b)
 		b == Block::blueNoSolidFence ||
 		b == Block::fenceNoSolid ||
 		b == Block::snowSolid2 ||
-		b == Block::snowSolid9||
+		b == Block::snowSolid9 ||
 		b == Block::bridge2
 		) {
 		return 0;
@@ -417,10 +422,43 @@ inline bool isWaterMusicSource(unsigned short b)
 	}
 }
 
+inline bool isSign(unsigned short b)
+{
+	return b == Block::sign ||
+		b == Block::signDecoration1 ||
+		b == Block::signDecoration2 ||
+		b == Block::signDecoration3 ||
+		b == Block::signDecoration4 ||
+		b == Block::signDecoration5;
+}
+
+inline bool isDoor(unsigned short b)
+{
+	return b == Block::levelExit;
+}
+
 struct Edge
 {
 	float sx, sy;
 	float ex, ey;
+};
+
+struct signData
+{
+	signData() {};
+	signData(glm::ivec2 p, const std::string& t) : pos(p), text(t) {}
+
+	glm::ivec2 pos;
+	std::string text;
+};
+
+struct doorData
+{
+	doorData() {};
+	doorData(glm::ivec2 p, const int i) : pos(p), levelId(i) {}
+
+	glm::ivec2 pos;
+	int levelId;
 };
 
 struct BlockInfo

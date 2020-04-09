@@ -133,7 +133,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="blocks.vert" />
-    <None Include="blocks.frag" />
+    <None Include="resources\blocks.frag" />
+    <None Include="resources\blocks.vert" />
   </ItemGroup>
 </Project>

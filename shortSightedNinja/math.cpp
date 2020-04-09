@@ -6,6 +6,7 @@
 #include "Entity.h"
 
 #undef max
+#undef min
 
 extern gl2d::Renderer2D renderer2d;
 
@@ -25,102 +26,11 @@ void drawLine(glm::vec2 x, glm::vec2 y, glm::vec3 color, float width)
 
 }
 
-
-void simulateLight(glm::vec2 pos, float radius, MapData &mapData, std::vector<glm::vec2> &triangles)
-{
-	triangles.clear();
-
-	mapData.CalculateVisibilityPolygon(pos.x, pos.y, radius);
-
-	auto it = std::unique(
-		mapData.vecVisibilityPolygonPoints.begin(),
-		mapData.vecVisibilityPolygonPoints.end(),
-		[&](const VisibilityPolygonPoints& t1, const VisibilityPolygonPoints& t2)
-		{
-			return fabs(t1.x - t2.x) < 0.1f && fabs(t1.y - t2.y) < 0.1f;
-		});
-	mapData.vecVisibilityPolygonPoints.resize(std::distance(mapData.vecVisibilityPolygonPoints.begin(), it));
-
-	if (mapData.vecVisibilityPolygonPoints.size() > 1)
-	{
-		// Draw each triangle in fan
-		for(int i = 0; i < mapData.vecVisibilityPolygonPoints.size() - 1; i++)
-		{
-			drawLine({ pos.x, pos.y }, {mapData.vecVisibilityPolygonPoints[i].x,mapData.vecVisibilityPolygonPoints[i].y },
-				{ 0.245f,0.189f,0.031f }, 3.0);
-
-			drawLine({ pos.x, pos.y }, { mapData.vecVisibilityPolygonPoints[i + 1].x,mapData.vecVisibilityPolygonPoints[i + 1].y },
-				{ 0.245f,0.189f,0.031f }, 3.0);
-
-			drawLine({mapData.vecVisibilityPolygonPoints[i].x,mapData.vecVisibilityPolygonPoints[i].y },
-				{ mapData.vecVisibilityPolygonPoints[i + 1].x,mapData.vecVisibilityPolygonPoints[i + 1].y },
-				{ 0.245f,0.189f,0.031f }, 3.0);
-
-		}
-
-		drawLine({ pos.x, pos.y }, { mapData.vecVisibilityPolygonPoints[mapData.vecVisibilityPolygonPoints.size() - 1].x,
-			mapData.vecVisibilityPolygonPoints[mapData.vecVisibilityPolygonPoints.size() - 1].y },
-			{ 0.245f,0.189f,0.031f }, 3.0);
-		drawLine({ pos.x, pos.y }, { mapData.vecVisibilityPolygonPoints[0].x, mapData.vecVisibilityPolygonPoints[0].y },
-			{ 0.245f,0.189f,0.031f }, 3.0);
-		drawLine({ mapData.vecVisibilityPolygonPoints[mapData.vecVisibilityPolygonPoints.size() - 1].x,
-			mapData.vecVisibilityPolygonPoints[mapData.vecVisibilityPolygonPoints.size() - 1].y },
-			{ mapData.vecVisibilityPolygonPoints[0].x, mapData.vecVisibilityPolygonPoints[0].y }, 
-			{ 0.245f,0.189f,0.031f }, 3.0);
-	}
-
-
-
-	for (int x = 0; x < 40; x++)
-	{
-		for (int y = 0; y < 40; y++)
-		{
-			mapData.get(x, y).mainColor = { 1,1,1,1 };
-		}
-	}
-
-#pragma region Debug the polygon edges
-	/*for(auto &e: mapData.vecEdges)
-	{
-		drawLine({ e.sx, e.sy }, { e.ex, e.ey }, {0.066f,0.135f,0.245f}, 5.0);
-		drawLine({ e.sx, e.sy }, { e.sx + 0.4, e.sy + 0.4 }, {0.245f,0.066f,0.066f},6.0);
-		drawLine({ e.ex, e.ey }, { e.ex + 0.4, e.ey + 0.4 }, { 0.245f,0.066f,0.066f },6.0);
-	}*/
-#pragma endregion
-}
-
-void simuleteLightTrace(glm::vec2 pos, float radius, MapData & mapData, std::vector<glm::vec2>& triangles)
-{
-	float rotateStep = 0.1;
-	float moveStep = BLOCK_SIZE * 0.1;
-
-	for(float i=0; i< 3.141*2.f; i+= rotateStep)
-	{
-		glm::vec2 movePos = pos;
-		glm::vec2 dir = { cos(i), -sin(i) };
-		dir *= moveStep;
-		
-		for(int d=0; d<radius; d += moveStep)
-		{
-			movePos += dir;
-			if(mapData.get(movePos.x / BLOCK_SIZE, movePos.y / BLOCK_SIZE).type == '!')
-			{
-				mapData.get(movePos.x / BLOCK_SIZE, movePos.y / BLOCK_SIZE).mainColor= glm::vec4(1, 1, 1, 1);
-				break;
-			}
-		}
-		drawLine( pos , movePos, { 0.245f,0.66f,0.66f }, 6.0);
-
-	}
-
-
-}
-
-void simuleteLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vector<Arrow> &arrows, gl2d::Renderer2D &maskRenderer, gl2d::Texture lightT)
+void simuleteLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vector<Arrow> &arrows, std::vector<Pickup> &pickups, float heat)
 {
 	//stencilRenderer.renderRectangle({ 3 * BLOCK_SIZE, 3 * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 1,1,1,1 });
 
-	maskRenderer.renderRectangle({ pos.x - radius*BLOCK_SIZE*2, pos.y - radius * BLOCK_SIZE*2, 4 * radius*BLOCK_SIZE, 4 * radius*BLOCK_SIZE }, {}, 0, lightT);
+	//xmaskRenderer.renderRectangle({ pos.x - radius*BLOCK_SIZE*2, pos.y - radius * BLOCK_SIZE*2, 4 * radius*BLOCK_SIZE, 4 * radius*BLOCK_SIZE }, {}, 0, lightT);
 
 	{
 		float r = radius;
@@ -136,7 +46,25 @@ void simuleteLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vect
 			float l = (1 - perc);
 
 			if (l < 0) { l = 0; }
-			l = sqrt(l);
+
+			i.light = std::max(i.light, l);
+		}
+	}
+
+	{
+		float r = radius ;
+		float maxDist = r * r *BLOCK_SIZE * BLOCK_SIZE;
+		for (auto &i : pickups)
+		{
+			float x = pos.x - i.pos.x*BLOCK_SIZE;
+			float y = pos.y - i.pos.y*BLOCK_SIZE;
+			float dist = x * x + y * y;
+
+			float perc = dist / maxDist;
+			float l = (1 - perc);
+
+			if (l < 0) { l = 0; }
+			l = pow(l,0.9);
 
 			i.light = std::max(i.light, l);
 		}
@@ -155,8 +83,16 @@ void simuleteLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vect
 				if (xPos >= 0 && yPos >= 0 && xPos < mapData.w && yPos < mapData.h)
 				{
 					float perc = dist / maxDist;
+					glm::vec4 color= { 1 - perc,1 - perc,1 - perc,1 };
+					
+					{
+						float heatPerc = std::max(0.08f, perc);
+						heatPerc = std::pow(heatPerc, heat);
+						mapData.get(xPos, yPos).heat = std::min( heatPerc, mapData.get(xPos, yPos).heat );
+					}
+
 					mapData.get(xPos, yPos).mainColor = glm::max(mapData.get(xPos, yPos).mainColor,
-						glm::vec4{ 1 - perc,1 - perc,1 - perc,1 });
+						color);
 
 					float top = 0;
 					float bottom = 0;
@@ -193,6 +129,11 @@ void simuleteLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vect
 
 						left = glm::dot(normalVect, dirVect) * (1 - perc);
 					}
+
+					//top = sqrt(top);
+					//bottom = sqrt(top);
+					//left = sqrt(left);
+					//right = sqrt(right);
 
 					mapData.get(xPos, yPos).sideColors = glm::max(mapData.get(xPos, yPos).sideColors,
 						glm::vec4{ top,bottom,left,right });

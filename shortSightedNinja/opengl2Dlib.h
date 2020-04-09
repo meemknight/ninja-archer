@@ -74,10 +74,13 @@ namespace gl2d
 
 		//Note: This function expects a buffer of bytes in GL_RGBA format
 		void createFromBuffer(const char* image_data, const int width, const int height);
-		void create1PxSquare();
+		void create1PxSquare(const char *b = 0);
 		void createFromFileData(const unsigned char* image_file_data, const size_t image_file_size);
+		void createFromFileDataWithPixelPadding(const unsigned char* image_file_data, 
+			const size_t image_file_size, int blockSize);
 
 		void loadFromFile(const char *fileName);
+		void loadFromFileWithPixelPadding(const char *fileName, int blockSize);
 
 		void bind(const unsigned int sample = 0);
 		void unbind();
@@ -166,7 +169,7 @@ namespace gl2d
 	};
 
 
-#define Renderer2D_Max_Buffer_Capacity 2000
+#define Renderer2D_Max_Buffer_Capacity 5000
 #define DefaultTextureCoords (glm::vec4{ 0, 1, 1, 0 })
 
 	enum Renderer2DBufferType
@@ -212,6 +215,14 @@ namespace gl2d
 
 		//converts pixels to screen (top left) (bottom right)
 		glm::vec4 toScreen(const glm::vec4 &transform);
+
+		inline void clearDrawData()
+		{
+			spritePositionsCount = 0;
+			spriteColorsCount = 0;
+			spriteTexturesCount = 0;
+			texturePositionsCount = 0;
+		}
 
 		// The origin will be the bottom left corner since it represents the line for the text to be drawn
 		//Pacing and lineSpace are influenced by size
@@ -271,6 +282,8 @@ namespace gl2d
 
 	glm::vec4 computeTextureAtlas(int xCount, int yCount, int x, int y, bool flip = 0);
 
+	glm::vec4 computeTextureAtlasWithPadding(int mapXsize, int mapYsize, int xCount, int yCount, int x, int y, bool flip = 0);
+
 	struct TextureAtlas
 	{
 		TextureAtlas() {};
@@ -282,6 +295,23 @@ namespace gl2d
 		glm::vec4 get(int x, int y, bool flip = 0)
 		{
 			return computeTextureAtlas(xCount, yCount, x, y, flip);
+		}
+	};
+
+	struct TextureAtlasPadding
+	{
+		TextureAtlasPadding() {};
+		TextureAtlasPadding(int x, int y, int xSize, int ySize) :xCount(x), yCount(y) 
+		,xSize(xSize), ySize(ySize){};
+
+		int xCount;
+		int yCount;
+		int xSize;
+		int ySize;
+
+		glm::vec4 get(int x, int y, bool flip = 0)
+		{
+			return computeTextureAtlasWithPadding(xSize, ySize, xCount, yCount, x, y, flip);
 		}
 	};
 

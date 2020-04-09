@@ -440,8 +440,12 @@ struct BlockInfo
 #define EAST 2
 #define WEST 3
 
+
 struct MapData
 {
+	//todo
+	std::vector<glm::ivec2> signText;
+
 	std::vector<glm::vec2> waterPos;
 	std::vector<glm::vec2> greenSoundPos;
 	std::vector<glm::vec2> redSoundPos;

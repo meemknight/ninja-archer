@@ -222,7 +222,6 @@ void MapData::create(int w, int h, unsigned short* d = 0)
 		}
 
 	setNeighbors();
-	//todo setup neighbours
 }
 
 BlockInfo& MapData::get(int x, int y)

@@ -51,6 +51,7 @@ gl2d::Texture sprites;
 gl2d::Texture characterSprite;
 gl2d::Texture arrowSprite;
 gl2d::Texture particlesSprite;
+gl2d::Texture crackTexture;
 
 std::vector<Arrow> arrows;
 
@@ -65,6 +66,7 @@ const float arrowPickupCullDown = 5;
 glm::ivec2 playerSpawnPos = { 0,0 };
 
 Particle jumpParticle;
+std::vector<Particle>crackParticles;
 
 struct ArrowItem
 {
@@ -81,6 +83,8 @@ std::vector <LightSource> wallLights;
 
 float playerLight = 6;
 float torchLight = 5;
+
+void respawn();
 
 void loadLevel()
 {
@@ -205,6 +209,8 @@ void loadLevel()
 				wallLights.push_back({ {x,y}, 0 });
 			}
 		}
+
+	respawn();
 }
 
 //todo
@@ -212,7 +218,6 @@ void respawn()
 {
 	inventory.clear();
 	//this vector should always have all arrows in order (and all of them there)
-	//todo 0's here probably
 	inventory.push_back({ 0,0,3 });
 	inventory.push_back({ 1,0,3 });
 	inventory.push_back({ 2,0,3 });
@@ -260,6 +265,7 @@ bool initGame()
 	//todo replace with padding
 	arrowSprite.loadFromFile("resources//arrow.png");
 	particlesSprite.loadFromFileWithPixelPadding("resources//particles.png", 8);
+	crackTexture.loadFromFileWithPixelPadding("resources//crackAnim.png", 8);
 
 	const char buff[] =
 	{
@@ -268,6 +274,8 @@ bool initGame()
 		BACKGROUND_B,
 		0xff
 	};
+
+	jumpParticle.animCount = 3;
 
 	arrows.reserve(10);
 
@@ -411,25 +419,31 @@ bool gameLogic(float deltaTime)
 
 	if (input::isKeyPressedOn(input::Buttons::shoot) && currentArrow > -1 && !player.dying)
 	{
-		for (auto& i : inventory)
+		player.idleTime = 0;
 		{
-			if (i.type == actualInventorty[currentArrow].type)
+
+
+			for (auto& i : inventory)
 			{
-				i.count--;
-				break;
+				if (i.type == actualInventorty[currentArrow].type)
+				{
+					//i.count--;
+					break;
+				}
 			}
+
+			Arrow a;
+			a.type = (Arrow::ArrowTypes)actualInventorty[currentArrow].type;
+			a.pos = player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2);
+			a.shootDir = input::getShootDir({ w / 2,h / 2 });
+			//a.pos.x += a.shootDir.x * BLOCK_SIZE * 0.9;
+			//a.pos.y += a.shootDir.y * BLOCK_SIZE * 0.9;
+			arrows.push_back(a);
 		}
-
-		Arrow a;
-		a.type = (Arrow::ArrowTypes)actualInventorty[currentArrow].type;
-		a.pos = player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2);
-		a.shootDir = input::getShootDir({ w / 2,h / 2 });
-		//a.pos.x += a.shootDir.x * BLOCK_SIZE * 0.9;
-		//a.pos.y += a.shootDir.y * BLOCK_SIZE * 0.9;
-		arrows.push_back(a);
 	}
+	
+	
 
-	//todo add player dimensions
 	renderer2d.currentCamera.follow(player.pos + (player.dimensions / 2.f), deltaTime * 120, 30, renderer2d.windowW, renderer2d.windowH);
 	//stencilRenderer2d.currentCamera = renderer2d.currentCamera;
 	backgroundRenderer2d.currentCamera = renderer2d.currentCamera;
@@ -595,8 +609,14 @@ bool gameLogic(float deltaTime)
 
 				if(g.type == Block::sign)
 				{
-					renderer2d.renderText({ BLOCK_SIZE*(x - 2), BLOCK_SIZE*(y - 1) },
-						"Sample Explicatii\ndf", font, {1,1,1,1}, 0.09);
+					renderer2d.renderText({ BLOCK_SIZE*(x), BLOCK_SIZE*(y - 1) },
+						"Lorem Ipsum is simply dummy rfawrwa \n"
+						"text  \n"
+						"and t\n"
+						"has bard  \n"
+						"sinceown\n"
+						"agall it.\n"
+						"It ha ce", font, {1,1,1,1}, 0.09);
 				}
 
 			}
@@ -775,7 +795,31 @@ bool gameLogic(float deltaTime)
 
 #pragma endregion
 
+#pragma region particles
+
+
+	for (int i = 0; i < crackParticles.size(); i++)
+	{
+
+		crackParticles[i].duration -= deltaTime;
+
+		if (crackParticles[i].duration <= 0)
+		{
+			crackParticles.erase(crackParticles.begin() + i);
+			i--;
+
+		}else
+		{
+			crackParticles[i].draw(renderer2d, deltaTime, crackTexture);
+		}
+	}
+
 	jumpParticle.draw(renderer2d, deltaTime, particlesSprite);
+
+#pragma endregion
+
+
+
 
 	player.draw(renderer2d, deltaTime, characterSprite);
 

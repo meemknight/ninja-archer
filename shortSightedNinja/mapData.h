@@ -3,6 +3,7 @@
 #include "glm/vec2.hpp"
 #include <vector>
 
+
 #define BLOCK_SIZE 8
 #define BLOCK_COUNT 424
 
@@ -230,10 +231,27 @@ namespace Block
 		tikiPole,
 		torchUnlitWood,
 		torchLitWood,
+		treeDecoration1,
+		treeDecoration2,
+		treeDecoration3,
+		treeDecoration4,
+		treeDecoration5,
+		treeDecoration6,
+		treeDecoration7,
+		treeDecoration8,
+		treeDecoration9,
+		treeDecoration10,
+		treeDecoration11,
+		treeDecoration12,
+		treeDecoration13,
+		treeDecoration14,
+		treeDecoration15,
+		treeDecoration16,
+		treeDecoration17,
+		treeDecoration18,
 		lastBlock,
 	};
 };
-
 
 inline bool isAir(unsigned short b)
 {
@@ -359,7 +377,8 @@ inline bool isColidable(unsigned short b)
 		b == Block::blueNoSolidFence ||
 		b == Block::fenceNoSolid ||
 		b == Block::snowSolid2 ||
-		b == Block::snowSolid9
+		b == Block::snowSolid9||
+		b == Block::bridge2
 		) {
 		return 0;
 	}

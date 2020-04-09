@@ -2,9 +2,12 @@
 #include <fstream>
 #include <sstream>
 #include "tools.h"
+#include <algorithm>
 
 GLint maskSamplerUniform = 0;
 gl2d::internal::ShaderProgram maskShader = {};
+
+#undef max
 
 namespace gl2d
 {
@@ -876,7 +879,7 @@ namespace gl2d
 		return glm::vec4(v1.x, v1.y, v3.x, v3.y);
 	}
 
-	void Renderer2D::renderText(const glm::vec2 position, const char * text, const Font font, const Color4f color, const float size, const float spacing, const float line_space)
+	void Renderer2D::renderText(glm::vec2 position, const char * text, const Font font, const Color4f color, const float size, const float spacing, const float line_space)
 	{
 		const int text_length = strlen(text);
 		Rect rectangle;
@@ -884,6 +887,56 @@ namespace gl2d
 
 		//This is the y position we render at because it advances when we encounter newlines
 		float linePositionY = position.y;
+
+		float maxPos = 0;
+		float maxPosY = 0;
+
+		for (int i = 0; i < text_length-1; i++)
+		{
+			if (text[i] == '\n')
+			{
+				rectangle.x = position.x;
+				linePositionY += (font.max_height + line_space) * size;
+			}
+			else if (text[i] == '\t')
+			{
+				rectangle.x += spacing * 3 * size * 4;
+			}
+			else if (text[i] == ' ')
+			{
+				rectangle.x += spacing * 3 * size;
+			}
+			else if (text[i] >= ' ' && text[i] <= '~')
+			{
+				const stbtt_aligned_quad quad = internal::fontGetGlyphQuad(font, text[i]);
+
+				rectangle.z = quad.x1 - quad.x0;
+				rectangle.w = quad.y1 - quad.y0;
+
+				rectangle.z *= size;
+				rectangle.w *= size;
+
+				rectangle.y = linePositionY - rectangle.w;
+
+				glm::vec4 colorData[4] = { color, color, color, color };
+				rectangle.x += rectangle.z + spacing * size;
+				maxPos = std::max(maxPos, rectangle.x);
+				maxPosY = std::max(maxPosY, rectangle.y);
+			}
+		}
+
+		float padd = maxPos - position.x;
+		padd /= 2;
+		position.x -= padd;
+
+		float paddY = maxPosY - position.y;
+		position.y -= paddY;
+
+		rectangle = {};
+		rectangle.x = position.x;
+
+		//This is the y position we render at because it advances when we encounter newlines
+		linePositionY = position.y;
 
 		for (int i = 0; i < text_length; i++)
 		{
@@ -1186,15 +1239,15 @@ namespace gl2d
 
 		//glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
-		glGenTextures(1, &depthtTexture);
-		glBindTexture(GL_TEXTURE_2D, depthtTexture);
+		//glGenTextures(1, &depthtTexture);
+		//glBindTexture(GL_TEXTURE_2D, depthtTexture);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, w, h, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+		//glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, w, h, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthtTexture, 0);
+		//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthtTexture, 0);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -1207,8 +1260,8 @@ namespace gl2d
 		glBindTexture(GL_TEXTURE_2D, texture.id);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
-		glBindTexture(GL_TEXTURE_2D, depthtTexture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		//glBindTexture(GL_TEXTURE_2D, depthtTexture);
+		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
 	}
 
@@ -1220,8 +1273,8 @@ namespace gl2d
 		glDeleteTextures(1, &texture.id);
 		texture = 0;
 
-		glDeleteTextures(1, &depthtTexture);
-		depthtTexture = 0;
+		//glDeleteTextures(1, &depthtTexture);
+		//depthtTexture = 0;
 	}
 
 	void FrameBuffer::clear()

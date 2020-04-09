@@ -17,10 +17,10 @@ void Particle::draw(gl2d::Renderer2D & renderer2d, float deltaTime, gl2d::Textur
 		float t = maxDuration - duration;
 		float perc = t / maxDuration;
 
-		frame = perc * 4;
+		frame = perc * frameCount;
 
 		auto a = particleSprite.GetSize();
-		gl2d::TextureAtlasPadding ta(4, 3, a.x, a.y);
+		gl2d::TextureAtlasPadding ta(frameCount, animCount, a.x, a.y);
 
 		renderer2d.renderRectangle({ pos, BLOCK_SIZE, BLOCK_SIZE }, {}, 0, particleSprite, ta.get(frame, type, !lookingRight));
 

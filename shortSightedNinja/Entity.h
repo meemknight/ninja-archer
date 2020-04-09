@@ -41,6 +41,7 @@ struct Entity
 
 	bool moving = 0;
 	bool dying = 0;
+	int isExitingLevel = -1;
 
 	bool iswebs;
 

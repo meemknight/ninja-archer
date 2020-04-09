@@ -272,8 +272,7 @@ inline bool isRedSolid(unsigned short b)
 		b == Block::redSolid6 ||
 		b == Block::redSolid7 ||
 		b == Block::redSolid8 ||
-		b == Block::redSolidFence||
-		b == Block::bridge2
+		b == Block::redSolidFence
 		)
 	{
 		return 1;
@@ -364,7 +363,8 @@ inline bool isColidable(unsigned short b)
 		b == Block::blueNoSolidFence ||
 		b == Block::fenceNoSolid ||
 		b == Block::snowSolid2 ||
-		b == Block::snowSolid9
+		b == Block::snowSolid9||
+		b == Block::bridge2
 		) {
 		return 0;
 	}

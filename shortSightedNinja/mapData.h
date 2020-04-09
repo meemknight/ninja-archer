@@ -251,7 +251,10 @@ namespace Block
 		treeDecoration18,
 		webDecoration4,
 		webDecoration5,
+		brickDecoration6,
+		brickDecoration7,
 		lastBlock,
+		
 	};
 };
 
@@ -427,6 +430,16 @@ inline bool isInteractableGrass(unsigned short b)
 		b == Block::grassDecoration4;
 }
 
+inline bool isSign(unsigned short b)
+{
+	return b == Block::sign ||
+		b == Block::signDecoration1 ||
+		b == Block::signDecoration2 ||
+		b == Block::signDecoration3 ||
+		b == Block::signDecoration4 ||
+		b == Block::signDecoration5;
+}
+
 struct BlockInfo
 {
 	bool hasNeighborLeft();
@@ -456,16 +469,26 @@ struct BlockInfo
 	void resetColors();
 };
 
-#define NORTH 0
-#define SOUTH 1
-#define EAST 2
-#define WEST 3
+struct signData
+{
+	signData() {};
+	signData(glm::ivec2 p,const std::string &t):
+		pos(p),text(t){};
 
+	glm::ivec2 pos;
+	std::string text;
+};
+
+struct exitData
+{
+	glm::ivec2 pos;
+	int levelId;
+};
 
 struct MapData
 {
-	//todo
-	std::vector<glm::ivec2> signText;
+	std::vector<signData> signDataVector;
+	std::vector<exitData> exitDataVector;
 
 	std::vector<glm::vec2> waterPos;
 	std::vector<glm::vec2> greenSoundPos;
@@ -495,3 +518,4 @@ struct MapData
 	void cleanup();
 };
 
+void setupMap(MapData &md, int levelId);

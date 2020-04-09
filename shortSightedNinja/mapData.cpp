@@ -245,6 +245,14 @@ void MapData::clearColorData()
 void MapData::cleanup()
 {
 	waterPos.clear();
+	signDataVector.clear();
+	greenSoundPos.clear();
+	redSoundPos.clear();
+	tikiSoundPos.clear();
+	snowSoundPos.clear();
+	caveSoundPos.clear();
+	exitDataVector.clear();
+
 	if (data)
 	{
 		delete[] data;

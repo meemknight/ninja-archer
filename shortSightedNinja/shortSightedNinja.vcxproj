@@ -29,6 +29,7 @@
     <ClCompile Include="input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mapData.cpp" />
+    <ClCompile Include="mapInfo.cpp" />
     <ClCompile Include="mapRenderer.cpp" />
     <ClCompile Include="math.cpp" />
     <ClCompile Include="opengl2Dlib.cpp" />

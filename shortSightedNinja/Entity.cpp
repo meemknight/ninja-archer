@@ -66,38 +66,6 @@ void Entity::checkCollisionBrute(glm::vec2 &pos, glm::vec2 lastPos, MapData & ma
 
 void Entity::resolveConstrains(MapData & mapData)
 {
-	/*
-	grounded = 0;
-	
-	bool upTouch = 0;
-	bool downTouch = 0;
-	bool leftTouch = 0;
-	bool rightTouch = 0;
-	
-	glm::vec2 delta = pos - lastPos;
-	glm::vec2 fullDelta = pos - lastPos;
-	
-	
-	glm::vec2 newPos = performCollision(mapData, { pos.x, lastPos.y }, { dimensions.x, dimensions.y }, { delta.x, 0 },
-		upTouch, downTouch, leftTouch, rightTouch);
-	pos = performCollision(mapData, { newPos.x, pos.y }, { dimensions.x, dimensions.y }, { 0, delta.y },
-		upTouch, downTouch, leftTouch, rightTouch);
-	
-	
-	if (downTouch)
-	{
-		grounded = 1;
-	}
-	
-	if (upTouch)
-	{
-		if (velocity.y < 0)
-		{
-			velocity.y = 0;
-		}
-	}
-	return;
-	*/
 	
 	bool upTouch = 0;
 	bool downTouch = 0;
@@ -157,7 +125,8 @@ void Entity::resolveConstrains(MapData & mapData)
 	end:
 	
 	if (pos.x < 0) { pos.x = 0; }
-	if (pos.x + dimensions.x > (mapData.w+1) * BLOCK_SIZE ) { pos.x = ((mapData.w + 1) * BLOCK_SIZE )-dimensions.x; }
+	if (pos.x + dimensions.x > (mapData.w) * BLOCK_SIZE ) { pos.x = ((mapData.w) * BLOCK_SIZE )-dimensions.x; }
+
 
 	if (upTouch)
 	{

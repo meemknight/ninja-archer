@@ -249,6 +249,8 @@ namespace Block
 		treeDecoration16,
 		treeDecoration17,
 		treeDecoration18,
+		webDecoration4,
+		webDecoration5,
 		lastBlock,
 	};
 };

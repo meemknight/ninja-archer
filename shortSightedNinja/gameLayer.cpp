@@ -456,7 +456,7 @@ void imguiFunc(float deltaTime)
 			{
 				ImGui::PushID(mCount);
 				if (ImGui::ImageButton((void*)(intptr_t)sprites.id,
-					{ 40,40 }, { spriteAtlas.get(mCount - 1, 0).x, spriteAtlas.get(mCount - 1,0).y },
+					{ 35,35 }, { spriteAtlas.get(mCount - 1, 0).x, spriteAtlas.get(mCount - 1,0).y },
 					{ spriteAtlas.get(mCount - 1, 0).z, spriteAtlas.get(mCount - 1,0).w }))
 				{
 					currentBlock = mCount;
@@ -464,7 +464,7 @@ void imguiFunc(float deltaTime)
 				}
 				ImGui::PopID();
 
-				if (localCount % 8 != 0)
+				if (localCount % 10 != 0)
 				{
 					ImGui::SameLine();
 				}
@@ -485,7 +485,7 @@ void imguiFunc(float deltaTime)
 				{
 					ImGui::PushID(mCount);
 					if (ImGui::ImageButton((void*)(intptr_t)sprites.id,
-						{ 40,40 }, { spriteAtlas.get(mCount - 1, 0).x, spriteAtlas.get(mCount - 1,0).y },
+						{ 35,35 }, { spriteAtlas.get(mCount - 1, 0).x, spriteAtlas.get(mCount - 1,0).y },
 						{ spriteAtlas.get(mCount - 1, 0).z, spriteAtlas.get(mCount - 1,0).w }))
 					{
 						currentBlock = mCount;
@@ -493,7 +493,7 @@ void imguiFunc(float deltaTime)
 					}
 					ImGui::PopID();
 
-					if (localCount % 8 != 0)
+					if (localCount % 10 != 0)
 						ImGui::SameLine();
 					localCount++;
 				}
@@ -510,7 +510,7 @@ void imguiFunc(float deltaTime)
 				{
 					ImGui::PushID(mCount);
 					if (ImGui::ImageButton((void*)(intptr_t)sprites.id,
-						{ 40,40 }, { spriteAtlas.get(mCount - 1, 0).x, spriteAtlas.get(mCount - 1,0).y },
+						{ 35,35 }, { spriteAtlas.get(mCount - 1, 0).x, spriteAtlas.get(mCount - 1,0).y },
 						{ spriteAtlas.get(mCount - 1, 0).z, spriteAtlas.get(mCount - 1,0).w }))
 					{
 						currentBlock = mCount;
@@ -518,7 +518,7 @@ void imguiFunc(float deltaTime)
 					}
 					ImGui::PopID();
 
-					if (localCount % 8 != 0)
+					if (localCount % 10 != 0)
 						ImGui::SameLine();
 					localCount++;
 				}

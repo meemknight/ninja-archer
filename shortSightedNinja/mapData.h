@@ -228,9 +228,28 @@ namespace Block
 		tikiPole,
 		torchUnlitWood,
 		torchLitWood,
+		treeDecoration1,
+		treeDecoration2,
+		treeDecoration3,
+		treeDecoration4,
+		treeDecoration5,
+		treeDecoration6,
+		treeDecoration7,
+		treeDecoration8,
+		treeDecoration9,
+		treeDecoration10,
+		treeDecoration11,
+		treeDecoration12,
+		treeDecoration13,
+		treeDecoration14,
+		treeDecoration15,
+		treeDecoration16,
+		treeDecoration17,
+		treeDecoration18,
 		lastBlock,
 	};
 };
+
 inline bool isUnfinished(unsigned short b)
 {
 	return b >= Block::unfinished1 &&b <= Block::unfinished75;
@@ -253,7 +272,8 @@ inline bool isRedSolid(unsigned short b)
 		b == Block::redSolid6 ||
 		b == Block::redSolid7 ||
 		b == Block::redSolid8 ||
-		b == Block::redSolidFence
+		b == Block::redSolidFence||
+		b == Block::bridge2
 		)
 	{
 		return 1;

@@ -22,7 +22,7 @@ float distFunc(float dist)
 		perc = 0;
 	}
 
-	return perc *0.2;
+	return perc ;
 }
 
 float MapData::getWaterPercentage(glm::vec2 pos)
@@ -222,7 +222,6 @@ void MapData::create(int w, int h, unsigned short* d = 0)
 		}
 
 	setNeighbors();
-	//todo setup neighbours
 }
 
 BlockInfo& MapData::get(int x, int y)
@@ -246,6 +245,14 @@ void MapData::clearColorData()
 void MapData::cleanup()
 {
 	waterPos.clear();
+	signDataVector.clear();
+	greenSoundPos.clear();
+	redSoundPos.clear();
+	tikiSoundPos.clear();
+	snowSoundPos.clear();
+	caveSoundPos.clear();
+	exitDataVector.clear();
+
 	if (data)
 	{
 		delete[] data;

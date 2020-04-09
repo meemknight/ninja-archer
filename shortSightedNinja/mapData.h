@@ -3,6 +3,7 @@
 #include "glm/vec2.hpp"
 #include <vector>
 
+
 #define BLOCK_SIZE 8
 #define BLOCK_COUNT 424
 
@@ -230,10 +231,32 @@ namespace Block
 		tikiPole,
 		torchUnlitWood,
 		torchLitWood,
+		treeDecoration1,
+		treeDecoration2,
+		treeDecoration3,
+		treeDecoration4,
+		treeDecoration5,
+		treeDecoration6,
+		treeDecoration7,
+		treeDecoration8,
+		treeDecoration9,
+		treeDecoration10,
+		treeDecoration11,
+		treeDecoration12,
+		treeDecoration13,
+		treeDecoration14,
+		treeDecoration15,
+		treeDecoration16,
+		treeDecoration17,
+		treeDecoration18,
+		webDecoration4,
+		webDecoration5,
+		brickDecoration6,
+		brickDecoration7,
 		lastBlock,
+		
 	};
 };
-
 
 inline bool isAir(unsigned short b)
 {
@@ -359,7 +382,8 @@ inline bool isColidable(unsigned short b)
 		b == Block::blueNoSolidFence ||
 		b == Block::fenceNoSolid ||
 		b == Block::snowSolid2 ||
-		b == Block::snowSolid9
+		b == Block::snowSolid9||
+		b == Block::bridge2
 		) {
 		return 0;
 	}
@@ -406,6 +430,16 @@ inline bool isInteractableGrass(unsigned short b)
 		b == Block::grassDecoration4;
 }
 
+inline bool isSign(unsigned short b)
+{
+	return b == Block::sign ||
+		b == Block::signDecoration1 ||
+		b == Block::signDecoration2 ||
+		b == Block::signDecoration3 ||
+		b == Block::signDecoration4 ||
+		b == Block::signDecoration5;
+}
+
 struct BlockInfo
 {
 	bool hasNeighborLeft();
@@ -435,13 +469,27 @@ struct BlockInfo
 	void resetColors();
 };
 
-#define NORTH 0
-#define SOUTH 1
-#define EAST 2
-#define WEST 3
+struct signData
+{
+	signData() {};
+	signData(glm::ivec2 p,const std::string &t):
+		pos(p),text(t){};
+
+	glm::ivec2 pos;
+	std::string text;
+};
+
+struct exitData
+{
+	glm::ivec2 pos;
+	int levelId;
+};
 
 struct MapData
 {
+	std::vector<signData> signDataVector;
+	std::vector<exitData> exitDataVector;
+
 	std::vector<glm::vec2> waterPos;
 	std::vector<glm::vec2> greenSoundPos;
 	std::vector<glm::vec2> redSoundPos;
@@ -470,3 +518,4 @@ struct MapData
 	void cleanup();
 };
 
+void setupMap(MapData &md, int levelId);

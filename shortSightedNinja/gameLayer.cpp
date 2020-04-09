@@ -56,6 +56,11 @@ gl2d::Texture particlesSprite;
 gl2d::Texture crackTexture;
 
 gl2d::Texture uiFrame;
+gl2d::Texture uiForest;
+gl2d::Texture uiCastle;
+gl2d::Texture uiCave;
+gl2d::Texture uiMountain;
+gl2d::Texture uiSnowMountain;
 
 std::vector<Arrow> arrows;
 
@@ -247,6 +252,11 @@ bool initGame()
 	crackTexture.loadFromFileWithPixelPadding("resources//crackAnim.png", 8);
 
 	uiFrame.loadFromFile("resources//ui//uiFrame.png");
+	uiForest.loadFromFile("resources//ui//forest.png");
+	uiCastle.loadFromFile("resources//ui//castle.png");
+	uiCave.loadFromFile("resources//ui//cave.png");
+	uiMountain.loadFromFile("resources//ui//mountain.png");
+	uiSnowMountain.loadFromFile("resources//ui//snowMountain.png");
 
 	const char buff[] =
 	{
@@ -305,16 +315,37 @@ bool gameLogic(float deltaTime)
 
 		Ui::Frame f({0, 0, w, h});
 
+		glm::vec4 frame2 = Ui::Box().xCenter().yCenter().yDimensionPercentage(0.7).xAspectRatio(1.f);
+
 		renderer2d.renderRectangle(
-			Ui::Box().xCenter().yCenter().yDimensionPercentage(0.7).xAspectRatio(1.f),
+			frame2,
 			{}, 0, uiFrame);
+
+		{
+			Ui::Frame f(frame2);
+
+			renderer2d.renderRectangle(
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.7).xAspectRatio(1.f),
+				{}, 0, uiForest);
+			renderer2d.renderRectangle(
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.7).xAspectRatio(1.f),
+				{}, 0, uiCastle);
+			renderer2d.renderRectangle(
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.7).xAspectRatio(1.f),
+				{}, 0, uiCave);
+			renderer2d.renderRectangle(
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.7).xAspectRatio(1.f),
+				{}, 0, uiMountain);
+			renderer2d.renderRectangle(
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.7).xAspectRatio(1.f),
+				{}, 0, uiSnowMountain);
+		}
 
 		renderer2d.flush();
 		return 1;
 	}
 
 #pragma endregion
-
 
 	if (platform::isKeyPressedOn('T'))
 	{

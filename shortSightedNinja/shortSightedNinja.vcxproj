@@ -61,8 +61,8 @@
     <ClInclude Include="Ui.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="blocks.frag" />
-    <None Include="blocks.vert" />
+    <None Include="resources\blocks.frag" />
+    <None Include="resources\blocks.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

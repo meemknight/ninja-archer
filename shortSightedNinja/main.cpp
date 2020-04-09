@@ -84,7 +84,6 @@ int MAIN
 	gl2d::setErrorFuncCallback([](const char* c) {elog(c); });
 	gl2d::init();
 
-
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
@@ -119,11 +118,21 @@ int MAIN
 			time2 = clock();
 			int deltaTime = time2 - time1;
 			time1 = clock();
+			int endFrame = time1 + 8;
 		
-			float fDeltaTime = (float)deltaTime / CLOCKS_PER_SEC;
-		
+			double dDeltaTime = (double)deltaTime / CLOCKS_PER_SEC;
+			static int count;
+			static double accum;
+			accum += dDeltaTime;
+			count++;
+			if(accum>1)
+			{
+				accum -= 1;
+				//llog(count);
+				count = 0;
+			}
 			//todo
-			//fDeltaTime = std::min(fDeltaTime, 1.f / 20.f);
+			float fDeltaTime = std::min(dDeltaTime, 1.0 / 20.0);
 		
 			input::updateInput();
 
@@ -143,6 +152,10 @@ int MAIN
 
 			SwapBuffers(hdc);
 		
+			int actualEnd = clock();
+			int sleep = endFrame - actualEnd;
+			if (sleep > 0) { Sleep(sleep); }
+
 			lbuttonPressed = false;
 			rbuttonPressed = false;
 			bMouseMoved = false;
@@ -356,35 +369,38 @@ namespace platform
 		return { p.x, p.y };
 	}
 
-
 	int isKeyHeld(int key)
 	{
-		return GetAsyncKeyState(key);
+		return GetAsyncKeyState(key)&& platform::isFocused();
 	}
 
 	int isKeyPressedOn(int key)
 	{
-		return GetAsyncKeyState(key) & 0x8000;
+		return ( GetAsyncKeyState(key) & 0x8000) &&platform::isFocused();
 	}
 
 	int isLMouseButtonPressed()
 	{
-		return lbuttonPressed;
-	}
-
-	int isRMouseButtonPressed()
-	{
-		return rbuttonPressed;
+		ImGuiIO& io = ImGui::GetIO();
+		return (!io.WantCaptureMouse) && lbuttonPressed && platform::isFocused();
 	}
 
 	int isLMouseHeld()
 	{
-		return lbutton;
+		ImGuiIO& io = ImGui::GetIO();
+	
+		return (!io.WantCaptureMouse) && lbutton && platform::isFocused();
 	}
+
+	int isRMouseButtonPressed()
+	{
+		return rbuttonPressed && platform::isFocused();
+	}
+
 
 	int isRMouseHeld()
 	{
-		return rbutton;
+		return rbutton && platform::isFocused();
 	}
 
 	void showMouse(bool show)

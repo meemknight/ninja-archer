@@ -34,6 +34,13 @@ sf::Sound soundPlayer;
 sf::Music waterPlayer;
 sf::Music greenPlayer;
 
+int currentSound = 0;
+enum Sounds
+{
+	none
+	//todo
+};
+
 MapRenderer mapRenderer;
 MapData mapData;
 Entity player;
@@ -228,6 +235,8 @@ bool initGame()
 {
 	srand(time(0));
 
+	font.createFromFile("resources//font.ttf");
+
 	glClearColor(BACKGROUNDF_R, BACKGROUNDF_G, BACKGROUNDF_B, 1.f);
 
 	renderer2d.create();
@@ -265,7 +274,7 @@ bool initGame()
 
 	{//music
 		pickupSoundbuffer.loadFromFile("resources//pick_up.wav");
-		pickupSoundbuffer.loadFromFile("resources//leaves.wav");
+		leavesSoundbuffer.loadFromFile("resources//leaves.wav");
 		waterPlayer.openFromFile("resources//water.wav");
 		waterPlayer.play();
 		waterPlayer.setLoop(1);
@@ -275,7 +284,7 @@ bool initGame()
 		greenPlayer.setLoop(1);
 
 
-		soundPlayer.setVolume(50);
+		soundPlayer.setVolume(10);
 	}
 
 
@@ -508,6 +517,8 @@ bool gameLogic(float deltaTime)
 	bool isInBlueBlock = 0;
 	bool isInGrayBlock = 0;
 
+
+	//the big for
 	{
 		int minX = 0;
 		int minY = 0;
@@ -573,13 +584,21 @@ bool gameLogic(float deltaTime)
 					player.iswebs = true;
 				}
 
-				//mihui
 				if (isInteractableGrass(g.type))
 				{
 					soundPlayer.stop();
+					//todo
+					//if (soundPlayer.get == leavesSoundbuffer);
 					soundPlayer.setBuffer(leavesSoundbuffer);
 					soundPlayer.play();
 				}
+
+				if(g.type == Block::sign)
+				{
+					renderer2d.renderText({ BLOCK_SIZE*(x - 2), BLOCK_SIZE*(y - 1) },
+						"Sample Explicatii\ndf", font, {1,1,1,1}, 0.09);
+				}
+
 			}
 		}
 	}
@@ -775,7 +794,6 @@ bool gameLogic(float deltaTime)
 		a.draw(renderer2d, arrowSprite);
 		a.checkCollision(mapData, isInRedBlock, isInBlueBlock, isInGrayBlock);
 		a.light = 0;
-
 
 
 		if (!a.shownAnim)

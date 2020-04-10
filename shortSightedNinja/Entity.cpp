@@ -145,7 +145,7 @@ void Entity::strafe(int dir)
 
 void Entity::run(float speed)
 {
-	if (isExitingLevel != -1)
+	if (isExitingLevel != -1 || lockMovementDie)
 	{
 		return;
 	}
@@ -162,14 +162,19 @@ void Entity::run(float speed)
 
 void Entity::airRun(float speed)
 {
-	if (dying)
+	if(lockMovementDie)
 	{
-		speed *= 0.5;
+		return;
 	}
 
 	if(isExitingLevel!=-1)
 	{
 		return;
+	}
+
+	if (dying)
+	{
+		speed *= 0.5;
 	}
 
 	if(speed > 0)
@@ -211,7 +216,7 @@ void Entity::applyGravity(float deltaTime)
 
 void Entity::applyVelocity(float deltaTime)
 {
-	if(dying)
+	if(dying || lockMovementDie)
 	{
 		return;
 	}
@@ -308,7 +313,6 @@ void Entity::checkGrounded(MapData &mapDat, float deltaTime)
 	
 
 }
-
 
 void Entity::checkWall(MapData & mapData, int move)
 {

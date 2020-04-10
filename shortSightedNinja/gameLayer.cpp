@@ -57,6 +57,7 @@ gl2d::Texture crackTexture;
 
 gl2d::Texture uiFrame;
 gl2d::Texture uiForest;
+gl2d::Texture uiTiki;
 gl2d::Texture uiCastle;
 gl2d::Texture uiCave;
 gl2d::Texture uiMountain;
@@ -160,6 +161,7 @@ void loadLevel()
 	player.updateMove();
 	player.dimensions = { 7, 7 };
 	player.dying = 0;
+	player.lockMovementDie = 0;
 	playerLight = 5;
 	player.velocity = {};
 	player.isExitingLevel = -1;
@@ -216,6 +218,7 @@ void respawn()
 	player.updateMove();
 	player.dimensions = { 7, 7 };
 	player.dying = 0;
+	player.lockMovementDie = 0;
 	playerLight = 5;
 	player.velocity = {};
 
@@ -253,6 +256,7 @@ bool initGame()
 
 	uiFrame.loadFromFile("resources//ui//uiFrame.png");
 	uiForest.loadFromFile("resources//ui//forest.png");
+	uiTiki.loadFromFile("resources//ui//tikiForest.png");
 	uiCastle.loadFromFile("resources//ui//castle.png");
 	uiCave.loadFromFile("resources//ui//cave.png");
 	uiMountain.loadFromFile("resources//ui//mountain.png");
@@ -623,6 +627,11 @@ bool gameLogic(float deltaTime)
 				if (g.type == Block::water3)
 				{
 					player.dying = 1;
+				}else
+				if (isSpike(g.type))
+				{
+					player.dying = 1;
+					player.lockMovementDie = 1;
 				}
 
 				if (g.type == Block::flagDown)
@@ -669,7 +678,7 @@ bool gameLogic(float deltaTime)
 				if(isSign(g.type))
 				{
 					auto iter = std::find_if(mapData.signDataVector.begin(), mapData.signDataVector.end(), 
-						[x, y](signData &d) {return (d.pos.x == x && d.pos.y == y); });
+						[x, y](signData &d)->bool {return (d.pos.x == x && d.pos.y == y); });
 
 					if(iter!=mapData.signDataVector.end())
 					{

@@ -124,9 +124,12 @@ namespace Block
 		woodSolid14,
 		bridge1,
 		bridge2,
+		woodSolid15,
+		woodSolid16,
+		woodSolid17,
+		woodSolid18,
 #pragma region unfinished
-
-		unfinished1, unfinished2, unfinished3, unfinished4, unfinished5,
+		unfinished5,
 		unfinished6, unfinished7, unfinished8, unfinished9, unfinished10,
 		unfinished11, unfinished12, unfinished13, unfinished14, unfinished15,
 		unfinished16, unfinished17, unfinished18, unfinished19, unfinished20,
@@ -252,14 +255,28 @@ namespace Block
 		webDecoration5,
 		brickDecoration6,
 		brickDecoration7,
+		spike1,
+		spike2,
+		spike3,
+		spike4,
 		lastBlock,
-		
 	};
 };
 
 inline bool isAir(unsigned short b)
 {
 	return b == Block::none;
+}
+
+inline bool isSpike(unsigned short b)
+{
+	return
+		b == Block::spike1
+		|| b == Block::spike2
+		|| b == Block::spike3
+		||b == Block::spike4
+		;
+
 }
 
 inline bool isWaterMusicSource(unsigned short b)

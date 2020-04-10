@@ -51,3 +51,7 @@ md.exitDataVector.emplace_back(glm::ivec2{112, 26}, -2);
 md.exitDataVector.emplace_back(glm::ivec2{112, 26}, 1);
 md.exitDataVector.emplace_back(glm::ivec2{112, 22}, 0);
 md.exitDataVector.emplace_back(glm::ivec2{109, 26}, -2);
+
+
+md.torchDataVector.emplace_back(glm::ivec2{ 35, 19}, 3);
+md.torchDataVector.emplace_back(glm::ivec2{ 19, 20}, 5);

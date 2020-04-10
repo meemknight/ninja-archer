@@ -57,7 +57,7 @@ bool editItems = false;
 char signStr[255] = {};
 glm::ivec2 itemPos;
 int levelId = -2;
-float torchLight = 0;
+float torchLight = 5;
 #pragma endregion
 
 bool initGame()
@@ -211,7 +211,7 @@ bool gameLogic(float deltaTime)
 					else
 					{
 						glm::ivec2 pos = { (int)mousePos.x / BLOCK_SIZE, (int)mousePos.y / BLOCK_SIZE };
-						torchData d(pos, 0);
+						torchData d(pos, 5);
 						torches.emplace_back(d);
 
 						itemPos = { (int)mousePos.x / BLOCK_SIZE, (int)mousePos.y / BLOCK_SIZE };
@@ -537,6 +537,14 @@ void imguiFunc(float deltaTime)
 				doorData d({ x, y }, id);
 				doors.emplace_back(d);
 			}
+			else if(current[3] == 't')
+			{
+				int x, y;
+				float light;
+				sscanf(current.c_str(), "md.torchDataVector.emplace_back(glm::ivec2{%d, %d}, %f);", &x, &y, &light);
+				torchData d({ x, y }, light);
+				torches.emplace_back(d);
+			}
 		}
 
 
@@ -601,6 +609,13 @@ void imguiFunc(float deltaTime)
 		for (auto& i : doors)
 		{
 			outputFile << "md.exitDataVector.emplace_back(glm::ivec2{" << i.pos.x << ", " << i.pos.y << "}, " << i.levelId << ");\n";
+		}
+
+		outputFile << "\n\n";
+
+		for(auto &i: torches)
+		{
+			outputFile << "md.torchDataVector.emplace_back(glm::ivec2{ " << i.pos.x << ", " << i.pos.y << "}, "<< i.light << ");\n";
 		}
 
 		outputFile.close();

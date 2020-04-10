@@ -145,6 +145,11 @@ void Entity::strafe(int dir)
 
 void Entity::run(float speed)
 {
+	if (isExitingLevel != -1 || lockMovementDie)
+	{
+		return;
+	}
+
 	if(iswebs)
 	{
 		pos.x += speed * runSpeed * BLOCK_SIZE * 0.1;
@@ -157,6 +162,16 @@ void Entity::run(float speed)
 
 void Entity::airRun(float speed)
 {
+	if(lockMovementDie)
+	{
+		return;
+	}
+
+	if(isExitingLevel!=-1)
+	{
+		return;
+	}
+
 	if (dying)
 	{
 		speed *= 0.5;
@@ -201,7 +216,7 @@ void Entity::applyGravity(float deltaTime)
 
 void Entity::applyVelocity(float deltaTime)
 {
-	if(dying)
+	if(dying || lockMovementDie)
 	{
 		return;
 	}
@@ -299,9 +314,11 @@ void Entity::checkGrounded(MapData &mapDat, float deltaTime)
 
 }
 
-
 void Entity::checkWall(MapData & mapData, int move)
 {
+	if (iswebs) 
+	{ return; }
+
 	if (pos.y < -BLOCK_SIZE)
 	{
 		return;
@@ -349,7 +366,7 @@ void Entity::checkWall(MapData & mapData, int move)
 	if (leftX < 0) { return; }
 	
 
-	if(isColidable(mapData.get(rightX, minY).type) && move > 0 && checkRight)
+	if(isColidable(mapData.get(rightX, minY).type) && move > 0 && checkRight && mapData.get(rightX, minY).type != Block::bareer)
 	{
 
 		if (isRedSolid(mapData.get(rightX, minY).type))
@@ -379,7 +396,7 @@ void Entity::checkWall(MapData & mapData, int move)
 	}
 
 
-	if (isColidable(mapData.get(leftX, minY).type) && move < 0 && checkLeft)
+	if (isColidable(mapData.get(leftX, minY).type) && move < 0 && checkLeft && mapData.get(rightX, minY).type != Block::bareer)
 	{
 
 		if(isRedSolid(mapData.get(leftX, minY).type))
@@ -406,15 +423,19 @@ void Entity::checkWall(MapData & mapData, int move)
 			velocity.y = 0;
 		}
 	}
-	//}
-
-
 
 }
 
 void Entity::jump()
 {
-	velocity.y = -jumpSpeed * BLOCK_SIZE;
+	if(iswebs)
+	{
+		velocity.y = -jumpSpeed * BLOCK_SIZE / 2;
+	}else
+	{
+		velocity.y = -jumpSpeed * BLOCK_SIZE;
+	}
+
 }
 
 int randVal = 1;

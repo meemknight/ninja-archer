@@ -8,6 +8,7 @@
 #include "input.h"
 #include <fstream>
 #include "imgui.h"
+#pragma region Macros
 
 #define BACKGROUND_R 33
 #define BACKGROUND_G 38
@@ -17,6 +18,9 @@
 #define BACKGROUNDF_G ((float)38 / (float)0xff)
 #define BACKGROUNDF_B ((float)63 / (float)0xff)
 
+#pragma endregion
+
+#pragma region Variables
 extern gl2d::internal::ShaderProgram maskShader;
 extern GLint maskSamplerUniform;
 
@@ -34,6 +38,7 @@ gl2d::Texture backgroundTexture;
 std::vector<Arrow> arrows;
 std::vector<signData> signs;
 std::vector<doorData> doors;
+std::vector<torchData> torches;
 
 unsigned short currentBlock = Block::blueNoSolid1;
 
@@ -50,16 +55,16 @@ bool simulateUnlitLights = false;
 bool highlightCheckPoints = false;
 bool editItems = false;
 char signStr[255] = {};
+glm::ivec2 itemPos;
 int levelId = -2;
+float torchLight = 0;
+#pragma endregion
 
 bool initGame()
 {
 	renderer2d.create();
-	//if (music.openFromFile("ding.flac"))
-	//music.play();
 	ShaderProgram sp{ "blocks.vert","blocks.frag" };
-	sprites.loadFromFile("sprites2.png");
-	//arrowSprite.loadFromFile("arrow.png");
+	sprites.loadFromFile("sprites.png");
 	backGroundFBO.create(40 * BLOCK_SIZE, 40 * BLOCK_SIZE);
 
 	mapRenderer.init(sp);
@@ -124,8 +129,8 @@ bool gameLogic(float deltaTime)
 		if (platform::isLMouseButtonPressed())
 		{
 			glm::vec2 mousePos;
-			mousePos.x = platform::getRelMousePosition().x + renderer2d.currentCamera.position.x;
-			mousePos.y = platform::getRelMousePosition().y + renderer2d.currentCamera.position.y;
+			mousePos.x = (platform::getRelMousePosition().x + renderer2d.currentCamera.position.x);
+			mousePos.y = (platform::getRelMousePosition().y + renderer2d.currentCamera.position.y);
 
 			mousePos = gl2d::scaleAroundPoint(mousePos, renderer2d.currentCamera.position +
 				glm::vec2{ renderer2d.windowW / 2, renderer2d.windowH / 2 }, 1.f / renderer2d.currentCamera.zoom);
@@ -138,47 +143,85 @@ bool gameLogic(float deltaTime)
 			{
 				auto block = mapData.get(mousePos.x / BLOCK_SIZE, mousePos.y / BLOCK_SIZE).type;
 
+#pragma region Edit Signs
 				if (isSign(block))
 				{
 					auto it = std::find_if(signs.begin(), signs.end(),
-						[x = mousePos.x / BLOCK_SIZE, y = mousePos.y / BLOCK_SIZE](signData& d)
+						[x = (int)mousePos.x / BLOCK_SIZE, y = (int)mousePos.y / BLOCK_SIZE](signData& d)
 					{ return d.pos.x == x && d.pos.y == y; });
 					if (it != signs.end())
 					{
-						std::string s(signStr);
+						int j = 0;
+						for (auto i : it->text)
+						{
+							signStr[j++] = i;
+						}
+						signStr[j] = NULL;
 
-						it->text = s;
+						itemPos = { (int)mousePos.x / BLOCK_SIZE, (int)mousePos.y / BLOCK_SIZE };
 					}
 					else
 					{
-						std::string s(signStr);
+						signStr[0] = 0;
+						std::string s = std::string(signStr);
 						glm::ivec2 pos = { mousePos.x / BLOCK_SIZE, mousePos.y / BLOCK_SIZE };
 						signData d(pos, s);
 						signs.emplace_back(d);
+
+						itemPos = { (int)mousePos.x / BLOCK_SIZE, (int)mousePos.y / BLOCK_SIZE };
 					}
 				}
+#pragma endregion
 
+#pragma region Edit Door
 				if (isDoor(block))
 				{
 					auto it = std::find_if(doors.begin(), doors.end(),
-						[x = mousePos.x / BLOCK_SIZE, y = mousePos.y / BLOCK_SIZE](doorData& d)
+						[x = (int)mousePos.x / BLOCK_SIZE, y = (int)mousePos.y / BLOCK_SIZE](doorData& d)
 					{ return d.pos.x == x && d.pos.y == y; });
 
 					if (it != doors.end())
 					{
-						it->levelId = levelId;
+						levelId = it->levelId;
+						itemPos = { (int)mousePos.x / BLOCK_SIZE, (int)mousePos.y / BLOCK_SIZE };
 					}
 					else
 					{
-						glm::ivec2 pos = { mousePos.x / BLOCK_SIZE, mousePos.y / BLOCK_SIZE };
-						doorData d(pos, levelId);
+						glm::ivec2 pos = { (int)mousePos.x / BLOCK_SIZE, (int)mousePos.y / BLOCK_SIZE };
+						doorData d(pos, -2);
 						doors.emplace_back(d);
+
+						itemPos = { (int)mousePos.x / BLOCK_SIZE, (int)mousePos.y / BLOCK_SIZE };
 					}
 				}
+#pragma endregion
 
+#pragma region Edit Torch
+				if (isLitTorch(block))
+				{
+					auto it = std::find_if(torches.begin(), torches.end(),
+						[x = (int)mousePos.x / BLOCK_SIZE, y = (int)mousePos.y / BLOCK_SIZE](torchData& d)
+					{ return d.pos.x == x && d.pos.y == y; });
+
+					if (it != torches.end())
+					{
+						torchLight = it->light;
+						itemPos = { (int)mousePos.x / BLOCK_SIZE, (int)mousePos.y / BLOCK_SIZE };
+					}
+					else
+					{
+						glm::ivec2 pos = { (int)mousePos.x / BLOCK_SIZE, (int)mousePos.y / BLOCK_SIZE };
+						torchData d(pos, 0);
+						torches.emplace_back(d);
+
+						itemPos = { (int)mousePos.x / BLOCK_SIZE, (int)mousePos.y / BLOCK_SIZE };
+					}
+				}
+#pragma endregion
 			}
 		}
 	}
+#pragma region Eye Dropper Tool
 	else if (platform::isKeyHeld(VK_CONTROL))
 	{
 		if (platform::isLMouseButtonPressed() || platform::isRMouseButtonPressed())
@@ -201,8 +244,11 @@ bool gameLogic(float deltaTime)
 			}
 		}
 	}
+#pragma endregion
+
 	else
 	{
+#pragma region Place Blocks
 		if (platform::isLMouseHeld())
 		{
 			glm::vec2 mousePos;
@@ -236,6 +282,9 @@ bool gameLogic(float deltaTime)
 			}
 
 		}
+#pragma endregion
+
+#pragma region Eraser
 		else if (platform::isRMouseHeld())
 		{
 			glm::vec2 mousePos;
@@ -255,6 +304,9 @@ bool gameLogic(float deltaTime)
 			}
 
 		}
+#pragma endregion
+
+#pragma region Render the current block
 		else
 		{
 			glm::vec2 mousePos;
@@ -277,6 +329,8 @@ bool gameLogic(float deltaTime)
 					 spriteAtlas.get(currentBlock - 1, 0).z, spriteAtlas.get(currentBlock - 1,0).w });
 			}
 		}
+#pragma endregion
+
 	}
 
 #pragma endregion
@@ -446,86 +500,12 @@ void imguiFunc(float deltaTime)
 
 		while (std::getline(inputFile, current))
 		{
-#pragma region Bad Code
-			/*if (current[3] == 's')
-			{
-				int i;
-				for (i = 4; i < current.length(); i++)
-				{
-					if (current[i - 1] == '{')
-					{
-						break;
-					}
-				}
-				std::string auxStr;
-				while (current[i] != ',')
-				{
-					auxStr += current[i++];
-				}
-				int x = std::stoi(auxStr);
-
-				i += 2;
-				auxStr = "";
-				while (current[i] != '}')
-				{
-					auxStr += current[i++];
-				}
-				int y = std::stoi(auxStr);
-
-				i += 3;
-				auxStr = "";
-
-				while (current[i] != '"')
-				{
-					auxStr += current[i];
-				}
-
-				signData d({ x, y }, auxStr);
-				signs.emplace_back(d);
-			}
-			else if (current[3] == 'e')
-			{
-				int i;
-				for (i = 4; i < current.length(); i++)
-				{
-					if (current[i - 1] == '{')
-					{
-						break;
-					}
-				}
-				std::string auxStr;
-				while (current[i] != ',')
-				{
-					auxStr += current[i++];
-				}
-				int x = std::stoi(auxStr);
-				i += 2;
-				auxStr = "";
-				while (current[i] != '}')
-				{
-					auxStr += current[i++];
-				}
-				int y = std::stoi(auxStr);
-
-				i += 2;
-				auxStr = "";
-				while (current[i] != ')')
-				{
-					auxStr += current[i];
-				}
-				int id = std::stoi(auxStr);
-
-				doorData d({ x, y }, id);
-				doors.emplace_back(d);
-			}*/
-#pragma endregion
-
-			if(current[0] == 0)
+			if (current[0] == 0)
 			{
 				continue;
 			}
 
-			if (current[3] == 's' && current[4] == 'i' )
+			if (current[3] == 's' && current[4] == 'i')
 			{
 				int x, y;
 				std::string str;
@@ -629,10 +609,49 @@ void imguiFunc(float deltaTime)
 
 #pragma region Block Selector
 	ImGui::Checkbox("Edit items", &editItems);
-	ImGui::InputText("Sign Text", signStr, sizeof(signStr));
 
-	ImGui::InputInt("Next Level Id", &levelId);
+	if (editItems)
+	{
+		ImGui::InputText("Sign Text", signStr, sizeof(signStr));
+#pragma region Edit Sign
 
+
+		if (ImGui::Button("Save Sign"))
+		{
+			auto it = std::find_if(signs.begin(), signs.end(),
+				[x = itemPos.x, y = itemPos.y](signData& d)
+			{ return d.pos.x == x && d.pos.y == y; });
+			it->text = std::string(signStr);
+		}
+#pragma endregion
+		ImGui::NewLine();
+#pragma region Edit Door
+		ImGui::InputInt("Next Level Id", &levelId);
+
+		if (ImGui::Button("Save Door"))
+		{
+			auto it = std::find_if(doors.begin(), doors.end(),
+				[x = itemPos.x, y = itemPos.y](doorData& d)
+			{ return d.pos.x == x && d.pos.y == y; });
+			it->levelId = levelId;
+		}
+#pragma endregion
+		ImGui::NewLine();
+#pragma region Edit Torch
+		ImGui::InputFloat("Torch", &torchLight);
+
+		if (ImGui::Button("Save Torch"))
+		{
+			auto it = std::find_if(torches.begin(), torches.end(),
+				[x = itemPos.x, y = itemPos.y](torchData& d)
+			{ return d.pos.x == x && d.pos.y == y; });
+
+			it->light = torchLight;
+		}
+#pragma endregion
+
+	}
+	ImGui::NewLine();
 
 	ImGui::Checkbox("Show Collidable Blocks", &collidable);
 	ImGui::Checkbox("Show Non-Collidable Blocks", &nonCollidable);
@@ -700,8 +719,7 @@ void imguiFunc(float deltaTime)
 				mCount++;
 			}
 		}
-
-		if (!collidable && nonCollidable)
+		else if (!collidable && nonCollidable)
 		{
 			unsigned short localCount = 0;
 			while (mCount < Block::lastBlock)

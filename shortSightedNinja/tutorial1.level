@@ -42,10 +42,12 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 
 
-md.signDataVector.emplace_back( glm::ivec2{29, 22}, "You can grab on walls\nand jump from them");
+md.signDataVector.emplace_back( glm::ivec2{29, 22}, "You can grab on walls\nand jump from");
 md.signDataVector.emplace_back( glm::ivec2{38, 17}, "Hold jump longer\nto jump higher");
 md.signDataVector.emplace_back( glm::ivec2{73, 19}, "Don't fall\ninto water");
 
 
 md.exitDataVector.emplace_back(glm::ivec2{112, 26}, -2);
 md.exitDataVector.emplace_back(glm::ivec2{112, 26}, 1);
+md.exitDataVector.emplace_back(glm::ivec2{112, 22}, 0);
+md.exitDataVector.emplace_back(glm::ivec2{109, 26}, -2);

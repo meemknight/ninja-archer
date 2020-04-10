@@ -28,6 +28,7 @@ extern GLint maskSamplerUniform;
 gl2d::Renderer2D renderer2d;
 //gl2d::Renderer2D stencilRenderer2d;
 
+//music
 sf::SoundBuffer pickupSoundbuffer;
 sf::SoundBuffer leavesSoundbuffer;
 sf::Sound soundPlayer;
@@ -36,7 +37,6 @@ sf::Music greenPlayer;
 sf::Music redPlayer;
 sf::Music grayPlayer;
 
-int currentSound = 0;
 enum Sounds
 {
 	none
@@ -56,6 +56,13 @@ gl2d::Texture particlesSprite;
 gl2d::Texture crackTexture;
 
 gl2d::Texture uiFrame;
+gl2d::Texture uiForest;
+gl2d::Texture uiTiki;
+gl2d::Texture uiCastle;
+gl2d::Texture uiCave;
+gl2d::Texture uiMountain;
+gl2d::Texture uiSnowMountain;
+gl2d::Texture uiArrows;
 
 std::vector<Arrow> arrows;
 
@@ -73,7 +80,7 @@ Particle jumpParticle;
 std::vector<Particle>crackParticles;
 
 // -2 if is main menu
-int currentLevel=0;
+int currentLevel=-2;
 
 struct ArrowItem
 {
@@ -155,6 +162,7 @@ void loadLevel()
 	player.updateMove();
 	player.dimensions = { 7, 7 };
 	player.dying = 0;
+	player.lockMovementDie = 0;
 	playerLight = 5;
 	player.velocity = {};
 	player.isExitingLevel = -1;
@@ -204,13 +212,13 @@ void respawn()
 	inventory.push_back({ 2,0,3 });
 	inventory.push_back({ 3,0,3 });
 
-
 	arrows.clear();
 
 	player.pos = { BLOCK_SIZE * playerSpawnPos.x, BLOCK_SIZE * playerSpawnPos.y };
 	player.updateMove();
 	player.dimensions = { 7, 7 };
 	player.dying = 0;
+	player.lockMovementDie = 0;
 	playerLight = 5;
 	player.velocity = {};
 
@@ -247,6 +255,13 @@ bool initGame()
 	crackTexture.loadFromFileWithPixelPadding("resources//crackAnim.png", 8);
 
 	uiFrame.loadFromFile("resources//ui//uiFrame.png");
+	uiForest.loadFromFile("resources//ui//forest.png");
+	uiTiki.loadFromFile("resources//ui//tikiForest.png");
+	uiCastle.loadFromFile("resources//ui//castle.png");
+	uiCave.loadFromFile("resources//ui//cave.png");
+	uiMountain.loadFromFile("resources//ui//mountain.png");
+	uiSnowMountain.loadFromFile("resources//ui//snowMountain.png");
+	uiArrows.loadFromFile("resources//ui//arrow.png");
 
 	const char buff[] =
 	{
@@ -277,12 +292,12 @@ bool initGame()
 		grayPlayer.openFromFile("resources//cave.wav");
 		grayPlayer.setLoop(1);
 
-		soundPlayer.setVolume(10);
+		soundPlayer.setVolume(2);
 	}
 
-	//loadLevel();
+	loadLevel();
 
-	currentLevel = -2;
+	//currentLevel = -2;
 
 	return true;
 }
@@ -305,16 +320,118 @@ bool gameLogic(float deltaTime)
 
 		Ui::Frame f({0, 0, w, h});
 
+		glm::vec4 frame2 = Ui::Box().xCenter().yCenter().yDimensionPercentage(0.7).xAspectRatio(1.f);
+
 		renderer2d.renderRectangle(
-			Ui::Box().xCenter().yCenter().yDimensionPercentage(0.7).xAspectRatio(1.f),
+			frame2,
 			{}, 0, uiFrame);
+
+		{
+			Ui::Frame f(frame2);
+
+			renderer2d.renderRectangle(
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
+				{}, 0, uiForest);
+			renderer2d.renderRectangle(
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
+				{}, 0, uiCastle);
+			renderer2d.renderRectangle(
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
+				{}, 0, uiCave);
+			renderer2d.renderRectangle(
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
+				{}, 0, uiMountain);
+			renderer2d.renderRectangle(
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
+				{}, 0, uiSnowMountain);
+			renderer2d.renderRectangle(
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
+				{}, 0, uiTiki);
+
+
+			uiArrows;
+		}
+
+		gl2d::TextureAtlas arrowsAtlas(1, 2);
+		int leftPressed = 0;
+		int rightPressed = 0;
+
+		int lReleased = 0;
+		int rReleased = 0;
+
+		auto leftBox = Ui::Box().xCenter(-frame2.z /1.5).yCenter().yDimensionPercentage(0.2).xAspectRatio(1.f)();
+		auto rightBox = Ui::Box().xCenter(frame2.z /1.5).yCenter().yDimensionPercentage(0.2).xAspectRatio(1.f)();
+
+		auto p = platform::getRelMousePosition();
+
+#pragma region buttons
+
+		if(platform::isLMouseHeld())
+		{
+			if (p.x >= leftBox.x && p.x <= leftBox.x + leftBox.z
+				&&
+				p.y >= leftBox.y && p.y <= leftBox.y + leftBox.w
+				)
+			{
+				if(platform::isLMouseButtonReleased())
+				{
+					lReleased = 1;
+				}
+				leftPressed = 1;
+			}
+
+			if (p.x >= rightBox.x && p.x <= rightBox.x + rightBox.z
+				&&
+				p.y >= rightBox.y && p.y <= rightBox.y + rightBox.w
+				)
+			{
+				if (platform::isLMouseButtonReleased())
+				{
+					rReleased = 1;
+				}
+				rightPressed = 1;
+			}
+		}else
+		{
+			if (p.x >= leftBox.x && p.x <= leftBox.x + leftBox.z
+				&&
+				p.y >= leftBox.y && p.y <= leftBox.y + leftBox.w
+				)
+			{
+				if (platform::isLMouseButtonReleased())
+				{
+					lReleased = 1;
+				}
+			}
+
+			if (p.x >= rightBox.x && p.x <= rightBox.x + rightBox.z
+				&&
+				p.y >= rightBox.y && p.y <= rightBox.y + rightBox.w
+				)
+			{
+				if (platform::isLMouseButtonReleased())
+				{
+					rReleased = 1;
+				}
+			}
+		}
+
+#pragma endregion
+
+		renderer2d.renderRectangle(leftBox,
+			{}, 0, uiArrows, arrowsAtlas.get(0,leftPressed,1));
+
+		renderer2d.renderRectangle(rightBox,
+			{}, 0, uiArrows, arrowsAtlas.get(0, rightPressed));
+
+		if(lReleased)
+		ilog(lReleased);
 
 		renderer2d.flush();
 		return 1;
 	}
 
 #pragma endregion
-
 
 	if (platform::isKeyPressedOn('T'))
 	{
@@ -349,7 +466,7 @@ bool gameLogic(float deltaTime)
 	
 	waterPlayer.setVolume(mapData.getWaterPercentage(player.pos));
 	greenPlayer.setVolume(mapData.getGreenPercentage(player.pos));
-	redPlayer.setVolume(mapData.getTikiPercentage(player.pos));
+	redPlayer.setVolume(mapData.getRedPercentage(player.pos));
 	grayPlayer.setVolume(mapData.getCavePercentage(player.pos));
 
 #pragma endregion
@@ -383,7 +500,6 @@ bool gameLogic(float deltaTime)
 	{
 		renderer2d.currentCamera.zoom += deltaTime;
 	}
-
 
 	if (input::isKeyPressedOn(input::Buttons::jump))
 	{
@@ -449,7 +565,7 @@ bool gameLogic(float deltaTime)
 			{
 				if (i.type == actualInventorty[currentArrow].type)
 				{
-					//i.count--;
+					i.count--;
 					break;
 				}
 			}
@@ -592,6 +708,11 @@ bool gameLogic(float deltaTime)
 				if (g.type == Block::water3)
 				{
 					player.dying = 1;
+				}else
+				if (isSpike(g.type))
+				{
+					player.dying = 1;
+					player.lockMovementDie = 1;
 				}
 
 				if (g.type == Block::flagDown)
@@ -638,7 +759,7 @@ bool gameLogic(float deltaTime)
 				if(isSign(g.type))
 				{
 					auto iter = std::find_if(mapData.signDataVector.begin(), mapData.signDataVector.end(), 
-						[x, y](signData &d) {return (d.pos.x == x && d.pos.y == y); });
+						[x, y](signData &d)->bool {return (d.pos.x == x && d.pos.y == y); });
 
 					if(iter!=mapData.signDataVector.end())
 					{

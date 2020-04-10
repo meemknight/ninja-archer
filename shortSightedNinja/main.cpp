@@ -28,6 +28,7 @@ HWND wind;
 static int lbutton = 0;
 static int rbutton = 0;
 static int lbuttonPressed = 0;
+static int lbuttonReleased= 0;
 static int rbuttonPressed = 0;
 static int bMouseMoved = 0;
 
@@ -159,6 +160,7 @@ int MAIN
 			lbuttonPressed = false;
 			rbuttonPressed = false;
 			bMouseMoved = false;
+			lbuttonReleased = false;
 		}
 	
 	}
@@ -256,6 +258,7 @@ LRESULT CALLBACK windProc(HWND wind, UINT m, WPARAM wp, LPARAM lp)
 		break;
 	case WM_LBUTTONUP:
 		lbutton = false;
+		lbuttonReleased = true;
 		break;
 
 	case WM_CLOSE:
@@ -383,6 +386,12 @@ namespace platform
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		return (!io.WantCaptureMouse) && lbuttonPressed && platform::isFocused();
+	}
+
+	int isLMouseButtonReleased()
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		return (!io.WantCaptureMouse) && lbuttonReleased && platform::isFocused();
 	}
 
 	int isLMouseHeld()

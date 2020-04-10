@@ -155,8 +155,6 @@ namespace gl2d
 	{
 		unsigned int fbo;
 		Texture texture;
-		//todo remove
-		unsigned int depthtTexture;
 
 		void create(unsigned int w, unsigned int h);
 		void resize(unsigned int w, unsigned int h);
@@ -226,7 +224,7 @@ namespace gl2d
 
 		// The origin will be the bottom left corner since it represents the line for the text to be drawn
 		//Pacing and lineSpace are influenced by size
-		void renderText(const glm::vec2 position, const char* text, const Font font, const Color4f color, const float size = 1.5f, const float spacing = 4, const float line_space = 3);
+		void renderText(glm::vec2 position, const char* text, const Font font, const Color4f color, const float size = 1.5f, const float spacing = 4, const float line_space = 3);
 
 		//todo color overloads
 		void renderRectangle(const Rect transforms, const Color4f colors[4], const glm::vec2 origin, const float rotation, const Texture texture, const glm::vec4 textureCoords = DefaultTextureCoords);

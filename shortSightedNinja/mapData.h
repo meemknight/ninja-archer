@@ -124,9 +124,12 @@ namespace Block
 		woodSolid14,
 		bridge1,
 		bridge2,
+		woodSolid15,
+		woodSolid16,
+		woodSolid17,
+		woodSolid18,
 #pragma region unfinished
-
-		unfinished1, unfinished2, unfinished3, unfinished4, unfinished5,
+		unfinished5,
 		unfinished6, unfinished7, unfinished8, unfinished9, unfinished10,
 		unfinished11, unfinished12, unfinished13, unfinished14, unfinished15,
 		unfinished16, unfinished17, unfinished18, unfinished19, unfinished20,
@@ -230,14 +233,50 @@ namespace Block
 		tikiPole,
 		torchUnlitWood,
 		torchLitWood,
+		treeDecoration1,
+		treeDecoration2,
+		treeDecoration3,
+		treeDecoration4,
+		treeDecoration5,
+		treeDecoration6,
+		treeDecoration7,
+		treeDecoration8,
+		treeDecoration9,
+		treeDecoration10,
+		treeDecoration11,
+		treeDecoration12,
+		treeDecoration13,
+		treeDecoration14,
+		treeDecoration15,
+		treeDecoration16,
+		treeDecoration17,
+		treeDecoration18,
+		webDecoration4,
+		webDecoration5,
+		brickDecoration6,
+		brickDecoration7,
+		spike1,
+		spike2,
+		spike3,
+		spike4,
 		lastBlock,
 	};
 };
 
-
 inline bool isAir(unsigned short b)
 {
 	return b == Block::none;
+}
+
+inline bool isSpike(unsigned short b)
+{
+	return
+		b == Block::spike1
+		|| b == Block::spike2
+		|| b == Block::spike3
+		||b == Block::spike4
+		;
+
 }
 
 inline bool isWaterMusicSource(unsigned short b)
@@ -359,7 +398,8 @@ inline bool isColidable(unsigned short b)
 		b == Block::blueNoSolidFence ||
 		b == Block::fenceNoSolid ||
 		b == Block::snowSolid2 ||
-		b == Block::snowSolid9
+		b == Block::snowSolid9||
+		b == Block::bridge2
 		) {
 		return 0;
 	}
@@ -406,6 +446,16 @@ inline bool isInteractableGrass(unsigned short b)
 		b == Block::grassDecoration4;
 }
 
+inline bool isSign(unsigned short b)
+{
+	return b == Block::sign ||
+		b == Block::signDecoration1 ||
+		b == Block::signDecoration2 ||
+		b == Block::signDecoration3 ||
+		b == Block::signDecoration4 ||
+		b == Block::signDecoration5;
+}
+
 struct BlockInfo
 {
 	bool hasNeighborLeft();
@@ -435,13 +485,40 @@ struct BlockInfo
 	void resetColors();
 };
 
-#define NORTH 0
-#define SOUTH 1
-#define EAST 2
-#define WEST 3
+struct signData
+{
+	signData() {};
+	signData(glm::ivec2 p,const std::string &t):
+		pos(p),text(t){};
+
+	glm::ivec2 pos;
+	std::string text;
+};
+
+struct exitData
+{
+	exitData() {};
+	exitData(glm::ivec2 p, int i):pos(p), levelId(i) {};
+
+	glm::ivec2 pos;
+	int levelId;
+};
+
+struct torchData
+{
+	torchData() {};
+	torchData(glm::ivec2 p, float i) :pos(p), light(i) {};
+
+	glm::ivec2 pos;
+	float light;
+};
 
 struct MapData
 {
+	std::vector<signData> signDataVector;
+	std::vector<exitData> exitDataVector;
+	std::vector<torchData> torchDataVector;
+
 	std::vector<glm::vec2> waterPos;
 	std::vector<glm::vec2> greenSoundPos;
 	std::vector<glm::vec2> redSoundPos;
@@ -451,6 +528,7 @@ struct MapData
 	float getWaterPercentage(glm::vec2 pos);
 	float getGreenPercentage(glm::vec2 pos);
 	float getTikiPercentage(glm::vec2 pos);
+	float getRedPercentage(glm::vec2 pos);
 	float getSnowPercentage(glm::vec2 pos);
 	float getCavePercentage(glm::vec2 pos);
 
@@ -470,3 +548,4 @@ struct MapData
 	void cleanup();
 };
 
+void setupMap(MapData &md, int levelId);

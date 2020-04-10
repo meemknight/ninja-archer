@@ -8,6 +8,7 @@
 #include "input.h"
 #include "Ui.h"
 #include "Particle.h"
+#include <algorithm>
 
 extern float gravitationalAcceleration;
 extern float jumpSpeed;
@@ -26,15 +27,16 @@ extern GLint maskSamplerUniform;
 
 gl2d::Renderer2D renderer2d;
 //gl2d::Renderer2D stencilRenderer2d;
-gl2d::Renderer2D backgroundRenderer2d;
 
+//music
 sf::SoundBuffer pickupSoundbuffer;
 sf::SoundBuffer leavesSoundbuffer;
 sf::Sound soundPlayer;
 sf::Music waterPlayer;
 sf::Music greenPlayer;
+sf::Music redPlayer;
+sf::Music grayPlayer;
 
-int currentSound = 0;
 enum Sounds
 {
 	none
@@ -51,6 +53,16 @@ gl2d::Texture sprites;
 gl2d::Texture characterSprite;
 gl2d::Texture arrowSprite;
 gl2d::Texture particlesSprite;
+gl2d::Texture crackTexture;
+
+gl2d::Texture uiFrame;
+gl2d::Texture uiForest;
+gl2d::Texture uiTiki;
+gl2d::Texture uiCastle;
+gl2d::Texture uiCave;
+gl2d::Texture uiMountain;
+gl2d::Texture uiSnowMountain;
+gl2d::Texture uiArrows;
 
 std::vector<Arrow> arrows;
 
@@ -65,6 +77,10 @@ const float arrowPickupCullDown = 5;
 glm::ivec2 playerSpawnPos = { 0,0 };
 
 Particle jumpParticle;
+std::vector<Particle>crackParticles;
+
+// -2 if is main menu
+int currentLevel=-2;
 
 struct ArrowItem
 {
@@ -81,6 +97,8 @@ std::vector <LightSource> wallLights;
 
 float playerLight = 6;
 float torchLight = 5;
+
+void respawn();
 
 void loadLevel()
 {
@@ -99,56 +117,8 @@ void loadLevel()
 
 	//pickups.push_back({ 4, 4, 1 });
 
-	unsigned short data[] =
-	{
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,275,275,275,275,275,0,0,275,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,215,0,0,195,0,0,195,195,195,273,273,273,273,273,195,0,273,0,0,195,0,212,0,0,0,195,0,212,0,195,195,195,0,195,250,195,0,
-9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,267,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+	setupMap(mapData, currentLevel);
 
-
-
-	};
-
-	mapData.create(40, 40, data);
-
-	mapData.setNeighbors();
 
 	for (int y = 0; y < mapData.h; y++)
 		for (int x = 0; x < mapData.w; x++)
@@ -192,8 +162,11 @@ void loadLevel()
 	player.updateMove();
 	player.dimensions = { 7, 7 };
 	player.dying = 0;
+	player.lockMovementDie = 0;
 	playerLight = 5;
 	player.velocity = {};
+	player.isExitingLevel = -1;
+	player.wallGrab = 0;
 
 	wallLights.clear();
 	//setup light sources
@@ -205,6 +178,28 @@ void loadLevel()
 				wallLights.push_back({ {x,y}, 0 });
 			}
 		}
+
+	if(mapData.waterPos.size() > 0)
+	{
+		waterPlayer.play();
+	}
+
+	if (mapData.greenSoundPos.size() > 0)
+	{
+		greenPlayer.play();
+	}
+
+	if (mapData.redSoundPos.size() > 0)
+	{
+		redPlayer.play();
+	}
+
+	if (mapData.caveSoundPos.size() > 0)
+	{
+		grayPlayer.play();
+	}
+
+	respawn();
 }
 
 //todo
@@ -212,12 +207,10 @@ void respawn()
 {
 	inventory.clear();
 	//this vector should always have all arrows in order (and all of them there)
-	//todo 0's here probably
 	inventory.push_back({ 0,0,3 });
 	inventory.push_back({ 1,0,3 });
 	inventory.push_back({ 2,0,3 });
 	inventory.push_back({ 3,0,3 });
-
 
 	arrows.clear();
 
@@ -225,6 +218,7 @@ void respawn()
 	player.updateMove();
 	player.dimensions = { 7, 7 };
 	player.dying = 0;
+	player.lockMovementDie = 0;
 	playerLight = 5;
 	player.velocity = {};
 
@@ -241,8 +235,6 @@ bool initGame()
 
 	renderer2d.create();
 	//stencilRenderer2d.create();
-	backgroundRenderer2d.create();
-	backgroundRenderer2d.setShaderProgram(maskShader);
 	//if (music.openFromFile("ding.flac"))
 	//music.play();
 	ShaderProgram sp{ "resources//blocks.vert","resources//blocks.frag" };
@@ -260,6 +252,16 @@ bool initGame()
 	//todo replace with padding
 	arrowSprite.loadFromFile("resources//arrow.png");
 	particlesSprite.loadFromFileWithPixelPadding("resources//particles.png", 8);
+	crackTexture.loadFromFileWithPixelPadding("resources//crackAnim.png", 8);
+
+	uiFrame.loadFromFile("resources//ui//uiFrame.png");
+	uiForest.loadFromFile("resources//ui//forest.png");
+	uiTiki.loadFromFile("resources//ui//tikiForest.png");
+	uiCastle.loadFromFile("resources//ui//castle.png");
+	uiCave.loadFromFile("resources//ui//cave.png");
+	uiMountain.loadFromFile("resources//ui//mountain.png");
+	uiSnowMountain.loadFromFile("resources//ui//snowMountain.png");
+	uiArrows.loadFromFile("resources//ui//arrow.png");
 
 	const char buff[] =
 	{
@@ -269,6 +271,8 @@ bool initGame()
 		0xff
 	};
 
+	jumpParticle.animCount = 3;
+
 	arrows.reserve(10);
 
 
@@ -276,57 +280,199 @@ bool initGame()
 		pickupSoundbuffer.loadFromFile("resources//pick_up.wav");
 		leavesSoundbuffer.loadFromFile("resources//leaves.wav");
 		waterPlayer.openFromFile("resources//water.wav");
-		waterPlayer.play();
+		
 		waterPlayer.setLoop(1);
 
 		greenPlayer.openFromFile("resources//rainForest.wav");
-		greenPlayer.play();
 		greenPlayer.setLoop(1);
 
+		redPlayer.openFromFile("resources//jungle.wav");
+		redPlayer.setLoop(1);
 
-		soundPlayer.setVolume(10);
+		grayPlayer.openFromFile("resources//cave.wav");
+		grayPlayer.setLoop(1);
+
+		soundPlayer.setVolume(2);
 	}
 
-
 	loadLevel();
+
+	//currentLevel = -2;
 
 	return true;
 }
 
 bool gameLogic(float deltaTime)
 {
-	//if (platform::isKeyPressedOn('T'))
-	//{
-	//	loadLevel();
-	//}
-
-	if (player.dying)
-	{
-		playerLight -= deltaTime * 2;
-		if (playerLight < 1)
-		{
-			respawn();
-		}
-	}
-
-#pragma region music
-
-	waterPlayer.setVolume(mapData.getWaterPercentage(player.pos));
-	greenPlayer.setVolume(mapData.getGreenPercentage(player.pos));
-	ilog(mapData.getWaterPercentage(player.pos));
-#pragma endregion
-
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	int w, h;
 	w = getWindowSizeX();
 	h = getWindowSizeY();
-
 	glViewport(0, 0, w, h);
 	renderer2d.updateWindowMetrics(w, h);
+
+#pragma region MyRegion
+
+	//main menu
+	if (currentLevel == -2)
+	{
+		renderer2d.currentCamera = gl2d::cameraCreateDefault();
+
+		Ui::Frame f({0, 0, w, h});
+
+		glm::vec4 frame2 = Ui::Box().xCenter().yCenter().yDimensionPercentage(0.7).xAspectRatio(1.f);
+
+		renderer2d.renderRectangle(
+			frame2,
+			{}, 0, uiFrame);
+
+		{
+			Ui::Frame f(frame2);
+
+			renderer2d.renderRectangle(
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
+				{}, 0, uiForest);
+			renderer2d.renderRectangle(
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
+				{}, 0, uiCastle);
+			renderer2d.renderRectangle(
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
+				{}, 0, uiCave);
+			renderer2d.renderRectangle(
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
+				{}, 0, uiMountain);
+			renderer2d.renderRectangle(
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
+				{}, 0, uiSnowMountain);
+			renderer2d.renderRectangle(
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
+				{}, 0, uiTiki);
+
+
+			uiArrows;
+		}
+
+		gl2d::TextureAtlas arrowsAtlas(1, 2);
+		int leftPressed = 0;
+		int rightPressed = 0;
+
+		int lReleased = 0;
+		int rReleased = 0;
+
+		auto leftBox = Ui::Box().xCenter(-frame2.z /1.5).yCenter().yDimensionPercentage(0.2).xAspectRatio(1.f)();
+		auto rightBox = Ui::Box().xCenter(frame2.z /1.5).yCenter().yDimensionPercentage(0.2).xAspectRatio(1.f)();
+
+		auto p = platform::getRelMousePosition();
+
+#pragma region buttons
+
+		if(platform::isLMouseHeld())
+		{
+			if (p.x >= leftBox.x && p.x <= leftBox.x + leftBox.z
+				&&
+				p.y >= leftBox.y && p.y <= leftBox.y + leftBox.w
+				)
+			{
+				if(platform::isLMouseButtonReleased())
+				{
+					lReleased = 1;
+				}
+				leftPressed = 1;
+			}
+
+			if (p.x >= rightBox.x && p.x <= rightBox.x + rightBox.z
+				&&
+				p.y >= rightBox.y && p.y <= rightBox.y + rightBox.w
+				)
+			{
+				if (platform::isLMouseButtonReleased())
+				{
+					rReleased = 1;
+				}
+				rightPressed = 1;
+			}
+		}else
+		{
+			if (p.x >= leftBox.x && p.x <= leftBox.x + leftBox.z
+				&&
+				p.y >= leftBox.y && p.y <= leftBox.y + leftBox.w
+				)
+			{
+				if (platform::isLMouseButtonReleased())
+				{
+					lReleased = 1;
+				}
+			}
+
+			if (p.x >= rightBox.x && p.x <= rightBox.x + rightBox.z
+				&&
+				p.y >= rightBox.y && p.y <= rightBox.y + rightBox.w
+				)
+			{
+				if (platform::isLMouseButtonReleased())
+				{
+					rReleased = 1;
+				}
+			}
+		}
+
+#pragma endregion
+
+		renderer2d.renderRectangle(leftBox,
+			{}, 0, uiArrows, arrowsAtlas.get(0,leftPressed,1));
+
+		renderer2d.renderRectangle(rightBox,
+			{}, 0, uiArrows, arrowsAtlas.get(0, rightPressed));
+
+		if(lReleased)
+		ilog(lReleased);
+
+		renderer2d.flush();
+		return 1;
+	}
+
+#pragma endregion
+
+	if (platform::isKeyPressedOn('T'))
+	{
+		loadLevel();
+	}
+
+	if (player.dying || player.isExitingLevel != -1)
+	{
+		playerLight -= deltaTime * 2;
+		if (playerLight < 1)
+		{
+			if(player.dying)
+			{
+				respawn();
+			}else
+			{
+				currentLevel = player.isExitingLevel;
+
+				if(currentLevel == -2)
+				{
+					mapData.cleanup();
+				}else
+				{
+					loadLevel();
+				}
+
+			}
+		}
+	}
+
+#pragma region music
+	
+	waterPlayer.setVolume(mapData.getWaterPercentage(player.pos));
+	greenPlayer.setVolume(mapData.getGreenPercentage(player.pos));
+	redPlayer.setVolume(mapData.getRedPercentage(player.pos));
+	grayPlayer.setVolume(mapData.getCavePercentage(player.pos));
+
+#pragma endregion
+
 	//stencilRenderer2d.updateWindowMetrics(backGroundFBO.texture.GetSize().x, 
 	//	backGroundFBO.texture.GetSize().y);
-	backgroundRenderer2d.updateWindowMetrics(w, h);
 
 	//renderer2d.renderRectangle({ 100,100,100,100 }, Colors_Green);
 	//renderer2d.flush();
@@ -354,7 +500,6 @@ bool gameLogic(float deltaTime)
 	{
 		renderer2d.currentCamera.zoom += deltaTime;
 	}
-
 
 	if (input::isKeyPressedOn(input::Buttons::jump))
 	{
@@ -409,30 +554,36 @@ bool gameLogic(float deltaTime)
 		}
 	}
 
-	if (input::isKeyPressedOn(input::Buttons::shoot) && currentArrow > -1 && !player.dying)
+	if (input::isKeyPressedOn(input::Buttons::shoot) && currentArrow > -1 && !player.dying
+		&& player.isExitingLevel == -1)
 	{
-		for (auto& i : inventory)
+		player.idleTime = 0;
 		{
-			if (i.type == actualInventorty[currentArrow].type)
+
+
+			for (auto& i : inventory)
 			{
-				i.count--;
-				break;
+				if (i.type == actualInventorty[currentArrow].type)
+				{
+					i.count--;
+					break;
+				}
 			}
+
+			Arrow a;
+			a.type = (Arrow::ArrowTypes)actualInventorty[currentArrow].type;
+			a.pos = player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2);
+			a.shootDir = input::getShootDir({ w / 2,h / 2 });
+			//a.pos.x += a.shootDir.x * BLOCK_SIZE * 0.9;
+			//a.pos.y += a.shootDir.y * BLOCK_SIZE * 0.9;
+			arrows.push_back(a);
 		}
-
-		Arrow a;
-		a.type = (Arrow::ArrowTypes)actualInventorty[currentArrow].type;
-		a.pos = player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2);
-		a.shootDir = input::getShootDir({ w / 2,h / 2 });
-		//a.pos.x += a.shootDir.x * BLOCK_SIZE * 0.9;
-		//a.pos.y += a.shootDir.y * BLOCK_SIZE * 0.9;
-		arrows.push_back(a);
 	}
+	
+	
 
-	//todo add player dimensions
 	renderer2d.currentCamera.follow(player.pos + (player.dimensions / 2.f), deltaTime * 120, 30, renderer2d.windowW, renderer2d.windowH);
 	//stencilRenderer2d.currentCamera = renderer2d.currentCamera;
-	backgroundRenderer2d.currentCamera = renderer2d.currentCamera;
 
 	player.applyGravity(deltaTime);
 	player.applyVelocity(deltaTime);
@@ -536,6 +687,10 @@ bool gameLogic(float deltaTime)
 		maxX = std::min(mapData.w, maxX);
 		maxY = std::min(mapData.h, maxY);
 
+		static bool playedGrassSound = 0;
+		bool playedGrassSoundThisFrame = 0;
+		static float grassTimeDelay;
+
 		player.iswebs = 0;
 		for (int y = minY; y <= maxY; y++)
 		{
@@ -553,6 +708,11 @@ bool gameLogic(float deltaTime)
 				if (g.type == Block::water3)
 				{
 					player.dying = 1;
+				}else
+				if (isSpike(g.type))
+				{
+					player.dying = 1;
+					player.lockMovementDie = 1;
 				}
 
 				if (g.type == Block::flagDown)
@@ -586,21 +746,57 @@ bool gameLogic(float deltaTime)
 
 				if (isInteractableGrass(g.type))
 				{
-					soundPlayer.stop();
-					//todo
-					//if (soundPlayer.get == leavesSoundbuffer);
-					soundPlayer.setBuffer(leavesSoundbuffer);
-					soundPlayer.play();
+					playedGrassSoundThisFrame = 1;
+					if (soundPlayer.getStatus() == sf::Sound::Status::Stopped && !playedGrassSound && grassTimeDelay <=0)
+					{
+						grassTimeDelay = rand()%5+1;
+						soundPlayer.setBuffer(leavesSoundbuffer);
+						playedGrassSound = 1;
+						soundPlayer.play();
+					}
 				}
 
-				if(g.type == Block::sign)
+				if(isSign(g.type))
 				{
-					renderer2d.renderText({ BLOCK_SIZE*(x - 2), BLOCK_SIZE*(y - 1) },
-						"Sample Explicatii\ndf", font, {1,1,1,1}, 0.09);
+					auto iter = std::find_if(mapData.signDataVector.begin(), mapData.signDataVector.end(), 
+						[x, y](signData &d)->bool {return (d.pos.x == x && d.pos.y == y); });
+
+					if(iter!=mapData.signDataVector.end())
+					{
+						renderer2d.renderText({ BLOCK_SIZE*(x), BLOCK_SIZE*(y - 1) },
+							iter->text.c_str(), font, { 1,1,1,1 }, 0.09);
+					}
+				}
+
+				if (g.type == Block::levelExit)
+				{
+
+					auto iter = std::find_if(mapData.exitDataVector.begin(), mapData.exitDataVector.end(),
+						[x, y](exitData &d) {return (d.pos.x == x && d.pos.y == y); });
+
+					if (iter != mapData.exitDataVector.end())
+					{
+						if (input::isKeyPressedOn(input::Buttons::up))
+						{
+							player.isExitingLevel = iter->levelId;	
+						}
+					}
+					
+					renderer2d.renderText({ BLOCK_SIZE*(x), BLOCK_SIZE*(y - 1) },
+						"Press Up to exit", font, { 1,1,1,1 }, 0.09);
 				}
 
 			}
 		}
+
+		grassTimeDelay -= deltaTime;
+		if (grassTimeDelay < 0) { grassTimeDelay = 0; }
+
+		if(!playedGrassSoundThisFrame)
+		{
+			playedGrassSound = 0;
+		}
+
 	}
 
 	for (auto& i : wallLights)
@@ -673,7 +869,7 @@ bool gameLogic(float deltaTime)
 
 #pragma region target
 	{
-		if (currentArrow != -1 && !player.dying)
+		if (currentArrow != -1 && !player.dying && player.isExitingLevel == -1)
 		{
 			glm::vec4 color = { 1,1,1,1 };
 
@@ -756,10 +952,11 @@ bool gameLogic(float deltaTime)
 		{
 			i.cullDown = arrowPickupCullDown;
 			inventory[i.type].count = inventory[i.type].maxCount;
-			soundPlayer.stop();
-			soundPlayer.setBuffer(pickupSoundbuffer);
-			soundPlayer.play();
-
+			if (soundPlayer.getStatus() == sf::Sound::Status::Stopped)
+			{
+				soundPlayer.setBuffer(pickupSoundbuffer);
+				soundPlayer.play();
+			}
 		}
 	}
 
@@ -775,7 +972,31 @@ bool gameLogic(float deltaTime)
 
 #pragma endregion
 
+#pragma region particles
+
+
+	for (int i = 0; i < crackParticles.size(); i++)
+	{
+
+		crackParticles[i].duration -= deltaTime;
+
+		if (crackParticles[i].duration <= 0)
+		{
+			crackParticles.erase(crackParticles.begin() + i);
+			i--;
+
+		}else
+		{
+			crackParticles[i].draw(renderer2d, deltaTime, crackTexture);
+		}
+	}
+
 	jumpParticle.draw(renderer2d, deltaTime, particlesSprite);
+
+#pragma endregion
+
+
+
 
 	player.draw(renderer2d, deltaTime, characterSprite);
 

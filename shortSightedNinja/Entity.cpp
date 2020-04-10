@@ -4,6 +4,7 @@
 #include "math.h"
 #include <time.h>
 #include <cstdlib>
+#include "Particle.h"
 
 float gravitationalAcceleration = 64;
 float jumpSpeed = 22;
@@ -26,7 +27,7 @@ float arrowSpeed = 25;
 #undef min;
 
 extern Entity player;
-
+extern std::vector<Particle>crackParticles;
 extern std::vector <LightSource> wallLights;
 
 //pos and size
@@ -111,7 +112,6 @@ void Entity::resolveConstrains(MapData & mapData)
 			}
 	
 		} while (glm::length((newPos + delta) - pos) > 1.0f * BLOCK_SIZE);
-		//todo optimize this while
 	
 		checkCollisionBrute(pos,
 			lastPos,
@@ -145,6 +145,11 @@ void Entity::strafe(int dir)
 
 void Entity::run(float speed)
 {
+	if (isExitingLevel != -1 || lockMovementDie)
+	{
+		return;
+	}
+
 	if(iswebs)
 	{
 		pos.x += speed * runSpeed * BLOCK_SIZE * 0.1;
@@ -157,6 +162,16 @@ void Entity::run(float speed)
 
 void Entity::airRun(float speed)
 {
+	if(lockMovementDie)
+	{
+		return;
+	}
+
+	if(isExitingLevel!=-1)
+	{
+		return;
+	}
+
 	if (dying)
 	{
 		speed *= 0.5;
@@ -201,7 +216,7 @@ void Entity::applyGravity(float deltaTime)
 
 void Entity::applyVelocity(float deltaTime)
 {
-	if(dying)
+	if(dying || lockMovementDie)
 	{
 		return;
 	}
@@ -299,9 +314,11 @@ void Entity::checkGrounded(MapData &mapDat, float deltaTime)
 
 }
 
-
 void Entity::checkWall(MapData & mapData, int move)
 {
+	if (iswebs) 
+	{ return; }
+
 	if (pos.y < -BLOCK_SIZE)
 	{
 		return;
@@ -349,7 +366,7 @@ void Entity::checkWall(MapData & mapData, int move)
 	if (leftX < 0) { return; }
 	
 
-	if(isColidable(mapData.get(rightX, minY).type) && move > 0 && checkRight)
+	if(isColidable(mapData.get(rightX, minY).type) && move > 0 && checkRight && mapData.get(rightX, minY).type != Block::bareer)
 	{
 
 		if (isRedSolid(mapData.get(rightX, minY).type))
@@ -379,7 +396,7 @@ void Entity::checkWall(MapData & mapData, int move)
 	}
 
 
-	if (isColidable(mapData.get(leftX, minY).type) && move < 0 && checkLeft)
+	if (isColidable(mapData.get(leftX, minY).type) && move < 0 && checkLeft && mapData.get(rightX, minY).type != Block::bareer)
 	{
 
 		if(isRedSolid(mapData.get(leftX, minY).type))
@@ -406,15 +423,19 @@ void Entity::checkWall(MapData & mapData, int move)
 			velocity.y = 0;
 		}
 	}
-	//}
-
-
 
 }
 
 void Entity::jump()
 {
-	velocity.y = -jumpSpeed * BLOCK_SIZE;
+	if(iswebs)
+	{
+		velocity.y = -jumpSpeed * BLOCK_SIZE / 2;
+	}else
+	{
+		velocity.y = -jumpSpeed * BLOCK_SIZE;
+	}
+
 }
 
 int randVal = 1;
@@ -725,6 +746,14 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 					m.type = Block::none;
 					mapData.setNeighbors();
 
+					{//particle
+						Particle p;
+						p.maxDuration = 1.2;
+						p.frameCount = 5;
+						p.set({ (int)(curPos.x), (int)(curPos.y) }, 0, 1);
+						crackParticles.push_back(p);
+					}
+
 					int minX = (curPos.x / BLOCK_SIZE) - 1;
 					int maxX = (curPos.x / BLOCK_SIZE) + 1;
 					int minY = (curPos.y / BLOCK_SIZE) - 1;
@@ -741,6 +770,14 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 							if(mapData.get(x,y).type == Block::rockCracked)
 							{
 								mapData.get(x, y).type = Block::none;
+								{//particle
+									Particle p;
+									p.maxDuration = 1.2;
+									p.frameCount = 5;
+									p.set({ x,y }, 0, 1);
+									crackParticles.push_back(p);
+								}
+
 							}
 						}
 
@@ -767,18 +804,48 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 			if(type == slimeArrow && hitOnce == 0)
 			{
 				hitOnce = 1;
-				
+			
+
+
 				if ((lastPos.x < floor(curPos.x / BLOCK_SIZE)*BLOCK_SIZE && shootDir.x > 0) ||
 					(lastPos.x > floor((curPos.x / BLOCK_SIZE) + 1)*BLOCK_SIZE&& shootDir.x < 0))
 				{
-					shootDir.x *= -1;
+					auto pos = glm::ivec2(lastPos.x, lastPos.y);
+					if(shootDir.x<0 && pos.x>0 && isColidable(mapData.get(pos.x-1, pos.y).type))
+					{
+						shootDir.y *= -1;
+					}else
+					if (pos.x < mapData.w - 1 && isColidable(mapData.get(pos.x + 1, pos.y).type))
+					{
+						shootDir.y *= -1;
+					}
+					else
+					{
+						shootDir.x *= -1;
+					}
+
 				}else
 				{
-					shootDir.y *= -1;
+			
+					auto pos = glm::ivec2(lastPos.x, lastPos.y);
+					if (shootDir.y > 0 && pos.y < mapData.h-1 && isColidable(mapData.get(pos.x, pos.y+1).type))
+					{
+						shootDir.x *= -1;
+					}
+					else
+					if (pos.y > 0 && isColidable(mapData.get(pos.x, pos.y-1).type))
+					{
+						shootDir.x *= -1;
+					}
+					else
+					{
+						shootDir.y *= -1;
+					}
+
 				}
 
-				curPos.x += shootDir.x * BLOCK_SIZE * affinity;
-				curPos.y += shootDir.y * BLOCK_SIZE * affinity;
+				curPos.x += shootDir.x * BLOCK_SIZE * affinity*2;
+				curPos.y += shootDir.y * BLOCK_SIZE * affinity*2;
 				pos = curPos;
 			}else
 			{

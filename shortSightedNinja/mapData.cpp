@@ -10,10 +10,12 @@ float distFunc(float dist)
 {
 	dist /= BLOCK_SIZE;
 
+	dist /= 1.1f;
+
 	dist = std::max(1.f, dist);
 	//shortestDist /= BLOCK_SIZE;
 
-	float perc = (100.f * BLOCK_SIZE) / (pow(dist, 2) * 0.2 + 3 + pow(dist, 3) * 0.012);
+	float perc = (100.f * BLOCK_SIZE) / (pow(dist, 2) * 0.04 + 3 + pow(dist, 3) * 0.008);
 	perc = std::min(perc, 100.f);
 	perc = std::max(perc, 0.f);
 
@@ -22,7 +24,7 @@ float distFunc(float dist)
 		perc = 0;
 	}
 
-	return perc *0.2;
+	return perc * 0.08;
 }
 
 float MapData::getWaterPercentage(glm::vec2 pos)
@@ -62,6 +64,34 @@ float MapData::getGreenPercentage(glm::vec2 pos)
 		(pos.x - i.x) * (pos.x - i.x) +
 		(pos.y - i.y) * (pos.y - i.y)
 			);
+
+		if (shortestDist < 0)
+		{
+			shortestDist = dist;
+		}
+		else
+		{
+			shortestDist = std::min(shortestDist, dist);
+		}
+	}
+
+	if (shortestDist < 0)
+		return 0;
+
+	return distFunc(shortestDist) * 0.5;
+}
+
+
+float MapData::getRedPercentage(glm::vec2 pos)
+{
+	float shortestDist = -1;
+
+	for (auto& i : redSoundPos)
+	{
+		float dist = sqrt(
+			(pos.x - i.x) * (pos.x - i.x) +
+			(pos.y - i.y) * (pos.y - i.y)
+		);
 
 		if (shortestDist < 0)
 		{
@@ -222,7 +252,6 @@ void MapData::create(int w, int h, unsigned short* d = 0)
 		}
 
 	setNeighbors();
-	//todo setup neighbours
 }
 
 BlockInfo& MapData::get(int x, int y)
@@ -246,6 +275,15 @@ void MapData::clearColorData()
 void MapData::cleanup()
 {
 	waterPos.clear();
+	signDataVector.clear();
+	greenSoundPos.clear();
+	redSoundPos.clear();
+	tikiSoundPos.clear();
+	snowSoundPos.clear();
+	caveSoundPos.clear();
+	exitDataVector.clear();
+	torchDataVector.clear();
+
 	if (data)
 	{
 		delete[] data;

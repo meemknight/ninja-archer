@@ -28,6 +28,7 @@ extern GLint maskSamplerUniform;
 gl2d::Renderer2D renderer2d;
 //gl2d::Renderer2D stencilRenderer2d;
 
+//music
 sf::SoundBuffer pickupSoundbuffer;
 sf::SoundBuffer leavesSoundbuffer;
 sf::Sound soundPlayer;
@@ -36,7 +37,6 @@ sf::Music greenPlayer;
 sf::Music redPlayer;
 sf::Music grayPlayer;
 
-int currentSound = 0;
 enum Sounds
 {
 	none
@@ -78,7 +78,7 @@ Particle jumpParticle;
 std::vector<Particle>crackParticles;
 
 // -2 if is main menu
-int currentLevel=1;
+int currentLevel=0;
 
 struct ArrowItem
 {
@@ -287,7 +287,7 @@ bool initGame()
 		grayPlayer.openFromFile("resources//cave.wav");
 		grayPlayer.setLoop(1);
 
-		soundPlayer.setVolume(10);
+		soundPlayer.setVolume(2);
 	}
 
 	loadLevel();
@@ -325,19 +325,19 @@ bool gameLogic(float deltaTime)
 			Ui::Frame f(frame2);
 
 			renderer2d.renderRectangle(
-				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.7).xAspectRatio(1.f),
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
 				{}, 0, uiForest);
 			renderer2d.renderRectangle(
-				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.7).xAspectRatio(1.f),
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
 				{}, 0, uiCastle);
 			renderer2d.renderRectangle(
-				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.7).xAspectRatio(1.f),
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
 				{}, 0, uiCave);
 			renderer2d.renderRectangle(
-				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.7).xAspectRatio(1.f),
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
 				{}, 0, uiMountain);
 			renderer2d.renderRectangle(
-				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.7).xAspectRatio(1.f),
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
 				{}, 0, uiSnowMountain);
 		}
 

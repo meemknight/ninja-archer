@@ -10,10 +10,12 @@ float distFunc(float dist)
 {
 	dist /= BLOCK_SIZE;
 
+	dist /= 1.1f;
+
 	dist = std::max(1.f, dist);
 	//shortestDist /= BLOCK_SIZE;
 
-	float perc = (100.f * BLOCK_SIZE) / (pow(dist, 2) * 0.2 + 3 + pow(dist, 3) * 0.012);
+	float perc = (100.f * BLOCK_SIZE) / (pow(dist, 2) * 0.04 + 3 + pow(dist, 3) * 0.008);
 	perc = std::min(perc, 100.f);
 	perc = std::max(perc, 0.f);
 
@@ -22,7 +24,7 @@ float distFunc(float dist)
 		perc = 0;
 	}
 
-	return perc;
+	return perc * 0.08;
 }
 
 float MapData::getWaterPercentage(glm::vec2 pos)

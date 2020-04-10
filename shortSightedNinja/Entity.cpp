@@ -145,6 +145,11 @@ void Entity::strafe(int dir)
 
 void Entity::run(float speed)
 {
+	if (isExitingLevel != -1)
+	{
+		return;
+	}
+
 	if(iswebs)
 	{
 		pos.x += speed * runSpeed * BLOCK_SIZE * 0.1;
@@ -160,6 +165,11 @@ void Entity::airRun(float speed)
 	if (dying)
 	{
 		speed *= 0.5;
+	}
+
+	if(isExitingLevel!=-1)
+	{
+		return;
 	}
 
 	if(speed > 0)
@@ -302,6 +312,9 @@ void Entity::checkGrounded(MapData &mapDat, float deltaTime)
 
 void Entity::checkWall(MapData & mapData, int move)
 {
+	if (iswebs) 
+	{ return; }
+
 	if (pos.y < -BLOCK_SIZE)
 	{
 		return;
@@ -414,7 +427,14 @@ void Entity::checkWall(MapData & mapData, int move)
 
 void Entity::jump()
 {
-	velocity.y = -jumpSpeed * BLOCK_SIZE;
+	if(iswebs)
+	{
+		velocity.y = -jumpSpeed * BLOCK_SIZE / 2;
+	}else
+	{
+		velocity.y = -jumpSpeed * BLOCK_SIZE;
+	}
+
 }
 
 int randVal = 1;

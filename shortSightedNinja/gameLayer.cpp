@@ -60,6 +60,21 @@ int levelId = -2;
 float torchLight = 5;
 #pragma endregion
 
+float getTorchLight(int x, int y)
+{
+	auto iter = std::find_if(torches.begin(), torches.end(),
+		[x, y](torchData &d)->bool {return (d.pos.x == x && d.pos.y == y); });
+
+	if (iter != torches.end())
+	{
+		return iter->light;
+	}
+	else
+	{
+		return 5;
+	}
+}
+
 bool initGame()
 {
 	renderer2d.create();
@@ -197,7 +212,8 @@ bool gameLogic(float deltaTime)
 #pragma endregion
 
 #pragma region Edit Torch
-				if (isLitTorch(block))
+				if (isLitTorch(block) ||
+					unLitTorch(block))
 				{
 					auto it = std::find_if(torches.begin(), torches.end(),
 						[x = (int)mousePos.x / BLOCK_SIZE, y = (int)mousePos.y / BLOCK_SIZE](torchData& d)
@@ -344,14 +360,16 @@ bool gameLogic(float deltaTime)
 			{
 				if (isLitTorch(mapData.get(x, y).type) && simulateLights)
 				{
+					float light = getTorchLight(x, y);
 					simuleteLightSpot({ x * BLOCK_SIZE + BLOCK_SIZE / 2,y * BLOCK_SIZE + BLOCK_SIZE / 2 },
-						5, mapData);
+						light, mapData);
 				}
 
 				if (unLitTorch(mapData.get(x, y).type) && simulateUnlitLights)
 				{
+					float light = getTorchLight(x, y);
 					simuleteLightSpot({ x * BLOCK_SIZE + BLOCK_SIZE / 2,y * BLOCK_SIZE + BLOCK_SIZE / 2 },
-						5, mapData);
+						light, mapData);
 				}
 
 			}
@@ -443,8 +461,15 @@ bool gameLogic(float deltaTime)
 			{
 				// show signs
 			}
+
+			
 		}
 
+	}
+
+	if (editItems)
+	{
+		renderer2d.renderRectangle({ itemPos.x * BLOCK_SIZE, itemPos.y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 1,1,0.2,0.4 });
 	}
 #pragma endregion
 
@@ -623,7 +648,8 @@ void imguiFunc(float deltaTime)
 
 		for (auto& i : torches)
 		{
-			if (isLitTorch(mapData.get(i.pos.x, i.pos.y).type))
+			if (isLitTorch(mapData.get(i.pos.x, i.pos.y).type)||
+				unLitTorch(mapData.get(i.pos.x, i.pos.y).type))
 			{
 				outputFile << "md.torchDataVector.emplace_back(glm::ivec2{ " << i.pos.x << ", " << i.pos.y << "}, " << i.light << ");\n";
 			}

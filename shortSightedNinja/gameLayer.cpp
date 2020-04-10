@@ -87,18 +87,16 @@ bool gameLogic(float deltaTime)
 
 	glViewport(0, 0, w, h);
 	renderer2d.updateWindowMetrics(w, h);
-	/*stencilRenderer2d.updateWindowMetrics(backGroundFBO.texture.GetSize().x,
-		backGroundFBO.texture.GetSize().y);*/
 
 
 #pragma region Camera Movement
 	if (platform::isKeyHeld('Q'))
 	{
-		renderer2d.currentCamera.zoom -= deltaTime*3;
+		renderer2d.currentCamera.zoom -= deltaTime * 3;
 	}
 	if (platform::isKeyHeld('E'))
 	{
-		renderer2d.currentCamera.zoom += deltaTime*3;
+		renderer2d.currentCamera.zoom += deltaTime * 3;
 	}
 	if (platform::isKeyHeld('D'))
 	{
@@ -427,20 +425,139 @@ void imguiFunc(float deltaTime)
 		int it = 0;
 		std::string current;
 
-		while (std::getline(inputFile, current))
+		for (int i = 0; i < mapHeight; i++)
 		{
+			std::getline(inputFile, current);
 			for (auto i = 0; i < current.length(); i++)
 			{
-				std::string aux;
+				std::string number;
 				while (current[i] != ',')
 				{
-					aux += current[i];
+					number += current[i];
 					i++;
 				}
-				blocks[it++] = static_cast<unsigned short>(std::stoi(aux));
+				blocks[it++] = static_cast<unsigned short>(std::stoi(number));
 			}
 		}
 		blocks[it] = NULL;
+
+		doors.clear();
+		signs.clear();
+
+		while (std::getline(inputFile, current))
+		{
+#pragma region Bad Code
+			/*if (current[3] == 's')
+			{
+				int i;
+				for (i = 4; i < current.length(); i++)
+				{
+					if (current[i - 1] == '{')
+					{
+						break;
+					}
+				}
+				std::string auxStr;
+				while (current[i] != ',')
+				{
+					auxStr += current[i++];
+				}
+				int x = std::stoi(auxStr);
+
+				i += 2;
+				auxStr = "";
+				while (current[i] != '}')
+				{
+					auxStr += current[i++];
+				}
+				int y = std::stoi(auxStr);
+
+				i += 3;
+				auxStr = "";
+
+				while (current[i] != '"')
+				{
+					auxStr += current[i];
+				}
+
+				signData d({ x, y }, auxStr);
+				signs.emplace_back(d);
+			}
+			else if (current[3] == 'e')
+			{
+				int i;
+				for (i = 4; i < current.length(); i++)
+				{
+					if (current[i - 1] == '{')
+					{
+						break;
+					}
+				}
+				std::string auxStr;
+				while (current[i] != ',')
+				{
+					auxStr += current[i++];
+				}
+				int x = std::stoi(auxStr);
+				i += 2;
+				auxStr = "";
+				while (current[i] != '}')
+				{
+					auxStr += current[i++];
+				}
+				int y = std::stoi(auxStr);
+
+				i += 2;
+				auxStr = "";
+				while (current[i] != ')')
+				{
+					auxStr += current[i];
+				}
+				int id = std::stoi(auxStr);
+
+				doorData d({ x, y }, id);
+				doors.emplace_back(d);
+			}*/
+#pragma endregion
+
+			if(current[0] == 0)
+			{
+				continue;
+			}
+
+			if (current[3] == 's' && current[4] == 'i' )
+			{
+				int x, y;
+				std::string str;
+				sscanf(current.c_str(), "md.signDataVector.emplace_back( glm::ivec2{%d, %d}", &x, &y);
+
+				int i;
+				for (i = 0; i < current.length(); i++)
+				{
+					if (current[i] == '"')
+					{
+						i++;
+						break;
+					}
+				}
+				while (current[i] != '"')
+				{
+					str += current[i++];
+				}
+
+				signData d({ x, y }, str);
+				llog(str);
+				signs.emplace_back(d);
+			}
+			else if (current[3] == 'e')
+			{
+				int x, y, id;
+				sscanf(current.c_str(), "md.exitDataVector.emplace_back(glm::ivec2{%d, %d}, %d);", &x, &y, &id);
+				doorData d({ x, y }, id);
+				doors.emplace_back(d);
+			}
+		}
+
 
 		inputFile.close();
 
@@ -501,7 +618,7 @@ void imguiFunc(float deltaTime)
 
 		for (auto& i : doors)
 		{
-			outputFile << "md.exitDataVector.emplace_back(glm::ivec2{ " << i.pos.x << ", " << i.pos.y << " }, " << i.levelId << ");\n";
+			outputFile << "md.exitDataVector.emplace_back(glm::ivec2{" << i.pos.x << ", " << i.pos.y << "}, " << i.levelId << ");\n";
 		}
 
 		outputFile.close();

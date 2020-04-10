@@ -537,7 +537,7 @@ void imguiFunc(float deltaTime)
 				doorData d({ x, y }, id);
 				doors.emplace_back(d);
 			}
-			else if(current[3] == 't')
+			else if (current[3] == 't')
 			{
 				int x, y;
 				float light;
@@ -599,23 +599,34 @@ void imguiFunc(float deltaTime)
 
 		outputFile << "\n\n";
 
+
+
 		for (auto& i : signs)
 		{
-			outputFile << "md.signDataVector.emplace_back( glm::ivec2{" << i.pos.x << ", " << i.pos.y << "}, \"" << i.text << "\");\n";
+			if (isSign(mapData.get(i.pos.x, i.pos.y).type))
+			{
+				outputFile << "md.signDataVector.emplace_back( glm::ivec2{" << i.pos.x << ", " << i.pos.y << "}, \"" << i.text << "\");\n";
+			}
 		}
 
 		outputFile << "\n\n";
 
 		for (auto& i : doors)
 		{
-			outputFile << "md.exitDataVector.emplace_back(glm::ivec2{" << i.pos.x << ", " << i.pos.y << "}, " << i.levelId << ");\n";
+			if (isDoor(mapData.get(i.pos.x, i.pos.y).type))
+			{
+				outputFile << "md.exitDataVector.emplace_back(glm::ivec2{" << i.pos.x << ", " << i.pos.y << "}, " << i.levelId << ");\n";
+			}
 		}
 
 		outputFile << "\n\n";
 
-		for(auto &i: torches)
+		for (auto& i : torches)
 		{
-			outputFile << "md.torchDataVector.emplace_back(glm::ivec2{ " << i.pos.x << ", " << i.pos.y << "}, "<< i.light << ");\n";
+			if (isLitTorch(mapData.get(i.pos.x, i.pos.y).type))
+			{
+				outputFile << "md.torchDataVector.emplace_back(glm::ivec2{ " << i.pos.x << ", " << i.pos.y << "}, " << i.light << ");\n";
+			}
 		}
 
 		outputFile.close();

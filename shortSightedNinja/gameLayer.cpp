@@ -33,6 +33,7 @@ sf::SoundBuffer pickupSoundbuffer;
 sf::SoundBuffer leavesSoundbuffer;
 sf::Sound soundPlayer;
 sf::Music waterPlayer;
+sf::Music tikiPlayer;
 sf::Music greenPlayer;
 sf::Music redPlayer;
 sf::Music grayPlayer;
@@ -193,6 +194,12 @@ void loadLevel()
 		waterPlayer.setVolume(0);
 	}
 
+	if (mapData.tikiSoundPos.size() > 0)
+	{
+		tikiPlayer.play();
+		tikiPlayer.setVolume(0);
+	}
+
 	if (mapData.greenSoundPos.size() > 0)
 	{
 		greenPlayer.play();
@@ -289,9 +296,12 @@ bool initGame()
 	{//music
 		pickupSoundbuffer.loadFromFile("resources//pick_up.wav");
 		leavesSoundbuffer.loadFromFile("resources//leaves.wav");
+	
 		waterPlayer.openFromFile("resources//water.wav");
-		
 		waterPlayer.setLoop(1);
+		
+		tikiPlayer.openFromFile("resources//tikiForest.wav");
+		tikiPlayer.setLoop(1);
 
 		greenPlayer.openFromFile("resources//rainForest.wav");
 		greenPlayer.setLoop(1);
@@ -337,6 +347,7 @@ bool gameLogic(float deltaTime)
 
 		waterPlayer.stop();
 		greenPlayer.stop();
+		tikiPlayer.stop();
 		redPlayer.stop();
 		grayPlayer.stop();
 		soundPlayer.stop();
@@ -344,6 +355,7 @@ bool gameLogic(float deltaTime)
 		greenPlayer.setVolume(0);
 		redPlayer.setVolume(0);
 		grayPlayer.setVolume(0);
+		tikiPlayer.setVolume(0);
 
 		renderer2d.currentCamera = gl2d::cameraCreateDefault();
 
@@ -503,6 +515,7 @@ bool gameLogic(float deltaTime)
 	greenPlayer.setVolume(mapData.getGreenPercentage(player.pos));
 	redPlayer.setVolume(mapData.getRedPercentage(player.pos));
 	grayPlayer.setVolume(mapData.getCavePercentage(player.pos));
+	tikiPlayer.setVolume(mapData.getTikiPercentage(player.pos));
 
 #pragma endregion
 

@@ -396,7 +396,7 @@ void Entity::checkWall(MapData & mapData, int move)
 	}
 
 
-	if (isColidable(mapData.get(leftX, minY).type) && move < 0 && checkLeft && mapData.get(rightX, minY).type != Block::bareer)
+	if (isColidable(mapData.get(leftX, minY).type) && move < 0 && checkLeft && mapData.get(leftX, minY).type != Block::bareer)
 	{
 
 		if(isRedSolid(mapData.get(leftX, minY).type))

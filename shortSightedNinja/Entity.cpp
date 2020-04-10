@@ -366,7 +366,7 @@ void Entity::checkWall(MapData & mapData, int move)
 	if (leftX < 0) { return; }
 	
 
-	if(isColidable(mapData.get(rightX, minY).type) && move > 0 && checkRight)
+	if(isColidable(mapData.get(rightX, minY).type) && move > 0 && checkRight && mapData.get(rightX, minY).type != Block::bareer)
 	{
 
 		if (isRedSolid(mapData.get(rightX, minY).type))
@@ -396,7 +396,7 @@ void Entity::checkWall(MapData & mapData, int move)
 	}
 
 
-	if (isColidable(mapData.get(leftX, minY).type) && move < 0 && checkLeft)
+	if (isColidable(mapData.get(leftX, minY).type) && move < 0 && checkLeft && mapData.get(rightX, minY).type != Block::bareer)
 	{
 
 		if(isRedSolid(mapData.get(leftX, minY).type))
@@ -423,9 +423,6 @@ void Entity::checkWall(MapData & mapData, int move)
 			velocity.y = 0;
 		}
 	}
-	//}
-
-
 
 }
 

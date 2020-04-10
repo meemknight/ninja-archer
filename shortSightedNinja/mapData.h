@@ -504,10 +504,20 @@ struct exitData
 	int levelId;
 };
 
+struct torchData
+{
+	torchData() {};
+	torchData(glm::ivec2 p, float i) :pos(p), light(i) {};
+
+	glm::ivec2 pos;
+	float light;
+};
+
 struct MapData
 {
 	std::vector<signData> signDataVector;
 	std::vector<exitData> exitDataVector;
+	std::vector<torchData> torchDataVector;
 
 	std::vector<glm::vec2> waterPos;
 	std::vector<glm::vec2> greenSoundPos;

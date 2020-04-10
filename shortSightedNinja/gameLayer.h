@@ -27,6 +27,8 @@ int isKeyPressedOn(int key);
 int isLMouseButtonPressed();
 int isRMouseButtonPressed();
 
+int isLMouseButtonReleased();
+
 int isLMouseHeld();
 int isRMouseHeld();
 

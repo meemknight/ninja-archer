@@ -62,6 +62,7 @@ gl2d::Texture uiCastle;
 gl2d::Texture uiCave;
 gl2d::Texture uiMountain;
 gl2d::Texture uiSnowMountain;
+gl2d::Texture uiArrows;
 
 std::vector<Arrow> arrows;
 
@@ -79,7 +80,7 @@ Particle jumpParticle;
 std::vector<Particle>crackParticles;
 
 // -2 if is main menu
-int currentLevel=0;
+int currentLevel=-2;
 
 struct ArrowItem
 {
@@ -211,7 +212,6 @@ void respawn()
 	inventory.push_back({ 2,0,3 });
 	inventory.push_back({ 3,0,3 });
 
-
 	arrows.clear();
 
 	player.pos = { BLOCK_SIZE * playerSpawnPos.x, BLOCK_SIZE * playerSpawnPos.y };
@@ -261,6 +261,7 @@ bool initGame()
 	uiCave.loadFromFile("resources//ui//cave.png");
 	uiMountain.loadFromFile("resources//ui//mountain.png");
 	uiSnowMountain.loadFromFile("resources//ui//snowMountain.png");
+	uiArrows.loadFromFile("resources//ui//arrow.png");
 
 	const char buff[] =
 	{
@@ -343,7 +344,88 @@ bool gameLogic(float deltaTime)
 			renderer2d.renderRectangle(
 				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
 				{}, 0, uiSnowMountain);
+			renderer2d.renderRectangle(
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
+				{}, 0, uiTiki);
+
+
+			uiArrows;
 		}
+
+		gl2d::TextureAtlas arrowsAtlas(1, 2);
+		int leftPressed = 0;
+		int rightPressed = 0;
+
+		int lReleased = 0;
+		int rReleased = 0;
+
+		auto leftBox = Ui::Box().xLeft(frame2.x - 200).yCenter().yDimensionPercentage(0.2).xAspectRatio(1.f)();
+		auto rightBox = Ui::Box().xRight(-frame2.x + 200).yCenter().yDimensionPercentage(0.2).xAspectRatio(1.f)();
+
+		auto p = platform::getRelMousePosition();
+
+#pragma region buttons
+
+		if(platform::isLMouseHeld())
+		{
+			if (p.x >= leftBox.x && p.x <= leftBox.x + leftBox.z
+				&&
+				p.y >= leftBox.y && p.y <= leftBox.y + leftBox.w
+				)
+			{
+				if(platform::isLMouseButtonReleased())
+				{
+					lReleased = 1;
+				}
+				leftPressed = 1;
+			}
+
+			if (p.x >= rightBox.x && p.x <= rightBox.x + rightBox.z
+				&&
+				p.y >= rightBox.y && p.y <= rightBox.y + rightBox.w
+				)
+			{
+				if (platform::isLMouseButtonReleased())
+				{
+					rReleased = 1;
+				}
+				rightPressed = 1;
+			}
+		}else
+		{
+			if (p.x >= leftBox.x && p.x <= leftBox.x + leftBox.z
+				&&
+				p.y >= leftBox.y && p.y <= leftBox.y + leftBox.w
+				)
+			{
+				if (platform::isLMouseButtonReleased())
+				{
+					lReleased = 1;
+				}
+			}
+
+			if (p.x >= rightBox.x && p.x <= rightBox.x + rightBox.z
+				&&
+				p.y >= rightBox.y && p.y <= rightBox.y + rightBox.w
+				)
+			{
+				if (platform::isLMouseButtonReleased())
+				{
+					rReleased = 1;
+				}
+			}
+		}
+
+#pragma endregion
+
+		renderer2d.renderRectangle(leftBox,
+			{}, 0, uiArrows, arrowsAtlas.get(0,leftPressed,1));
+
+		renderer2d.renderRectangle(rightBox,
+			{}, 0, uiArrows, arrowsAtlas.get(0, rightPressed));
+
+		if(lReleased)
+		ilog(lReleased);
 
 		renderer2d.flush();
 		return 1;
@@ -418,7 +500,6 @@ bool gameLogic(float deltaTime)
 	{
 		renderer2d.currentCamera.zoom += deltaTime;
 	}
-
 
 	if (input::isKeyPressedOn(input::Buttons::jump))
 	{

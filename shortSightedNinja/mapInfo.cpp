@@ -124,6 +124,8 @@ void setupMap(MapData &md, int levelId)
 		md.signDataVector.emplace_back(glm::ivec2{ 73, 19 }, "Don't fall\ninto water");		
 	
 		md.exitDataVector.emplace_back(glm::ivec2{ 112, 26 }, 1);
+
+		//md.torchDataVector.emplace_back(glm::ivec2{ 112, 26 }, 1);
 	}
 	break;
 	case 1:

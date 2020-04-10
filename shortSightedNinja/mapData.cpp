@@ -282,6 +282,7 @@ void MapData::cleanup()
 	snowSoundPos.clear();
 	caveSoundPos.clear();
 	exitDataVector.clear();
+	torchDataVector.clear();
 
 	if (data)
 	{

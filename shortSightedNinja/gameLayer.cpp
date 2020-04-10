@@ -63,16 +63,16 @@ float torchLight = 0;
 bool initGame()
 {
 	renderer2d.create();
-	ShaderProgram sp{ "blocks.vert","blocks.frag" };
-	sprites.loadFromFile("sprites.png");
+	ShaderProgram sp{ "resources//blocks.vert","resources//blocks.frag" };
+	sprites.loadFromFile("resources//sprites.png");
 	backGroundFBO.create(40 * BLOCK_SIZE, 40 * BLOCK_SIZE);
 
 	mapRenderer.init(sp);
 	mapRenderer.sprites = sprites;
-	mapRenderer.upTexture.loadFromFile("top.png");
-	mapRenderer.downTexture.loadFromFile("bottom.png");
-	mapRenderer.leftTexture.loadFromFile("left.png");
-	mapRenderer.rightTexture.loadFromFile("right.png");
+	mapRenderer.upTexture.loadFromFile("resources//top.png");
+	mapRenderer.downTexture.loadFromFile("resources//bottom.png");
+	mapRenderer.leftTexture.loadFromFile("resources//left.png");
+	mapRenderer.rightTexture.loadFromFile("resources//right.png");
 
 	mapData.create(40, 40, map);
 
@@ -469,7 +469,8 @@ void imguiFunc(float deltaTime)
 	if (ImGui::Button("Open Map"))
 	{
 		char aux[256];
-		strcpy(aux, name);
+		strcpy(aux, "resources//");
+		strcat(aux, name);
 		strcat(aux, ".level");
 		std::ifstream inputFile(aux);
 
@@ -573,7 +574,8 @@ void imguiFunc(float deltaTime)
 	if (ImGui::Button("Save Map"))
 	{
 		char aux[256] = {};
-		strcpy(aux, name);
+		strcpy(aux, "resources//");
+		strcat(aux, name);
 		strcat(aux, ".level");
 
 		std::ofstream outputFile(aux);

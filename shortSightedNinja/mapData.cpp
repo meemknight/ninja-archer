@@ -22,7 +22,7 @@ float distFunc(float dist)
 		perc = 0;
 	}
 
-	return perc ;
+	return perc;
 }
 
 float MapData::getWaterPercentage(glm::vec2 pos)
@@ -62,6 +62,34 @@ float MapData::getGreenPercentage(glm::vec2 pos)
 		(pos.x - i.x) * (pos.x - i.x) +
 		(pos.y - i.y) * (pos.y - i.y)
 			);
+
+		if (shortestDist < 0)
+		{
+			shortestDist = dist;
+		}
+		else
+		{
+			shortestDist = std::min(shortestDist, dist);
+		}
+	}
+
+	if (shortestDist < 0)
+		return 0;
+
+	return distFunc(shortestDist) * 0.5;
+}
+
+
+float MapData::getRedPercentage(glm::vec2 pos)
+{
+	float shortestDist = -1;
+
+	for (auto& i : redSoundPos)
+	{
+		float dist = sqrt(
+			(pos.x - i.x) * (pos.x - i.x) +
+			(pos.y - i.y) * (pos.y - i.y)
+		);
 
 		if (shortestDist < 0)
 		{

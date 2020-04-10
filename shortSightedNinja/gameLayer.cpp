@@ -78,7 +78,7 @@ Particle jumpParticle;
 std::vector<Particle>crackParticles;
 
 // -2 if is main menu
-int currentLevel=0;
+int currentLevel=1;
 
 struct ArrowItem
 {
@@ -290,9 +290,9 @@ bool initGame()
 		soundPlayer.setVolume(10);
 	}
 
-	//loadLevel();
+	loadLevel();
 
-	currentLevel = -2;
+	//currentLevel = -2;
 
 	return true;
 }
@@ -380,7 +380,7 @@ bool gameLogic(float deltaTime)
 	
 	waterPlayer.setVolume(mapData.getWaterPercentage(player.pos));
 	greenPlayer.setVolume(mapData.getGreenPercentage(player.pos));
-	redPlayer.setVolume(mapData.getTikiPercentage(player.pos));
+	redPlayer.setVolume(mapData.getRedPercentage(player.pos));
 	grayPlayer.setVolume(mapData.getCavePercentage(player.pos));
 
 #pragma endregion
@@ -480,7 +480,7 @@ bool gameLogic(float deltaTime)
 			{
 				if (i.type == actualInventorty[currentArrow].type)
 				{
-					//i.count--;
+					i.count--;
 					break;
 				}
 			}

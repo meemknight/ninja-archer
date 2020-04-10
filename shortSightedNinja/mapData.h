@@ -481,6 +481,9 @@ struct signData
 
 struct exitData
 {
+	exitData() {};
+	exitData(glm::ivec2 p, int i):pos(p), levelId(i) {};
+
 	glm::ivec2 pos;
 	int levelId;
 };
@@ -499,6 +502,7 @@ struct MapData
 	float getWaterPercentage(glm::vec2 pos);
 	float getGreenPercentage(glm::vec2 pos);
 	float getTikiPercentage(glm::vec2 pos);
+	float getRedPercentage(glm::vec2 pos);
 	float getSnowPercentage(glm::vec2 pos);
 	float getCavePercentage(glm::vec2 pos);
 

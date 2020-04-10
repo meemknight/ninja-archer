@@ -287,6 +287,7 @@ void MapData::cleanup()
 	if (data)
 	{
 		delete[] data;
+		data = nullptr;
 	}
 }
 

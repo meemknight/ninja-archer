@@ -102,13 +102,16 @@ void respawn();
 
 void loadLevel()
 {
+	ilog("current level",currentLevel);
 	inventory.clear();
 	//this vector should always have all arrows in order (and all of them there)
-	inventory.push_back({ 0,3,3 });
-	inventory.push_back({ 1,3,3 });
-	inventory.push_back({ 2,3,3 });
-	inventory.push_back({ 3,3,3 });
-	inventory.push_back({ 4,3,3 });
+	inventory.push_back({ 0,0,3 });
+	inventory.push_back({ 1,0,3 });
+	inventory.push_back({ 2,0,3 });
+	inventory.push_back({ 3,0,3 });
+	inventory.push_back({ 4,0,3 });
+
+	wallLights.clear();
 
 	renderer2d.currentCamera.zoom = 5.1;
 
@@ -117,9 +120,14 @@ void loadLevel()
 
 	//pickups.push_back({ 4, 4, 1 });
 
+	if(currentLevel==-2)
+	{
+		mapData.cleanup();
+		return;
+	}
+
 	setupMap(mapData, currentLevel);
-
-
+	
 	for (int y = 0; y < mapData.h; y++)
 		for (int x = 0; x < mapData.w; x++)
 		{
@@ -159,7 +167,9 @@ void loadLevel()
 		}
 
 	player.pos = { BLOCK_SIZE * playerSpawnPos.x, BLOCK_SIZE * playerSpawnPos.y };
-	player.updateMove();
+	//player.updateMove();
+	player.lastPos = player.pos;
+
 	player.dimensions = { 7, 7 };
 	player.dying = 0;
 	player.lockMovementDie = 0;
@@ -182,27 +192,30 @@ void loadLevel()
 	if(mapData.waterPos.size() > 0)
 	{
 		waterPlayer.play();
+		waterPlayer.setVolume(0);
 	}
 
 	if (mapData.greenSoundPos.size() > 0)
 	{
 		greenPlayer.play();
+		greenPlayer.setVolume(0);
 	}
 
 	if (mapData.redSoundPos.size() > 0)
 	{
 		redPlayer.play();
+		redPlayer.setVolume(0);
 	}
 
 	if (mapData.caveSoundPos.size() > 0)
 	{
 		grayPlayer.play();
+		grayPlayer.setVolume(0);
 	}
 
 	respawn();
 }
 
-//todo
 void respawn()
 {
 	inventory.clear();
@@ -214,6 +227,8 @@ void respawn()
 
 	arrows.clear();
 
+	glog(playerSpawnPos.x, playerSpawnPos.y);
+
 	player.pos = { BLOCK_SIZE * playerSpawnPos.x, BLOCK_SIZE * playerSpawnPos.y };
 	player.updateMove();
 	player.dimensions = { 7, 7 };
@@ -223,7 +238,6 @@ void respawn()
 	player.velocity = {};
 
 }
-
 
 bool initGame()
 {
@@ -295,9 +309,18 @@ bool initGame()
 		soundPlayer.setVolume(2);
 	}
 
-	loadLevel();
-
-	//currentLevel = -2;
+	if (loadLevelFromLastState(currentLevel, playerSpawnPos))
+	{
+		glm::ivec2 i = playerSpawnPos;
+		loadLevel();
+		playerSpawnPos = i;
+		wlog(i.x, i.y);
+		respawn();
+	}else
+	{
+		ilog(currentLevel);
+		loadLevel();
+	}
 
 	return true;
 }
@@ -313,9 +336,21 @@ bool gameLogic(float deltaTime)
 
 #pragma region MyRegion
 
+
 	//main menu
 	if (currentLevel == -2)
 	{
+
+		waterPlayer.stop();
+		greenPlayer.stop();
+		redPlayer.stop();
+		grayPlayer.stop();
+		soundPlayer.stop();
+		waterPlayer.setVolume(0);
+		greenPlayer.setVolume(0);
+		redPlayer.setVolume(0);
+		grayPlayer.setVolume(0);
+
 		renderer2d.currentCamera = gl2d::cameraCreateDefault();
 
 		Ui::Frame f({0, 0, w, h});
@@ -424,8 +459,11 @@ bool gameLogic(float deltaTime)
 		renderer2d.renderRectangle(rightBox,
 			{}, 0, uiArrows, arrowsAtlas.get(0, rightPressed));
 
-		if(lReleased)
-		ilog(lReleased);
+		if (lReleased)
+		{
+			currentLevel = 0;
+			loadLevel();
+		}
 
 		renderer2d.flush();
 		return 1;
@@ -453,6 +491,10 @@ bool gameLogic(float deltaTime)
 				if(currentLevel == -2)
 				{
 					mapData.cleanup();
+					loadLevel();
+
+
+					return 1;
 				}else
 				{
 					loadLevel();
@@ -996,8 +1038,6 @@ bool gameLogic(float deltaTime)
 #pragma endregion
 
 
-
-
 	player.draw(renderer2d, deltaTime, characterSprite);
 
 #pragma region arrows
@@ -1159,7 +1199,10 @@ bool gameLogic(float deltaTime)
 
 void closeGame()
 {
-	//music.stop();
+	elog(playerSpawnPos.x, playerSpawnPos.y);
+	Sleep(1000);
+	saveState(playerSpawnPos, currentLevel);
+
 }
 
 void imguiFunc(float deltaTime)

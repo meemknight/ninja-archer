@@ -1,5 +1,7 @@
 #include "mapData.h"
 #include <string>
+#include <fstream>
+#include "tools.h"
 
 #define LEVELS 2
 
@@ -113,6 +115,13 @@ glm::ivec2 levelSizes[LEVELS] = { { 160, 40 }, {120, 50} };
 
 void setupMap(MapData &md, int levelId)
 {
+
+	if(levelId == -2)
+	{
+		md.cleanup();
+		return;
+	}
+
 	md.create(levelSizes[levelId].x, levelSizes[levelId].y, levelVect[levelId]);
 
 	switch (levelId)
@@ -131,8 +140,7 @@ void setupMap(MapData &md, int levelId)
 	case 1:
 	{
 
-
-		md.exitDataVector.emplace_back(glm::ivec2{ 17, 36 }, 0);
+		md.exitDataVector.emplace_back(glm::ivec2{ 17, 36 }, -2);
 
 	}
 	break;
@@ -141,5 +149,46 @@ void setupMap(MapData &md, int levelId)
 		break;
 	}
 
+}
+
+void saveState(glm::ivec2 playerSpawnPos, int levelId)
+{
+
+	if(levelId == -2)
+	{
+		std::ofstream f;
+		f.open("state", std::ofstream::out | std::ofstream::trunc);
+		f.close();
+		return;
+	}
+
+	std::ofstream f("state");
+	
+	if (!f.is_open()) { return; }
+
+	int posX = playerSpawnPos.x;
+	int posY= playerSpawnPos.y;
+
+	f << posX << " " << posY << " " << levelId;
+		
+	f.close();
+}
+
+bool loadLevelFromLastState(int &level, glm::ivec2 &spawn)
+{
+	std::ifstream f("state");
+
+	if(!f.is_open() || f.eof())
+	{
+		level = -2;
+		spawn = {};
+		f.close();
+		return 0;
+	}else
+	{
+		f >> spawn.x >> spawn.y >> level;
+
+		return 1;
+	}
 
 }

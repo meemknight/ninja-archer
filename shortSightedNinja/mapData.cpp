@@ -259,6 +259,20 @@ BlockInfo& MapData::get(int x, int y)
 	return data[x + this->w * y];
 }
 
+float MapData::getTorchLight(int x, int y)
+{
+	auto iter = std::find_if(torchDataVector.begin(), torchDataVector.end(),
+		[x, y](torchData &d)->bool {return (d.pos.x == x && d.pos.y == y); });
+
+	if (iter != torchDataVector.end())
+	{
+		return iter->light;
+	}else
+	{
+		return 5;
+	}
+}
+
 void MapData::clearColorData()
 {
 	if (data)

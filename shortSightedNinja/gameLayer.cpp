@@ -96,13 +96,11 @@ std::vector <ArrowItem> actualInventorty;
 std::vector <LightSource> wallLights;
 
 float playerLight = 6;
-float torchLight = 5;
 
 void respawn();
 
 void loadLevel()
 {
-	ilog("current level",currentLevel);
 	inventory.clear();
 	//this vector should always have all arrows in order (and all of them there)
 	inventory.push_back({ 0,0,3 });
@@ -185,7 +183,7 @@ void loadLevel()
 		{
 			if (isLitTorch(mapData.get(x, y).type))
 			{
-				wallLights.push_back({ {x,y}, 0 });
+				wallLights.push_back({ {x,y}, 0, mapData.getTorchLight(x,y) });
 			}
 		}
 
@@ -226,8 +224,6 @@ void respawn()
 	inventory.push_back({ 3,0,3 });
 
 	arrows.clear();
-
-	glog(playerSpawnPos.x, playerSpawnPos.y);
 
 	player.pos = { BLOCK_SIZE * playerSpawnPos.x, BLOCK_SIZE * playerSpawnPos.y };
 	player.updateMove();
@@ -314,11 +310,9 @@ bool initGame()
 		glm::ivec2 i = playerSpawnPos;
 		loadLevel();
 		playerSpawnPos = i;
-		wlog(i.x, i.y);
 		respawn();
 	}else
 	{
-		ilog(currentLevel);
 		loadLevel();
 	}
 
@@ -493,7 +487,6 @@ bool gameLogic(float deltaTime)
 					mapData.cleanup();
 					loadLevel();
 
-
 					return 1;
 				}else
 				{
@@ -601,7 +594,6 @@ bool gameLogic(float deltaTime)
 	{
 		player.idleTime = 0;
 		{
-
 
 			for (auto& i : inventory)
 			{
@@ -742,7 +734,7 @@ bool gameLogic(float deltaTime)
 				if (unLitTorch(g.type))
 				{
 					g.type++;
-					wallLights.push_back({ { x,y } });
+					wallLights.push_back({ { x,y }, 0, mapData.getTorchLight(x,y) });
 				}
 
 				g.playerEntered = 1;
@@ -822,6 +814,9 @@ bool gameLogic(float deltaTime)
 						{
 							player.isExitingLevel = iter->levelId;	
 						}
+					}else
+					{
+						player.isExitingLevel = -2;
 					}
 					
 					renderer2d.renderText({ BLOCK_SIZE*(x), BLOCK_SIZE*(y - 1) },
@@ -843,12 +838,12 @@ bool gameLogic(float deltaTime)
 
 	for (auto& i : wallLights)
 	{
-		float r = torchLight;
+		float r = i.intensity;
 		float intensity = 0.3;
 
 		if (i.animationDuration <= 0)
 		{
-			r = torchLight;
+			r = i.intensity;
 			intensity = 0.3;
 		}
 		else
@@ -885,11 +880,11 @@ bool gameLogic(float deltaTime)
 	{
 		if (i.type == Arrow::fireArrow)
 		{
-			float r = torchLight;
+			float r = 5;
 
-			if (i.liveTime < torchLight)
+			if (i.liveTime < 5)
 			{
-				r *= (i.liveTime / (float)torchLight);
+				r *= (i.liveTime / (float)5);
 
 				if (i.liveTime < 1)
 				{
@@ -1199,7 +1194,6 @@ bool gameLogic(float deltaTime)
 
 void closeGame()
 {
-	elog(playerSpawnPos.x, playerSpawnPos.y);
 	Sleep(1000);
 	saveState(playerSpawnPos, currentLevel);
 

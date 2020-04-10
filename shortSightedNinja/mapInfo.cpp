@@ -149,6 +149,7 @@ void setupMap(MapData &md, int levelId)
 		break;
 	}
 
+
 }
 
 void saveState(glm::ivec2 playerSpawnPos, int levelId)

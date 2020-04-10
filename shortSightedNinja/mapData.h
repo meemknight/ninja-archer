@@ -540,6 +540,7 @@ struct MapData
 	void create(int w, int h, unsigned short* d);
 	BlockInfo& get(int x, int y);
 
+	float getTorchLight(int x, int y);
 
 	void clearColorData();
 

@@ -790,7 +790,8 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 				{
 					//todo check bigger lights if added
 					t++;
-					wallLights.push_back({ { curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE } });
+					wallLights.push_back({ { curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE }, 0, 
+						mapData.getTorchLight( curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE ) });
 				}
 
 			}

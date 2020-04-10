@@ -359,8 +359,8 @@ bool gameLogic(float deltaTime)
 		int lReleased = 0;
 		int rReleased = 0;
 
-		auto leftBox = Ui::Box().xLeft(frame2.x - 200).yCenter().yDimensionPercentage(0.2).xAspectRatio(1.f)();
-		auto rightBox = Ui::Box().xRight(-frame2.x + 200).yCenter().yDimensionPercentage(0.2).xAspectRatio(1.f)();
+		auto leftBox = Ui::Box().xCenter(-frame2.z /1.5).yCenter().yDimensionPercentage(0.2).xAspectRatio(1.f)();
+		auto rightBox = Ui::Box().xCenter(frame2.z /1.5).yCenter().yDimensionPercentage(0.2).xAspectRatio(1.f)();
 
 		auto p = platform::getRelMousePosition();
 

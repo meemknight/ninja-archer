@@ -174,7 +174,7 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData,
 			{
 				glm::vec4 sideC = g.sideColors;
 
-				if(!isColidable(g.type))
+				if(!isCollidable(g.type))
 				{
 					sideC = {};
 				}else

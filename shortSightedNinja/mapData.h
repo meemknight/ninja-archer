@@ -373,7 +373,7 @@ inline bool isBlueNoSolid(unsigned short  b)
 	else { return 0; }
 }
 
-inline bool isColidable(unsigned short b)
+inline bool isCollidable(unsigned short b)
 {
 
 	if (
@@ -415,9 +415,15 @@ inline bool isColidable(unsigned short b)
 
 }
 
+
+inline bool isCollidableForArrows(unsigned short b)
+{
+	return (isCollidable(b) && b != Block::bareer);
+}
+
 inline bool isOpaque(unsigned short  b)
 {
-	return isColidable(b);
+	return isCollidable(b);
 }
 
 inline bool isLitTorch(unsigned short b)

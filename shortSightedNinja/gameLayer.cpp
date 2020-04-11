@@ -403,6 +403,10 @@ bool gameLogic(float deltaTime)
 
 			if (playButton)
 			{
+				currentLevel = 2;
+				loadLevel();
+				return 1;
+
 				if(loadLevelFromLastState(currentLevel, playerSpawnPos))
 				{
 					glm::ivec2 i = playerSpawnPos;
@@ -415,7 +419,7 @@ bool gameLogic(float deltaTime)
 					loadLevel();
 					respawn();
 				}
-				
+
 			}
 
 		}else if (menuState == MenuState::levelSelector)
@@ -623,7 +627,7 @@ bool gameLogic(float deltaTime)
 	}
 	if (jumpDelayTime < 0) { jumpDelayTime = -1; }
 	
-	if (input::isKeyPressedOn(input::Buttons::jump) || jumpDelayTime > 0)
+	if ( player.isExitingLevel == -1 &&(input::isKeyPressedOn(input::Buttons::jump) || jumpDelayTime > 0))
 	{
 		if (input::isKeyPressedOn(input::Buttons::jump) && player.wallGrab == 0)
 		{
@@ -1050,7 +1054,7 @@ bool gameLogic(float deltaTime)
 				}
 				else
 				{
-					if (isColidable(mapData.get(pos.x / BLOCK_SIZE, pos.y / BLOCK_SIZE).type))
+					if (isCollidable(mapData.get(pos.x / BLOCK_SIZE, pos.y / BLOCK_SIZE).type))
 					{
 						dist = i;
 						break;

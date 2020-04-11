@@ -403,10 +403,7 @@ bool gameLogic(float deltaTime)
 
 			if (playButton)
 			{
-				currentLevel = 2;
-				loadLevel();
-				return 1;
-
+				
 				if(loadLevelFromLastState(currentLevel, playerSpawnPos))
 				{
 					glm::ivec2 i = playerSpawnPos;

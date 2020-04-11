@@ -19,7 +19,7 @@ float grabMargin = 0.25f;
 float notGrabTimeVal = 0.2;
 bool snapWallGrab = 0;
 float ghostJumpTime = 0.08;
-float blockTouchDownMargin = 3;
+float blockTouchDownMargin = 0;
 
 float arrowSpeed = 25;
 
@@ -291,7 +291,7 @@ void Entity::checkGrounded(MapData &mapDat, float deltaTime)
 
 	for (int x = minx; x <= maxx; x++)
 	{
-		if (isColidable(mapDat.get(x, floor((pos.y + dimensions.y + 0.1 + blockTouchDownMargin) / BLOCK_SIZE)).type))
+		if (isColidable(mapDat.get(x, floor((pos.y + dimensions.y + blockTouchDownMargin) / BLOCK_SIZE)).type))
 		{
 			grounded = 1;
 			canJump = 1;
@@ -428,6 +428,8 @@ void Entity::checkWall(MapData & mapData, int move)
 
 void Entity::jump()
 {
+	ilog("jump");
+
 	if(iswebs)
 	{
 		velocity.y = -jumpSpeed * BLOCK_SIZE / 2;

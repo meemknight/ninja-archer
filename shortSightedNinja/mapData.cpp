@@ -8,9 +8,10 @@
 
 float distFunc(float dist)
 {
+
 	dist /= BLOCK_SIZE;
 
-	dist /= 1.1f;
+	dist -= 6;
 
 	dist = std::max(1.f, dist);
 	//shortestDist /= BLOCK_SIZE;

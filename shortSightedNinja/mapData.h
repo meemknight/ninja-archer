@@ -2,6 +2,7 @@
 #include "glm/vec4.hpp"
 #include "glm/vec2.hpp"
 #include <vector>
+#include <string>
 
 #define BLOCK_SIZE 8
 #define BLOCK_COUNT 424

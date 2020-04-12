@@ -165,6 +165,8 @@ int MAIN
 	
 	}
 
+	CloseWindow(wind);
+
 	closeGame();
 
 	return 0;

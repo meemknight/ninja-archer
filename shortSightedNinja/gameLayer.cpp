@@ -217,6 +217,7 @@ void loadLevel()
 		grayPlayer.setVolume(0);
 	}
 
+	saveState(playerSpawnPos, currentLevel);
 	respawn();
 }
 
@@ -409,6 +410,7 @@ bool gameLogic(float deltaTime)
 					glm::ivec2 i = playerSpawnPos;
 					loadLevel();
 					playerSpawnPos = i;
+					saveState(i, currentLevel);
 					respawn();
 				}else
 				{
@@ -768,6 +770,10 @@ bool gameLogic(float deltaTime)
 
 #pragma region inventory
 
+	if (!platform::isFocused()) 
+	{
+		currentArrow = -1;
+	}
 
 	if (input::isKeyPressedOn(input::Buttons::swapLeft))
 	{
@@ -833,7 +839,7 @@ bool gameLogic(float deltaTime)
 				if (unLitTorch(g.type))
 				{
 					g.type++;
-					wallLights.push_back({ { x,y }, 0, mapData.getTorchLight(x,y) });
+					wallLights.push_back({ { x,y }, mapData.getTorchLight(x,y) });
 				}
 
 				g.playerEntered = 1;
@@ -861,6 +867,8 @@ bool gameLogic(float deltaTime)
 					{
 						mapData.get(playerSpawnPos.x, playerSpawnPos.y).type = Block::flagDown;
 					}
+
+					saveState({ x,y }, currentLevel);
 
 					playerSpawnPos = { x,y };
 					g.type = Block::flagUp;
@@ -945,12 +953,10 @@ bool gameLogic(float deltaTime)
 	for (auto& i : wallLights)
 	{
 		float r = i.intensity;
-		float intensity = 0.3;
 
 		if (i.animationDuration <= 0)
 		{
 			r = i.intensity;
-			intensity = 0.3;
 		}
 		else
 		{
@@ -961,16 +967,15 @@ bool gameLogic(float deltaTime)
 				perc = i.animationDuration - (i.animationStartTime / 2.f);
 				perc = perc / (i.animationStartTime / 2.f);
 				perc = 1 - perc;
-				r *= perc;
-				intensity *= perc * 2;
-				intensity = std::max(intensity, 0.3f);
+				r *= perc * 1.2;
+				r = std::max(r, 0.3f);
 			}
 			else
 			{
 				perc = i.animationStartTime / 2.f - i.animationDuration;
 				perc = perc / (i.animationStartTime / 2.f);
 				perc = 1 - perc;
-				intensity *= (perc + 1);
+				r *= (perc + 1);
 			}
 
 			i.animationDuration -= deltaTime;
@@ -978,7 +983,7 @@ bool gameLogic(float deltaTime)
 
 		//todo remove intensity
 		simuleteLightSpot({ i.pos.x * BLOCK_SIZE + BLOCK_SIZE / 2,i.pos.y * BLOCK_SIZE + BLOCK_SIZE / 2 },
-			r, mapData, arrows, pickups, intensity);
+			r, mapData, arrows, pickups, 0);
 
 	}
 

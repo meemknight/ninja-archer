@@ -16,7 +16,7 @@ float strafeSpeedMove = 10;
 float runSpeed = 14;
 float airRunSpeed = 10;
 float grabMargin = 0.25f;
-float notGrabTimeVal = 0.1;
+float notGrabTimeVal = 0.08;
 bool snapWallGrab = 0;
 float ghostJumpTime = 0.08;
 float blockTouchDownMargin = 0;
@@ -283,8 +283,8 @@ void Entity::checkGrounded(MapData &mapDat, float deltaTime)
 		return;
 	}
 
-	int minx = floor((pos.x + 1) / BLOCK_SIZE);
-	int maxx = floor((pos.x + dimensions.x - 1) / BLOCK_SIZE);
+	int minx = floor((pos.x ) / BLOCK_SIZE);
+	int maxx = floor((pos.x + dimensions.x - 1 ) / BLOCK_SIZE);
 
 	minx = std::max(minx, 0);
 	maxx = std::min(maxx, mapDat.w);
@@ -428,7 +428,6 @@ void Entity::checkWall(MapData & mapData, int move)
 
 void Entity::jump()
 {
-	ilog("jump");
 
 	if(iswebs)
 	{

@@ -431,6 +431,51 @@ void setupMap(MapData &md, int levelId)
 
 }
 
+void saveProgress(int nextLevel)
+{
+	if(nextLevel<0 || nextLevel > LEVELS-1)
+	{
+		return;
+	}
+
+	int lastProgress = -2;
+	loadProgress(lastProgress);
+
+	if(nextLevel > lastProgress)
+	{
+		std::ofstream f("resources//state2");
+
+		if (!f.is_open()) { return; }
+
+		f << nextLevel;
+
+		f.close();
+	}
+}
+
+void loadProgress(int &nextLevel)
+{
+
+	std::ifstream f("resources//state2");
+
+	if (!f.is_open()) { nextLevel = 0; return; }
+
+	f >> nextLevel;
+
+	if(nextLevel < 0)
+	{
+		nextLevel = 0;
+	}
+
+	if(nextLevel > LEVELS -1)
+	{
+		nextLevel = LEVELS - 1;
+	}
+
+	f.close();
+}
+
+
 void saveState(glm::ivec2 playerSpawnPos, int levelId)
 {
 

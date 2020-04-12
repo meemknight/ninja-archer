@@ -374,6 +374,11 @@ bool gameLogic(float deltaTime)
 
 	static int selectedLevel;
 
+	if(input::isKeyReleased(input::Buttons::esc))
+	{
+		menuState = MenuState::mainMenu;
+	}
+
 	//main menu
 	if (currentLevel == -2)
 	{
@@ -411,7 +416,6 @@ bool gameLogic(float deltaTime)
 			{
 				if (platform::isLMouseButtonReleased())
 				{
-					ilog("yes2");
 					playButton = 1;
 				}
 			}
@@ -420,7 +424,6 @@ bool gameLogic(float deltaTime)
 			{
 				if (platform::isLMouseButtonReleased())
 				{
-					ilog("yes1");
 					levelSelectButton = 1;
 				}
 			}
@@ -589,12 +592,11 @@ bool gameLogic(float deltaTime)
 			renderer2d.renderRectangle(rightBox,
 				{}, 0, uiArrows, arrowsAtlas.get(0, rightPressed));
 
-
 			if (lReleased)
 			{
 
-				currentLevel = 3;
-				loadLevel();
+				//currentLevel = 1;
+				//loadLevel();
 
 				selectedLevel--;
 				if(selectedLevel <0)
@@ -698,6 +700,7 @@ bool gameLogic(float deltaTime)
 	grayPlayer.setVolume(mapData.getCavePercentage(player.pos));
 	tikiPlayer.setVolume(mapData.getTikiPercentage(player.pos));
 
+
 #pragma endregion
 
 	//stencilRenderer2d.updateWindowMetrics(backGroundFBO.texture.GetSize().x, 
@@ -725,12 +728,14 @@ bool gameLogic(float deltaTime)
 
 	if (platform::isKeyHeld('Z'))
 	{
-		renderer2d.currentCamera.zoom -= deltaTime;
+		renderer2d.currentCamera.zoom -= deltaTime*2;
 	}
 	if (platform::isKeyHeld('X'))
 	{
-		renderer2d.currentCamera.zoom += deltaTime;
+		renderer2d.currentCamera.zoom += deltaTime*2;
 	}
+	renderer2d.currentCamera.zoom = glm::clamp(renderer2d.currentCamera.zoom, 3.f, 7.f);
+
 
 	if(jumpDelayTime>0)
 	{

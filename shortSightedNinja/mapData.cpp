@@ -27,6 +27,8 @@ float distFunc(float dist)
 		perc = 0;
 	}
 
+	if (perc * 0.08 < 1.62) { perc = 0; };
+
 	return perc * 0.08;
 }
 

@@ -19,6 +19,7 @@ namespace input
 			up,
 			swapLeft,
 			swapRight,
+			esc,
 			buttonsCount
 		};
 	};

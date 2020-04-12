@@ -12,7 +12,7 @@
 ///define ERRORS_ONLY
 ///to only display error messages
 
-#define FORCE_LOG
+#define ERRORS_ONLY
 
 #include <iostream>
 #include <Windows.h>
@@ -142,7 +142,7 @@ inline void elog(F f, T ...args)
 
 inline void elog(std::stringstream &&stream)
 {
-	errorMessage(stream.str().c_str());
+	MessageBoxA(0, stream.str().c_str(), "error", MB_ICONERROR);
 }
 
 template<class F, class ...T>

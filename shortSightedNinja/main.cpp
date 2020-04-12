@@ -129,7 +129,8 @@ int MAIN
 			if(accum>1)
 			{
 				accum -= 1;
-				//llog(count);
+				//
+				(count);
 				count = 0;
 			}
 			//todo

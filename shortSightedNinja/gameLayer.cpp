@@ -544,10 +544,10 @@ bool gameLogic(float deltaTime)
 
 #pragma endregion
 
-	if (platform::isKeyPressedOn('T'))
-	{
-		loadLevel();
-	}
+	//if (platform::isKeyPressedOn('T'))
+	//{
+	//	loadLevel();
+	//}
 
 	if (player.dying || player.isExitingLevel != -1)
 	{
@@ -675,16 +675,6 @@ bool gameLogic(float deltaTime)
 		}
 	}
 
-	actualInventorty.clear();
-
-	for (auto i : inventory)
-	{
-		if (i.count)
-		{
-			actualInventorty.push_back(i);
-		}
-	}
-
 	if (input::isKeyPressedOn(input::Buttons::shoot) && currentArrow > -1 && !player.dying
 		&& player.isExitingLevel == -1)
 	{
@@ -707,6 +697,16 @@ bool gameLogic(float deltaTime)
 			//a.pos.x += a.shootDir.x * BLOCK_SIZE * 0.9;
 			//a.pos.y += a.shootDir.y * BLOCK_SIZE * 0.9;
 			arrows.push_back(a);
+		}
+	}
+
+	actualInventorty.clear();
+
+	for (auto i : inventory)
+	{
+		if (i.count)
+		{
+			actualInventorty.push_back(i);
 		}
 	}
 

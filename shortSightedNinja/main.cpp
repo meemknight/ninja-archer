@@ -60,7 +60,7 @@ int MAIN
 
 	wind = CreateWindow(
 		wc.lpszClassName,
-		"Short sight ninja",
+		"Midnight Arrow ",
 		WS_OVERLAPPEDWINDOW | WS_VISIBLE,
 		550,
 		100,

@@ -523,13 +523,12 @@ bool gameLogic(float deltaTime)
 				uiArrows;
 			}
 
-			glm::vec4 playBox= Ui::Box().xCenter().yBottom(-100).yDimensionPixels(100).xDimensionPercentage(0.8);
+			glm::vec4 playBox= Ui::Box().xCenter().yBottom(-20).yDimensionPixels(100).xDimensionPercentage(0.8);
 			
 			renderer2d.render9Patch2(playBox,
 				8, { 1,1,1,1 }, {}, 0, uiButton, { 0,1,1,0 }, { 0,0.8,0.8,0 });
-			renderer2d.renderText({ playBox.x + playBox.z + 200 ,playBox.y + playBox.w / 2 },
-				"Play", font, { 1,1,1,1 }, 0.7);
-
+			renderer2d.renderText({ playBox.x + playBox.z /2 ,playBox.y + playBox.w / 2 },
+				std::string(std::string("Play ") + std::to_string(selectedLevel+1)).c_str, font, { 1,1,1,1 }, 0.7);
 
 			gl2d::TextureAtlas arrowsAtlas(1, 2);
 			int leftPressed = 0;

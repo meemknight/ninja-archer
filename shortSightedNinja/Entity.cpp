@@ -803,7 +803,7 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 			auto t = mapData.get(curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE).type;
 
 			
-			if(type == slimeArrow && hitOnce == 0)
+			if(type == Arrow::ArrowTypes::slimeArrow && hitOnce == 0)
 			{
 				hitOnce = 1;
 			
@@ -812,9 +812,9 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 				if ((lastPos.x < floor(curPos.x / BLOCK_SIZE)*BLOCK_SIZE && shootDir.x > 0) ||
 					(lastPos.x > floor((curPos.x / BLOCK_SIZE) + 1)*BLOCK_SIZE&& shootDir.x < 0))
 				{
-					auto pos = glm::ivec2(lastPos.x, lastPos.y);
-					pos.x / BLOCK_SIZE;
-					pos.y / BLOCK_SIZE;
+					auto pos = glm::vec2(lastPos.x, lastPos.y);
+					pos.x /= BLOCK_SIZE;
+					pos.y /= BLOCK_SIZE;
 					if(shootDir.x<0 && pos.x>0 && isCollidableForArrows(mapData.get(pos.x-1, pos.y).type))
 					{
 						shootDir.y *= -1;

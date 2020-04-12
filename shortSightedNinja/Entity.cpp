@@ -816,15 +816,15 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 					pos.y /= BLOCK_SIZE;
 					if(shootDir.x<0 && pos.x>0 && isCollidableForArrows(mapData.get(pos.x-1, pos.y).type))
 					{
-						shootDir.y *= -1;
+						shootDir.x *= -1;
 					}else
 					if (pos.x < mapData.w - 1 && isCollidableForArrows(mapData.get(pos.x + 1, pos.y).type))
 					{
-						shootDir.y *= -1;
+						shootDir.x *= -1;
 					}
 					else
 					{
-						shootDir.x *= -1;
+						shootDir.y *= -1;
 					}
 
 				}else
@@ -835,16 +835,16 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 					pos.y /= BLOCK_SIZE;
 					if (shootDir.y > 0 && pos.y < mapData.h-1 && isCollidableForArrows(mapData.get(pos.x, pos.y+1).type))
 					{
-						shootDir.x *= -1;
+						shootDir.y *= -1;
 					}
 					else
 					if (pos.y > 0 && isCollidableForArrows(mapData.get(pos.x, pos.y-1).type))
 					{
-						shootDir.x *= -1;
+						shootDir.y *= -1;
 					}
 					else
 					{
-						shootDir.y *= -1;
+						shootDir.x *= -1;
 					}
 
 				}

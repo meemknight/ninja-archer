@@ -16,10 +16,10 @@ float strafeSpeedMove = 10;
 float runSpeed = 14;
 float airRunSpeed = 10;
 float grabMargin = 0.25f;
-float notGrabTimeVal = 0.2;
+float notGrabTimeVal = 0.08;
 bool snapWallGrab = 0;
 float ghostJumpTime = 0.08;
-float blockTouchDownMargin = 3;
+float blockTouchDownMargin = 0;
 
 float arrowSpeed = 25;
 
@@ -283,15 +283,15 @@ void Entity::checkGrounded(MapData &mapDat, float deltaTime)
 		return;
 	}
 
-	int minx = floor((pos.x + 1) / BLOCK_SIZE);
-	int maxx = floor((pos.x + dimensions.x - 1) / BLOCK_SIZE);
+	int minx = floor((pos.x ) / BLOCK_SIZE);
+	int maxx = floor((pos.x + dimensions.x - 1 ) / BLOCK_SIZE);
 
 	minx = std::max(minx, 0);
 	maxx = std::min(maxx, mapDat.w);
 
 	for (int x = minx; x <= maxx; x++)
 	{
-		if (isColidable(mapDat.get(x, floor((pos.y + dimensions.y + 0.1 + blockTouchDownMargin) / BLOCK_SIZE)).type))
+		if (isCollidable(mapDat.get(x, floor((pos.y + dimensions.y + blockTouchDownMargin) / BLOCK_SIZE)).type))
 		{
 			grounded = 1;
 			canJump = 1;
@@ -366,7 +366,7 @@ void Entity::checkWall(MapData & mapData, int move)
 	if (leftX < 0) { return; }
 	
 
-	if(isColidable(mapData.get(rightX, minY).type) && move > 0 && checkRight && mapData.get(rightX, minY).type != Block::bareer)
+	if(isCollidable(mapData.get(rightX, minY).type) && move > 0 && checkRight && mapData.get(rightX, minY).type != Block::bareer)
 	{
 
 		if (isRedSolid(mapData.get(rightX, minY).type))
@@ -396,7 +396,7 @@ void Entity::checkWall(MapData & mapData, int move)
 	}
 
 
-	if (isColidable(mapData.get(leftX, minY).type) && move < 0 && checkLeft && mapData.get(rightX, minY).type != Block::bareer)
+	if (isCollidable(mapData.get(leftX, minY).type) && move < 0 && checkLeft && mapData.get(leftX, minY).type != Block::bareer)
 	{
 
 		if(isRedSolid(mapData.get(leftX, minY).type))
@@ -428,6 +428,7 @@ void Entity::checkWall(MapData & mapData, int move)
 
 void Entity::jump()
 {
+
 	if(iswebs)
 	{
 		velocity.y = -jumpSpeed * BLOCK_SIZE / 2;
@@ -524,7 +525,7 @@ glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 s
 	for (int y = minY; y < maxY; y++)
 		for (int x = minX; x < maxX; x++)
 		{
-			if (isColidable(mapData.get(x, y).type))
+			if (isCollidable(mapData.get(x, y).type))
 			{
 				if(aabb({ pos,dimensions }, { x*BLOCK_SIZE, y*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }))
 				{
@@ -790,13 +791,14 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 				{
 					//todo check bigger lights if added
 					t++;
-					wallLights.push_back({ { curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE } });
+					wallLights.push_back({ { curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE }, 0, 
+						mapData.getTorchLight( curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE ) });
 				}
 
 			}
 		}
 
-		if(isColidable(mapData.get(curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE).type))
+		if(isCollidableForArrows(mapData.get(curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE).type))
 		{
 			auto t = mapData.get(curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE).type;
 
@@ -811,11 +813,11 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 					(lastPos.x > floor((curPos.x / BLOCK_SIZE) + 1)*BLOCK_SIZE&& shootDir.x < 0))
 				{
 					auto pos = glm::ivec2(lastPos.x, lastPos.y);
-					if(shootDir.x<0 && pos.x>0 && isColidable(mapData.get(pos.x-1, pos.y).type))
+					if(shootDir.x<0 && pos.x>0 && isCollidableForArrows(mapData.get(pos.x-1, pos.y).type))
 					{
 						shootDir.y *= -1;
 					}else
-					if (pos.x < mapData.w - 1 && isColidable(mapData.get(pos.x + 1, pos.y).type))
+					if (pos.x < mapData.w - 1 && isCollidableForArrows(mapData.get(pos.x + 1, pos.y).type))
 					{
 						shootDir.y *= -1;
 					}
@@ -828,12 +830,12 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 				{
 			
 					auto pos = glm::ivec2(lastPos.x, lastPos.y);
-					if (shootDir.y > 0 && pos.y < mapData.h-1 && isColidable(mapData.get(pos.x, pos.y+1).type))
+					if (shootDir.y > 0 && pos.y < mapData.h-1 && isCollidableForArrows(mapData.get(pos.x, pos.y+1).type))
 					{
 						shootDir.x *= -1;
 					}
 					else
-					if (pos.y > 0 && isColidable(mapData.get(pos.x, pos.y-1).type))
+					if (pos.y > 0 && isCollidableForArrows(mapData.get(pos.x, pos.y-1).type))
 					{
 						shootDir.x *= -1;
 					}

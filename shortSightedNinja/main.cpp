@@ -60,7 +60,7 @@ int MAIN
 
 	wind = CreateWindow(
 		wc.lpszClassName,
-		"Short sight ninja",
+		"Midnight Arrow ",
 		WS_OVERLAPPEDWINDOW | WS_VISIBLE,
 		550,
 		100,
@@ -129,7 +129,8 @@ int MAIN
 			if(accum>1)
 			{
 				accum -= 1;
-				//llog(count);
+				//
+				(count);
 				count = 0;
 			}
 			//todo
@@ -164,6 +165,8 @@ int MAIN
 		}
 	
 	}
+
+	CloseWindow(wind);
 
 	closeGame();
 

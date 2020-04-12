@@ -42,3 +42,6 @@ bool initGame();
 bool gameLogic(float deltaTime);
 void closeGame();
 void imguiFunc(float deltaTime);
+
+void saveState(glm::ivec2 playerSpawnPos, int levelId);
+bool loadLevelFromLastState(int &level, glm::ivec2 &spawn);

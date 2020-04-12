@@ -8,9 +8,12 @@
 
 float distFunc(float dist)
 {
+
 	dist /= BLOCK_SIZE;
 
-	dist /= 1.1f;
+	dist /= 1.5;
+
+	dist -= 6;
 
 	dist = std::max(1.f, dist);
 	//shortestDist /= BLOCK_SIZE;
@@ -23,6 +26,8 @@ float distFunc(float dist)
 	{
 		perc = 0;
 	}
+
+	if (perc * 0.08 < 1.62) { perc = 0; };
 
 	return perc * 0.08;
 }
@@ -259,6 +264,20 @@ BlockInfo& MapData::get(int x, int y)
 	return data[x + this->w * y];
 }
 
+float MapData::getTorchLight(int x, int y)
+{
+	auto iter = std::find_if(torchDataVector.begin(), torchDataVector.end(),
+		[x, y](torchData &d)->bool {return (d.pos.x == x && d.pos.y == y); });
+
+	if (iter != torchDataVector.end())
+	{
+		return iter->light;
+	}else
+	{
+		return 5;
+	}
+}
+
 void MapData::clearColorData()
 {
 	if (data)
@@ -287,6 +306,7 @@ void MapData::cleanup()
 	if (data)
 	{
 		delete[] data;
+		data = nullptr;
 	}
 }
 

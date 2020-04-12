@@ -11,6 +11,8 @@ float distFunc(float dist)
 
 	dist /= BLOCK_SIZE;
 
+	dist /= 1.5;
+
 	dist -= 6;
 
 	dist = std::max(1.f, dist);

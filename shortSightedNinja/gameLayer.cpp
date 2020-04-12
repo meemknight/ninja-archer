@@ -593,6 +593,9 @@ bool gameLogic(float deltaTime)
 			if (lReleased)
 			{
 
+				currentLevel = 3;
+				loadLevel();
+
 				selectedLevel--;
 				if(selectedLevel <0)
 				{

@@ -241,7 +241,11 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData,
 					data.type == Block::tikiDecoration3 ||
 					data.type == Block::webBlock ||
 					data.type == Block::skullDecoration ||
-					data.type == Block::levelExit
+					data.type == Block::levelExit||
+					data.type == Block::spike1 ||
+					data.type == Block::spike2 ||
+					data.type == Block::spike3 ||
+					data.type == Block::spike4
 					
 					)
 				{

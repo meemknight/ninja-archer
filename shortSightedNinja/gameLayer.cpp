@@ -9,6 +9,8 @@
 #include "Ui.h"
 #include "Particle.h"
 #include <algorithm>
+#include <string>
+#include <sstream>
 
 extern float gravitationalAcceleration;
 extern float jumpSpeed;

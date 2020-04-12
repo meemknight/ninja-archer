@@ -108,7 +108,7 @@ std::vector <LightSource> wallLights;
 
 float playerLight = 6;
 
-const char* levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki tribe"};
+const char* levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki tribe", "Secret Level"};
 
 void respawn();
 
@@ -455,14 +455,14 @@ bool gameLogic(float deltaTime)
 
 
 			renderer2d.renderText({button1.x + button1.z/2,button1.y + button1.w/2}, 
-				"Continue jurney", font, {1,1,1,1}, 0.7);
+				"Continue jurney", font, {1,1,1,1}, 0.6);
 
 
 			renderer2d.renderText({ button2.x + button2.z / 2,button2.y + button2.w / 2 },
-				"Select zone", font, { 1,1,1,1 }, 0.7);
+				"Select zone", font, { 1,1,1,1 }, 0.6);
 
 			renderer2d.renderText({ button3.x + button3.z / 2,button3.y + button3.w / 2 },
-				"Credits", font, { 1,1,1,1 }, 0.7);
+				"Credits", font, { 1,1,1,1 }, 0.6);
 
 			if (playButton)
 			{
@@ -547,7 +547,7 @@ bool gameLogic(float deltaTime)
 			renderer2d.render9Patch2(playBox,
 				8, { 1,1,1,1 }, {}, 0, uiButton, { 0,1,1,0 }, { 0,0.8,0.8,0 });
 			renderer2d.renderText({ playBox.x + playBox.z /2 ,playBox.y + playBox.w / 2 },
-				temp.c_str(), font, { 1,1,1,1 }, 0.7);
+				temp.c_str(), font, { 1,1,1,1 }, 0.6);
 
 			gl2d::TextureAtlas arrowsAtlas(1, 2);
 			int leftPressed = 0;
@@ -669,14 +669,14 @@ bool gameLogic(float deltaTime)
 
 
 			renderer2d.renderText({ button1.x + button1.z + 200 ,button1.y + button1.w / 2 },
-				"Our page", font, { 1,1,1,1 }, 0.7);
+				"Our page", font, { 1,1,1,1 }, 0.6);
 
 
 			renderer2d.renderText({ button2.x + button2.z + 200 ,button2.y + button2.w / 2 },
-				"Music", font, { 1,1,1,1 }, 0.7);
+				"Music", font, { 1,1,1,1 }, 0.6);
 
 			renderer2d.renderText({ button3.x + button3.z + 200 ,button3.y + button3.w / 2 },
-				"Art", font, { 1,1,1,1 }, 0.7);
+				"Art", font, { 1,1,1,1 }, 0.6);
 		
 
 		https://wuxia.itch.io/

@@ -646,7 +646,6 @@ bool gameLogic(float deltaTime)
 			if (isButtonReleased(p, button2)) {system("start https://www.youtube.com/channel/UCEXX5i6961zc4-L8thTctBg");};
 			if (isButtonReleased(p, button3)){ system("start https://itch.io/profile/adamatomic"); };
 
-
 		}
 
 

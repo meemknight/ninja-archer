@@ -91,6 +91,8 @@ int currentLevel=-2;
 
 float jumpDelayTime = 0;
 
+int maxLevel=0;
+
 struct ArrowItem
 {
 	int type;
@@ -105,6 +107,8 @@ std::vector <ArrowItem> actualInventorty;
 std::vector <LightSource> wallLights;
 
 float playerLight = 6;
+
+const char* levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki tribe"};
 
 void respawn();
 
@@ -336,6 +340,8 @@ bool initGame()
 		//loadLevel();
 	}
 
+	loadProgress(maxLevel);
+
 	return true;
 }
 
@@ -527,7 +533,16 @@ bool gameLogic(float deltaTime)
 
 			glm::vec4 playBox= Ui::Box().xCenter().yBottom(-20).yDimensionPixels(100).xDimensionPercentage(0.8);
 			
-			std::string temp(std::string("Play ") + std::to_string(selectedLevel + 1));
+			std::string temp;
+			if(selectedLevel > maxLevel)
+			{
+				temp = (std::string("Locked area: ") + (levelNames[selectedLevel]));
+
+			}else
+			{
+				temp = (std::string("Play area: ") + (levelNames[selectedLevel]));
+
+			}
 
 			renderer2d.render9Patch2(playBox,
 				8, { 1,1,1,1 }, {}, 0, uiButton, { 0,1,1,0 }, { 0,0.8,0.8,0 });
@@ -626,6 +641,7 @@ bool gameLogic(float deltaTime)
 				//loadLevel();
 			}
 
+			if (selectedLevel <= maxLevel)
 			if(isButtonReleased(p, playBox))
 			{
 				currentLevel = selectedLevel;
@@ -1062,6 +1078,7 @@ bool gameLogic(float deltaTime)
 						if (input::isKeyPressedOn(input::Buttons::up))
 						{
 							player.isExitingLevel = iter->levelId;	
+							saveProgress(iter->levelId);
 						}
 					}else
 					{

@@ -491,7 +491,7 @@ bool gameLogic(float deltaTime)
 
 			Ui::Frame f({ 0, 0, w, h });
 
-			glm::vec4 frame2 = Ui::Box().xCenter().yCenter().yDimensionPercentage(0.7).xAspectRatio(1.f);
+			glm::vec4 frame2 = Ui::Box().xCenter().yTop(50).yDimensionPercentage(0.6).xAspectRatio(1.f);
 
 			renderer2d.renderRectangle(
 				frame2,
@@ -522,6 +522,14 @@ bool gameLogic(float deltaTime)
 
 				uiArrows;
 			}
+
+			glm::vec4 playBox= Ui::Box().xCenter().yBottom(-100).yDimensionPixels(100).xDimensionPercentage(0.8);
+			
+			renderer2d.render9Patch2(playBox,
+				8, { 1,1,1,1 }, {}, 0, uiButton, { 0,1,1,0 }, { 0,0.8,0.8,0 });
+			renderer2d.renderText({ playBox.x + playBox.z + 200 ,playBox.y + playBox.w / 2 },
+				"Play", font, { 1,1,1,1 }, 0.7);
+
 
 			gl2d::TextureAtlas arrowsAtlas(1, 2);
 			int leftPressed = 0;
@@ -595,9 +603,6 @@ bool gameLogic(float deltaTime)
 			if (lReleased)
 			{
 
-				currentLevel = 2;
-				loadLevel();
-
 				selectedLevel--;
 				if(selectedLevel <0)
 				{
@@ -617,6 +622,13 @@ bool gameLogic(float deltaTime)
 				//currentLevel = 2;
 				//loadLevel();
 			}
+
+			if(isButtonReleased(p, playBox))
+			{
+				currentLevel = selectedLevel;
+				loadLevel();
+			}
+
 		}else if (menuState == MenuState::creditsAres)
 		{
 			auto p = platform::getRelMousePosition();
@@ -647,9 +659,11 @@ bool gameLogic(float deltaTime)
 			renderer2d.renderText({ button3.x + button3.z + 200 ,button3.y + button3.w / 2 },
 				"Art", font, { 1,1,1,1 }, 0.7);
 		
-			if (isButtonReleased(p, button1)) {};
+
+		https://wuxia.itch.io/
+			if (isButtonReleased(p, button1)) {system("start https://wuxia.itch.io/"); };
 			if (isButtonReleased(p, button2)) {system("start https://www.youtube.com/channel/UCEXX5i6961zc4-L8thTctBg");};
-			if (isButtonReleased(p, button3)){ system("start https://itch.io/profile/adamatomic"); };
+			if (isButtonReleased(p, button3)) {system("start https://itch.io/profile/adamatomic"); };
 
 		}
 
@@ -804,6 +818,7 @@ bool gameLogic(float deltaTime)
 			{
 				if (i.type == actualInventorty[currentArrow].type)
 				{
+				
 					i.count--;
 					break;
 				}
@@ -1134,7 +1149,8 @@ bool gameLogic(float deltaTime)
 
 #pragma region target
 	{
-		if (currentArrow != -1 && !player.dying && player.isExitingLevel == -1)
+		if (currentArrow >= 0 && !player.dying && player.isExitingLevel == -1 && 
+			currentArrow < actualInventorty.size() )
 		{
 			glm::vec4 color = { 1,1,1,1 };
 
@@ -1321,7 +1337,7 @@ bool gameLogic(float deltaTime)
 			{
 
 				int left = currentArrow - 1;
-				if (left == -1)
+				if (left <= -1)
 				{
 				}
 				else
@@ -1363,7 +1379,7 @@ bool gameLogic(float deltaTime)
 					right = actualInventorty[right].type;
 				}
 
-				if (left != -1)
+				if (left > -1)
 				{
 					float dim = 0.2;
 					for (int i = -1; i < leftCount - 1; i++)
@@ -1377,7 +1393,7 @@ bool gameLogic(float deltaTime)
 				}
 
 
-				if (right != -1)
+				if (right > -1)
 				{
 					float dim = 0.2;
 					for (int i = -1; i < rightCount - 1; i++)
@@ -1390,7 +1406,7 @@ bool gameLogic(float deltaTime)
 					}
 				}
 
-				if (center != -1)
+				if (center > -1)
 				{
 					float dim = 1 - (centerCount / 10.f);
 

@@ -6,6 +6,7 @@
 
 #define BLOCK_SIZE 8
 #define BLOCK_COUNT 424
+#define LEVELS 4
 
 namespace Block
 {

@@ -3,8 +3,6 @@
 #include <fstream>
 #include "tools.h"
 
-#define LEVELS 4
-
 unsigned short level1[] = 
 {
 

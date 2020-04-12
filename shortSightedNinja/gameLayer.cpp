@@ -65,6 +65,9 @@ gl2d::Texture uiMountain;
 gl2d::Texture uiSnowMountain;
 gl2d::Texture uiArrows;
 gl2d::Texture uiButton;
+gl2d::Texture uiItch;
+gl2d::Texture uiMusic;
+gl2d::Texture uiArt;
 
 std::vector<Arrow> arrows;
 
@@ -280,6 +283,9 @@ bool initGame()
 	uiSnowMountain.loadFromFile("resources//ui//snowMountain.png");
 	uiArrows.loadFromFile("resources//ui//arrow.png");
 	uiButton.loadFromFile("resources//ui//button.png");
+	uiItch.loadFromFile("resources//ui//itch.png");
+	uiMusic.loadFromFile("resources//ui//music.jpg");
+	uiArt.loadFromFile("resources//ui//art.png");
 
 	const char buff[] =
 	{
@@ -331,11 +337,29 @@ bool initGame()
 	return true;
 }
 
-enum MenuState:int
+enum MenuState :int
 {
-	mainMenu=1,
-	levelSelector
-}menuState = mainMenu;
+	mainMenu = 1,
+	levelSelector,
+	creditsAres,
+
+}; int menuState = MenuState::mainMenu;
+
+bool isInButton(const glm::vec2 &p, const glm::vec4 &box)
+{
+	return(p.x >= box.x && p.x <= box.x + box.z
+		&&
+		p.y >= box.y && p.y <= box.y + box.w
+		);
+}
+
+bool isButtonReleased(const glm::vec2 &p, const glm::vec4 &box)
+{
+	return(p.x >= box.x && p.x <= box.x + box.z
+		&&
+		p.y >= box.y && p.y <= box.y + box.w
+		) && platform::isLMouseButtonReleased();
+}
 
 bool gameLogic(float deltaTime)
 {
@@ -347,6 +371,8 @@ bool gameLogic(float deltaTime)
 	renderer2d.updateWindowMetrics(w, h);
 
 #pragma region MyRegion
+
+	static int selectedLevel;
 
 	//main menu
 	if (currentLevel == -2)
@@ -370,24 +396,42 @@ bool gameLogic(float deltaTime)
 		{
 			Ui::Frame f({ 0, 0, w, h });
 			
-			auto button1 = Ui::Box().xCenter().yCenter( - 150).xDimensionPercentage(0.5).yDimensionPixels(200)();
-			auto button2 = Ui::Box().xCenter().yCenter(+150).xDimensionPercentage(0.5).yDimensionPixels(200)();
+			auto button1 = Ui::Box().xCenter().yCenter( - 200).xDimensionPercentage(0.5).yDimensionPixels(150)();
+			auto button2 = Ui::Box().xCenter().yCenter().xDimensionPercentage(0.5).yDimensionPixels(150)();
+			auto button3 = Ui::Box().xCenter().yCenter(+200).xDimensionPercentage(0.5).yDimensionPixels(150)();
 
 			auto p = platform::getRelMousePosition();
 			
 			bool playButton = 0;
+			bool levelSelectButton = 0;
+			bool creditsSelectButton = 0;
 
-			if (p.x >= button1.x && p.x <= button1.x + button1.z
-				&&
-				p.y >= button1.y && p.y <= button1.y + button1.w
-				)
+			//todo refactor
+			if (isInButton(p, button1))
 			{
 				if (platform::isLMouseButtonReleased())
 				{
+					ilog("yes2");
 					playButton = 1;
 				}
 			}
-			
+
+			if (isInButton(p, button2))
+			{
+				if (platform::isLMouseButtonReleased())
+				{
+					ilog("yes1");
+					levelSelectButton = 1;
+				}
+			}
+
+			if (isInButton(p, button3))
+			{
+				if (platform::isLMouseButtonReleased())
+				{
+					creditsSelectButton = 1;
+				}
+			}
 
 			renderer2d.render9Patch2( button1,
 				8, { 1,1,1,1 }, {}, 0, uiButton, {0,1,1,0}, { 0,0.8,0.8,0 });
@@ -395,12 +439,19 @@ bool gameLogic(float deltaTime)
 			renderer2d.render9Patch2(button2,
 				8, { 1,1,1,1 }, {}, 0, uiButton, { 0,1,1,0 }, { 0,0.8,0.8,0 });
 
+			renderer2d.render9Patch2(button3,
+				8, { 1,1,1,1 }, {}, 0, uiButton, { 0,1,1,0 }, { 0,0.8,0.8,0 });
+
+
 			renderer2d.renderText({button1.x + button1.z/2,button1.y + button1.w/2}, 
 				"Continue jurney", font, {1,1,1,1}, 0.7);
 
 
 			renderer2d.renderText({ button2.x + button2.z / 2,button2.y + button2.w / 2 },
 				"Select zone", font, { 1,1,1,1 }, 0.7);
+
+			renderer2d.renderText({ button3.x + button3.z / 2,button3.y + button3.w / 2 },
+				"Credits", font, { 1,1,1,1 }, 0.7);
 
 			if (playButton)
 			{
@@ -419,6 +470,17 @@ bool gameLogic(float deltaTime)
 					respawn();
 				}
 
+			}
+
+			if(levelSelectButton)
+			{
+				menuState = MenuState::levelSelector;
+				selectedLevel = 0;
+			}
+
+			if(creditsSelectButton)
+			{
+				menuState = MenuState::creditsAres;
 			}
 
 		}else if (menuState == MenuState::levelSelector)
@@ -479,10 +541,7 @@ bool gameLogic(float deltaTime)
 					p.y >= leftBox.y && p.y <= leftBox.y + leftBox.w
 					)
 				{
-					if (platform::isLMouseButtonReleased())
-					{
-						lReleased = 1;
-					}
+					
 					leftPressed = 1;
 				}
 
@@ -491,14 +550,11 @@ bool gameLogic(float deltaTime)
 					p.y >= rightBox.y && p.y <= rightBox.y + rightBox.w
 					)
 				{
-					if (platform::isLMouseButtonReleased())
-					{
-						rReleased = 1;
-					}
+					
 					rightPressed = 1;
 				}
 			}
-			else
+			
 			{
 				if (p.x >= leftBox.x && p.x <= leftBox.x + leftBox.z
 					&&
@@ -525,18 +581,72 @@ bool gameLogic(float deltaTime)
 
 #pragma endregion 
 
+			if(selectedLevel >0)
 			renderer2d.renderRectangle(leftBox,
 				{}, 0, uiArrows, arrowsAtlas.get(0, leftPressed, 1));
 
+			if (selectedLevel < LEVELS-1)
 			renderer2d.renderRectangle(rightBox,
 				{}, 0, uiArrows, arrowsAtlas.get(0, rightPressed));
 
 
 			if (lReleased)
 			{
-				currentLevel = 2;
-				loadLevel();
+
+				selectedLevel--;
+				if(selectedLevel <0)
+				{
+					selectedLevel = 0;
+				}
+			
+				//currentLevel = 2;
+				//loadLevel();
 			}
+			if (rReleased)
+			{
+				selectedLevel++;
+				if (selectedLevel >= LEVELS)
+				{
+					selectedLevel = LEVELS-1;
+				}
+				//currentLevel = 2;
+				//loadLevel();
+			}
+		}else if (menuState == MenuState::creditsAres)
+		{
+			auto p = platform::getRelMousePosition();
+
+			Ui::Frame f({ 0, 0, w, h });
+
+			auto button1 = Ui::Box().xLeft(100).yCenter(-200).yDimensionPixels(150).xAspectRatio(1)();
+			auto button2 = Ui::Box().xLeft(100).yCenter().yDimensionPixels(150).xAspectRatio(1)();
+			auto button3 = Ui::Box().xLeft(100).yCenter(+200).yDimensionPixels(150).xAspectRatio(1)();
+			
+			renderer2d.render9Patch2(button1,
+				8, { 1,1,1,1 }, {}, 0, uiItch, { 0,1,1,0 }, { 0,0.8,0.8,0 });
+
+			renderer2d.render9Patch2(button2,
+				8, { 1,1,1,1 }, {}, 0, uiMusic, { 0,1,1,0 }, { 0,0.8,0.8,0 });
+
+			renderer2d.render9Patch2(button3,
+				8, { 1,1,1,1 }, {}, 0, uiArt, { 0,1,1,0 }, { 0,0.8,0.8,0 });
+
+
+			renderer2d.renderText({ button1.x + button1.z + 200 ,button1.y + button1.w / 2 },
+				"Our page", font, { 1,1,1,1 }, 0.7);
+
+
+			renderer2d.renderText({ button2.x + button2.z + 200 ,button2.y + button2.w / 2 },
+				"Music", font, { 1,1,1,1 }, 0.7);
+
+			renderer2d.renderText({ button3.x + button3.z + 200 ,button3.y + button3.w / 2 },
+				"Art", font, { 1,1,1,1 }, 0.7);
+		
+			if (isButtonReleased(p, button1)) {};
+			if (isButtonReleased(p, button2)) {system("start https://www.youtube.com/channel/UCEXX5i6961zc4-L8thTctBg");};
+			if (isButtonReleased(p, button3)){ system("start https://itch.io/profile/adamatomic"); };
+
+
 		}
 
 
@@ -1309,7 +1419,13 @@ bool gameLogic(float deltaTime)
 
 void closeGame()
 {
-	Sleep(1000);
+	waterPlayer.stop();
+	greenPlayer.stop();
+	tikiPlayer.stop();
+	redPlayer.stop();
+	grayPlayer.stop();
+	soundPlayer.stop();
+
 	saveState(playerSpawnPos, currentLevel);
 
 }

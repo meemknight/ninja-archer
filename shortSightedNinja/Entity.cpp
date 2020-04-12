@@ -808,11 +808,10 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 				hitOnce = 1;
 			
 
-
 				if ((lastPos.x < floor(curPos.x / BLOCK_SIZE)*BLOCK_SIZE && shootDir.x > 0) ||
 					(lastPos.x > floor((curPos.x / BLOCK_SIZE) + 1)*BLOCK_SIZE&& shootDir.x < 0))
 				{
-					auto pos = glm::vec2(lastPos.x, lastPos.y);
+					auto pos = glm::ivec2(lastPos.x, lastPos.y);
 					pos.x /= BLOCK_SIZE;
 					pos.y /= BLOCK_SIZE;
 					if(shootDir.x<0 && pos.x>0 && isCollidableForArrows(mapData.get(pos.x-1, pos.y).type))
@@ -832,8 +831,8 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 				{
 			
 					auto pos = glm::ivec2(lastPos.x, lastPos.y);
-					pos.x / BLOCK_SIZE;
-					pos.y / BLOCK_SIZE;
+					pos.x /= BLOCK_SIZE;
+					pos.y /= BLOCK_SIZE;
 					if (shootDir.y > 0 && pos.y < mapData.h-1 && isCollidableForArrows(mapData.get(pos.x, pos.y+1).type))
 					{
 						shootDir.x *= -1;

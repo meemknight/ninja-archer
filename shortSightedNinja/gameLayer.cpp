@@ -552,7 +552,6 @@ void imguiFunc(float deltaTime)
 				}
 
 				signData d({ x, y }, str);
-				llog(str);
 				signs.emplace_back(d);
 			}
 			else if (current[3] == 'e')
@@ -733,7 +732,6 @@ void imguiFunc(float deltaTime)
 					{ spriteAtlas.get(mCount - 1, 0).z, spriteAtlas.get(mCount - 1,0).w }))
 				{
 					currentBlock = mCount;
-					llog((int)currentBlock);
 				}
 				ImGui::PopID();
 
@@ -762,7 +760,6 @@ void imguiFunc(float deltaTime)
 						{ spriteAtlas.get(mCount - 1, 0).z, spriteAtlas.get(mCount - 1,0).w }))
 					{
 						currentBlock = mCount;
-						llog((int)localCount);
 					}
 					ImGui::PopID();
 
@@ -786,7 +783,7 @@ void imguiFunc(float deltaTime)
 						{ spriteAtlas.get(mCount - 1, 0).z, spriteAtlas.get(mCount - 1,0).w }))
 					{
 						currentBlock = mCount;
-						llog((int)currentBlock);
+						//llog((int)currentBlock);
 					}
 					ImGui::PopID();
 

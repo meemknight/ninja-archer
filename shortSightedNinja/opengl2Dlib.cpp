@@ -1078,6 +1078,7 @@ namespace gl2d
 
 		const unsigned char* decodedImage = stbi_load_from_memory(image_file_data, image_file_size, &width, &height, &channels, 4);
 
+		/*
 		int newW = width + (width / blockSize);
 		int newH = height + (height / blockSize);
 
@@ -1119,6 +1120,74 @@ namespace gl2d
 				}
 			}
 			
+		}
+		*/
+		
+		int newW = width + ((width * 2) / blockSize);
+		int newH = height + ((height * 2) / blockSize);
+
+		auto getOld = [decodedImage, width](int x, int y, int c)->const unsigned char
+		{
+			return decodedImage[4*(x + (y * width)) + c];
+		};
+
+		
+		unsigned char *newData = new unsigned char[newW * newH * 4];
+		ZeroMemory(newData, newW * newH * 4);
+
+		auto getNew = [newData, newW](int x, int y, int c)
+		{
+			return &newData[4 * (x + (y * newW)) + c];
+		};
+
+		int newDataCursor = 0;
+		int dataCursor = 0;
+
+		for(int y=0; y < newH; y++)
+		{
+			int yNo = 0;
+			if((y==0 || y== newH-1
+				|| ((y)%(blockSize+2))==0||
+				((y+1) % (blockSize + 2)) == 0
+				))
+			{
+				yNo = 1;
+			}
+			
+			for (int x = 0; x < newW; x++)
+			{
+				if (
+					yNo||
+					
+					((
+					x == 0 || x == newW - 1
+					|| (x % (blockSize + 2)) == 0 ||
+					((x + 1) % (blockSize + 2)) == 0
+					) 
+						)
+					
+					)
+				{
+					newData[newDataCursor++] = 0;
+					newData[newDataCursor++] = 0;
+					newData[newDataCursor++] = 0;
+					newData[newDataCursor++] = 0;
+				}else
+				{
+					newData[newDataCursor++] = decodedImage[dataCursor++];
+					newData[newDataCursor++] = decodedImage[dataCursor++];
+					newData[newDataCursor++] = decodedImage[dataCursor++];
+					newData[newDataCursor++] = decodedImage[dataCursor++];
+				
+					//newData[newDataCursor++] = 255;
+					//newData[newDataCursor++] = 255;
+					//newData[newDataCursor++] = 255;
+					//newData[newDataCursor++] = 255;
+
+				}
+
+			}
+		
 		}
 
 		createFromBuffer((const char*)newData, newW, newH);
@@ -1319,11 +1388,11 @@ namespace gl2d
 		//todo
 		if (flip)
 		{
-			return { (x + 1) * xSize - Xpadding, 1 - (y * ySize) - Ypadding, (x)* xSize, 1.f - ((y + 1) * ySize) };
+			return { (x + 1) * xSize - Xpadding, 1 - (y * ySize) - Ypadding, (x)* xSize + Xpadding, 1.f - ((y + 1) * ySize) + Ypadding };
 		}
 		else
 		{
-			return { x * xSize, 1 - (y * ySize) - Ypadding, (x + 1) * xSize - Xpadding, 1.f - ((y + 1) * ySize) };
+			return { x * xSize + Xpadding, 1 - (y * ySize) - Ypadding, (x + 1) * xSize - Xpadding, 1.f - ((y + 1) * ySize) + Ypadding };
 		}
 	}
 

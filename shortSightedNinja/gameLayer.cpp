@@ -1504,7 +1504,7 @@ extern bool snapWallGrab;
 
 	//ImGui::Begin("image");
 	//ImGui::Image((void*)(intptr_t)characterSprite.id,
-	//	{ 120,120 });
+	//	{ 4 * 60, 8*60 });
 	//ImGui::End();
 
 	//ImGui::Begin("Move settings");

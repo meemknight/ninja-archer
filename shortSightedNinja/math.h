@@ -19,7 +19,7 @@ struct LightSource
 		animationDuration(animDur), intensity(intensity)
 	{};
 
-	static constexpr int animationStartTime = 2;
+	static constexpr float animationStartTime = 2;
 	glm::ivec2 pos = {};
 	float animationDuration;
 	float intensity = 5;

@@ -531,7 +531,7 @@ void loadProgress(int &nextLevel)
 
 	if(nextLevel > LEVELS -1)
 	{
-		nextLevel = LEVELS - 1;
+		nextLevel = 0;
 	}
 
 	f.close();
@@ -543,9 +543,6 @@ void saveState(glm::ivec2 playerSpawnPos, int levelId)
 
 	if(levelId == -2 || levelId >= LEVELS)
 	{
-		std::ofstream f;
-		f.open("resources//state", std::ofstream::out | std::ofstream::trunc);
-		f.close();
 		return;
 	}
 

@@ -21,7 +21,7 @@ bool snapWallGrab = 0;
 float ghostJumpTime = 0.08;
 float blockTouchDownMargin = 0;
 
-float arrowSpeed = 25;
+float arrowSpeed = 20;
 
 #undef max;
 #undef min;

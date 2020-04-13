@@ -88,11 +88,14 @@ namespace gl2d
 		stbtt_aligned_quad fontGetGlyphQuad(const Font font, const char c)
 		{
 			stbtt_aligned_quad quad = { 0 };
-			float xoffset = 0;
-			float yoffset = 0;
+		
+			float x=0;
+			float y=0;
 
-			stbtt_GetPackedQuad(font.packedCharsBuffer, font.size.x, font.size.y, c - ' ', &xoffset, &yoffset, &quad, 1);
-
+			stbtt_GetPackedQuad(font.packedCharsBuffer,
+				font.size.x, font.size.y, c - ' ', &x, &y, &quad, 1);
+			
+			
 			return quad;
 		}
 
@@ -908,7 +911,8 @@ namespace gl2d
 			}
 			else if (text[i] >= ' ' && text[i] <= '~')
 			{
-				const stbtt_aligned_quad quad = internal::fontGetGlyphQuad(font, text[i]);
+				const stbtt_aligned_quad quad = internal::fontGetGlyphQuad
+				(font, text[i]);
 
 				rectangle.z = quad.x1 - quad.x0;
 				rectangle.w = quad.y1 - quad.y0;
@@ -916,9 +920,9 @@ namespace gl2d
 				rectangle.z *= size;
 				rectangle.w *= size;
 
-				rectangle.y = linePositionY - rectangle.w;
+				rectangle.y = linePositionY + quad.y0;
 
-				glm::vec4 colorData[4] = { color, color, color, color };
+
 				rectangle.x += rectangle.z + spacing * size;
 				maxPos = std::max(maxPos, rectangle.x);
 				maxPosY = std::max(maxPosY, rectangle.y);
@@ -955,7 +959,9 @@ namespace gl2d
 			}
 			else if (text[i] >= ' ' && text[i] <= '~')
 			{
-				const stbtt_aligned_quad quad = internal::fontGetGlyphQuad(font, text[i]);
+
+				const stbtt_aligned_quad quad = internal::fontGetGlyphQuad
+				(font, text[i]);
 
 				rectangle.z = quad.x1 - quad.x0;
 				rectangle.w = quad.y1 - quad.y0;
@@ -963,7 +969,8 @@ namespace gl2d
 				rectangle.z *= size;
 				rectangle.w *= size;
 
-				rectangle.y = linePositionY - rectangle.w;
+				//rectangle.y = linePositionY - rectangle.w;
+				rectangle.y = linePositionY + quad.y0;
 
 				glm::vec4 colorData[4] = { color, color, color, color };
 				renderRectangle(rectangle, colorData, glm::vec2{ 0, 0 }, 0, font.texture, glm::vec4{ quad.s0, quad.t0, quad.s1, quad.t1 });

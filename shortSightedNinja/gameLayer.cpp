@@ -866,8 +866,8 @@ bool gameLogic(float deltaTime)
 #pragma endregion
 	
 
-	renderer2d.currentCamera.follow(player.pos + (player.dimensions / 2.f), deltaTime * 120, 30, renderer2d.windowW, renderer2d.windowH);
 	//stencilRenderer2d.currentCamera = renderer2d.currentCamera;
+	renderer2d.currentCamera.follow(player.pos + (player.dimensions / 2.f), deltaTime * 110, 4 * BLOCK_SIZE, renderer2d.windowW, renderer2d.windowH);
 
 	player.applyGravity(deltaTime);
 	player.applyVelocity(deltaTime);
@@ -1113,21 +1113,23 @@ bool gameLogic(float deltaTime)
 		else
 		{
 			float perc;
+			float bonusPerc = 0.2;
 
 			if (i.animationDuration > i.animationStartTime / 2.f)
 			{
 				perc = i.animationDuration - (i.animationStartTime / 2.f);
 				perc = perc / (i.animationStartTime / 2.f);
 				perc = 1 - perc;
-				r *= perc * 1.2;
+				r *= perc * (1 + bonusPerc);
 				r = std::max(r, 0.3f);
 			}
 			else
 			{
-				perc = i.animationStartTime / 2.f - i.animationDuration;
+				perc = i.animationDuration - i.animationStartTime / 2.f ;
 				perc = perc / (i.animationStartTime / 2.f);
-				perc = 1 - perc;
-				r *= (perc + 1);
+				perc = perc+1;
+				ilog(perc);
+				r += r* (perc) * bonusPerc;
 			}
 
 			i.animationDuration -= deltaTime;

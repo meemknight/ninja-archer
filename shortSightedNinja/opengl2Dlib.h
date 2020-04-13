@@ -312,5 +312,7 @@ namespace gl2d
 			return computeTextureAtlasWithPadding(xSize, ySize, xCount, yCount, x, y, flip);
 		}
 	};
+	// Get default internal texture (white texture)
+
 
 };

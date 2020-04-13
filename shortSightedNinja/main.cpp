@@ -6,13 +6,17 @@
 #include <algorithm>
 //#include <io.h>
 //#include <fcntl.h>
+#include "buildConfig.h"
 
 #include "tools.h"
 #include "opengl2Dlib.h"
 
+#ifndef RemoveImgui
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_win32.h"
+
+#endif
 
 #include "input.h"
 
@@ -85,6 +89,8 @@ int MAIN
 	gl2d::setErrorFuncCallback([](const char* c) {elog(c); });
 	gl2d::init();
 
+#ifndef RemoveImgui
+
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
@@ -95,6 +101,9 @@ int MAIN
 	const char *glslVersion = "#version 330";
 	ImGui_ImplOpenGL3_Init(glslVersion);
 	ImGui::StyleColorsDark();
+
+#endif // !RemoveImgui
+
 
 	input::loadXinput();
 
@@ -143,6 +152,8 @@ int MAIN
 				quit = true;
 			}
 
+#ifndef RemoveImgui
+
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
@@ -151,6 +162,7 @@ int MAIN
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+#endif
 
 			SwapBuffers(hdc);
 		
@@ -175,6 +187,7 @@ int MAIN
 
 LRESULT CALLBACK windProc(HWND wind, UINT m, WPARAM wp, LPARAM lp)
 {
+#ifndef RemoveImgui
 	if (ImGui::GetCurrentContext() == NULL)
 		goto endImgui;
 	
@@ -242,7 +255,8 @@ LRESULT CALLBACK windProc(HWND wind, UINT m, WPARAM wp, LPARAM lp)
 			goto endImgui;
 		}
 	}
-	endImgui:
+endImgui:
+#endif
 
 	LRESULT l = 0;
 
@@ -387,21 +401,36 @@ namespace platform
 
 	int isLMouseButtonPressed()
 	{
+
+#ifndef RemoveImgui
 		ImGuiIO& io = ImGui::GetIO();
 		return (!io.WantCaptureMouse) && lbuttonPressed && platform::isFocused();
+#else
+		return  lbuttonPressed && platform::isFocused();
+#endif
+	
 	}
 
 	int isLMouseButtonReleased()
 	{
+#ifndef RemoveImgui
 		ImGuiIO& io = ImGui::GetIO();
 		return (!io.WantCaptureMouse) && lbuttonReleased && platform::isFocused();
+#else
+		return  lbuttonReleased && platform::isFocused();
+#endif
+
 	}
 
 	int isLMouseHeld()
 	{
+#ifndef RemoveImgui
 		ImGuiIO& io = ImGui::GetIO();
-	
 		return (!io.WantCaptureMouse) && lbutton && platform::isFocused();
+#else
+		return lbutton && platform::isFocused();
+#endif
+	
 	}
 
 	int isRMouseButtonPressed()

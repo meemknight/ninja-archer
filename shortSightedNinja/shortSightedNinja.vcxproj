@@ -39,6 +39,7 @@
     <ClCompile Include="Ui.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="buildConfig.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="gameLayer.h" />
     <ClInclude Include="imconfig.h" />

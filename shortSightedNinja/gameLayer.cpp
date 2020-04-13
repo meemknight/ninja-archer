@@ -1476,6 +1476,8 @@ void closeGame()
 void imguiFunc(float deltaTime)
 {
 
+#ifndef RemoveImgui
+
 	static bool active = 0;
 	static glm::vec4 color;
 
@@ -1557,5 +1559,7 @@ extern bool snapWallGrab;
 	//	ImGui::Text("%04d: Some text", n);
 	//ImGui::EndChild();
 	//ImGui::End();
+#endif 
+
 
 }

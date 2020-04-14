@@ -1143,6 +1143,7 @@ namespace gl2d
 		int newDataCursor = 0;
 		int dataCursor = 0;
 
+		//first copy data
 		for(int y=0; y < newH; y++)
 		{
 			int yNo = 0;
@@ -1178,17 +1179,75 @@ namespace gl2d
 					newData[newDataCursor++] = decodedImage[dataCursor++];
 					newData[newDataCursor++] = decodedImage[dataCursor++];
 					newData[newDataCursor++] = decodedImage[dataCursor++];
-				
-					//newData[newDataCursor++] = 255;
-					//newData[newDataCursor++] = 255;
-					//newData[newDataCursor++] = 255;
-					//newData[newDataCursor++] = 255;
-
 				}
 
 			}
 		
 		}
+
+		//then add margins
+		
+
+		for(int x =1; x< newW-1; x++)
+		{
+			//copy on left
+			if (x == 1 || 
+				(x%(blockSize+2)) == 1
+				)
+			{
+				for(int y=0; y< newH; y++)
+				{
+					*getNew(x - 1, y, 0) = *getNew(x, y, 0);
+					*getNew(x - 1, y, 1) = *getNew(x, y, 1);
+					*getNew(x - 1, y, 2) = *getNew(x, y, 2);
+					*getNew(x - 1, y, 3) = *getNew(x, y, 3);
+				}
+
+			}else //copy on rigght
+				if (x == newW - 2 ||
+					(x % (blockSize + 2)) == blockSize
+					)
+				{
+					for (int y = 0; y < newH; y++)
+					{
+						*getNew(x+1, y, 0) = *getNew(x, y, 0);
+						*getNew(x+1, y, 1) = *getNew(x, y, 1);
+						*getNew(x+1, y, 2) = *getNew(x, y, 2);
+						*getNew(x+1, y, 3) = *getNew(x, y, 3);
+					}
+				}
+		}
+
+		for(int y=1; y< newH -1; y++)
+		{
+			if (y == 1 ||
+				(y % (blockSize + 2)) == 1
+				)
+			{
+				for (int x = 0; x < newW; x++)
+				{
+					*getNew(x, y-1, 0) = *getNew(x, y, 0);
+					*getNew(x, y-1, 1) = *getNew(x, y, 1);
+					*getNew(x, y-1, 2) = *getNew(x, y, 2);
+					*getNew(x, y-1, 3) = *getNew(x, y, 3);
+				}
+			}
+			else
+				if (y == newH - 2 ||
+					(y % (blockSize + 2)) == blockSize
+					)
+				{
+					for (int x = 0; x < newW; x++)
+					{
+						*getNew(x ,y+1, 0) = *getNew(x, y , 0);
+						*getNew(x, y+1, 1) = *getNew(x, y , 1);
+						*getNew(x, y+1, 2) = *getNew(x, y , 2);
+						*getNew(x, y+1, 3) = *getNew(x, y , 3);
+					}
+				}
+		
+		}
+
 
 		createFromBuffer((const char*)newData, newW, newH);
 

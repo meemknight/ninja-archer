@@ -700,7 +700,7 @@ bool gameLogic(float deltaTime)
 
 	if (player.dying || player.isExitingLevel != -1)
 	{
-		playerLight -= deltaTime * 2;
+		playerLight -= deltaTime * 3;
 		if (playerLight < 1)
 		{
 			if(player.dying)

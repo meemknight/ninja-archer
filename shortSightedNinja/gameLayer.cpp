@@ -242,7 +242,7 @@ void respawn()
 	arrows.clear();
 
 	player.pos = { BLOCK_SIZE * playerSpawnPos.x, BLOCK_SIZE * playerSpawnPos.y };
-	player.updateMove();
+	player.updateMove(0);
 	player.dimensions = { 7, 7 };
 	player.dying = 0;
 	player.lockMovementDie = 0;
@@ -874,7 +874,7 @@ bool gameLogic(float deltaTime)
 
 	player.resolveConstrains(mapData);
 
-	player.updateMove();
+	player.updateMove(deltaTime);
 
 	player.checkGrounded(mapData, deltaTime);
 
@@ -1128,7 +1128,6 @@ bool gameLogic(float deltaTime)
 				perc = i.animationDuration - i.animationStartTime / 2.f ;
 				perc = perc / (i.animationStartTime / 2.f);
 				perc = perc+1;
-				ilog(perc);
 				r += r* (perc) * bonusPerc;
 			}
 

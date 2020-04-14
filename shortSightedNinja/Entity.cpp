@@ -16,10 +16,9 @@ float strafeSpeedMove = 10;
 float runSpeed = 14;
 float airRunSpeed = 10;
 float grabMargin = 0.25f;
-float notGrabTimeVal = 0.08;
+float notGrabTimeVal = 0.06;
 bool snapWallGrab = 0;
 float ghostJumpTime = 0.08;
-float blockTouchDownMargin = 0;
 
 float arrowSpeed = 20;
 
@@ -152,12 +151,15 @@ void Entity::run(float speed)
 
 	if(iswebs)
 	{
-		pos.x += speed * runSpeed * BLOCK_SIZE * 0.1;
+		pos.x += speed * runSpeed * BLOCK_SIZE * 0.1 * getAcceleration();
 	}else
 	{
-		pos.x += speed * runSpeed * BLOCK_SIZE;
+		pos.x += speed * runSpeed * BLOCK_SIZE * getAcceleration();
 	}
 	moving = (bool)speed;
+
+	if (speed) { accelerating = true; }
+
 }
 
 void Entity::airRun(float speed)
@@ -175,6 +177,11 @@ void Entity::airRun(float speed)
 	if (dying)
 	{
 		speed *= 0.5;
+	}
+
+	if(speed)
+	{
+		accelerating = 1;
 	}
 
 	if(speed > 0)
@@ -291,7 +298,7 @@ void Entity::checkGrounded(MapData &mapDat, float deltaTime)
 
 	for (int x = minx; x <= maxx; x++)
 	{
-		if (isCollidable(mapDat.get(x, floor((pos.y + dimensions.y + blockTouchDownMargin) / BLOCK_SIZE)).type))
+		if (isCollidable(mapDat.get(x, floor((pos.y + dimensions.y) / BLOCK_SIZE)).type))
 		{
 			grounded = 1;
 			canJump = 1;
@@ -329,7 +336,7 @@ void Entity::checkWall(MapData & mapData, int move)
 		return;
 	}
 
-	int minY = floor((pos.y /BLOCK_SIZE)+0.1f);
+	int minY = floor(((pos.y )/BLOCK_SIZE)+0.1f);
 	float dist = (pos.y / BLOCK_SIZE) + 0.1f - floor((pos.y / BLOCK_SIZE) + 0.1f);
 	
 	if(minY <0)
@@ -339,7 +346,7 @@ void Entity::checkWall(MapData & mapData, int move)
 
 	if(dist > grabMargin)
 	{
-		return;
+		//return;
 	}
 	
 	bool checkRight = 0;
@@ -360,7 +367,6 @@ void Entity::checkWall(MapData & mapData, int move)
 		checkLeft = 1;
 	}
 
-	int maxY = minY + 1;
 	int rightX = floor((pos.x + dimensions.x) / BLOCK_SIZE);
 	int leftX = floor((pos.x-2) / BLOCK_SIZE);
 	if (leftX < 0) { return; }

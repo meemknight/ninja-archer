@@ -2,6 +2,10 @@
 #include "glm/vec2.hpp"
 #include "mapData.h"
 #include "mapRenderer.h"
+#include <algorithm>
+
+#undef min
+#undef max
 
 
 struct Entity
@@ -39,14 +43,25 @@ struct Entity
 
 	float notGrabTime = 0;
 
+	float accelerateTime = 0;
+	float maxAccelerationTime = 0.15;
+
 	bool moving = 0;
 	bool dying = 0;
 	bool lockMovementDie = 0;
 	int isExitingLevel = -1;
+	bool accelerating = 0;
+
+	float getAcceleration() 
+	{
+		float a = std::max((accelerateTime / maxAccelerationTime), 0.6f);
+		if (a <= 0.9) { return a; }
+		return a;
+	}
 
 	bool iswebs;
 
-	void updateMove() 
+	void updateMove(float deltaTime) 
 	{
 		if(lastPos.x - pos.x < 0)
 		{
@@ -66,6 +81,26 @@ struct Entity
 		}
 
 		lastPos = pos; 
+
+		if (!accelerating)
+		{
+			if(accelerateTime>0)
+			{
+				accelerateTime-= deltaTime;
+			}else
+			{
+				accelerateTime = 0;
+			}
+		}else
+		{
+			accelerateTime += deltaTime;
+			if(accelerateTime > maxAccelerationTime)
+			{
+				accelerateTime = maxAccelerationTime;
+			}
+		}
+
+		accelerating = 0;
 	}
 	
 	void strafe(int dir);

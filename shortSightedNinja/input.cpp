@@ -221,7 +221,7 @@ namespace input
 						retValY = 0.f;
 					}
 
-					val = retValY < (-moveSensitivity * 2.8);
+					val = retValY < (-moveSensitivity * 3.8);
 					val = val | (pad->wButtons & bindingsController[b]);
 				}else if (b == input::Buttons::up)
 				{
@@ -235,7 +235,7 @@ namespace input
 						retValY = 0.f;
 					}
 
-					val = retValY > moveSensitivity * 2.8;
+					val = retValY > moveSensitivity * 3.8;
 					val = val | (pad->wButtons & bindingsController[b]);
 				}
 				else

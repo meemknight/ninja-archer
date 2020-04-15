@@ -128,6 +128,8 @@ private:
 	bool &upTouch, bool &downTouch, bool &leftTouch, bool &rightTouch);
 };
 
+bool aabb(glm::vec4 b1, glm::vec4 b2);
+
 struct Arrow
 {
 	enum ArrowTypes: int

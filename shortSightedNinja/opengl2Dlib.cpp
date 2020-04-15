@@ -882,59 +882,71 @@ namespace gl2d
 		return glm::vec4(v1.x, v1.y, v3.x, v3.y);
 	}
 
-	void Renderer2D::renderText(glm::vec2 position, const char * text, const Font font, const Color4f color, const float size, const float spacing, const float line_space)
+	void Renderer2D::renderText(glm::vec2 position, const char * text, const Font font,
+		const Color4f color, const float size, const float spacing, const float line_space, bool showInCenter)
 	{
 		const int text_length = strlen(text);
 		Rect rectangle;
 		rectangle.x = position.x;
-
-		//This is the y position we render at because it advances when we encounter newlines
 		float linePositionY = position.y;
 
-		float maxPos = 0;
-		float maxPosY = 0;
-
-		for (int i = 0; i < text_length-1; i++)
+		if(showInCenter)
 		{
-			if (text[i] == '\n')
+			//This is the y position we render at because it advances when we encounter newlines
+
+			float maxPos = 0;
+			float maxPosY = 0;
+
+			for (int i = 0; i < text_length; i++)
 			{
-				rectangle.x = position.x;
-				linePositionY += (font.max_height + line_space) * size;
+				if (text[i] == '\n')
+				{
+					rectangle.x = position.x;
+					linePositionY += (font.max_height + line_space) * size;
+				}
+				else if (text[i] == '\t')
+				{
+					const stbtt_aligned_quad quad = internal::fontGetGlyphQuad
+					(font, '_');
+					auto x = quad.x1 - quad.x0;
+
+					rectangle.x += x * size * 3 + spacing * size;
+				}
+				else if (text[i] == ' ')
+				{
+					const stbtt_aligned_quad quad = internal::fontGetGlyphQuad
+					(font, '_');
+					auto x = quad.x1 - quad.x0;
+
+					rectangle.x += x * size+ spacing*size;
+				}
+				else if (text[i] >= ' ' && text[i] <= '~')
+				{
+					const stbtt_aligned_quad quad = internal::fontGetGlyphQuad
+					(font, text[i]);
+
+					rectangle.z = quad.x1 - quad.x0;
+					rectangle.w = quad.y1 - quad.y0;
+
+					rectangle.z *= size;
+					rectangle.w *= size;
+
+					rectangle.y = linePositionY + quad.y0 * size;
+
+
+					rectangle.x += rectangle.z + spacing * size;
+					maxPos = std::max(maxPos, rectangle.x);
+					maxPosY = std::max(maxPosY, rectangle.y);
+				}
 			}
-			else if (text[i] == '\t')
-			{
-				rectangle.x += spacing * 3 * size * 4;
-			}
-			else if (text[i] == ' ')
-			{
-				rectangle.x += spacing * 3 * size;
-			}
-			else if (text[i] >= ' ' && text[i] <= '~')
-			{
-				const stbtt_aligned_quad quad = internal::fontGetGlyphQuad
-				(font, text[i]);
 
-				rectangle.z = quad.x1 - quad.x0;
-				rectangle.w = quad.y1 - quad.y0;
+			float padd = maxPos - position.x;
+			padd /= 2;
+			position.x -= padd;
 
-				rectangle.z *= size;
-				rectangle.w *= size;
-
-				rectangle.y = linePositionY + quad.y0;
-
-
-				rectangle.x += rectangle.z + spacing * size;
-				maxPos = std::max(maxPos, rectangle.x);
-				maxPosY = std::max(maxPosY, rectangle.y);
-			}
+			float paddY = maxPosY - position.y;
+			position.y -= paddY;
 		}
-
-		float padd = maxPos - position.x;
-		padd /= 2;
-		position.x -= padd;
-
-		float paddY = maxPosY - position.y;
-		position.y -= paddY;
 
 		rectangle = {};
 		rectangle.x = position.x;
@@ -951,11 +963,18 @@ namespace gl2d
 			}
 			else if (text[i] == '\t')
 			{
-				rectangle.x += spacing * 3 * size * 4;
+				const stbtt_aligned_quad quad = internal::fontGetGlyphQuad
+				(font, '_');
+				auto x = quad.x1 - quad.x0;
+
+				rectangle.x += x * size * 3 + spacing * size;
 			}
 			else if (text[i] == ' ')
 			{
-				rectangle.x += spacing * 3 * size;
+				const stbtt_aligned_quad quad = internal::fontGetGlyphQuad
+				(font, '_');
+				auto x = quad.x1 - quad.x0;
+				rectangle.x += x * size + spacing * size;
 			}
 			else if (text[i] >= ' ' && text[i] <= '~')
 			{
@@ -970,7 +989,7 @@ namespace gl2d
 				rectangle.w *= size;
 
 				//rectangle.y = linePositionY - rectangle.w;
-				rectangle.y = linePositionY + quad.y0;
+				rectangle.y = linePositionY + quad.y0 * size;
 
 				glm::vec4 colorData[4] = { color, color, color, color };
 				renderRectangle(rectangle, colorData, glm::vec2{ 0, 0 }, 0, font.texture, glm::vec4{ quad.s0, quad.t0, quad.s1, quad.t1 });

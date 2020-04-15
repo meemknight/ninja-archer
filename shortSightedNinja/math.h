@@ -22,5 +22,11 @@ struct LightSource
 	static constexpr float animationStartTime = 2;
 	glm::ivec2 pos = {};
 	float animationDuration;
-	float intensity = 5;
+
+	//in units 1 2 3 ,, etc
+	float intensity = 0;
+
+	float boxW = 0;
+	float boxH = 0;
+
 };

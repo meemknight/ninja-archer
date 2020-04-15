@@ -8,6 +8,7 @@
 #include "input.h"
 #include "Ui.h"
 #include "Particle.h"
+#include "DialogInteraction.h"
 #include <algorithm>
 #include <string>
 #include <sstream>
@@ -70,6 +71,7 @@ gl2d::Texture uiButton;
 gl2d::Texture uiItch;
 gl2d::Texture uiMusic;
 gl2d::Texture uiArt;
+gl2d::Texture uiDialogBox;
 
 std::vector<Arrow> arrows;
 
@@ -85,6 +87,8 @@ glm::ivec2 playerSpawnPos = { 0,0 };
 
 Particle jumpParticle;
 std::vector<Particle>crackParticles;
+
+DialogInteraction currentDialog;
 
 // -2 if is main menu
 int currentLevel=-2;
@@ -114,6 +118,9 @@ void respawn();
 
 void loadLevel()
 {
+	currentDialog.setNewDialog("Dialog, Sample.\nFraze 2. Text3.");
+	currentDialog.start();
+
 	inventory.clear();
 	//this vector should always have all arrows in order (and all of them there)
 	inventory.push_back({ 0,0,3 });
@@ -193,6 +200,9 @@ void loadLevel()
 			if (isLitTorch(mapData.get(x, y).type))
 			{
 				wallLights.push_back({ {x,y}, 0, mapData.getTorchLight(x,y) });
+			}else if(unLitTorch(mapData.get(x, y).type))
+			{			
+				wallLights.push_back({ {x,y}, 0, 0 });
 			}
 		}
 
@@ -292,6 +302,7 @@ bool initGame()
 	uiItch.loadFromFile("resources//ui//itch.png");
 	uiMusic.loadFromFile("resources//ui//music.jpg");
 	uiArt.loadFromFile("resources//ui//art.png");
+	uiDialogBox.loadFromFile("resources//ui//uiDialogFrame.png");
 
 	const char buff[] =
 	{
@@ -990,7 +1001,18 @@ bool gameLogic(float deltaTime)
 				if (unLitTorch(g.type))
 				{
 					g.type++;
-					wallLights.push_back({ { x,y }, mapData.getTorchLight(x,y) });
+
+					auto it = std::find_if(wallLights.begin(), wallLights.end(), [x, y](LightSource &ls)
+					{
+						return ls.pos.x == x && ls.pos.y == y;
+					});
+
+					if(it!= wallLights.end())
+					{
+						it->animationDuration = it->animationStartTime;
+						it->intensity = mapData.getTorchLight(x, y);
+					}
+
 				}
 
 				g.playerEntered = 1;
@@ -1104,6 +1126,37 @@ bool gameLogic(float deltaTime)
 
 	for (auto& i : wallLights)
 	{
+
+#pragma region checkLightBoxes
+
+		if (i.intensity == 0 && i.boxW != 0 && i.boxH != 0)
+		{
+
+			glm::vec4 box = { (i.pos.x * BLOCK_SIZE + BLOCK_SIZE / 2) - (i.boxW*BLOCK_SIZE / 2),
+				(i.pos.y * BLOCK_SIZE + BLOCK_SIZE / 2) - (i.boxH*BLOCK_SIZE / 2),
+				i.boxW*BLOCK_SIZE,
+				i.boxH*BLOCK_SIZE,
+			};
+
+			if (aabb(glm::vec4{player.pos, player.dimensions}, box))
+			{
+				auto &b = mapData.get(i.pos.x, i.pos.y);
+				if(unLitTorch(b.type))
+				{
+					b.type++;
+				}
+
+				i.intensity = mapData.getTorchLight(i.pos.x, i.pos.y);
+				i.animationDuration = i.animationStartTime;
+			}
+		}
+
+#pragma endregion
+
+
+#pragma region light animation
+
+
 		float r = i.intensity;
 
 		if (i.animationDuration <= 0)
@@ -1132,7 +1185,10 @@ bool gameLogic(float deltaTime)
 			}
 
 			i.animationDuration -= deltaTime;
+
 		}
+
+#pragma endregion
 
 		//todo remove intensity
 		simuleteLightSpot({ i.pos.x * BLOCK_SIZE + BLOCK_SIZE / 2,i.pos.y * BLOCK_SIZE + BLOCK_SIZE / 2 },
@@ -1454,6 +1510,19 @@ bool gameLogic(float deltaTime)
 	}
 
 #pragma endregion
+
+#pragma region dialog
+
+	currentDialog.draw(renderer2d, w, h, deltaTime);
+
+	if(input::isKeyReleased(input::Buttons::esc) && currentDialog.hasFinishedDialog)
+	{
+		currentDialog.close();
+	}
+
+#pragma endregion
+
+
 
 	renderer2d.flush();
 

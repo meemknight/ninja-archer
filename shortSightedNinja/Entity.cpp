@@ -346,7 +346,7 @@ void Entity::checkWall(MapData & mapData, int move)
 
 	if(dist > grabMargin)
 	{
-		//return;
+		return;
 	}
 	
 	bool checkRight = 0;
@@ -795,10 +795,21 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 			{
 				if (type == Arrow::ArrowTypes::fireArrow)
 				{
-					//todo check bigger lights if added
 					t++;
-					wallLights.push_back({ { curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE }, 0, 
-						mapData.getTorchLight( curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE ) });
+					int x = curPos.x / BLOCK_SIZE;
+					int y = curPos.y / BLOCK_SIZE;
+					auto it = std::find_if(wallLights.begin(), wallLights.end(), [x, y](LightSource &ls)
+					{
+						return ls.pos.x == x && ls.pos.y == y;
+					});
+
+					if (it != wallLights.end())
+					{
+						it->animationDuration = it->animationStartTime;
+						it->intensity = mapData.getTorchLight(x, y);
+					}
+					//wallLights.push_back({ { curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE }, 0, 
+					//	mapData.getTorchLight( curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE ) });
 				}
 
 			}

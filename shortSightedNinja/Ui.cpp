@@ -111,10 +111,20 @@ namespace Ui
 		XcenterState = -1;
 		return *this;
 	}
+	Box & Box::xLeftPerc(float perc)
+	{
+		xLeft(perc*width);
+		return *this;
+	}
 	Box & Box::yTop(int dist)
 	{
 		dimensions.y = dist;
 		YcenterState = -1;
+		return *this;
+	}
+	Box & Box::yTopPerc(float perc)
+	{
+		yTop(perc * height);
 		return *this;
 	}
 	Box & Box::xRight(int dist)

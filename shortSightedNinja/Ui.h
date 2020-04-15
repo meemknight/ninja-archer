@@ -44,7 +44,9 @@ namespace Ui
 		Box &xCenter(int dist = 0);
 		Box &yCenter(int dist = 0);
 		Box &xLeft(int dist = 0);
+		Box &xLeftPerc(float perc = 0);
 		Box &yTop(int dist = 0);
+		Box &yTopPerc(float perc = 0);
 		Box &xRight(int dist = 0);
 		Box &yBottom(int dist = 0);
 

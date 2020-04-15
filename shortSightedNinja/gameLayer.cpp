@@ -31,6 +31,9 @@ extern GLint maskSamplerUniform;
 gl2d::Renderer2D renderer2d;
 //gl2d::Renderer2D stencilRenderer2d;
 
+#pragma region music
+
+
 //music
 sf::SoundBuffer pickupSoundbuffer;
 sf::SoundBuffer leavesSoundbuffer;
@@ -41,17 +44,25 @@ sf::Music greenPlayer;
 sf::Music redPlayer;
 sf::Music grayPlayer;
 
+
 enum Sounds
 {
 	none
 	//todo
 };
 
+#pragma endregion
+
+
 MapRenderer mapRenderer;
 MapData mapData;
 Entity player;
 
+#ifndef RemoveImgui
 #include "imgui.h"
+#endif 
+
+#pragma region Textures
 
 gl2d::Texture sprites;
 gl2d::Texture characterSprite;
@@ -72,6 +83,12 @@ gl2d::Texture uiItch;
 gl2d::Texture uiMusic;
 gl2d::Texture uiArt;
 gl2d::Texture uiDialogBox;
+gl2d::Texture uiImages;
+
+std::unordered_map<std::string, textureDataWithUV> textureDataForDialog;
+
+#pragma endregion
+
 
 std::vector<Arrow> arrows;
 
@@ -118,7 +135,12 @@ void respawn();
 
 void loadLevel()
 {
-	currentDialog.setNewDialog("Dialog, Sample.\nFraze 2. Text3.");
+	//currentDialog.setNewDialog("Dialog, Sample.\nFraze 2. Text3.");
+
+	currentDialog.dialogData.push_back({ { "Dialog, Sample.\nFraze 2. Text3." }, textureDataForDialog["character"] });
+	currentDialog.dialogData.push_back({ { "Nu stiu ce s azic.\nFraze 2. Text3." }, textureDataForDialog["character"] });
+	currentDialog.dialogData.push_back({ {"Dialog, Sample3.\n epic moment aici."}, textureDataForDialog["character"] });
+	
 	currentDialog.start();
 
 	inventory.clear();
@@ -303,7 +325,12 @@ bool initGame()
 	uiMusic.loadFromFile("resources//ui//music.jpg");
 	uiArt.loadFromFile("resources//ui//art.png");
 	uiDialogBox.loadFromFile("resources//ui//uiDialogFrame.png");
+	uiImages.loadFromFileWithPixelPadding("resources//ui//uiImages.png", 8);
 
+	gl2d::TextureAtlasPadding uiImagesAtlas(4, 1, uiImages.GetSize().x, uiImages.GetSize().y);
+
+	textureDataForDialog["character"] = { uiImages, uiImagesAtlas.get(0,0) };
+	
 	const char buff[] =
 	{
 		BACKGROUND_R,
@@ -1515,9 +1542,15 @@ bool gameLogic(float deltaTime)
 
 	currentDialog.draw(renderer2d, w, h, deltaTime);
 
+	
 	if(input::isKeyReleased(input::Buttons::esc) && currentDialog.hasFinishedDialog)
 	{
-		currentDialog.close();
+		if(!currentDialog.updateDialog())
+		{
+			currentDialog.close();
+		}
+		//currentDialog.setNewDialog("Partea a doua a dialogului");
+
 	}
 
 #pragma endregion

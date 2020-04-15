@@ -3,21 +3,28 @@
 
 extern gl2d::Texture uiDialogBox;
 extern gl2d::Font font;
+extern std::unordered_map<std::string, textureDataWithUV> textureDataForDialog;
 
-void DialogInteraction::setNewDialog(const char * newText)
+void DialogInteraction::resetDialogData()
+{
+	dialogData.clear();
+	currentDialogPos = 0;
+	mTextToShow.clear();
+	mNextLetter = 0;
+	text = nullptr;
+}
+
+void DialogInteraction::setNewDialog(const std::string &newText, textureDataWithUV img)
 {
 	text = newText;
 	mTextToShow.clear();
 	mNextLetter = 0;
-	mAnimTimePerLetter = 0;
-	showing = 0;
-	hasFinishedDialog = 0;
-	mMoveAnimTime = 0;
+	currentImage = img;
 }
 
-float letterTime = 0.1;
-float phrazeTime = 1.2;
-float animTime = 2.2;
+float letterTime = 0.07;
+float phrazeTime = 1;
+float animTime = 1.8;
 
 float getPerc(float time)
 {
@@ -62,7 +69,7 @@ void DialogInteraction::draw(gl2d::Renderer2D &renderer, int w, int h, float del
 	if(mState == 0)
 	{
 		hasFinishedDialog = true;
-		if (mNextLetter < strlen(text))
+		if (mNextLetter < text.size())
 		{
 			hasFinishedDialog = false;
 			mAnimTimePerLetter -= deltaTime;
@@ -102,8 +109,20 @@ void DialogInteraction::draw(gl2d::Renderer2D &renderer, int w, int h, float del
 
 	if(mState == 0)
 	{
-		Ui::Frame f2({ w/10,h/10,w - w/10,h - h/10});
-		glm::vec2 textPos = Ui::Box().xLeft(0).yTop(0)();
+		{
+			Ui::Frame f2({ w / 10,h / 10,w/2 - w / 10, h/2 - h / 10 });
+
+			renderer.renderRectangle(
+				Ui::Box().xCenter().yCenter().yDimensionPercentage(1).xAspectRatio(1),
+				{}, 0, currentImage.t, currentImage.uv
+			);
+
+		}
+
+		{
+			Ui::Frame f2({ w / 2,h / 10,w/2 - w / 10,h - h / 10 });
+
+			glm::vec2 textPos = Ui::Box().xLeft(0).yTop(0)();
 
 		if (!hasFinishedDialog)
 			mTextToShow += '|';
@@ -113,7 +132,8 @@ void DialogInteraction::draw(gl2d::Renderer2D &renderer, int w, int h, float del
 
 		if (!hasFinishedDialog)
 			mTextToShow.pop_back();
-	
+
+		}
 	}
 	renderer.currentCamera = c;
 #pragma endregion
@@ -138,4 +158,36 @@ void DialogInteraction::start()
 	{
 		mMoveAnimTime = animTime;
 	}
+
+
+	if (dialogData.size())
+	{
+		
+		setNewDialog(dialogData[currentDialogPos].text, dialogData[currentDialogPos].image);
+
+		currentDialogPos++;
+	}
+
+}
+
+bool DialogInteraction::blockMovement()
+{
+	return (mState != 0 || showing);
+}
+
+bool DialogInteraction::updateDialog()
+{
+
+	if (currentDialogPos < dialogData.size())
+	{
+
+		setNewDialog(dialogData[currentDialogPos].text, dialogData[currentDialogPos].image);
+		currentDialogPos++;
+		return true;
+
+	}else
+	{
+		return 0;
+	}
+
 }

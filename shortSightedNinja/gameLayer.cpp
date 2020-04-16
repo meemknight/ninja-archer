@@ -1225,7 +1225,6 @@ bool gameLogic(float deltaTime)
 #pragma endregion
 
 
-
 	for (auto& i : wallLights)
 	{
 
@@ -1503,7 +1502,6 @@ bool gameLogic(float deltaTime)
 
 #pragma endregion
 
-
 #pragma region ui
 
 	{
@@ -1633,7 +1631,10 @@ bool gameLogic(float deltaTime)
 			currentDialog.close();
 			
 			//todo check if bird is in dialog
-			bird.startEndMove(bird.position, getDiagonalBirdPos(bird.position, player.pos));
+			if(bird.showing)
+			{
+				bird.startEndMove(bird.position, getDiagonalBirdPos(bird.position, player.pos));
+			}
 		}
 		//currentDialog.setNewDialog("Partea a doua a dialogului");
 

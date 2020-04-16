@@ -381,7 +381,6 @@ void setupMap(MapData &md, int levelId)
 
 		md.exitDataVector.emplace_back(glm::ivec2{ 166, 25 }, 1);
 
-
 		md.torchDataVector.emplace_back(glm::ivec2{ 35, 19 }, 5);
 		md.torchDataVector.emplace_back(glm::ivec2{ 19, 20 }, 5);
 		md.torchDataVector.emplace_back(glm::ivec2{ 109, 24 }, 6);
@@ -401,10 +400,11 @@ void setupMap(MapData &md, int levelId)
 		md.torchDataVector.emplace_back(glm::ivec2{ 82, 17 }, 8);
 		md.torchDataVector.emplace_back(glm::ivec2{ 58, 20 }, 5);
 
-
 		md.dialogs[glm::ivec2{166, 25}].data.push_back({std::string("Nice there is the exit."),  tDDCaracter});
-		md.dialogs[glm::ivec2{ 166, 25 }].data.push_back({ std::string("Let's go."),  tDDCaracter });
+		md.dialogs[glm::ivec2{ 166, 25 }].data.push_back({ std::string("Let's go."),  tDDBird });
 		md.dialogs[glm::ivec2{ 166, 25 }].birdPos = { 164,25 };
+
+		md.dialogs[glm::ivec2{ 29, 22 }].data.push_back({ std::string("Let's start"),  tDDCaracter });
 
 		//md.torchDataVector.emplace_back(glm::ivec2{ 112, 26 }, 1);
 	}

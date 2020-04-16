@@ -945,9 +945,26 @@ void Bird::update(float deltaTime)
 {
 	if(isMovingType != 0 )
 	{
-	
+		texturePos.y = 2;
+
 		if(glm::distance(position, destination) > birdSpeed * deltaTime)
 		{
+			if (glm::distance(position, destination) > BLOCK_SIZE * 4.5)
+			{
+				texturePos.y = 2;
+			}
+			else
+			{
+				if (isMovingType == 1)
+				{
+					texturePos.y = 1;
+				}else
+				{
+					texturePos.y = 2;
+				}
+
+			}
+
 			glm::vec2 dir = destination - startPos;
 			dir = glm::normalize(dir);
 			dir *= deltaTime * birdSpeed;
@@ -955,7 +972,8 @@ void Bird::update(float deltaTime)
 		}else
 		{
 			position = destination;
-		
+
+			texturePos.y = 0;
 			
 			if (isMovingType == 2)
 			{
@@ -968,7 +986,24 @@ void Bird::update(float deltaTime)
 
 	}else
 	{
-			//todo animate stationary bird
+
+		changeTime -= deltaTime;
+		if(changeTime <= 0)
+		{
+			changeTime = rand() % 5 + 3;
+			if(texturePos.y == 0)
+			{
+				texturePos.y = 3;
+			}else
+			{
+				texturePos.y = 0;
+			}
+
+		}
+
+
+
+		//todo animate stationary bird
 	}
 
 }
@@ -992,27 +1027,64 @@ void Bird::startEndMove(glm::vec2 start, glm::vec2 dest)
 
 void Bird::draw(gl2d::Renderer2D & renderer, float deltaTime, gl2d::Texture t, glm::vec2 playerPos)
 {
-	if(!showing)
+	if (!showing)
 	{
 		return;
 	}
+
+	//animate
+
+	frameTime -= deltaTime;
+
+	if (frameTime <= 0)
+	{
+		frameTime += birdFrameDuration;
+		texturePos.x++;
+	}
+	texturePos.x %= 4;
 
 	auto size = t.GetSize();
 	gl2d::TextureAtlasPadding ta(4, 4, size.x, size.y);
 
 	bool rotate = 0;
-	if(playerPos.x < position.x)
+	if (playerPos.x < position.x)
 	{
 		rotate = true;
-	}else
+	}
+	else
 	{
 		rotate = false;
 	}
 
+	if (isMovingType == 2)
+	{
+		rotate = !rotate;
+	}
+
+	float perc = getShowPerc();
+
+	if (isMovingType == 1)
+	{
+		perc = 1 - perc;
+	}
+	else if (isMovingType == 0)
+	{
+		perc = 1;
+	}
+
+
 	renderer.renderRectangle({ position,BLOCK_SIZE,BLOCK_SIZE },
+		{1,1,1,perc},		
 		{}, 0, t, ta.get(texturePos.x, texturePos.y, rotate)
 	);
 
 
+
+}
+
+float Bird::getShowPerc()
+{
+
+	return glm::distance(position, destination) / glm::distance(startPos, destination);
 
 }

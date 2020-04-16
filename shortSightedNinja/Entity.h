@@ -7,7 +7,6 @@
 #undef min
 #undef max
 
-
 struct Entity
 {
 	glm::vec2 pos;
@@ -185,5 +184,43 @@ struct Pickup
 	bool colidePlayer(Entity &player);
 
 	void draw(gl2d::Renderer2D &renderer2d, gl2d::Texture arrowTexture, float deltaTime);
+
+};
+
+//gets a position diagonal of the player
+static glm::vec2 getDiagonalBirdPos(glm::vec2 position, glm::vec2 playerPos)
+{
+
+	if(playerPos.x < position.x) // go right
+	{
+		return position - glm::vec2{ -7 * BLOCK_SIZE, 6 * BLOCK_SIZE };
+	}else // go left
+	{
+		return position - glm::vec2{ +7 * BLOCK_SIZE, 6 * BLOCK_SIZE };
+	}
+
+}
+
+struct Bird
+{
+	glm::vec2 position;
+
+	glm::vec2 destination;
+	glm::vec2 startPos;
+
+
+	//1 ender 2 leave
+	int isMovingType = 0;
+
+	void update(float deltaTime);
+
+	void startMove(glm::vec2 start, glm::vec2 dest);
+	void startEndMove(glm::vec2 start, glm::vec2 dest);
+
+	void draw(gl2d::Renderer2D &renderer, float deltaTime, gl2d::Texture t, glm::vec2 playerPos);
+
+	glm::ivec2 texturePos = {};
+
+	bool showing = 1;
 
 };

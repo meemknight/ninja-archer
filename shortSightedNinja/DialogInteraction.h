@@ -30,6 +30,8 @@ struct FullDialogData
 
 	std::vector<DialogData> data;
 	bool hasShown = 0;
+	glm::vec2 birdPos = { -1,-1 };
+
 };
 
 struct DialogInteraction

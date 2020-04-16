@@ -348,7 +348,12 @@ unsigned short level4[] =
 unsigned short *levelVect[LEVELS] = { level0, level1, level2, level3, level4 };
 glm::ivec2 levelSizes[LEVELS] = { { 185, 46 }, {120, 80}, {135, 76}, {180, 70}, {40, 40} };
 
-extern std::unordered_map<std::string, textureDataWithUV> textureDataForDialog;
+
+extern textureDataWithUV tDDCaracter;
+extern textureDataWithUV tDDCaracterAnnoyed;
+extern textureDataWithUV tDDCaracterSurprized;
+extern textureDataWithUV tDDBird;
+
 
 void setupMap(MapData &md, int levelId)
 {
@@ -397,8 +402,9 @@ void setupMap(MapData &md, int levelId)
 		md.torchDataVector.emplace_back(glm::ivec2{ 58, 20 }, 5);
 
 
-		md.dialogs[glm::ivec2{166, 25}].data.push_back({std::string("Nice there is the exit."),  textureDataForDialog["character"]});
-		md.dialogs[glm::ivec2{166, 25}].data.push_back({std::string("Let's go."),  textureDataForDialog["character"]} );
+		md.dialogs[glm::ivec2{166, 25}].data.push_back({std::string("Nice there is the exit."),  tDDCaracter});
+		md.dialogs[glm::ivec2{ 166, 25 }].data.push_back({ std::string("Let's go."),  tDDCaracter });
+		md.dialogs[glm::ivec2{ 166, 25 }].birdPos = { 164,25 };
 
 		//md.torchDataVector.emplace_back(glm::ivec2{ 112, 26 }, 1);
 	}

@@ -68,6 +68,7 @@ gl2d::Texture characterSprite;
 gl2d::Texture arrowSprite;
 gl2d::Texture particlesSprite;
 gl2d::Texture crackTexture;
+gl2d::Texture birdTexture;
 
 gl2d::Texture uiFrame;
 gl2d::Texture uiForest;
@@ -84,7 +85,11 @@ gl2d::Texture uiArt;
 gl2d::Texture uiDialogBox;
 gl2d::Texture uiImages;
 
-std::unordered_map<std::string, textureDataWithUV> textureDataForDialog;
+
+textureDataWithUV tDDCaracter;
+textureDataWithUV tDDCaracterAnnoyed;
+textureDataWithUV tDDCaracterSurprized;
+textureDataWithUV tDDBird;
 
 #pragma endregion
 
@@ -128,20 +133,20 @@ std::vector <LightSource> wallLights;
 
 float playerLight = 6;
 
-const char* levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki tribe", "Secret Level"};
+Bird bird;
 
+const char* levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki tribe", "Secret Level"};
 
 void respawn();
 
 void loadLevel()
 {
-	//currentDialog.setNewDialog("Dialog, Sample.\nFraze 2. Text3.");
 
-	currentDialog.dialogData.push_back({{ "Dialog, Sample.\nFraze 2. Text3." }, textureDataForDialog["character"]});
+	//currentDialog.dialogData.push_back({{ "Dialog, Sample.\nFraze 2. Text3." }, textureDataForDialog["character"]});
 	//currentDialog.dialogData.push_back({ { "Nu stiu ce s azic.\nFraze 2. Text3." }, textureDataForDialog["character"] });
 	//currentDialog.dialogData.push_back({ {"Dialog, Sample3.\n epic moment aici."}, textureDataForDialog["character"] });
 	
-	currentDialog.start();
+	//currentDialog.start();
 
 	inventory.clear();
 	//this vector should always have all arrows in order (and all of them there)
@@ -311,6 +316,7 @@ bool initGame()
 	arrowSprite.loadFromFile("resources//arrow.png");
 	particlesSprite.loadFromFileWithPixelPadding("resources//particles.png", 8);
 	crackTexture.loadFromFileWithPixelPadding("resources//crackAnim.png", 8);
+	birdTexture.loadFromFileWithPixelPadding("resources//bird.png", 8);
 
 	uiFrame.loadFromFile("resources//ui//uiFrame.png");
 	uiForest.loadFromFile("resources//ui//forest.png");
@@ -329,7 +335,11 @@ bool initGame()
 
 	gl2d::TextureAtlasPadding uiImagesAtlas(4, 1, uiImages.GetSize().x, uiImages.GetSize().y);
 
-	textureDataForDialog["character"] = { uiImages, uiImagesAtlas.get(0,0) };
+	tDDCaracter = { uiImages, uiImagesAtlas.get(0,0) };
+	tDDCaracterAnnoyed = { uiImages, uiImagesAtlas.get(1,0) };
+	tDDCaracterSurprized = { uiImages, uiImagesAtlas.get(2,0) };
+	tDDBird = { uiImages, uiImagesAtlas.get(3,0) };
+
 	
 	const char buff[] =
 	{
@@ -895,11 +905,13 @@ bool gameLogic(float deltaTime)
 	}else
 	{
 	player.idleTime = 0;
+	jumpDelayTime = 0;
 	}
 
 	if (!platform::isFocused())
 	{
 		player.idleTime = 0;
+		jumpDelayTime = 0;
 	}
 
 
@@ -1200,13 +1212,17 @@ bool gameLogic(float deltaTime)
 				i.second.hasShown = true;
 				currentDialog.resetDialogData();
 				currentDialog.dialogData = i.second.data;
+				if (i.second.birdPos.x >= 0 && i.second.birdPos.y >= 0)
+				{
+					bird.startMove(getDiagonalBirdPos({ i.second.birdPos.x * BLOCK_SIZE, i.second.birdPos.y * BLOCK_SIZE }
+						, player.pos), {i.second.birdPos.x * BLOCK_SIZE, i.second.birdPos.y * BLOCK_SIZE });
+				}
 				currentDialog.start();
 			}
 		}
 	}
 
 #pragma endregion
-
 
 
 
@@ -1480,6 +1496,14 @@ bool gameLogic(float deltaTime)
 
 #pragma endregion
 
+#pragma region bird
+
+	bird.update(deltaTime);
+	bird.draw(renderer2d, deltaTime, birdTexture, player.pos);
+
+#pragma endregion
+
+
 #pragma region ui
 
 	{
@@ -1607,13 +1631,15 @@ bool gameLogic(float deltaTime)
 		if(!currentDialog.updateDialog())
 		{
 			currentDialog.close();
+			
+			//todo check if bird is in dialog
+			bird.startEndMove(bird.position, getDiagonalBirdPos(bird.position, player.pos));
 		}
 		//currentDialog.setNewDialog("Partea a doua a dialogului");
 
 	}
 
 #pragma endregion
-
 
 
 	renderer2d.flush();

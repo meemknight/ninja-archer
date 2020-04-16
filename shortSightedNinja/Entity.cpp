@@ -938,3 +938,81 @@ void Pickup::draw(gl2d::Renderer2D & renderer2d, gl2d::Texture arrowTexture, flo
 	}
 	
 }
+
+float birdSpeed = BLOCK_SIZE * 7;
+
+void Bird::update(float deltaTime)
+{
+	if(isMovingType != 0 )
+	{
+	
+		if(glm::distance(position, destination) > birdSpeed * deltaTime)
+		{
+			glm::vec2 dir = destination - startPos;
+			dir = glm::normalize(dir);
+			dir *= deltaTime * birdSpeed;
+			position += dir;
+		}else
+		{
+			position = destination;
+		
+			
+			if (isMovingType == 2)
+			{
+				showing = 0;
+			}
+			
+			isMovingType = 0;
+			//todo clamp pos
+		}
+
+	}else
+	{
+			//todo animate stationary bird
+	}
+
+}
+
+void Bird::startMove(glm::vec2 start, glm::vec2 dest)
+{
+
+	showing = true;
+	position = start;
+	startPos = start;
+	destination = dest;
+	isMovingType = 1;
+
+}
+
+void Bird::startEndMove(glm::vec2 start, glm::vec2 dest)
+{
+	startMove(start, dest);
+	isMovingType = 2;
+}
+
+void Bird::draw(gl2d::Renderer2D & renderer, float deltaTime, gl2d::Texture t, glm::vec2 playerPos)
+{
+	if(!showing)
+	{
+		return;
+	}
+
+	auto size = t.GetSize();
+	gl2d::TextureAtlasPadding ta(4, 4, size.x, size.y);
+
+	bool rotate = 0;
+	if(playerPos.x < position.x)
+	{
+		rotate = true;
+	}else
+	{
+		rotate = false;
+	}
+
+	renderer.renderRectangle({ position,BLOCK_SIZE,BLOCK_SIZE },
+		{}, 0, t, ta.get(texturePos.x, texturePos.y, rotate)
+	);
+
+
+
+}

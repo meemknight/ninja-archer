@@ -53,7 +53,6 @@ enum Sounds
 
 #pragma endregion
 
-
 MapRenderer mapRenderer;
 MapData mapData;
 Entity player;
@@ -131,17 +130,18 @@ float playerLight = 6;
 
 const char* levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki tribe", "Secret Level"};
 
+
 void respawn();
 
 void loadLevel()
 {
 	//currentDialog.setNewDialog("Dialog, Sample.\nFraze 2. Text3.");
 
-	currentDialog.dialogData.push_back({{ "Dialog, Sample.\nFraze 2. Text3." }, textureDataForDialog["character"]});
-	currentDialog.dialogData.push_back({ { "Nu stiu ce s azic.\nFraze 2. Text3." }, textureDataForDialog["character"] });
-	currentDialog.dialogData.push_back({ {"Dialog, Sample3.\n epic moment aici."}, textureDataForDialog["character"] });
-	
-	currentDialog.start();
+	//currentDialog.dialogData.push_back({{ "Dialog, Sample.\nFraze 2. Text3." }, textureDataForDialog["character"]});
+	//currentDialog.dialogData.push_back({ { "Nu stiu ce s azic.\nFraze 2. Text3." }, textureDataForDialog["character"] });
+	//currentDialog.dialogData.push_back({ {"Dialog, Sample3.\n epic moment aici."}, textureDataForDialog["character"] });
+	//
+	//currentDialog.start();
 
 	inventory.clear();
 	//this vector should always have all arrows in order (and all of them there)
@@ -784,115 +784,219 @@ bool gameLogic(float deltaTime)
 	//renderer2d.currentCamera.position = { -500,-100 };
 
 #pragma region controlls
-
-	if (player.wallGrab == 0)
+	
+	if(!currentDialog.blockMovement())
 	{
-		if (player.grounded)
+		if (player.wallGrab == 0)
 		{
-			player.run(deltaTime * input::getMoveDir());
+			if (player.grounded)
+			{
+				player.run(deltaTime * input::getMoveDir());
+			}
+			else
+			{
+				player.airRun(deltaTime * input::getMoveDir());
+			}
+		}
+
+		if (platform::isKeyHeld('Z'))
+		{
+			renderer2d.currentCamera.zoom -= deltaTime * 2;
+		}
+		if (platform::isKeyHeld('X'))
+		{
+			renderer2d.currentCamera.zoom += deltaTime * 2;
+		}
+		renderer2d.currentCamera.zoom = glm::clamp(renderer2d.currentCamera.zoom, 3.f, 7.f);
+
+
+		if (jumpDelayTime > 0)
+		{
+			jumpDelayTime -= deltaTime;
+		}
+		if (jumpDelayTime < 0) { jumpDelayTime = -1; }
+
+		if (player.isExitingLevel == -1 && (input::isKeyPressedOn(input::Buttons::jump) || jumpDelayTime > 0))
+		{
+			if (input::isKeyPressedOn(input::Buttons::jump) && player.wallGrab == 0)
+			{
+				jumpDelayTime = 0.2;
+			}
+
+			if (player.wallGrab == 0)
+			{
+				if (player.canJump)
+				{
+					jumpDelayTime = 0;
+					player.jump();
+					player.canJump = 0;
+					jumpParticle.set(player.pos, 0, player.movingRight);
+				}
+			}
+			else if (player.wallGrab == 1)
+			{
+				jumpDelayTime = 0;
+				player.strafe(-1);
+				player.jumpFromWall();
+				player.wallGrab = 0;
+				player.redGrab = 0;
+				player.grayGrab = 0;
+				player.blueGrab = 0;
+				jumpParticle.set(player.pos, 1, !player.movingRight);
+
+			}
+			else if (player.wallGrab == -1)
+			{
+				jumpDelayTime = 0;
+				player.strafe(1);
+				player.jumpFromWall();
+				player.wallGrab = 0;
+				player.redGrab = 0;
+				player.grayGrab = 0;
+				player.blueGrab = 0;
+				jumpParticle.set(player.pos, 1, !player.movingRight);
+
+			}
+		}
+
+		if (input::isKeyReleased(input::Buttons::jump))
+		{
+			if (player.velocity.y < 0)
+			{
+				player.velocity.y *= 0.4;
+			}
+		}
+
+		if (input::isKeyPressedOn(input::Buttons::shoot) && currentArrow > -1 && !player.dying
+			&& player.isExitingLevel == -1)
+		{
+			player.idleTime = 0;
+			{
+
+				for (auto& i : inventory)
+				{
+					if (i.type == actualInventorty[currentArrow].type)
+					{
+
+						i.count--;
+						break;
+					}
+				}
+
+				Arrow a;
+				a.type = (Arrow::ArrowTypes)actualInventorty[currentArrow].type;
+				a.pos = player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2);
+				a.shootDir = input::getShootDir({ w / 2,h / 2 });
+				//a.pos.x += a.shootDir.x * BLOCK_SIZE * 0.9;
+				//a.pos.y += a.shootDir.y * BLOCK_SIZE * 0.9;
+				arrows.push_back(a);
+			}
+		}
+
+	}
+
+		renderer2d.currentCamera.follow(player.pos + (player.dimensions / 2.f), deltaTime * 110, 4 * BLOCK_SIZE, renderer2d.windowW, renderer2d.windowH);
+
+		player.applyGravity(deltaTime);
+		player.applyVelocity(deltaTime);
+
+		player.resolveConstrains(mapData);
+
+		player.updateMove(deltaTime);
+
+		player.checkGrounded(mapData, deltaTime);
+
+		if(!currentDialog.blockMovement())
+		{
+
+			if (input::isKeyHeld(input::Buttons::down))
+			{
+				player.wallGrab = 0;
+			}
+			else
+			{
+				player.checkWall(mapData, input::getMoveDir());
+			}
+
+
+
+#pragma region jump prticle
+
+
+		{
+			static bool animateFall;
+			static float animReloadTime;
+			if (player.velocity.y >= 230)
+			{
+				if (animateFall)
+				{
+					jumpParticle.set(player.pos, 2, player.movingRight);
+					animateFall = 0;
+					animReloadTime = 0.2;
+				}
+				animReloadTime -= deltaTime;
+				if (animReloadTime <= 0)
+				{
+					animateFall = 1;
+					animReloadTime = 0.92;
+				}
+			}
+			else
+			{
+				animateFall = 1;
+			}
+		}
+
+#pragma endregion
+		
+		
+
+#pragma region inventory
+
+		if (!platform::isFocused())
+		{
+			currentArrow = -1;
+		}
+
+		if (input::isKeyPressedOn(input::Buttons::swapLeft))
+		{
+			currentArrow--;
+		}
+		else if (input::isKeyPressedOn(input::Buttons::swapRight))
+		{
+			currentArrow++;
+		}
+
+		if (currentArrow < -1)
+		{
+			currentArrow = actualInventorty.size() - 1;
+		}
+
+		if (currentArrow >= actualInventorty.size())
+		{
+			currentArrow = -1;
+		}
+
+		if (actualInventorty.size() == 0)
+		{
+			currentArrow = -1;
+		}
+
+#pragma endregion
+
+
+		
 		}
 		else
 		{
-			player.airRun(deltaTime * input::getMoveDir());
-		}
-	}
-
-	if (platform::isKeyHeld('Z'))
-	{
-		renderer2d.currentCamera.zoom -= deltaTime*2;
-	}
-	if (platform::isKeyHeld('X'))
-	{
-		renderer2d.currentCamera.zoom += deltaTime*2;
-	}
-	renderer2d.currentCamera.zoom = glm::clamp(renderer2d.currentCamera.zoom, 3.f, 7.f);
-
-
-	if(jumpDelayTime>0)
-	{
-		jumpDelayTime -= deltaTime;
-	}
-	if (jumpDelayTime < 0) { jumpDelayTime = -1; }
-	
-	if ( player.isExitingLevel == -1 &&(input::isKeyPressedOn(input::Buttons::jump) || jumpDelayTime > 0))
-	{
-		if (input::isKeyPressedOn(input::Buttons::jump) && player.wallGrab == 0)
-		{
-			jumpDelayTime = 0.2;
+			currentArrow = -1;
 		}
 
-		if (player.wallGrab == 0)
-		{
-			if (player.canJump)
-			{
-				jumpDelayTime = 0;
-				player.jump();
-				player.canJump = 0;
-				jumpParticle.set(player.pos, 0, player.movingRight);
-			}
-		}
-		else if (player.wallGrab == 1)
-		{
-			jumpDelayTime = 0;
-			player.strafe(-1);
-			player.jumpFromWall();
-			player.wallGrab = 0;
-			player.redGrab = 0;
-			player.grayGrab = 0;
-			player.blueGrab = 0;
-			jumpParticle.set(player.pos, 1, !player.movingRight);
 
-		}
-		else if (player.wallGrab == -1)
-		{
-			jumpDelayTime = 0;
-			player.strafe(1);
-			player.jumpFromWall();
-			player.wallGrab = 0;
-			player.redGrab = 0;
-			player.grayGrab = 0;
-			player.blueGrab = 0;
-			jumpParticle.set(player.pos, 1, !player.movingRight);
+#pragma endregion
 
-		}
-	}
-
-	if (input::isKeyReleased(input::Buttons::jump))
-	{
-		if (player.velocity.y < 0)
-		{
-			player.velocity.y *= 0.4;
-		}
-	}
-
-	if (input::isKeyPressedOn(input::Buttons::shoot) && currentArrow > -1 && !player.dying
-		&& player.isExitingLevel == -1)
-	{
-		player.idleTime = 0;
-		{
-
-			for (auto& i : inventory)
-			{
-				if (i.type == actualInventorty[currentArrow].type)
-				{
-				
-					i.count--;
-					break;
-				}
-			}
-
-			Arrow a;
-			a.type = (Arrow::ArrowTypes)actualInventorty[currentArrow].type;
-			a.pos = player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2);
-			a.shootDir = input::getShootDir({ w / 2,h / 2 });
-			//a.pos.x += a.shootDir.x * BLOCK_SIZE * 0.9;
-			//a.pos.y += a.shootDir.y * BLOCK_SIZE * 0.9;
-			arrows.push_back(a);
-		}
-	}
 
 	actualInventorty.clear();
-
 	for (auto i : inventory)
 	{
 		if (i.count)
@@ -901,54 +1005,11 @@ bool gameLogic(float deltaTime)
 		}
 	}
 
-#pragma endregion
 	
 
 	//stencilRenderer2d.currentCamera = renderer2d.currentCamera;
-	renderer2d.currentCamera.follow(player.pos + (player.dimensions / 2.f), deltaTime * 110, 4 * BLOCK_SIZE, renderer2d.windowW, renderer2d.windowH);
-
-	player.applyGravity(deltaTime);
-	player.applyVelocity(deltaTime);
-
-	player.resolveConstrains(mapData);
-
-	player.updateMove(deltaTime);
-
-	player.checkGrounded(mapData, deltaTime);
-
-	if (input::isKeyHeld(input::Buttons::down))
-	{
-		player.wallGrab = 0;
-	}
-	else
-	{
-		player.checkWall(mapData, input::getMoveDir());
-	}
 
 
-	{
-		static bool animateFall;
-		static float animReloadTime;
-		if (player.velocity.y >= 230)
-		{
-			if (animateFall)
-			{
-				jumpParticle.set(player.pos, 2, player.movingRight);
-				animateFall = 0;
-				animReloadTime = 0.2;
-			}
-			animReloadTime -= deltaTime;
-			if (animReloadTime <= 0)
-			{
-				animateFall = 1;
-				animReloadTime = 0.92;
-			}
-		}
-		else
-		{
-			animateFall = 1;
-		}
-	}
 	//mapRenderer.addBlock(renderer2d.toScreen({ 100,100,100,100 }), { 0,1,1,0 }, {1,1,1,1});
 	//mapRenderer.render();
 
@@ -956,39 +1017,6 @@ bool gameLogic(float deltaTime)
 
 	simuleteLightSpot(player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2),
 		playerLight, mapData, arrows, pickups, 0);
-
-#pragma region inventory
-
-	if (!platform::isFocused()) 
-	{
-		currentArrow = -1;
-	}
-
-	if (input::isKeyPressedOn(input::Buttons::swapLeft))
-	{
-		currentArrow--;
-	}
-	else if (input::isKeyPressedOn(input::Buttons::swapRight))
-	{
-		currentArrow++;
-	}
-
-	if (currentArrow < -1)
-	{
-		currentArrow = actualInventorty.size() - 1;
-	}
-
-	if (currentArrow >= actualInventorty.size())
-	{
-		currentArrow = -1;
-	}
-
-	if (actualInventorty.size() == 0)
-	{
-		currentArrow = -1;
-	}
-
-#pragma endregion
 
 #pragma region lights
 
@@ -1150,6 +1178,28 @@ bool gameLogic(float deltaTime)
 		}
 
 	}
+
+#pragma region dialogs
+
+	for(auto &i : mapData.dialogs)
+	{
+		if(!i.second.hasShown)
+		{
+			glm::vec2 dist = i.first;
+			dist *= BLOCK_SIZE;
+			if (glm::distance(player.pos, dist) < 5 * BLOCK_SIZE)
+			{
+				i.second.hasShown = true;
+				currentDialog.dialogData = i.second.data;
+				currentDialog.start();
+			}
+		}
+	}
+
+#pragma endregion
+
+
+
 
 	for (auto& i : wallLights)
 	{

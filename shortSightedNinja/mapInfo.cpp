@@ -348,6 +348,8 @@ unsigned short level4[] =
 unsigned short *levelVect[LEVELS] = { level0, level1, level2, level3, level4 };
 glm::ivec2 levelSizes[LEVELS] = { { 185, 46 }, {120, 80}, {135, 76}, {180, 70}, {40, 40} };
 
+extern std::unordered_map<std::string, textureDataWithUV> textureDataForDialog;
+
 void setupMap(MapData &md, int levelId)
 {
 
@@ -394,6 +396,9 @@ void setupMap(MapData &md, int levelId)
 		md.torchDataVector.emplace_back(glm::ivec2{ 82, 17 }, 8);
 		md.torchDataVector.emplace_back(glm::ivec2{ 58, 20 }, 5);
 
+
+		md.dialogs[glm::ivec2{166, 25}].data.push_back({std::string("Nice there is the exit."),  textureDataForDialog["character"]});
+		md.dialogs[glm::ivec2{166, 25}].data.push_back({std::string("Let's go."),  textureDataForDialog["character"]} );
 
 		//md.torchDataVector.emplace_back(glm::ivec2{ 112, 26 }, 1);
 	}

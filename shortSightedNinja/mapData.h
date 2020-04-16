@@ -3,6 +3,11 @@
 #include "glm/vec2.hpp"
 #include <vector>
 #include <string>
+#include <unordered_map>
+#include "DialogInteraction.h"
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/gtx/hash.hpp"
 
 #define BLOCK_SIZE 8
 #define BLOCK_COUNT 424
@@ -533,6 +538,9 @@ struct MapData
 	std::vector<glm::vec2> tikiSoundPos;
 	std::vector<glm::vec2> snowSoundPos;
 	std::vector<glm::vec2> caveSoundPos;
+
+	std::unordered_map<glm::ivec2, FullDialogData> dialogs;
+
 	float getWaterPercentage(glm::vec2 pos);
 	float getGreenPercentage(glm::vec2 pos);
 	float getTikiPercentage(glm::vec2 pos);

@@ -302,6 +302,7 @@ void MapData::cleanup()
 	caveSoundPos.clear();
 	exitDataVector.clear();
 	torchDataVector.clear();
+	dialogs.clear();
 
 	if (data)
 	{

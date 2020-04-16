@@ -1,8 +1,8 @@
 #pragma once
-#include "Entity.h"
 #include "opengl2Dlib.h"
 #include <string>
 #include <unordered_map>
+#include <initializer_list>
 
 struct textureDataWithUV
 {
@@ -16,6 +16,21 @@ struct DialogData
 	textureDataWithUV image;
 };
 
+struct FullDialogData
+{
+	FullDialogData() { hasShown = 0; }
+
+	FullDialogData(std::initializer_list<DialogData> list)
+	{
+		for(auto &i :list)
+		{
+			data.emplace_back(i);
+		}
+	}
+
+	std::vector<DialogData> data;
+	bool hasShown = 0;
+};
 
 struct DialogInteraction
 {

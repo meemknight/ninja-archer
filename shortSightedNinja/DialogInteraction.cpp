@@ -22,9 +22,9 @@ void DialogInteraction::setNewDialog(const std::string &newText, textureDataWith
 	currentImage = img;
 }
 
-float letterTime = 0.07;
-float phrazeTime = 1;
-float animTime = 1.8;
+float letterTime = 0.04;
+float phrazeTime = 0.5;
+float animTime = 1;
 
 float getPerc(float time)
 {
@@ -49,8 +49,11 @@ void DialogInteraction::draw(gl2d::Renderer2D &renderer, int w, int h, float del
 			
 			if(mState == 1)
 			{
+				showing = 0;
+				mState = 0;
 				return;
 			}
+
 			mState = 0;
 		}else
 		{
@@ -150,6 +153,11 @@ void DialogInteraction::draw(gl2d::Renderer2D &renderer, int w, int h, float del
 
 void DialogInteraction::close()
 {
+	if(showing == 0)
+	{
+		return;
+	}
+
 	mState = 1;
 	showing = 0;
 	if(mMoveAnimTime <=0)

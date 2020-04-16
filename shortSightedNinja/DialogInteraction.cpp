@@ -110,17 +110,25 @@ void DialogInteraction::draw(gl2d::Renderer2D &renderer, int w, int h, float del
 	if(mState == 0)
 	{
 		{
-			Ui::Frame f2({ w / 10,h / 10,w/2 - w / 10, h/2 - h / 10 });
+			///character
+			Ui::Frame f2(Ui::Box().xLeftPerc(0.1).xDimensionPercentage(0.2).yAspectRatio(1).yTopPerc(0.1)());
+
+			auto box = Ui::Box().xCenter().yCenter().yDimensionPercentage(1).xAspectRatio(1)();
+
+			renderer.renderRectangle({ box.x-5, box.y+5, box.z, box.w }
+				, {0,0,0.1,0.7},
+				{}, 0, currentImage.t, currentImage.uv
+			);
 
 			renderer.renderRectangle(
-				Ui::Box().xCenter().yCenter().yDimensionPercentage(1).xAspectRatio(1),
+				box,
 				{}, 0, currentImage.t, currentImage.uv
 			);
 
 		}
 
 		{
-			Ui::Frame f2({ w / 2,h / 10,w/2 - w / 10,h - h / 10 });
+			Ui::Frame f2(Ui::Box().xLeftPerc(0.33).xDimensionPercentage(0.5).yDimensionPercentage(0.9).yTopPerc(0.3)());
 
 			glm::vec2 textPos = Ui::Box().xLeft(0).yTop(0)();
 
@@ -128,7 +136,7 @@ void DialogInteraction::draw(gl2d::Renderer2D &renderer, int w, int h, float del
 			mTextToShow += '|';
 
 		renderer.renderText(textPos,
-			mTextToShow.c_str(), font, { 1,1,1,intensity }, 0.7, 4, 3, false);
+			mTextToShow.c_str(), font, { 1,1,1,intensity }, 0.7, 4.2, 3, false, { 0,0,0.1,0.7 });
 
 		if (!hasFinishedDialog)
 			mTextToShow.pop_back();

@@ -137,7 +137,7 @@ void loadLevel()
 {
 	//currentDialog.setNewDialog("Dialog, Sample.\nFraze 2. Text3.");
 
-	currentDialog.dialogData.push_back({ { "Dialog, Sample.\nFraze 2. Text3." }, textureDataForDialog["character"] });
+	currentDialog.dialogData.push_back({{ "Dialog, Sample.\nFraze 2. Text3." }, textureDataForDialog["character"]});
 	currentDialog.dialogData.push_back({ { "Nu stiu ce s azic.\nFraze 2. Text3." }, textureDataForDialog["character"] });
 	currentDialog.dialogData.push_back({ {"Dialog, Sample3.\n epic moment aici."}, textureDataForDialog["character"] });
 	

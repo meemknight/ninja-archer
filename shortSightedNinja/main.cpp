@@ -44,6 +44,9 @@ extern "C"
 //	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 
+const float width = 960;
+const float heigth = 680;
+
 int MAIN
 {
 
@@ -59,8 +62,6 @@ int MAIN
 
 	RegisterClass(&wc);
 
-	float width = 960;
-	float heigth = 680;
 
 	wind = CreateWindow(
 		wc.lpszClassName,
@@ -277,7 +278,13 @@ endImgui:
 		lbutton = false;
 		lbuttonReleased = true;
 		break;
-
+	case WM_GETMINMAXINFO:
+	{
+		LPMINMAXINFO lpMMI = (LPMINMAXINFO)lp;
+		lpMMI->ptMinTrackSize.x = width;
+		lpMMI->ptMinTrackSize.y = heigth;
+	}
+		break;
 	case WM_CLOSE:
 		quit = true;
 		break;

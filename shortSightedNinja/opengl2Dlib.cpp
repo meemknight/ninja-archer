@@ -883,7 +883,10 @@ namespace gl2d
 	}
 
 	void Renderer2D::renderText(glm::vec2 position, const char * text, const Font font,
-		const Color4f color, const float size, const float spacing, const float line_space, bool showInCenter)
+		const Color4f color, const float size, const float spacing, const float line_space, bool showInCenter,
+		const Color4f ShadowColor
+		, const Color4f LightColor
+		)
 	{
 		const int text_length = strlen(text);
 		Rect rectangle;
@@ -991,8 +994,31 @@ namespace gl2d
 				//rectangle.y = linePositionY - rectangle.w;
 				rectangle.y = linePositionY + quad.y0 * size;
 
-				glm::vec4 colorData[4] = { color, color, color, color };
+				glm::vec4 colorData[4] = { color, color, color, color };				
+				
+				if(ShadowColor.w)
+				{
+					glm::vec2 pos = { -5, 3 };
+					pos *= size;
+					renderRectangle({ rectangle.x + pos.x, rectangle.y + pos.y,  rectangle.z, rectangle.w},
+						ShadowColor, glm::vec2{ 0, 0 }, 0, font.texture,
+						glm::vec4{ quad.s0, quad.t0, quad.s1, quad.t1 });
+
+				}
+
 				renderRectangle(rectangle, colorData, glm::vec2{ 0, 0 }, 0, font.texture, glm::vec4{ quad.s0, quad.t0, quad.s1, quad.t1 });
+
+				if(LightColor.w)
+				{
+					glm::vec2 pos = { -2, 1 };
+					pos *= size;
+					renderRectangle({ rectangle.x + pos.x, rectangle.y + pos.y,  rectangle.z, rectangle.w },
+						LightColor, glm::vec2{ 0, 0 }, 0, font.texture,
+						glm::vec4{ quad.s0, quad.t0, quad.s1, quad.t1 });
+
+				}
+
+				
 				rectangle.x += rectangle.z + spacing * size;
 			}
 		}

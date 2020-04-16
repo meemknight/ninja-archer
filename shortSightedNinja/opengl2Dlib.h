@@ -225,7 +225,8 @@ namespace gl2d
 		// The origin will be the bottom left corner since it represents the line for the text to be drawn
 		//Pacing and lineSpace are influenced by size
 		void renderText(glm::vec2 position, const char* text, const Font font, const Color4f color, const float size = 1.5f,
-			const float spacing = 4, const float line_space = 3, bool showInCenter = 1);
+			const float spacing = 4, const float line_space = 3, bool showInCenter = 1, const Color4f ShadowColor = {}
+		, const Color4f LightColor = {});
 
 		//todo color overloads
 		void renderRectangle(const Rect transforms, const Color4f colors[4], const glm::vec2 origin, const float rotation, const Texture texture, const glm::vec4 textureCoords = DefaultTextureCoords);

@@ -11,7 +11,7 @@ void DialogInteraction::resetDialogData()
 	currentDialogPos = 0;
 	mTextToShow.clear();
 	mNextLetter = 0;
-	text = nullptr;
+	text = {};
 }
 
 void DialogInteraction::setNewDialog(const std::string &newText, textureDataWithUV img)
@@ -114,7 +114,7 @@ void DialogInteraction::draw(gl2d::Renderer2D &renderer, int w, int h, float del
 	{
 		{
 			///character
-			Ui::Frame f2(Ui::Box().xLeftPerc(0.1).xDimensionPercentage(0.2).yAspectRatio(1).yTopPerc(0.1)());
+			Ui::Frame f2(Ui::Box().xLeftPerc(0.1).yDimensionPercentage(0.4).xAspectRatio(1).yTopPerc(0.1)());
 
 			auto box = Ui::Box().xCenter().yCenter().yDimensionPercentage(1).xAspectRatio(1)();
 
@@ -131,7 +131,7 @@ void DialogInteraction::draw(gl2d::Renderer2D &renderer, int w, int h, float del
 		}
 
 		{
-			Ui::Frame f2(Ui::Box().xLeftPerc(0.33).xDimensionPercentage(0.5).yDimensionPercentage(0.9).yTopPerc(0.3)());
+			Ui::Frame f2(Ui::Box().xLeftPerc(0.23).xDimensionPercentage(0.7).yDimensionPercentage(0.9).yTopPerc(0.3)());
 
 			glm::vec2 textPos = Ui::Box().xLeft(0).yTop(0)();
 
@@ -174,7 +174,6 @@ void DialogInteraction::start()
 	{
 		mMoveAnimTime = animTime;
 	}
-
 
 	if (dialogData.size())
 	{

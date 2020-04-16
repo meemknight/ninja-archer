@@ -137,11 +137,11 @@ void loadLevel()
 {
 	//currentDialog.setNewDialog("Dialog, Sample.\nFraze 2. Text3.");
 
-	//currentDialog.dialogData.push_back({{ "Dialog, Sample.\nFraze 2. Text3." }, textureDataForDialog["character"]});
+	currentDialog.dialogData.push_back({{ "Dialog, Sample.\nFraze 2. Text3." }, textureDataForDialog["character"]});
 	//currentDialog.dialogData.push_back({ { "Nu stiu ce s azic.\nFraze 2. Text3." }, textureDataForDialog["character"] });
 	//currentDialog.dialogData.push_back({ {"Dialog, Sample3.\n epic moment aici."}, textureDataForDialog["character"] });
-	//
-	//currentDialog.start();
+	
+	currentDialog.start();
 
 	inventory.clear();
 	//this vector should always have all arrows in order (and all of them there)
@@ -771,7 +771,6 @@ bool gameLogic(float deltaTime)
 	grayPlayer.setVolume(mapData.getCavePercentage(player.pos));
 	tikiPlayer.setVolume(mapData.getTikiPercentage(player.pos));
 
-
 #pragma endregion
 
 	//stencilRenderer2d.updateWindowMetrics(backGroundFBO.texture.GetSize().x, 
@@ -893,7 +892,16 @@ bool gameLogic(float deltaTime)
 			}
 		}
 
+	}else
+	{
+	player.idleTime = 0;
 	}
+
+	if (!platform::isFocused())
+	{
+		player.idleTime = 0;
+	}
+
 
 		renderer2d.currentCamera.follow(player.pos + (player.dimensions / 2.f), deltaTime * 110, 4 * BLOCK_SIZE, renderer2d.windowW, renderer2d.windowH);
 
@@ -1190,6 +1198,7 @@ bool gameLogic(float deltaTime)
 			if (glm::distance(player.pos, dist) < 5 * BLOCK_SIZE)
 			{
 				i.second.hasShown = true;
+				currentDialog.resetDialogData();
 				currentDialog.dialogData = i.second.data;
 				currentDialog.start();
 			}

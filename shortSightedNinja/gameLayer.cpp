@@ -131,7 +131,8 @@ std::vector <ArrowItem> actualInventorty;
 
 std::vector <LightSource> wallLights;
 
-float playerLight = 6;
+float playerLight = 5;
+float lightPerc = 1;
 
 Bird bird;
 
@@ -215,6 +216,7 @@ void loadLevel()
 	player.dying = 0;
 	player.lockMovementDie = 0;
 	playerLight = 5;
+	lightPerc = 1;
 	player.velocity = {};
 	player.isExitingLevel = -1;
 	player.wallGrab = 0;
@@ -284,6 +286,7 @@ void respawn()
 	player.dying = 0;
 	player.lockMovementDie = 0;
 	playerLight = 5;
+	lightPerc = 1;
 	player.velocity = {};
 
 }
@@ -748,8 +751,8 @@ bool gameLogic(float deltaTime)
 
 	if (player.dying || player.isExitingLevel != -1)
 	{
-		playerLight -= deltaTime * 3;
-		if (playerLight < 1)
+		lightPerc -= deltaTime * 0.8;
+		if (lightPerc < 0)
 		{
 			if(player.dying)
 			{
@@ -1036,7 +1039,7 @@ bool gameLogic(float deltaTime)
 	mapData.clearColorData();
 
 	simuleteLightSpot(player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2),
-		playerLight, mapData, arrows, pickups, 0);
+		playerLight * lightPerc, mapData, arrows, pickups, 0);
 
 #pragma region lights
 
@@ -1293,7 +1296,7 @@ bool gameLogic(float deltaTime)
 
 		//todo remove intensity
 		simuleteLightSpot({ i.pos.x * BLOCK_SIZE + BLOCK_SIZE / 2,i.pos.y * BLOCK_SIZE + BLOCK_SIZE / 2 },
-			r, mapData, arrows, pickups, 0);
+			r * lightPerc, mapData, arrows, pickups, 0);
 
 	}
 
@@ -1316,7 +1319,7 @@ bool gameLogic(float deltaTime)
 			if (r > 0)
 			{
 				simuleteLightSpot({ i.pos },
-					r, mapData, arrows, pickups, 0.1);
+					r * lightPerc, mapData, arrows, pickups, 0.1);
 			}
 
 		}
@@ -1367,7 +1370,9 @@ bool gameLogic(float deltaTime)
 				}
 				else
 				{
-					if (isCollidable(mapData.get(pos.x / BLOCK_SIZE, pos.y / BLOCK_SIZE).type))
+					if (isCollidableForArrows(mapData.get(pos.x / BLOCK_SIZE, pos.y / BLOCK_SIZE).type)
+						|| mapData.get(pos.x / BLOCK_SIZE, pos.y / BLOCK_SIZE).type == Block::webBlock
+						)
 					{
 						dist = i;
 						break;
@@ -1637,7 +1642,7 @@ bool gameLogic(float deltaTime)
 			}
 		}
 		//currentDialog.setNewDialog("Partea a doua a dialogului");
-
+		 
 	}
 
 #pragma endregion

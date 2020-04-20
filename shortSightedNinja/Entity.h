@@ -51,56 +51,11 @@ struct Entity
 	int isExitingLevel = -1;
 	bool accelerating = 0;
 
-	float getAcceleration() 
-	{
-		float a = std::max((accelerateTime / maxAccelerationTime), 0.6f);
-		if (a <= 0.9) { return a; }
-		return a;
-	}
+	float getAcceleration();
 
 	bool iswebs;
 
-	void updateMove(float deltaTime) 
-	{
-		if(lastPos.x - pos.x < 0)
-		{
-			movingRight = 1;
-		}else if(lastPos.x - pos.x > 0)
-		{
-			movingRight = 0;
-		}
-
-		if(wallGrab == -1)
-		{
-			movingRight = 0;
-		}
-		if (wallGrab == 1)
-		{
-			movingRight = 1;
-		}
-
-		lastPos = pos; 
-
-		if (!accelerating)
-		{
-			if(accelerateTime>0)
-			{
-				accelerateTime-= deltaTime;
-			}else
-			{
-				accelerateTime = 0;
-			}
-		}else
-		{
-			accelerateTime += deltaTime;
-			if(accelerateTime > maxAccelerationTime)
-			{
-				accelerateTime = maxAccelerationTime;
-			}
-		}
-
-		accelerating = 0;
-	}
+	void updateMove(float deltaTime);
 	
 	void strafe(int dir);
 

@@ -719,6 +719,37 @@ namespace gl2d
 		upperTexPos.w = inner_texture_coords.y;
 		renderRectangle(topPos, colorData, Position2D{ 0, 0 }, 0, texture, upperTexPos);
 
+		//Rect topPos = position;
+		//topPos.x += leftBorder;
+		//topPos.w = topBorder;
+		//topPos.z = topBorder;
+		//float end = rightBorder;
+		//float size = topBorder;
+		//
+		////todo replace with 1
+		//while(1)
+		//{
+		//	if(topPos.x + size <= end)
+		//	{
+		//
+		//		//draw
+		//		renderRectangle(topPos, colorData, Position2D{ 0, 0 }, 0, texture, upperTexPos);
+		//
+		//		topPos += size;
+		//	}else
+		//	{
+		//		float newW = end - topPos.x;
+		//		if(newW>0)
+		//		{
+		//			topPos.z = newW;
+		//			renderRectangle(topPos, colorData, Position2D{ 0, 0 }, 0, texture, upperTexPos);
+		//		}
+		//		break;
+		//	}
+		//
+		//}
+
+
 		//bottom
 		Rect bottom = position;
 		bottom.x += leftBorder;
@@ -767,6 +798,8 @@ namespace gl2d
 		topleftTexPos.z = inner_texture_coords.x;
 		topleftTexPos.w = inner_texture_coords.y;
 		renderRectangle(topleft, colorData, Position2D{ 0, 0 }, 0, texture, topleftTexPos);
+		//todo repair
+
 
 		//topright
 		Rect topright = position;

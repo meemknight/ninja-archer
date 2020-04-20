@@ -137,6 +137,58 @@ void Entity::resolveConstrains(MapData & mapData)
 
 }
 
+float Entity::getAcceleration()
+{
+	float a = std::max((accelerateTime / maxAccelerationTime), 0.6f);
+	if (a <= 0.9) { return a; }
+	return a;
+}
+
+void Entity::updateMove(float deltaTime)
+{
+	if (lastPos.x - pos.x < 0)
+	{
+		movingRight = 1;
+	}
+	else if (lastPos.x - pos.x > 0)
+	{
+		movingRight = 0;
+	}
+
+	if (wallGrab == -1)
+	{
+		movingRight = 0;
+	}
+	if (wallGrab == 1)
+	{
+		movingRight = 1;
+	}
+
+	lastPos = pos;
+
+	if (!accelerating)
+	{
+		if (accelerateTime>0)
+		{
+			accelerateTime -= deltaTime;
+		}
+		else
+		{
+			accelerateTime = 0;
+		}
+	}
+	else
+	{
+		accelerateTime += deltaTime;
+		if (accelerateTime > maxAccelerationTime)
+		{
+			accelerateTime = maxAccelerationTime;
+		}
+	}
+
+	accelerating = 0;
+}
+
 void Entity::strafe(int dir)
 {
 	velocity.x = dir * strafeSpeed * BLOCK_SIZE;

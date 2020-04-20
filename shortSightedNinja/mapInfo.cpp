@@ -348,12 +348,10 @@ unsigned short level4[] =
 unsigned short *levelVect[LEVELS] = { level0, level1, level2, level3, level4 };
 glm::ivec2 levelSizes[LEVELS] = { { 185, 46 }, {120, 80}, {135, 76}, {180, 70}, {40, 40} };
 
-
 extern textureDataWithUV tDDCaracter;
 extern textureDataWithUV tDDCaracterAnnoyed;
 extern textureDataWithUV tDDCaracterSurprized;
 extern textureDataWithUV tDDBird;
-
 
 void setupMap(MapData &md, int levelId)
 {
@@ -411,7 +409,6 @@ void setupMap(MapData &md, int levelId)
 	break;
 	case 1:
 	{
-
 
 		md.signDataVector.emplace_back(glm::ivec2{ 59, 6 }, "You can't move properly\nif you are into webs");
 

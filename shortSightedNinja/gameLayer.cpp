@@ -13,6 +13,7 @@
 #include <string>
 #include <sstream>
 #include "menu.h"
+#include "Settings.h"
 
 extern float gravitationalAcceleration;
 extern float jumpSpeed;
@@ -26,8 +27,11 @@ extern float grabMargin;
 extern float notGrabTimeVal;
 extern bool snapWallGrab;
 
+
 extern gl2d::internal::ShaderProgram maskShader;
 extern GLint maskSamplerUniform;
+
+extern int currentSettingsMenu;
 
 gl2d::Renderer2D renderer2d;
 //gl2d::Renderer2D stencilRenderer2d;
@@ -94,7 +98,6 @@ textureDataWithUV tDDBird;
 
 #pragma endregion
 
-
 std::vector<Arrow> arrows;
 
 std::vector<Pickup> pickups;
@@ -118,6 +121,8 @@ int currentLevel=-2;
 float jumpDelayTime = 0;
 
 int maxLevel=0;
+static int ingameMenuMainPage = 1;
+bool inGameMenu = 0;
 
 struct ArrowItem
 {
@@ -143,7 +148,8 @@ void respawn();
 
 void loadLevel()
 {
-
+	ingameMenuMainPage = 1;
+	inGameMenu = 0;
 	//currentDialog.dialogData.push_back({{ "Dialog, Sample.\nFraze 2. Text3." }, textureDataForDialog["character"]});
 	//currentDialog.dialogData.push_back({ { "Nu stiu ce s azic.\nFraze 2. Text3." }, textureDataForDialog["character"] });
 	//currentDialog.dialogData.push_back({ {"Dialog, Sample3.\n epic moment aici."}, textureDataForDialog["character"] });
@@ -240,30 +246,45 @@ void loadLevel()
 	{
 		waterPlayer.play();
 		waterPlayer.setVolume(0);
+	}else
+	{
+		waterPlayer.stop();
 	}
 
 	if (mapData.tikiSoundPos.size() > 0)
 	{
 		tikiPlayer.play();
 		tikiPlayer.setVolume(0);
+	}else
+	{
+		tikiPlayer.stop();
 	}
 
 	if (mapData.greenSoundPos.size() > 0)
 	{
 		greenPlayer.play();
 		greenPlayer.setVolume(0);
+	}else
+	{
+		greenPlayer.stop();
 	}
 
 	if (mapData.redSoundPos.size() > 0)
 	{
 		redPlayer.play();
 		redPlayer.setVolume(0);
+	}else
+	{
+		redPlayer.stop();
 	}
 
 	if (mapData.caveSoundPos.size() > 0)
 	{
 		grayPlayer.play();
 		grayPlayer.setVolume(0);
+	}else
+	{
+		grayPlayer.stop();
 	}
 
 	saveState(playerSpawnPos, currentLevel);
@@ -402,9 +423,10 @@ enum MenuState :int
 {
 	mainMenu = 1,
 	levelSelector,
-	creditsAres,
+	settingsMenu,
 
 }; int menuState = MenuState::mainMenu;
+
 
 bool gameLogic(float deltaTime)
 {
@@ -420,7 +442,7 @@ bool gameLogic(float deltaTime)
 
 	static int selectedLevel;
 
-	if(input::isKeyReleased(input::Buttons::esc))
+	if(input::isKeyReleased(input::Buttons::esc) && menuState != MenuState::settingsMenu)
 	{
 		menuState = MenuState::mainMenu;
 	}
@@ -491,7 +513,7 @@ bool gameLogic(float deltaTime)
 				"Select zone", font, { 1,1,1,1 }, 0.6, 4, 3, true, { 0.1,0.1,0.1,1 });
 
 			renderer2d.renderText({ button3.x + button3.z / 2,button3.y + button3.w / 2 },
-				"Credits", font, { 1,1,1,1 }, 0.6, 4, 3, true, { 0.1,0.1,0.1,1 });
+				"Settings", font, { 1,1,1,1 }, 0.6, 4, 3, true, { 0.1,0.1,0.1,1 });
 
 
 			if (playButton)
@@ -521,7 +543,8 @@ bool gameLogic(float deltaTime)
 
 			if(creditsSelectButton)
 			{
-				menuState = MenuState::creditsAres;
+				menuState = MenuState::settingsMenu;
+				settings::setMainSettingsPage();
 			}
 
 		}else if (menuState == MenuState::levelSelector)
@@ -678,23 +701,14 @@ bool gameLogic(float deltaTime)
 				loadLevel();
 			}
 
-		}else if (menuState == MenuState::creditsAres)
+		}else if (menuState == MenuState::settingsMenu)
 		{
-			bool backPressed = 0;
-			menu::startMenu();
-			static bool boolTest3;
-			static bool boolHasPressed2;
-			static float sound = 0.5;
+			settings::displaySettings(renderer2d, deltaTime);
 
-			menu::uninteractableCentreText("test1test1test1");
-			menu::interactableText("test2", &boolHasPressed2);
-			menu::booleanTextBox("test3", &boolTest3);
-			menu::booleanTextBox("test4", &boolTest3);
-			menu::interactableText("test5", &boolTest3);
-			menu::slider0_1("sound", &sound);
-			menu::uninteractableCentreText("test7");
-
-			menu::endMenu(renderer2d, uiDialogBox, font, &backPressed, deltaTime);
+			if(currentSettingsMenu == 0)
+			{
+				menuState = MenuState::mainMenu;
+			}
 
 			/*
 			auto p = platform::getRelMousePosition();
@@ -739,6 +753,69 @@ bool gameLogic(float deltaTime)
 	}  ////////////////////////////////////////// end main menu
 
 #pragma endregion
+	{
+		if (inGameMenu)
+		{
+
+			if(ingameMenuMainPage)
+			{
+			
+				menu::startMenu();
+			
+				menu::uninteractableCentreText("Menu");
+				bool s = 0;
+				bool exit = 0;
+
+				menu::interactableText("Settings", &s);
+				menu::interactableText("Exit level", &exit);
+
+				bool back = 0;
+				menu::endMenu(renderer2d, uiDialogBox, font, &back, deltaTime);
+				
+				if(back)
+				{
+					inGameMenu = false;
+				}
+				if(s)
+				{
+					ingameMenuMainPage = 0;
+					settings::setMainSettingsPage();
+				}
+				if (exit)
+				{
+					mapData.cleanup();
+					currentLevel = -2;
+					loadLevel();
+				}
+			}else
+			{
+				settings::displaySettings(renderer2d, deltaTime);
+				if (currentSettingsMenu == 0) 
+				{
+					ingameMenuMainPage = 1;
+				};
+			}
+
+
+			renderer2d.flush();
+
+			if (input::isControllerInput()
+				&& input::isKeyReleased(input::Buttons::menu)
+				)
+			{
+				inGameMenu = false;
+			}
+
+			return 1;
+		}
+
+		if (input::isKeyReleased(input::Buttons::menu))
+		{
+			inGameMenu = true;
+			ingameMenuMainPage = 1;
+			settings::setMainSettingsPage();
+		}
+	}
 
 	//if (platform::isKeyPressedOn('T'))
 	//{
@@ -774,11 +851,13 @@ bool gameLogic(float deltaTime)
 
 #pragma region music
 	
-	waterPlayer.setVolume(mapData.getWaterPercentage(player.pos));
-	greenPlayer.setVolume(mapData.getGreenPercentage(player.pos));
-	redPlayer.setVolume(mapData.getRedPercentage(player.pos));
-	grayPlayer.setVolume(mapData.getCavePercentage(player.pos));
-	tikiPlayer.setVolume(mapData.getTikiPercentage(player.pos));
+	waterPlayer.setVolume(mapData.getWaterPercentage(player.pos)* settings::getMusicSound());
+	greenPlayer.setVolume(mapData.getGreenPercentage(player.pos)* settings::getMusicSound());
+	redPlayer.setVolume(mapData.getRedPercentage(player.pos)    * settings::getMusicSound());
+	grayPlayer.setVolume(mapData.getCavePercentage(player.pos)  * settings::getMusicSound());
+	tikiPlayer.setVolume(mapData.getTikiPercentage(player.pos)  * settings::getMusicSound());
+
+	soundPlayer.setVolume(4 * settings::getAmbientSound());
 
 #pragma endregion
 
@@ -807,16 +886,7 @@ bool gameLogic(float deltaTime)
 			}
 		}
 
-		if (platform::isKeyHeld('Z'))
-		{
-			renderer2d.currentCamera.zoom -= deltaTime * 2;
-		}
-		if (platform::isKeyHeld('X'))
-		{
-			renderer2d.currentCamera.zoom += deltaTime * 2;
-		}
-		renderer2d.currentCamera.zoom = glm::clamp(renderer2d.currentCamera.zoom, 3.f, 7.f);
-
+		renderer2d.currentCamera.zoom = settings::getZoom();
 
 		if (jumpDelayTime > 0)
 		{
@@ -1189,7 +1259,10 @@ bool gameLogic(float deltaTime)
 						}
 					}else
 					{
-						player.isExitingLevel = -2;
+						if (input::isKeyPressedOn(input::Buttons::up))
+						{
+							player.isExitingLevel = -2;
+						}
 					}
 
 					//todo delegate this render text for later
@@ -1542,7 +1615,17 @@ bool gameLogic(float deltaTime)
 
 		//ui
 		{
-			Ui::Frame cornerLeft(Ui::Box().xLeftPerc(0.08).yBottom(-20).xDimensionPercentage(0.1f).yAspectRatio(0.5f)());
+			glm::vec4 uiBox;
+			
+			if(settings::showArrowIndicators())
+			{
+				uiBox = Ui::Box().xLeftPerc(0.08).yBottom(-20).xDimensionPercentage(0.1f).yAspectRatio(0.5f)();
+			}else
+			{
+				uiBox = Ui::Box().xLeft(20).yBottom(-20).xDimensionPercentage(0.1f).yAspectRatio(0.5f)();
+			}
+			
+			Ui::Frame cornerLeft(uiBox);
 
 			int centerCount = 1;
 			int leftCount = 1;
@@ -1645,7 +1728,7 @@ bool gameLogic(float deltaTime)
 		}
 
 		//the 2 buttons
-		if(actualInventorty.size() != 0)
+		if(actualInventorty.size() != 0 && settings::showArrowIndicators())
 		{
 			auto left = Ui::Box().xLeft(10).yBottom(-20).xDimensionPercentage(0.04f).yAspectRatio(1.f)();
 			auto right = Ui::Box().xLeftPerc(0.2).yBottom(-20).xDimensionPercentage(0.04f).yAspectRatio(1.f)();

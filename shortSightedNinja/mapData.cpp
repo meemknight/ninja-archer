@@ -29,7 +29,7 @@ float distFunc(float dist)
 
 	if (perc * 0.08 < 1.62) { perc = 0; };
 
-	return perc * 0.08;
+	return perc * 0.08 * 0.6;
 }
 
 float MapData::getWaterPercentage(glm::vec2 pos)
@@ -56,7 +56,7 @@ float MapData::getWaterPercentage(glm::vec2 pos)
 	if (shortestDist < 0)
 		return 0;
 
-	return distFunc(shortestDist) * 0.5;
+	return distFunc(shortestDist);
 }
 
 float MapData::getGreenPercentage(glm::vec2 pos)
@@ -83,9 +83,8 @@ float MapData::getGreenPercentage(glm::vec2 pos)
 	if (shortestDist < 0)
 		return 0;
 
-	return distFunc(shortestDist) * 0.5;
+	return distFunc(shortestDist);
 }
-
 
 float MapData::getRedPercentage(glm::vec2 pos)
 {
@@ -111,7 +110,7 @@ float MapData::getRedPercentage(glm::vec2 pos)
 	if (shortestDist < 0)
 		return 0;
 
-	return distFunc(shortestDist) * 0.5;
+	return distFunc(shortestDist);
 }
 
 float MapData::getTikiPercentage(glm::vec2 pos)
@@ -138,7 +137,7 @@ float MapData::getTikiPercentage(glm::vec2 pos)
 	if (shortestDist < 0)
 		return 0;
 
-	return distFunc(shortestDist) * 0.5;
+	return distFunc(shortestDist);
 }
 
 float MapData::getSnowPercentage(glm::vec2 pos)
@@ -165,7 +164,7 @@ float MapData::getSnowPercentage(glm::vec2 pos)
 	if (shortestDist < 0)
 		return 0;
 
-	return distFunc(shortestDist) * 0.5;
+	return distFunc(shortestDist);
 }
 
 float MapData::getCavePercentage(glm::vec2 pos)
@@ -192,7 +191,7 @@ float MapData::getCavePercentage(glm::vec2 pos)
 	if (shortestDist < 0)
 		return 0;
 
-	return distFunc(shortestDist) * 0.5;
+	return distFunc(shortestDist);
 }
 
 

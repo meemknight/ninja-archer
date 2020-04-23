@@ -36,6 +36,7 @@
     <ClCompile Include="menu.cpp" />
     <ClCompile Include="opengl2Dlib.cpp" />
     <ClCompile Include="Particle.cpp" />
+    <ClCompile Include="Settings.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="stb_impl.cpp" />
     <ClCompile Include="Ui.cpp" />
@@ -60,6 +61,7 @@
     <ClInclude Include="menu.h" />
     <ClInclude Include="opengl2Dlib.h" />
     <ClInclude Include="Particle.h" />
+    <ClInclude Include="Settings.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="stb_truetype.h" />

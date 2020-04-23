@@ -89,6 +89,10 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 	//todo check if button hasChanged
 	//todo check if console or mouse
 
+	auto c = renderer.currentCamera;
+	renderer.currentCamera.setDefault();
+
+
 	float inPerc = 0.9;
 
 	renderer.renderRectangle({ 0,0,renderer.windowW, renderer.windowH }, {}, 0,
@@ -321,6 +325,15 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 		perMenuData.cursorIndex++;
 	}
 
+	if (input::isKeyReleased(input::Buttons::esc))
+	{
+		if(backPressed)
+		{
+			*backPressed = true;
+		}
+	}
+
+
 	if(perMenuData.cursorIndex < 0)
 	{
 		perMenuData.cursorIndex = count - 1;
@@ -330,5 +343,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 	{
 		perMenuData.cursorIndex = 0;
 	}
+
+	renderer.currentCamera = c;
 
 }

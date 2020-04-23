@@ -143,10 +143,22 @@ int MAIN
 				(count);
 				count = 0;
 			}
+
 			//todo
 			float fDeltaTime = std::min(dDeltaTime, 1.0 / 20.0);
 		
 			input::updateInput();
+
+			if(input::isControllerInput())
+			{
+				platform::showMouse(false);
+			}
+			else 
+			{
+				platform::showMouse(true);
+			}
+
+
 
 			if (!gameLogic(fDeltaTime))
 			{
@@ -451,9 +463,23 @@ namespace platform
 		return rbutton && platform::isFocused();
 	}
 
+	static bool lastShow = 1;
 	void showMouse(bool show)
 	{
-		ShowCursor(show);
+		if(lastShow != show)
+		{
+			ShowCursor(show);
+
+			if (show)
+			{
+				SetCursor(LoadCursor(NULL, IDC_ARROW));
+				SendMessage(wind, WM_SETCURSOR, (WPARAM)wind, MAKELPARAM(HTCLIENT, WM_MOUSEMOVE));
+				//SetCursor(LoadCursor(GetModuleHandle(0), IDC_HAND));
+			}
+		}
+	
+		
+		lastShow = show;
 	}
 
 	bool isFocused()

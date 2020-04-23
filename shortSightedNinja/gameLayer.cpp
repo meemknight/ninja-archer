@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <string>
 #include <sstream>
+#include "menu.h"
 
 extern float gravitationalAcceleration;
 extern float jumpSpeed;
@@ -84,7 +85,7 @@ gl2d::Texture uiMusic;
 gl2d::Texture uiArt;
 gl2d::Texture uiDialogBox;
 gl2d::Texture uiImages;
-
+gl2d::Texture uiButtons;
 
 textureDataWithUV tDDCaracter;
 textureDataWithUV tDDCaracterAnnoyed;
@@ -335,6 +336,7 @@ bool initGame()
 	uiArt.loadFromFile("resources//ui//art.png");
 	uiDialogBox.loadFromFile("resources//ui//uiDialogFrame.png");
 	uiImages.loadFromFileWithPixelPadding("resources//ui//uiImages.png", 8);
+	uiButtons.loadFromFileWithPixelPadding("resources//ui//uiButtons.png", 16);
 
 	gl2d::TextureAtlasPadding uiImagesAtlas(4, 1, uiImages.GetSize().x, uiImages.GetSize().y);
 
@@ -404,24 +406,9 @@ enum MenuState :int
 
 }; int menuState = MenuState::mainMenu;
 
-bool isInButton(const glm::vec2 &p, const glm::vec4 &box)
-{
-	return(p.x >= box.x && p.x <= box.x + box.z
-		&&
-		p.y >= box.y && p.y <= box.y + box.w
-		);
-}
-
-bool isButtonReleased(const glm::vec2 &p, const glm::vec4 &box)
-{
-	return(p.x >= box.x && p.x <= box.x + box.z
-		&&
-		p.y >= box.y && p.y <= box.y + box.w
-		) && platform::isLMouseButtonReleased();
-}
-
 bool gameLogic(float deltaTime)
 {
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	int w, h;
 	w = getWindowSizeX();
@@ -471,28 +458,19 @@ bool gameLogic(float deltaTime)
 			bool creditsSelectButton = 0;
 
 			//todo refactor
-			if (isInButton(p, button1))
+			if (Ui::isButtonReleased(p, button1))
 			{
-				if (platform::isLMouseButtonReleased())
-				{
 					playButton = 1;
-				}
 			}
 
-			if (isInButton(p, button2))
+			if (Ui::isButtonReleased(p, button2))
 			{
-				if (platform::isLMouseButtonReleased())
-				{
-					levelSelectButton = 1;
-				}
+				levelSelectButton = 1;
 			}
 
-			if (isInButton(p, button3))
+			if (Ui::isButtonReleased(p, button3))
 			{
-				if (platform::isLMouseButtonReleased())
-				{
-					creditsSelectButton = 1;
-				}
+				creditsSelectButton = 1;
 			}
 
 			renderer2d.render9Patch2( button1,
@@ -506,14 +484,15 @@ bool gameLogic(float deltaTime)
 
 
 			renderer2d.renderText({button1.x + button1.z/2,button1.y + button1.w/2}, 
-				"Continue jurney", font, {1,1,1,1}, 0.6);
+				"Continue jurney", font, {1,1,1,1}, 0.6, 4, 3, true, { 0.1,0.1,0.1,1 });
 
 
 			renderer2d.renderText({ button2.x + button2.z / 2,button2.y + button2.w / 2 },
-				"Select zone", font, { 1,1,1,1 }, 0.6);
+				"Select zone", font, { 1,1,1,1 }, 0.6, 4, 3, true, { 0.1,0.1,0.1,1 });
 
 			renderer2d.renderText({ button3.x + button3.z / 2,button3.y + button3.w / 2 },
-				"Credits", font, { 1,1,1,1 }, 0.6);
+				"Credits", font, { 1,1,1,1 }, 0.6, 4, 3, true, { 0.1,0.1,0.1,1 });
+
 
 			if (playButton)
 			{
@@ -598,7 +577,7 @@ bool gameLogic(float deltaTime)
 			renderer2d.render9Patch2(playBox,
 				8, { 1,1,1,1 }, {}, 0, uiButton, { 0,1,1,0 }, { 0,0.8,0.8,0 });
 			renderer2d.renderText({ playBox.x + playBox.z /2 ,playBox.y + playBox.w / 2 },
-				temp.c_str(), font, { 1,1,1,1 }, 0.6);
+				temp.c_str(), font, { 1,1,1,1 }, 0.6, 4, 3, true, { 0.1,0.1,0.1,1 });
 
 			gl2d::TextureAtlas arrowsAtlas(1, 2);
 			int leftPressed = 0;
@@ -693,7 +672,7 @@ bool gameLogic(float deltaTime)
 			}
 
 			if (selectedLevel <= maxLevel)
-			if(isButtonReleased(p, playBox))
+			if(Ui::isButtonReleased(p, playBox))
 			{
 				currentLevel = selectedLevel;
 				loadLevel();
@@ -701,6 +680,23 @@ bool gameLogic(float deltaTime)
 
 		}else if (menuState == MenuState::creditsAres)
 		{
+			bool backPressed = 0;
+			menu::startMenu();
+			static bool boolTest3;
+			static bool boolHasPressed2;
+			static float sound = 0.5;
+
+			menu::uninteractableCentreText("test1test1test1");
+			menu::interactableText("test2", &boolHasPressed2);
+			menu::booleanTextBox("test3", &boolTest3);
+			menu::booleanTextBox("test4", &boolTest3);
+			menu::interactableText("test5", &boolTest3);
+			menu::slider0_1("sound", &sound);
+			menu::uninteractableCentreText("test7");
+
+			menu::endMenu(renderer2d, uiDialogBox, font, &backPressed, deltaTime);
+
+			/*
 			auto p = platform::getRelMousePosition();
 
 			Ui::Frame f({ 0, 0, w, h });
@@ -734,7 +730,7 @@ bool gameLogic(float deltaTime)
 			if (isButtonReleased(p, button1)) {system("start https://wuxia.itch.io/"); };
 			if (isButtonReleased(p, button2)) {system("start https://www.youtube.com/channel/UCEXX5i6961zc4-L8thTctBg");};
 			if (isButtonReleased(p, button3)) {system("start https://itch.io/profile/adamatomic"); };
-
+			*/
 		}
 
 
@@ -1155,6 +1151,7 @@ bool gameLogic(float deltaTime)
 					}
 				}
 
+				//todo delegate this render text for later
 				if(isSign(g.type))
 				{
 					auto iter = std::find_if(mapData.signDataVector.begin(), mapData.signDataVector.end(), 
@@ -1163,7 +1160,17 @@ bool gameLogic(float deltaTime)
 					if(iter!=mapData.signDataVector.end())
 					{
 						renderer2d.renderText({ BLOCK_SIZE*(x), BLOCK_SIZE*(y - 1) },
-							iter->text.c_str(), font, { 1,1,1,1 }, 0.09);
+							iter->text.c_str(), font, { 1,1,1,1 }, 0.09, 4, 3, true, { 0.1,0.1,0.1,1 });
+
+						if(iter->button>=0)
+						{
+							glm::vec2 pos = renderer2d.getTextSize(iter->text.c_str(), font, 0.09, 4, 3);
+							pos.y = 0;
+							pos.x /= 2;
+							pos += glm::vec2(BLOCK_SIZE*(x), BLOCK_SIZE*(y - 1));
+							input::drawButtonWithHover(renderer2d, pos, BLOCK_SIZE, iter->button);
+						}
+
 					}
 				}
 
@@ -1184,9 +1191,14 @@ bool gameLogic(float deltaTime)
 					{
 						player.isExitingLevel = -2;
 					}
-					
-					renderer2d.renderText({ BLOCK_SIZE*(x), BLOCK_SIZE*(y - 1) },
-						"Press Up to exit", font, { 1,1,1,1 }, 0.09);
+
+					//todo delegate this render text for later
+
+					input::drawButtonWithHover(renderer2d, { BLOCK_SIZE*(x), BLOCK_SIZE*(y - 1.2) }, BLOCK_SIZE,
+						input::Buttons::up);
+
+					//renderer2d.renderText({ BLOCK_SIZE*(x), BLOCK_SIZE*(y - 1) },
+					//	"Press Up to exit", font, { 1,1,1,1 }, 0.09, 4, 3, true, { 0.1,0.1,0.1,1 });
 				}
 
 			}
@@ -1401,7 +1413,20 @@ bool gameLogic(float deltaTime)
 
 		//glUseProgram(mapRenderer.shader.id);
 		//glUniform1i(glGetUniformLocation(mapRenderer.shader.id, "u_time"), clock());
+
+		//renderer2d.flush();
+		auto c = renderer2d.currentCamera;
+
 		mapRenderer.drawFromMapData(renderer2d, mapData, deltaTime, animPos);
+
+		//for(int i=0; i<3; i++)
+		//{
+		//	renderer2d.currentCamera.zoom *= 0.99;
+		//	mapRenderer.drawFromMapData(renderer2d, mapData, deltaTime, animPos);
+		//	renderer2d.flush();
+		//
+		//}
+		//renderer2d.currentCamera = c;
 	}
 #pragma endregion
 
@@ -1517,7 +1542,7 @@ bool gameLogic(float deltaTime)
 
 		//ui
 		{
-			Ui::Frame cornerLeft(Ui::Box().xLeft(20).yBottom(-20).xDimensionPercentage(0.1f).yAspectRatio(0.5f)());
+			Ui::Frame cornerLeft(Ui::Box().xLeftPerc(0.08).yBottom(-20).xDimensionPercentage(0.1f).yAspectRatio(0.5f)());
 
 			int centerCount = 1;
 			int leftCount = 1;
@@ -1617,6 +1642,18 @@ bool gameLogic(float deltaTime)
 
 			}
 
+		}
+
+		//the 2 buttons
+		if(actualInventorty.size() != 0)
+		{
+			auto left = Ui::Box().xLeft(10).yBottom(-20).xDimensionPercentage(0.04f).yAspectRatio(1.f)();
+			auto right = Ui::Box().xLeftPerc(0.2).yBottom(-20).xDimensionPercentage(0.04f).yAspectRatio(1.f)();
+			right.x += 10;
+
+			input::drawButton(renderer2d, left, left.z, input::Buttons::swapLeft, 0.4f);
+			input::drawButton(renderer2d, right, right.z, input::Buttons::swapRight, 0.4f);
+			
 		}
 
 		renderer2d.currentCamera = c;

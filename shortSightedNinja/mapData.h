@@ -504,8 +504,12 @@ struct signData
 	signData(glm::ivec2 p,const std::string &t):
 		pos(p),text(t){};
 
+	signData(glm::ivec2 p, const std::string &t, int button) :
+		pos(p), text(t), button(button){};
+
 	glm::ivec2 pos;
 	std::string text;
+	int button = -1;
 };
 
 struct exitData

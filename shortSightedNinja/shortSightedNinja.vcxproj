@@ -33,6 +33,7 @@
     <ClCompile Include="mapInfo.cpp" />
     <ClCompile Include="mapRenderer.cpp" />
     <ClCompile Include="math.cpp" />
+    <ClCompile Include="menu.cpp" />
     <ClCompile Include="opengl2Dlib.cpp" />
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -56,6 +57,7 @@
     <ClInclude Include="mapData.h" />
     <ClInclude Include="mapRenderer.h" />
     <ClInclude Include="math.h" />
+    <ClInclude Include="menu.h" />
     <ClInclude Include="opengl2Dlib.h" />
     <ClInclude Include="Particle.h" />
     <ClInclude Include="Shader.h" />

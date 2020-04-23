@@ -167,7 +167,7 @@ namespace gl2d
 	};
 
 
-#define Renderer2D_Max_Buffer_Capacity 5000
+#define Renderer2D_Max_Buffer_Capacity 6000
 #define DefaultTextureCoords (glm::vec4{ 0, 1, 1, 0 })
 
 	enum Renderer2DBufferType
@@ -222,10 +222,13 @@ namespace gl2d
 			texturePositionsCount = 0;
 		}
 
+		glm::vec2 getTextSize(const char* text, const Font font, const float size = 1.5f,
+			const float spacing = 4, const float line_space = 3);
+
 		// The origin will be the bottom left corner since it represents the line for the text to be drawn
 		//Pacing and lineSpace are influenced by size
 		void renderText(glm::vec2 position, const char* text, const Font font, const Color4f color, const float size = 1.5f,
-			const float spacing = 4, const float line_space = 3, bool showInCenter = 1, const Color4f ShadowColor = {}
+			const float spacing = 4, const float line_space = 3, bool showInCenter = 1, const Color4f ShadowColor = { 0.1,0.1,0.1,1 }
 		, const Color4f LightColor = {});
 
 		//todo color overloads
@@ -301,6 +304,7 @@ namespace gl2d
 	struct TextureAtlasPadding
 	{
 		TextureAtlasPadding() {};
+		//count count size size
 		TextureAtlasPadding(int x, int y, int xSize, int ySize) :xCount(x), yCount(y) 
 		,xSize(xSize), ySize(ySize){};
 

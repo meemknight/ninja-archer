@@ -1,5 +1,6 @@
 #include "DialogInteraction.h"
 #include "Ui.h"
+#include "input.h"
 
 extern gl2d::Texture uiDialogBox;
 extern gl2d::Font font;
@@ -131,18 +132,27 @@ void DialogInteraction::draw(gl2d::Renderer2D &renderer, int w, int h, float del
 		}
 
 		{
-			Ui::Frame f2(Ui::Box().xLeftPerc(0.23).xDimensionPercentage(0.7).yDimensionPercentage(0.9).yTopPerc(0.3)());
+				auto currentBox = Ui::Box().xLeftPerc(0.23).xDimensionPercentage(0.7).yDimensionPercentage(0.8).yTopPerc(0.3)();
+				Ui::Frame f2(currentBox);
 
-			glm::vec2 textPos = Ui::Box().xLeft(0).yTop(0)();
+				glm::vec2 textPos = Ui::Box().xLeft(0).yTop(0)();
 
-		if (!hasFinishedDialog)
-			mTextToShow += '|';
+			if (!hasFinishedDialog)
+				mTextToShow += '|';
 
-		renderer.renderText(textPos,
-			mTextToShow.c_str(), font, { 1,1,1,intensity }, 0.7, 4.2, 3, false, { 0,0,0.1,0.7 });
+			renderer.renderText(textPos,
+				mTextToShow.c_str(), font, { 1,1,1,intensity }, 0.7, 4.2, 3, false, { 0,0,0.1,0.7 });
 
-		if (!hasFinishedDialog)
-			mTextToShow.pop_back();
+			if (!hasFinishedDialog)
+				mTextToShow.pop_back();
+
+
+				//draw back button
+			if(hasFinishedDialog)
+			{
+				input::drawButtonWithHover(renderer, { currentBox.x + currentBox.z - 150, currentBox.y + currentBox.w - 150 },
+					80, input::Buttons::esc);
+			}
 
 		}
 	}

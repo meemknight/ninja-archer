@@ -915,6 +915,73 @@ namespace gl2d
 		return glm::vec4(v1.x, v1.y, v3.x, v3.y);
 	}
 
+	glm::vec2 Renderer2D::getTextSize(const char * text, const Font font,
+		const float size, const float spacing, const float line_space)
+	{
+		glm::vec2 position = {};
+
+		const int text_length = strlen(text);
+		Rect rectangle;
+		rectangle.x = position.x;
+		float linePositionY = position.y;
+
+		//This is the y position we render at because it advances when we encounter newlines
+
+		float maxPos = 0;
+		float maxPosY = 0;
+
+		for (int i = 0; i < text_length; i++)
+		{
+			if (text[i] == '\n')
+			{
+				rectangle.x = position.x;
+				linePositionY += (font.max_height + line_space) * size;
+			}
+			else if (text[i] == '\t')
+			{
+				const stbtt_aligned_quad quad = internal::fontGetGlyphQuad
+				(font, '_');
+				auto x = quad.x1 - quad.x0;
+
+				rectangle.x += x * size * 3 + spacing * size;
+			}
+			else if (text[i] == ' ')
+			{
+				const stbtt_aligned_quad quad = internal::fontGetGlyphQuad
+				(font, '_');
+				auto x = quad.x1 - quad.x0;
+
+				rectangle.x += x * size + spacing * size;
+			}
+			else if (text[i] >= ' ' && text[i] <= '~')
+			{
+				const stbtt_aligned_quad quad = internal::fontGetGlyphQuad
+				(font, text[i]);
+
+				rectangle.z = quad.x1 - quad.x0;
+				rectangle.w = quad.y1 - quad.y0;
+
+				rectangle.z *= size;
+				rectangle.w *= size;
+
+				rectangle.y = linePositionY + quad.y0 * size;
+
+				rectangle.x += rectangle.z + spacing * size;
+				maxPos = std::max(maxPos, rectangle.x);
+				maxPosY = std::max(maxPosY, rectangle.y);
+			}
+		}
+
+		float paddX = maxPos;
+
+		float paddY = maxPosY;
+
+		paddY += font.max_height * size;
+
+		return glm::vec2{ paddX, paddY };
+		
+	}
+
 	void Renderer2D::renderText(glm::vec2 position, const char * text, const Font font,
 		const Color4f color, const float size, const float spacing, const float line_space, bool showInCenter,
 		const Color4f ShadowColor

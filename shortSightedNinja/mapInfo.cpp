@@ -1,6 +1,7 @@
 #include "mapData.h"
 #include <string>
 #include <fstream>
+#include "input.h"
 #include "tools.h"
 
 unsigned short level0[] = 
@@ -369,13 +370,12 @@ void setupMap(MapData &md, int levelId)
 	case 0:
 	{
 
-		md.signDataVector.emplace_back(glm::ivec2{ 29, 22 }, "You can grab on walls\nand jump from");
-		md.signDataVector.emplace_back(glm::ivec2{ 38, 17 }, "Hold jump longer\nto jump higher");
+		md.signDataVector.emplace_back(glm::ivec2{ 29, 22 }, "You can grab on walls\nand jump from", input::Buttons::jump);
+		md.signDataVector.emplace_back(glm::ivec2{ 38, 17 }, "Hold jump longer\nto jump higher", input::Buttons::jump);
 		md.signDataVector.emplace_back(glm::ivec2{ 73, 19 }, "Don't fall\ninto the water");
-		md.signDataVector.emplace_back(glm::ivec2{ 112, 26 }, "Select arrows using 'Q' and 'E'\nand shoot with L Mouse");
+		md.signDataVector.emplace_back(glm::ivec2{ 112, 26 }, "Select the arrows and shoot", input::Buttons::shoot);
 		md.signDataVector.emplace_back(glm::ivec2{ 60, 11 }, "");
 		md.signDataVector.emplace_back(glm::ivec2{ 128, 34 }, "Use the Flame Arrows to see in\nthe darkness and find your way out!");
-
 
 		md.exitDataVector.emplace_back(glm::ivec2{ 166, 25 }, 1);
 

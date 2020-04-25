@@ -14,6 +14,7 @@
 #include <sstream>
 #include "menu.h"
 #include "Settings.h"
+#include "Sound.h"
 
 extern float gravitationalAcceleration;
 extern float jumpSpeed;
@@ -141,6 +142,8 @@ float playerLight = 5;
 float lightPerc = 1;
 
 Bird bird;
+
+SoundManager soundManager;
 
 const char* levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki tribe", "Secret Level"};
 
@@ -400,6 +403,8 @@ bool initGame()
 		grayPlayer.setLoop(1);
 
 		soundPlayer.setVolume(2);
+	
+		soundManager.loadMusic();
 	}
 
 	//if (loadLevelFromLastState(currentLevel, playerSpawnPos))
@@ -850,7 +855,7 @@ bool gameLogic(float deltaTime)
 	}
 
 #pragma region music
-	
+	 
 	waterPlayer.setVolume(mapData.getWaterPercentage(player.pos)* settings::getMusicSound());
 	greenPlayer.setVolume(mapData.getGreenPercentage(player.pos)* settings::getMusicSound());
 	redPlayer.setVolume(mapData.getRedPercentage(player.pos)    * settings::getMusicSound());

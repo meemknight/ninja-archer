@@ -38,6 +38,7 @@
     <ClCompile Include="Particle.cpp" />
     <ClCompile Include="Settings.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Sound.cpp" />
     <ClCompile Include="stb_impl.cpp" />
     <ClCompile Include="Ui.cpp" />
   </ItemGroup>
@@ -63,6 +64,7 @@
     <ClInclude Include="Particle.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="Sound.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="stb_truetype.h" />
     <ClInclude Include="tools.h" />

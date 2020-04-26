@@ -224,34 +224,34 @@ void MapData::create(int w, int h, unsigned short* d = 0)
 				waterPos.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
 			}
 
-			if (d.type == Block::musicGreen)
+			if (d.type == Block::musicEffectGreen)
 			{
 				greenSoundPos.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
-				d.type = Block::none;
+				//d.type = Block::none;
 			}
 			else
 				if (d.type == Block::musicRed)
 				{
 					redSoundPos.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
-					d.type = Block::none;
+					//d.type = Block::none;
 				}
 				else
 					if (d.type == Block::musicTiki)
 					{
 						tikiSoundPos.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
-						d.type = Block::none;
+						//d.type = Block::none;
 					}
 					else
 						if (d.type == Block::musicSnow)
 						{
 							snowSoundPos.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
-							d.type = Block::none;
+							//d.type = Block::none;
 						}
 						else
 							if (d.type == Block::musicCave)
 							{
 								caveSoundPos.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
-								d.type = Block::none;
+								//d.type = Block::none;
 							}
 		}
 

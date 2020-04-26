@@ -50,12 +50,7 @@ sf::Music greenPlayer;
 sf::Music redPlayer;
 sf::Music grayPlayer;
 
-
-enum Sounds
-{
-	none
-	//todo
-};
+SoundManager soundManager;
 
 #pragma endregion
 
@@ -143,7 +138,6 @@ float lightPerc = 1;
 
 Bird bird;
 
-SoundManager soundManager;
 
 const char* levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki tribe", "Secret Level"};
 
@@ -244,6 +238,8 @@ void loadLevel()
 				wallLights.push_back({ {x,y}, 0, 0 });
 			}
 		}
+
+	soundManager.setMusicPositions(mapData);
 
 	if(mapData.waterPos.size() > 0)
 	{
@@ -1754,7 +1750,8 @@ bool gameLogic(float deltaTime)
 	currentDialog.draw(renderer2d, w, h, deltaTime);
 
 	
-	if(input::isKeyReleased(input::Buttons::esc) && currentDialog.hasFinishedDialog)
+	if( input::isKeyReleased(input::Buttons::jump)
+		 && currentDialog.hasFinishedDialog)
 	{
 		if(!currentDialog.updateDialog())
 		{

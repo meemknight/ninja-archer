@@ -151,7 +151,7 @@ void DialogInteraction::draw(gl2d::Renderer2D &renderer, int w, int h, float del
 			if(hasFinishedDialog)
 			{
 				input::drawButtonWithHover(renderer, { currentBox.x + currentBox.z - 150, currentBox.y + currentBox.w - 150 },
-					80, input::Buttons::esc);
+					80, input::Buttons::jump);
 			}
 
 		}

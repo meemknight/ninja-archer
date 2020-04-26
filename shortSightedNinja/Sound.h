@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Audio.hpp>
+#include "mapData.h"
 
 struct SoundManager
 {
@@ -59,6 +60,7 @@ struct SoundManager
 		"resources//water.wav",
 	};
 
+	//this is the thing that playes music
 	struct MusicStruct
 	{
 		sf::Music m;
@@ -67,10 +69,19 @@ struct SoundManager
 		float desiredVolume = 0;
 	};
 
+	//this vector holds music players
 	MusicStruct musicVect[musicTapesCount] = {};
 	MusicStruct effectsVect[musicEffectsCount] = {};
 
+	//this holds sound emitors positions and it has no size, that sound doesn't exist
+	std::vector<glm::ivec2> musicPositions[tapes::musicTapesCount] = {};
+	std::vector<glm::ivec2> effectsPositions[musicEffects::musicEffectsCount] = {};
+
+	void setMusicPositions(MapData &mapData);
+
 	void loadMusic();
+
+	void setMusicAndEffectVolume(glm::vec2 pos);
 
 };
 

@@ -44,7 +44,6 @@ gl2d::Renderer2D renderer2d;
 sf::SoundBuffer pickupSoundbuffer;
 sf::SoundBuffer leavesSoundbuffer;
 sf::Sound soundPlayer;
-sf::Music waterPlayer;
 
 SoundManager soundManager;
 
@@ -129,11 +128,10 @@ std::vector <ArrowItem> actualInventorty;
 
 std::vector <LightSource> wallLights;
 
-float playerLight = 5;
+const float playerLight = 5;
 float lightPerc = 1;
 
 Bird bird;
-
 
 const char* levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki tribe", "Secret Level"};
 
@@ -216,7 +214,6 @@ void loadLevel()
 	player.dimensions = { 7, 7 };
 	player.dying = 0;
 	player.lockMovementDie = 0;
-	playerLight = 5;
 	lightPerc = 1;
 	player.velocity = {};
 	player.isExitingLevel = -1;
@@ -237,15 +234,6 @@ void loadLevel()
 		}
 
 	soundManager.setMusicPositions(mapData);
-
-	if(mapData.waterPos.size() > 0)
-	{
-		waterPlayer.play();
-		waterPlayer.setVolume(0);
-	}else
-	{
-		waterPlayer.stop();
-	}
 
 
 	saveState(playerSpawnPos, currentLevel);
@@ -268,7 +256,6 @@ void respawn()
 	player.dimensions = { 7, 7 };
 	player.dying = 0;
 	player.lockMovementDie = 0;
-	playerLight = 5;
 	lightPerc = 1;
 	player.velocity = {};
 	player.wallGrab = 0;
@@ -346,9 +333,6 @@ bool initGame()
 		pickupSoundbuffer.loadFromFile("resources//pick_up.wav");
 		leavesSoundbuffer.loadFromFile("resources//leaves.wav");
 	
-		waterPlayer.openFromFile("resources//water.wav");
-		waterPlayer.setLoop(1);
-
 		soundPlayer.setVolume(2);
 	
 		soundManager.loadMusic();
@@ -402,13 +386,10 @@ bool gameLogic(float deltaTime)
 	//main menu
 	if (currentLevel == -2)
 	{
-
-		waterPlayer.stop();
 		
 		soundManager.stoppMusic();
 
 		soundPlayer.stop();
-		waterPlayer.setVolume(0);
 
 		renderer2d.currentCamera = gl2d::cameraCreateDefault();
 
@@ -700,7 +681,10 @@ bool gameLogic(float deltaTime)
 	}  ////////////////////////////////////////// end main menu
 
 #pragma endregion
+
+	
 	{
+	
 		if (inGameMenu)
 		{
 
@@ -745,7 +729,6 @@ bool gameLogic(float deltaTime)
 				};
 			}
 
-
 			renderer2d.flush();
 
 			if (input::isControllerInput()
@@ -754,6 +737,10 @@ bool gameLogic(float deltaTime)
 			{
 				inGameMenu = false;
 			}
+
+			soundManager.settings.musicVolume = settings::getMusicSound();
+			soundManager.settings.ambientVolume = settings::getAmbientSound();
+			soundManager.updateSoundVolume();
 
 			return 1;
 		}
@@ -802,14 +789,15 @@ bool gameLogic(float deltaTime)
 #pragma region music
 	 
 	soundManager.settings.musicVolume = settings::getMusicSound();
+	soundManager.settings.ambientVolume = settings::getAmbientSound();
 
-	waterPlayer.setVolume(mapData.getWaterPercentage(player.pos)* settings::getMusicSound());
 	//greenPlayer.setVolume(mapData.getGreenPercentage(player.pos)* settings::getMusicSound());
 	//redPlayer.setVolume(mapData.getRedPercentage(player.pos)    * settings::getMusicSound());
 	//grayPlayer.setVolume(mapData.getCavePercentage(player.pos)  * settings::getMusicSound());
 	//tikiPlayer.setVolume(mapData.getTikiPercentage(player.pos)  * settings::getMusicSound());
 
 	soundManager.setMusicAndEffectVolume(player.pos);
+	soundManager.updateSoundTransation(deltaTime);
 
 	soundPlayer.setVolume(4 * settings::getAmbientSound());
 
@@ -1731,7 +1719,6 @@ bool gameLogic(float deltaTime)
 
 void closeGame()
 {
-	waterPlayer.stop();
 	
 	soundPlayer.stop();
 

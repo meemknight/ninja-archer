@@ -180,7 +180,7 @@ struct Bird
 
 	float frameTime = 0;
 
-	bool showing = 1;
+	bool showing = 0;
 	float changeTime = 0;
 
 	float getShowPerc();

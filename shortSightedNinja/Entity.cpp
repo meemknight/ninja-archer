@@ -1079,6 +1079,7 @@ void Bird::startEndMove(glm::vec2 start, glm::vec2 dest)
 
 void Bird::draw(gl2d::Renderer2D & renderer, float deltaTime, gl2d::Texture t, glm::vec2 playerPos)
 {
+
 	if (!showing)
 	{
 		return;

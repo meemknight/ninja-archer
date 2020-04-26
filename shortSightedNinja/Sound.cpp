@@ -1,9 +1,11 @@
 #include "Sound.h"
 #include "tools.h"
 
+#define MinSoundDist 32
+
 void SoundManager::setMusicPositions(MapData & mapData)
 {
-	unsigned short musicTypes[musicTapesCount] =
+	constexpr unsigned short musicTypes[musicTapesCount] =
 	{
 		Block::musicRed, Block::musicTiki, Block::musicSnow, Block::musicCave, Block::musicIce,
 		Block::musicBlue, Block::musicCrimson, Block::musicKhaki, Block::musicDarkGreen, Block::musicGreen, Block::musicLightGray
@@ -12,6 +14,20 @@ void SoundManager::setMusicPositions(MapData & mapData)
 	for (int i = 0; i < musicTapesCount; i++)
 	{
 		musicPositions[i].clear();
+	}
+
+	// sound effects
+	constexpr unsigned short soundTypes[musicEffectsCount] =
+	{
+		Block::musicEffectGreen,
+		Block::musicEffecSnow,
+		Block::musicEffecWater,
+		Block::musicEffecCave,
+	};
+
+	for (int i = 0; i < musicEffectsCount; i++)
+	{
+		effectsPositions[i].clear();
 	}
 
 	for (int y = 0; y < mapData.h; y++)
@@ -28,15 +44,29 @@ void SoundManager::setMusicPositions(MapData & mapData)
 					musicPositions[i].push_back({ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
 					break;
 				}
+
 			}
-		
+
+			for(int i=0; i<musicEffectsCount; i++)
+			{
+				if(b == soundTypes[i] ||
+					(i == musicEffects::musicEffectWater && isWaterMusicSource(b)))
+				{
+					if(b == soundTypes[i])
+					{
+						b = Block::none;
+					}
+
+					effectsPositions[i].push_back({ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
+				}
+			}
+
 		}
 
 	for (int i = 0; i < musicTapesCount; i++)
 	{
 		if(musicPositions[i].size() != 0)
 		{
-			glog("yes");
 			musicVect[i].setVolume(0);
 			musicVect[i].play();
 			musicVect[i].currentVolume = 0;
@@ -51,6 +81,24 @@ void SoundManager::setMusicPositions(MapData & mapData)
 		}
 	}
 
+	for (int i=0; i<musicEffectsCount; i++)
+	{
+		if(effectsPositions[i].size()!=0)
+		{
+			effectsVect[i].setVolume(0);
+			effectsVect[i].play();
+			effectsVect[i].currentVolume = 0;
+			effectsVect[i].desiredVolume = 0;
+		}else
+		{
+			effectsVect[i].setVolume(0);
+			effectsVect[i].stop();
+			effectsVect[i].currentVolume = 0;
+			effectsVect[i].desiredVolume = 0;
+		}
+	
+	}
+	
 
 }
 
@@ -86,7 +134,6 @@ void SoundManager::loadMusic()
 
 }
 
-
 float distFunc2(float dist)
 {
 
@@ -113,45 +160,176 @@ float distFunc2(float dist)
 
 void SoundManager::setMusicAndEffectVolume(glm::vec2 pos)
 {
-	float shortestDistVect[musicTapesCount];
-	for(int i=0; i< musicTapesCount; i++)
 	{
-		shortestDistVect[i] = -1;
+		float shortestDist[musicTapesCount];
+		for (int i = 0; i < musicTapesCount; i++)
+		{
+			shortestDist[i] = -1;
+		}
+
+		for (int m = 0; m < musicTapesCount; m++)
+		{
+			if (musicPositions[m].size() == 0) { continue; }
+
+			for (auto& i : musicPositions[m])
+			{
+				float dist = sqrt(
+					(pos.x - i.x) * (pos.x - i.x) +
+					(pos.y - i.y) * (pos.y - i.y)
+				);
+
+				if (shortestDist[m] < 0)
+				{
+					shortestDist[m] = dist;
+				}
+				else
+				{
+					shortestDist[m] = std::min(shortestDist[m], dist);
+				}
+
+			}
+
+			if(shortestDist[m] >  MinSoundDist * BLOCK_SIZE )
+			{
+				shortestDist[m] = -1;
+			}
+
+		}
+
+
+		float minSoundDist = -1;
+		int id = -1;
+
+		for(int i=0; i<musicTapesCount; i++)
+		{
+			if(shortestDist[i] > 0)
+			{
+				if(minSoundDist<0)
+				{
+					minSoundDist = shortestDist[i];
+					id = i;
+				}else if(minSoundDist > shortestDist[i])
+				{
+					minSoundDist = shortestDist[i];
+					id = i;
+				}
+
+			}
+		}
+
+		for (int i = 0; i < musicTapesCount; i++)
+		{
+			if(i == id)
+			{
+				musicVect[i].desiredVolume = 1;
+				//musicVect[i].setVolume(1 * settings.musicVolume);
+			}else
+			{
+				musicVect[i].desiredVolume = 0;
+				//musicVect[i].setVolume(0);
+			}
+
+			//if (shortestDist[i] > 0)
+			//{
+			//	float v = distFunc2(shortestDist[i]);
+			//	musicVect[i].setVolume(v * settings.musicVolume);
+			//};
+		}
+
 	}
 
-	for(int m=0; m< musicTapesCount; m++)
+	// set effect volume
 	{
-		if (musicPositions[m].size() == 0) { continue; }
-
-		for (auto& i : musicPositions[m])
+		float shortestDist[musicEffectsCount];
+		for(int i=0; i< musicEffectsCount; i++)
 		{
-			float dist = sqrt(
-				(pos.x - i.x) * (pos.x - i.x) +
-				(pos.y - i.y) * (pos.y - i.y)
-			);
+			shortestDist[i] = -1;
+		}
+		
+		for(int m=0; m<musicEffectsCount; m++)
+		{
+			//effectsPositions
+			if (effectsPositions[m].size() == 0) { continue; }
 
-			if (shortestDistVect[m] < 0)
+			for(auto &i : effectsPositions[m])
 			{
-				shortestDistVect[m] = dist;
+				float dist = sqrt(
+					(pos.x - i.x) * (pos.x - i.x) +
+					(pos.y - i.y) * (pos.y - i.y)
+				);
+
+				if (shortestDist[m] < 0)
+				{
+					shortestDist[m] = dist;
+				}
+				else
+				{
+					shortestDist[m] = std::min(shortestDist[m], dist);
+				}
 			}
-			else
+
+		}
+
+		for (int i = 0; i < musicEffectsCount; i++)
+		{
+			if(shortestDist[i]>0)
 			{
-				shortestDistVect[m] = std::min(shortestDistVect[m], dist);
+				float v = distFunc2(shortestDist[i]);
+				effectsVect[i].desiredVolume = v;
 			}
 
 		}
 
 	}
 
-	for (int i = 0; i < musicTapesCount; i++)
+}
+
+constexpr float transationSpeed = 0.10;
+
+void SoundManager::updateSoundTransation(float deltaTime)
+{
+	for(int i=0; i<musicTapesCount; i++)
 	{
-		if (shortestDistVect[i] > 0) 
+		if(musicVect[i].loaded && musicPositions[i].size())
 		{
-			float v = distFunc2(shortestDistVect[i]);
-			musicVect[i].setVolume(v * settings.musicVolume);
-		};
+			if(std::abs(musicVect[i].desiredVolume - musicVect[i].currentVolume) > transationSpeed * deltaTime)
+			{
+				if(musicVect[i].currentVolume > musicVect[i].desiredVolume)
+				{
+					musicVect[i].currentVolume -= transationSpeed * deltaTime;
+				}else
+				{
+					musicVect[i].currentVolume += transationSpeed * deltaTime;
+				}
+			}else
+			{
+				musicVect[i].currentVolume = musicVect[i].desiredVolume;
+			}
+
+			musicVect[i].setVolume(musicVect[i].currentVolume * settings.musicVolume);
+
+		}
+	
 	}
 
+	for (int i = 0; i < musicEffectsCount; i++)
+	{
+		effectsVect[i].currentVolume = effectsVect[i].desiredVolume;
+		effectsVect[i].setVolume(effectsVect[i].currentVolume * settings.musicVolume);
+	}
+}
+
+void SoundManager::updateSoundVolume()
+{
+	for (int i = 0; i < musicTapesCount; i++)
+	{
+		musicVect[i].setVolume(musicVect[i].currentVolume * settings.musicVolume);
+	}
+
+	for (int i = 0; i < musicEffectsCount; i++)
+	{
+		effectsVect[i].setVolume(effectsVect[i].currentVolume * settings.musicVolume);
+	}
 
 }
 

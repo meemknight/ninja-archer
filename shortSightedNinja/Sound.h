@@ -56,8 +56,8 @@ struct SoundManager
 	{
 		"resources//rainForest.wav",
 		0,
-		0,
 		"resources//water.wav",
+		0,
 	};
 
 	//this is the thing that playes music
@@ -86,6 +86,10 @@ struct SoundManager
 	void loadMusic();
 
 	void setMusicAndEffectVolume(glm::vec2 pos);
+
+	void updateSoundTransation(float deltaTime);
+	
+	void updateSoundVolume();
 
 	void stoppMusic();
 

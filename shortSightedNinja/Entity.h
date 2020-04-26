@@ -50,6 +50,7 @@ struct Entity
 	bool lockMovementDie = 0;
 	int isExitingLevel = -1;
 	bool accelerating = 0;
+	bool isSittingOnIce = 0;
 
 	float getAcceleration();
 

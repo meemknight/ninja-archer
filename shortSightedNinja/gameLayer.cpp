@@ -211,6 +211,7 @@ void loadLevel()
 	//player.updateMove();
 	player.lastPos = player.pos;
 
+	//todo refactor
 	player.dimensions = { 7, 7 };
 	player.dying = 0;
 	player.lockMovementDie = 0;
@@ -218,6 +219,7 @@ void loadLevel()
 	player.velocity = {};
 	player.isExitingLevel = -1;
 	player.wallGrab = 0;
+	player.isSittingOnIce = 0;
 
 	wallLights.clear();
 	//setup light sources
@@ -259,7 +261,8 @@ void respawn()
 	lightPerc = 1;
 	player.velocity = {};
 	player.wallGrab = 0;
-	
+	player.isSittingOnIce = 0;
+
 }
 
 bool initGame()
@@ -936,6 +939,8 @@ bool gameLogic(float deltaTime)
 		player.updateMove(deltaTime);
 
 		player.checkGrounded(mapData, deltaTime);
+
+		ilog(player.velocity.x);
 
 		if(!currentDialog.blockMovement())
 		{

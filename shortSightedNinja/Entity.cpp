@@ -9,9 +9,11 @@
 float gravitationalAcceleration = 64;
 float jumpSpeed = 22;
 float jumpFromWallSpeed = 22;
-float velocityClamp = 30;
+float velocityClampY = 30;
+float velocityClampX = 10;
 float drag = 0.15f;
-float strafeSpeed = 10;
+float dragX = 0.20f;
+float strafeSpeed = 8;
 float strafeSpeedMove = 10;
 float runSpeed = 14;
 float airRunSpeed = 10;
@@ -19,6 +21,7 @@ float grabMargin = 0.55f;
 float notGrabTimeVal = 0.06;
 bool snapWallGrab = 0;
 float ghostJumpTime = 0.08;
+float iceSlipX = 3;
 
 float arrowSpeed = 20;
 
@@ -212,6 +215,14 @@ void Entity::run(float speed)
 
 	if (speed) { accelerating = true; }
 
+	if(isSittingOnIce && speed)
+	{
+		float f = speed < 0 ? -1 : 1;
+
+		velocity.x = f * iceSlipX * BLOCK_SIZE;
+	
+	}
+
 }
 
 void Entity::airRun(float speed)
@@ -251,7 +262,13 @@ void Entity::airRun(float speed)
 		}
 	}
 	
-	if (speed) { velocity.x = 0; }
+	float dir = speed < 0 ? -1 : 1;
+	float velocityDir = velocity.x < 0 ? -1 : 1;
+
+
+	if((grounded && !isSittingOnIce) || ((dir != velocityDir) && speed)) { velocity.x = 0; }
+	
+	//if (speed && !isSittingOnIce ) { velocity.x = 0; }
 
 	if(iswebs)
 	{
@@ -286,8 +303,9 @@ void Entity::applyVelocity(float deltaTime)
 		notGrabTime -= deltaTime;
 	}
 
-	const float c = velocityClamp * BLOCK_SIZE;
-	velocity = glm::clamp(velocity, { -c,-c }, { c, c });
+	const float cx = velocityClampX * BLOCK_SIZE;
+	const float cy = velocityClampY * BLOCK_SIZE;
+	velocity = glm::clamp(velocity, { -cx,-cy }, { cx, cy });
 
 	if(wallGrab != 0)
 	{
@@ -297,25 +315,33 @@ void Entity::applyVelocity(float deltaTime)
 	pos += velocity * deltaTime;
 
 	//drag
+	float newDrag = dragX;
+
 	if(iswebs)
 	{
-		velocity.x += velocity.x * (-drag * deltaTime * BLOCK_SIZE *2);
-	}else
-	{
-		velocity.x += velocity.x * (-drag * deltaTime * BLOCK_SIZE);
+		newDrag *= 2;
 	}
+
+	if(isSittingOnIce)
+	{
+		//newDrag /= 2.f;
+	}
+
+	velocity.x += velocity.x * (-newDrag * deltaTime * BLOCK_SIZE);
+
 
 	if(iswebs)
 	{
 		velocity.y += velocity.y * (-drag * deltaTime * BLOCK_SIZE*4);
 	}
 
-	if(grounded || wallGrab)
+	if((grounded && !isSittingOnIce) || wallGrab)
 	{
 		velocity.x = 0;
 	}
 
-	if (std::fabs(velocity.x) < 10)
+
+	if (std::fabs(velocity.x) < 0.1)
 	{
 		velocity.x = 0;
 	}
@@ -348,14 +374,20 @@ void Entity::checkGrounded(MapData &mapDat, float deltaTime)
 	minx = std::max(minx, 0);
 	maxx = std::min(maxx, mapDat.w);
 
+	isSittingOnIce = false;
+
 	for (int x = minx; x <= maxx; x++)
 	{
+		if(isIce(mapDat.get(x, floor((pos.y + dimensions.y) / BLOCK_SIZE)).type))
+		{
+			isSittingOnIce = true;
+		}
+		
 		if (isCollidable(mapDat.get(x, floor((pos.y + dimensions.y) / BLOCK_SIZE)).type))
 		{
 			grounded = 1;
 			canJump = 1;
 			hasTouchGround = 1;
-			break;
 		}
 	}
 

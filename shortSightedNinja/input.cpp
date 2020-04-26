@@ -50,8 +50,8 @@ namespace input
 	WORD bindingsController[Buttons::buttonsCount] = { 0, XINPUT_GAMEPAD_DPAD_DOWN
 		, XINPUT_GAMEPAD_DPAD_LEFT, XINPUT_GAMEPAD_DPAD_RIGHT, XINPUT_GAMEPAD_A, 0, XINPUT_GAMEPAD_DPAD_UP,
 	XINPUT_GAMEPAD_LEFT_SHOULDER, XINPUT_GAMEPAD_RIGHT_SHOULDER, XINPUT_GAMEPAD_B, XINPUT_GAMEPAD_START };
-	float deadZone = 0.18f;
-	float moveSensitivity = 0.20f;
+	float deadZone = 0.28f;
+	float moveSensitivity = 0.25f;
 
 	int buttonsHeld[Buttons::buttonsCount] = {};
 	int buttonsPressed[Buttons::buttonsCount] = {};

@@ -512,6 +512,21 @@ inline bool isSign(unsigned short b)
 		b == Block::signDecoration5;
 }
 
+inline bool isIce(unsigned short b)
+{
+	return (b == Block::ice1
+		|| b == Block::ice2
+		|| b == Block::ice3
+		|| b == Block::ice4
+		|| b == Block::ice5
+		|| b == Block::ice6
+		|| b == Block::ice7
+		|| b == Block::ice8
+		|| b == Block::ice9
+		|| b == Block::ice10
+		|| b == Block::ice11);
+}
+
 struct BlockInfo
 {
 	bool hasNeighborLeft();

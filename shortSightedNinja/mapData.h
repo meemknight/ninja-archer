@@ -6,6 +6,7 @@
 #define BLOCK_SIZE 8
 #define BLOCK_COUNT 424
 
+
 namespace Block
 {
 	enum : unsigned short
@@ -128,14 +129,10 @@ namespace Block
 		woodSolid16,
 		woodSolid17,
 		woodSolid18,
+		ice1, ice2, ice3, ice4, ice5, ice6, ice7, ice8, ice9, ice10, ice11,
+		ice12, ice13, ice14, ice15, iceDino1, iceDino2, iceDino3, iceDino4, iceDino5, iceDino6, iceDino7,
 #pragma region unfinished
-
-		unfinished5,
-		unfinished6, unfinished7, unfinished8, unfinished9, unfinished10,
-		unfinished11, unfinished12, unfinished13, unfinished14, unfinished15,
-		unfinished16, unfinished17, unfinished18, unfinished19, unfinished20,
-		unfinished21, unfinished22, unfinished23, unfinished24, unfinished25,
-		unfinished26, unfinished27, unfinished28, unfinished29, unfinished30,
+		unfinished27, unfinished28, unfinished29, unfinished30,
 		unfinished31, unfinished32, unfinished33, unfinished34, unfinished35,
 		unfinished36, unfinished37, unfinished38, unfinished39, unfinished40,
 		unfinished41, unfinished42, unfinished43, unfinished44, unfinished45,
@@ -225,7 +222,7 @@ namespace Block
 		woddenDecoration5,
 		woddenDecoration6,
 		woddenDecoration7,
-		musicGreen,
+		musicEffectGreen,
 		musicRed,
 		musicTiki,
 		musicSnow,
@@ -260,20 +257,85 @@ namespace Block
 		spike2,
 		spike3,
 		spike4,
+		icicle1,
+		icicle2,
+		iceBackground1,
+		iceBackground2,
+		iceBackground3,
+		iceBackground4,
+		iceBackground5,
+		iceBackground6,
+		iceBackground7,
+		iceBackground8,
+		iceBackground9,
+		iceBackground10,
+		iceBackground11,
+		iceBackground12,
+		iceBackground13,
+		iceBackground14,
+		iceBackground15,
+		iceBackground16,
+		iceBackground17,
+		iceBackground18,
+		snowPlant1,
+		snowPlant2,
+		snowBackgroun1,
+		snowBackgroun2,
+		snowBackgroun3,
+		snowBackgroun4,
+		snowBackgroun5,
+		snowBackgroun6,
+		snowBackgroun7,
+		snowBackgroun8,
+		snowUnlitTorch,
+		snowLitTorch,
+		musicIce,
+		musicBlue,
+		musicCrimson,
+		musicKhaki,
+		musicDarkGreen,
+		musicGreen,
+		musicLightGray,
+		musicEffecSnow,
+		musicEffecWater,
+		musicEffecCave,
 		lastBlock,
 
 	};
 };
 
-inline bool isUnfinished(unsigned short b)
-{
-	return b >= Block::unfinished5 && b <= Block::unfinished75;
-}
-
-
 inline bool isAir(unsigned short b)
 {
 	return b == Block::none;
+}
+
+inline bool isSpike(unsigned short b)
+{
+	return
+		b == Block::spike1
+		|| b == Block::spike2
+		|| b == Block::spike3
+		|| b == Block::spike4
+		;
+
+}
+
+inline bool isWaterMusicSource(unsigned short b)
+{
+	if (
+		b == Block::waterFallBegin ||
+		b == Block::waterFallEnd ||
+		b == Block::water7 ||
+		b == Block::water4 ||
+		b == Block::musicEffecWater
+		)
+	{
+		return true;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 inline bool isRedSolid(unsigned short b)
@@ -334,7 +396,7 @@ inline bool isBlueSolid(unsigned short b)
 	else { return 0; }
 }
 
-inline bool isBlueNoSolid(unsigned short b)
+inline bool isBlueNoSolid(unsigned short  b)
 {
 	if (
 		b == Block::blueNoSolid1 ||
@@ -395,7 +457,13 @@ inline bool isColidable(unsigned short b)
 
 }
 
-inline bool isOpaque(unsigned short b)
+
+inline bool isCollidableForArrows(unsigned short b)
+{
+	return (isColidable(b) && b != Block::bareer);
+}
+
+inline bool isOpaque(unsigned short  b)
 {
 	return isColidable(b);
 }
@@ -403,31 +471,29 @@ inline bool isOpaque(unsigned short b)
 inline bool isLitTorch(unsigned short b)
 {
 	return b == Block::torceTopBrickLit || b == Block::torceTopLeavesLit || b == Block::litLantern
-		|| b == Block::torchLitWood;
+		|| b == Block::torchLitWood || b == Block::snowLitTorch;
 }
 
-inline bool unLitTorch(unsigned short  b)
+inline bool unLitTorch(unsigned short b)
 {
 	return b == Block::torceTopBrickUnlit || b == Block::torceTopLeavesUnlit || b == Block::unlitLantern
-		|| b == Block::torchUnlitWood;
+		|| b == Block::torchUnlitWood || b == Block::snowUnlitTorch;
 
 }
 
-inline bool isWaterMusicSource(unsigned short b)
+inline bool isInteractableGrass(unsigned short b)
 {
-	if (
-		b == Block::waterFallBegin ||
-		b == Block::waterFallEnd ||
-		b == Block::water7 ||
-		b == Block::water4
-		)
-	{
-		return true;
-	}
-	else
-	{
-		return 0;
-	}
+
+	return b == Block::grassDecoration ||
+		b == Block::leavesRight ||
+		b == Block::leavesLeft ||
+		b == Block::vines1 ||
+		b == Block::vines2 ||
+		b == Block::grassDecoration2 ||
+		b == Block::grassDecoration3 ||
+		b == Block::grassDecoration4 ||
+		b == Block::snowPlant1 ||
+		b == Block::snowPlant2;
 }
 
 inline bool isSign(unsigned short b)
@@ -440,29 +506,17 @@ inline bool isSign(unsigned short b)
 		b == Block::signDecoration5;
 }
 
+
 inline bool isDoor(unsigned short b)
 {
 	return b == Block::levelExit;
 }
 
-inline bool isSpike(unsigned short b)
-{
-	return
-		b == Block::spike1
-		|| b == Block::spike2
-		|| b == Block::spike3
-		|| b == Block::spike4
-		;
 
+inline bool isUnfinished(unsigned short b)
+{
+	return b >= Block::unfinished27 && b <= Block::unfinished75;
 }
-
-
-
-struct Edge
-{
-	float sx, sy;
-	float ex, ey;
-};
 
 struct torchData
 {
@@ -527,11 +581,8 @@ struct BlockInfo
 #define SOUTH 1
 #define EAST 2
 #define WEST 3
-struct VisibilityPolygonPoints
-{
-	float angle;
-	float x, y;
-};
+
+
 struct MapData
 {
 	BlockInfo* data;
@@ -539,14 +590,11 @@ struct MapData
 	int w;
 	int h;
 
-	std::vector<Edge> vecEdges;
 
-	std::vector<VisibilityPolygonPoints> vecVisibilityPolygonPoints;
 
 	void create(int w, int h, const unsigned short* d);
 	BlockInfo& get(int x, int y);
 
-	void CalculateVisibilityPolygon(float ox, float oy, float radius);
 
 	void clearColorData();
 

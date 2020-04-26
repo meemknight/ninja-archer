@@ -45,10 +45,6 @@ sf::SoundBuffer pickupSoundbuffer;
 sf::SoundBuffer leavesSoundbuffer;
 sf::Sound soundPlayer;
 sf::Music waterPlayer;
-sf::Music tikiPlayer;
-sf::Music greenPlayer;
-sf::Music redPlayer;
-sf::Music grayPlayer;
 
 SoundManager soundManager;
 
@@ -145,6 +141,7 @@ void respawn();
 
 void loadLevel()
 {
+	menu::resetMenuState();
 	ingameMenuMainPage = 1;
 	inGameMenu = 0;
 	//currentDialog.dialogData.push_back({{ "Dialog, Sample.\nFraze 2. Text3." }, textureDataForDialog["character"]});
@@ -250,41 +247,6 @@ void loadLevel()
 		waterPlayer.stop();
 	}
 
-	if (mapData.tikiSoundPos.size() > 0)
-	{
-		tikiPlayer.play();
-		tikiPlayer.setVolume(0);
-	}else
-	{
-		tikiPlayer.stop();
-	}
-
-	if (mapData.greenSoundPos.size() > 0)
-	{
-		greenPlayer.play();
-		greenPlayer.setVolume(0);
-	}else
-	{
-		greenPlayer.stop();
-	}
-
-	if (mapData.redSoundPos.size() > 0)
-	{
-		redPlayer.play();
-		redPlayer.setVolume(0);
-	}else
-	{
-		redPlayer.stop();
-	}
-
-	if (mapData.caveSoundPos.size() > 0)
-	{
-		grayPlayer.play();
-		grayPlayer.setVolume(0);
-	}else
-	{
-		grayPlayer.stop();
-	}
 
 	saveState(playerSpawnPos, currentLevel);
 	respawn();
@@ -309,7 +271,8 @@ void respawn()
 	playerLight = 5;
 	lightPerc = 1;
 	player.velocity = {};
-
+	player.wallGrab = 0;
+	
 }
 
 bool initGame()
@@ -385,18 +348,6 @@ bool initGame()
 	
 		waterPlayer.openFromFile("resources//water.wav");
 		waterPlayer.setLoop(1);
-		
-		tikiPlayer.openFromFile("resources//tikiForest.wav");
-		tikiPlayer.setLoop(1);
-
-		greenPlayer.openFromFile("resources//rainForest.wav");
-		greenPlayer.setLoop(1);
-
-		redPlayer.openFromFile("resources//jungle.wav");
-		redPlayer.setLoop(1);
-
-		grayPlayer.openFromFile("resources//cave.wav");
-		grayPlayer.setLoop(1);
 
 		soundPlayer.setVolume(2);
 	
@@ -453,16 +404,11 @@ bool gameLogic(float deltaTime)
 	{
 
 		waterPlayer.stop();
-		greenPlayer.stop();
-		tikiPlayer.stop();
-		redPlayer.stop();
-		grayPlayer.stop();
+		
+		soundManager.stoppMusic();
+
 		soundPlayer.stop();
 		waterPlayer.setVolume(0);
-		greenPlayer.setVolume(0);
-		redPlayer.setVolume(0);
-		grayPlayer.setVolume(0);
-		tikiPlayer.setVolume(0);
 
 		renderer2d.currentCamera = gl2d::cameraCreateDefault();
 
@@ -760,7 +706,7 @@ bool gameLogic(float deltaTime)
 
 			if(ingameMenuMainPage)
 			{
-			
+				
 				menu::startMenu();
 			
 				menu::uninteractableCentreText("Menu");
@@ -780,6 +726,7 @@ bool gameLogic(float deltaTime)
 				if(s)
 				{
 					ingameMenuMainPage = 0;
+					menu::resetMenuState();
 					settings::setMainSettingsPage();
 				}
 				if (exit)
@@ -793,6 +740,7 @@ bool gameLogic(float deltaTime)
 				settings::displaySettings(renderer2d, deltaTime);
 				if (currentSettingsMenu == 0) 
 				{
+					menu::resetMenuState();
 					ingameMenuMainPage = 1;
 				};
 			}
@@ -813,6 +761,7 @@ bool gameLogic(float deltaTime)
 		if (input::isKeyReleased(input::Buttons::menu))
 		{
 			inGameMenu = true;
+			menu::resetMenuState();
 			ingameMenuMainPage = 1;
 			settings::setMainSettingsPage();
 		}
@@ -852,11 +801,15 @@ bool gameLogic(float deltaTime)
 
 #pragma region music
 	 
+	soundManager.settings.musicVolume = settings::getMusicSound();
+
 	waterPlayer.setVolume(mapData.getWaterPercentage(player.pos)* settings::getMusicSound());
-	greenPlayer.setVolume(mapData.getGreenPercentage(player.pos)* settings::getMusicSound());
-	redPlayer.setVolume(mapData.getRedPercentage(player.pos)    * settings::getMusicSound());
-	grayPlayer.setVolume(mapData.getCavePercentage(player.pos)  * settings::getMusicSound());
-	tikiPlayer.setVolume(mapData.getTikiPercentage(player.pos)  * settings::getMusicSound());
+	//greenPlayer.setVolume(mapData.getGreenPercentage(player.pos)* settings::getMusicSound());
+	//redPlayer.setVolume(mapData.getRedPercentage(player.pos)    * settings::getMusicSound());
+	//grayPlayer.setVolume(mapData.getCavePercentage(player.pos)  * settings::getMusicSound());
+	//tikiPlayer.setVolume(mapData.getTikiPercentage(player.pos)  * settings::getMusicSound());
+
+	soundManager.setMusicAndEffectVolume(player.pos);
 
 	soundPlayer.setVolume(4 * settings::getAmbientSound());
 
@@ -1779,11 +1732,10 @@ bool gameLogic(float deltaTime)
 void closeGame()
 {
 	waterPlayer.stop();
-	greenPlayer.stop();
-	tikiPlayer.stop();
-	redPlayer.stop();
-	grayPlayer.stop();
+	
 	soundPlayer.stop();
+
+	soundManager.stoppMusic();
 
 	saveState(playerSpawnPos, currentLevel);
 

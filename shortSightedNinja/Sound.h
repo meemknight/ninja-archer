@@ -67,6 +67,10 @@ struct SoundManager
 		bool loaded = 0;
 		float currentVolume = 0;
 		float desiredVolume = 0;
+
+		void play() { if (loaded)m.play(); }
+		void stop() { if (loaded)m.stop(); }
+		void setVolume(float f) { if (loaded)m.setVolume(f * 100); }
 	};
 
 	//this vector holds music players
@@ -74,14 +78,16 @@ struct SoundManager
 	MusicStruct effectsVect[musicEffectsCount] = {};
 
 	//this holds sound emitors positions and it has no size, that sound doesn't exist
-	std::vector<glm::ivec2> musicPositions[tapes::musicTapesCount] = {};
-	std::vector<glm::ivec2> effectsPositions[musicEffects::musicEffectsCount] = {};
+	std::vector<glm::vec2> musicPositions[tapes::musicTapesCount] = {};
+	std::vector<glm::vec2> effectsPositions[musicEffects::musicEffectsCount] = {};
 
 	void setMusicPositions(MapData &mapData);
 
 	void loadMusic();
 
 	void setMusicAndEffectVolume(glm::vec2 pos);
+
+	void stoppMusic();
 
 };
 

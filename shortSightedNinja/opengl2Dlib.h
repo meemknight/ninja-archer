@@ -7,6 +7,7 @@
 
 namespace gl2d
 {
+
 	void init();
 
 	void defaultErrorFunc(const char* msg);
@@ -16,6 +17,9 @@ namespace gl2d
 	errorFuncType *setErrorFuncCallback(errorFuncType *newFunc);
 
 	struct Font;
+
+	//returns false on fail
+	bool setVsync(bool b);
 
 	namespace internal
 	{

@@ -47,6 +47,9 @@ extern "C"
 const float width = 960;
 const float heigth = 680;
 
+static LARGE_INTEGER queryFrequency;
+static bool openglVsync = 0;
+
 int MAIN
 {
 
@@ -113,13 +116,24 @@ int MAIN
 		return 0;
 	}
 
-	int time1 = clock();
-	int time2 = clock();
+
+	QueryPerformanceFrequency(&queryFrequency);
+
+	LARGE_INTEGER time1 = {};
+	LARGE_INTEGER time2 = {};
+
+	QueryPerformanceCounter(&time1);
+	QueryPerformanceCounter(&time2);
 
 	timeBeginPeriod(1);
 	//todo probably end this when in menu
 	//todo also check if works if not, do not use sleep
 	//todo probably use opengl to implement this if supported https://www.khronos.org/opengl/wiki/Swap_Interval#In_Windows
+
+	if(gl2d::setVsync(true))
+	{
+		openglVsync = true;
+	}
 
 	while (!quit)
 	{
@@ -131,26 +145,21 @@ int MAIN
 		}
 		else
 		{
-			time2 = clock();
-			int deltaTime = time2 - time1;
-			time1 = clock();
-			int endFrame = time1 + 8;
+			QueryPerformanceCounter(&time2);
+			int deltaTime = time2.QuadPart - time1.QuadPart;
+			QueryPerformanceCounter(&time1);
+
+			float endFrame = (time1.QuadPart/ (float)queryFrequency.QuadPart) + 8;
 			//todo variable frame rate selector
 			//todo change to queryPerformance counter
 			//note real64 MSPerFrame = (((1000.0f*(real64)CounterElapsed) / (real64)PerfCountFrequency));
 
-			double dDeltaTime = (double)deltaTime / CLOCKS_PER_SEC;
+			double dDeltaTime = (double)deltaTime / queryFrequency.QuadPart;
 			static int count;
 			static double accum;
 			accum += dDeltaTime;
 			count++;
-			if(accum>1)
-			{
-				accum -= 1;
-				//
-				(count);
-				count = 0;
-			}
+		
 
 			//todo
 			float fDeltaTime = std::min(dDeltaTime, 1.0 / 20.0);
@@ -166,7 +175,12 @@ int MAIN
 				platform::showMouse(true);
 			}
 
-
+			if (accum > 1)
+			{
+				accum -= 1;
+				ilog(count);
+				count = 0;
+			}
 
 			if (!gameLogic(fDeltaTime))
 			{
@@ -187,9 +201,15 @@ int MAIN
 
 			SwapBuffers(hdc);
 		
-			int actualEnd = clock();
-			int sleep = endFrame - actualEnd;
-			if (sleep > 0) { Sleep(sleep); }
+			if (!openglVsync) 
+			{
+				LARGE_INTEGER actualEnd;
+				QueryPerformanceCounter(&actualEnd);
+
+				//int sleep = endFrame - (actualEnd.QuadPart / queryFrequency.QuadPart);
+				int sleep = (1000.0 / 60.0) - (dDeltaTime * 1000.0);
+				if (sleep > 0) { Sleep(sleep); }
+			}
 
 			lbuttonPressed = false;
 			rbuttonPressed = false;
@@ -418,12 +438,12 @@ namespace platform
 
 	int isKeyHeld(int key)
 	{
-		return GetAsyncKeyState(key)&& platform::isFocused();
+		return GetAsyncKeyState(key) && platform::isFocused();
 	}
 
 	int isKeyPressedOn(int key)
 	{
-		return ( GetAsyncKeyState(key) & 0x8000) &&platform::isFocused();
+		return ( GetAsyncKeyState(key) & 0x8000) && platform::isFocused();
 	}
 
 	int isLMouseButtonPressed()
@@ -489,8 +509,10 @@ namespace platform
 		lastShow = show;
 	}
 
+	//todo probably rework
 	bool isFocused()
 	{
+		//return 1;
 		return GetActiveWindow() == wind;
 	}
 

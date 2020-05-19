@@ -1,4 +1,5 @@
 #include "opengl2Dlib.h"
+#include <GL/wglew.h>
 #include <fstream>
 #include <sstream>
 #include "tools.h"
@@ -188,12 +189,47 @@ namespace gl2d
 		}
 	}
 
+	struct
+	{
+		bool WGL_EXT_swap_control_ext;
+	}extensions = {};
+
 	void init()
 	{
+		int last = 0;
+		glGetIntegerv(GL_NUM_EXTENSIONS, &last);
+		for(int i=0; i<last; i++)
+		{
+			const char *c = (const char*)glGetStringi(GL_EXTENSIONS, i);
+			if(strcmp(c, "WGL_EXT_swap_control") == 0)
+			{
+				extensions.WGL_EXT_swap_control_ext = true;
+				break;
+			}
+		}
+
+		if (wglGetProcAddress("wglSwapIntervalEXT") == nullptr)
+		{
+			extensions.WGL_EXT_swap_control_ext = false;
+		}
+
 		defaultShader = internal::createShaderProgram(defaultVertexShader, defaultFragmentShader);
 		maskShader = internal::createShaderProgram(defaultVertexShader, maskFragmentShader);
 		maskSamplerUniform = glGetUniformLocation(maskShader.id, "u_mask");
 		enableNecessaryGLFeatures();
+	}
+
+	bool setVsync(bool b)
+	{
+		if(extensions.WGL_EXT_swap_control_ext)
+		{
+			wglSwapIntervalEXT(b);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	glm::vec2 rotateAroundPoint(glm::vec2 vec, glm::vec2 point, const float degrees)

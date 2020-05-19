@@ -196,21 +196,22 @@ namespace gl2d
 
 	void init()
 	{
-		int last = 0;
-		glGetIntegerv(GL_NUM_EXTENSIONS, &last);
-		for(int i=0; i<last; i++)
-		{
-			const char *c = (const char*)glGetStringi(GL_EXTENSIONS, i);
-			if(strcmp(c, "WGL_EXT_swap_control") == 0)
-			{
-				extensions.WGL_EXT_swap_control_ext = true;
-				break;
-			}
-		}
+		//int last = 0;
+		//glGetIntegerv(GL_NUM_EXTENSIONS, &last);
+		//for(int i=0; i<last; i++)
+		//{
+		//	const char *c = (const char*)glGetStringi(GL_EXTENSIONS, i);
+		//	if(strcmp(c, "WGL_EXT_swap_control") == 0)
+		//	{
+		//		extensions.WGL_EXT_swap_control_ext = true;
+		//		break;
+		//	}
+		//}
+		//todo check ?
 
-		if (wglGetProcAddress("wglSwapIntervalEXT") == nullptr)
+		if (wglGetProcAddress("wglSwapIntervalEXT") != nullptr)
 		{
-			extensions.WGL_EXT_swap_control_ext = false;
+			extensions.WGL_EXT_swap_control_ext = true;
 		}
 
 		defaultShader = internal::createShaderProgram(defaultVertexShader, defaultFragmentShader);

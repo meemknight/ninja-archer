@@ -26,7 +26,7 @@ namespace input
 
 	void loadXinput()
 	{
-
+		//todo also load 9-0-1
 		HMODULE xinputLib = LoadLibrary("xinput1_4.dll");
 		if (!xinputLib)
 		{
@@ -100,10 +100,18 @@ namespace input
 	void updateInput()
 	{
 		XINPUT_STATE s;
-		bool read = 1;
-		if (xInputLoaded == 0 || DynamicXinputGetState(0, &s) != ERROR_SUCCESS)
+		bool read = 0;
+		if (xInputLoaded != 0)
 		{
-			read = 0;
+			for(int i=0; i<3; i++)
+			{
+				if (DynamicXinputGetState(i, &s) != ERROR_SUCCESS)
+				{
+					read = 1;
+					break;
+				}
+			}
+
 		}
 
 #pragma region determin whether controller or not
@@ -159,6 +167,7 @@ namespace input
 
 		if (read)
 		{
+			//todo proper normalize
 			const XINPUT_GAMEPAD *pad = &s.Gamepad;
 			float retValX = pad->sThumbRX / (float)SHRT_MAX;
 			float retValY = -pad->sThumbRY / (float)SHRT_MAX;

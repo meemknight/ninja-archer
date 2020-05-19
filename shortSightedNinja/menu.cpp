@@ -86,8 +86,19 @@ float speed = 0.3;
 
 void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture, gl2d::Font f, bool * backPressed, float deltaTime)
 {
-	//todo check if button hasChanged
-	//todo check if console or mouse
+	//input bindings
+	///todo add your own functions here
+
+	bool usingControllerInput = input::isControllerInput();
+	bool acceptKeyReleased = input::isKeyReleased(input::Buttons::jump);
+	bool leftPressed = input::isKeyHeld(input::Buttons::left);
+	bool rightPressed = input::isKeyHeld(input::Buttons::right);
+	bool upReleased = input::isKeyReleased(input::Buttons::up);
+	bool downReleased = input::isKeyReleased(input::Buttons::down);
+	bool escReleased = input::isKeyReleased(input::Buttons::esc);
+
+	//
+
 
 	auto c = renderer.currentCamera;
 	renderer.currentCamera.setDefault();
@@ -143,7 +154,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 			box.y -= box.w;
 			box.z += bonusW;
 
-			if(!input::isControllerInput())
+			if(!usingControllerInput)
 			{
 				if(Ui::isInButton(p,box) && mouseMoved)
 				{
@@ -159,8 +170,8 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 				renderer.renderText({ textBox.x, textBox.y }, i.text, f, color,
 					0.7, 4, 3, false);
 
-				if (input::isKeyReleased(input::Buttons::jump) ||
-						(!input::isControllerInput()
+				if (acceptKeyReleased ||
+						(!usingControllerInput
 							&&	
 							Ui::isButtonReleased(p, box)
 						)
@@ -205,7 +216,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 			box.y -= box.w;
 			box.z += bonusW;
 
-			if (!input::isControllerInput())
+			if (!usingControllerInput)
 			{
 				if (Ui::isInButton(p, box) && mouseMoved)
 				{
@@ -225,11 +236,11 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 
 				if (i.fVal)
 				{
-					if (input::isKeyHeld(input::Buttons::left))
+					if (leftPressed)
 					{
 						*i.fVal -= deltaTime * speed;
 					}
-					if (input::isKeyHeld(input::Buttons::right))
+					if (rightPressed)
 					{
 						*i.fVal += deltaTime * speed;
 					}
@@ -270,7 +281,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 			box.y -= box.w;
 			box.z += bonusW;
 
-			if (!input::isControllerInput())
+			if (!usingControllerInput)
 			{
 				if (Ui::isInButton(p, box) && mouseMoved)
 				{
@@ -285,9 +296,9 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 				renderer.renderText({ textBox.x, textBox.y }, i.text, f, { 1,1,0.2,1 },
 					0.7, 4, 3, false, { 0.1,0.1,0.1,1 });
 
-				if (input::isKeyReleased(input::Buttons::jump) ||
+				if (acceptKeyReleased ||
 					(
-						!input::isControllerInput()
+						!usingControllerInput
 						&&
 						Ui::isButtonReleased(p, box)
 						)
@@ -315,24 +326,23 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 	}
 
 
-	if (input::isKeyReleased(input::Buttons::up))
+	if (upReleased)
 	{
 		perMenuData.cursorIndex--;
 	}
 		
-	if(input::isKeyReleased(input::Buttons::down))
+	if(downReleased)
 	{
 		perMenuData.cursorIndex++;
 	}
 
-	if (input::isKeyReleased(input::Buttons::esc))
+	if (escReleased)
 	{
 		if(backPressed)
 		{
 			*backPressed = true;
 		}
 	}
-
 
 	if(perMenuData.cursorIndex < 0)
 	{

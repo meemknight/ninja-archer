@@ -197,7 +197,9 @@ void Entity::strafe(int dir)
 	velocity.x = dir * strafeSpeed * BLOCK_SIZE;
 }
 
-void Entity::run(float speed)
+constexpr float iceAcceleration = 10;
+
+void Entity::run(float speed, float deltaTime)
 {
 	if (isExitingLevel != -1 || lockMovementDie)
 	{
@@ -219,9 +221,23 @@ void Entity::run(float speed)
 	{
 		float f = speed < 0 ? -1 : 1;
 
-		velocity.x = f * iceSlipX * BLOCK_SIZE;
-	
+		velocity.x += f * iceSlipX * BLOCK_SIZE * deltaTime * iceAcceleration;
+
+		if(speed < 0)
+		{
+			velocity.x = std::max(-1 * iceSlipX * BLOCK_SIZE, velocity.x);
+		}else
+		{
+			velocity.x = std::min(1 * iceSlipX * BLOCK_SIZE, velocity.x);
+		}
+
 	}
+
+	//todo check what i did earlier
+	//if(!isSittingOnIce && speed)
+	//{
+	//	velocity.x = 0;
+	//}
 
 }
 
@@ -268,7 +284,8 @@ void Entity::airRun(float speed)
 
 	if((grounded && !isSittingOnIce) || ((dir != velocityDir) && speed)) { velocity.x = 0; }
 	
-	//if (speed && !isSittingOnIce ) { velocity.x = 0; }
+	//this removes velocity
+	if (speed && !isSittingOnIce ) { velocity.x = 0; }
 
 	if(iswebs)
 	{

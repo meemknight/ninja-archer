@@ -823,7 +823,7 @@ bool gameLogic(float deltaTime)
 		{
 			if (player.grounded)
 			{
-				player.run(deltaTime * input::getMoveDir());
+				player.run(deltaTime * input::getMoveDir(), deltaTime);
 			}
 			else
 			{
@@ -928,8 +928,7 @@ bool gameLogic(float deltaTime)
 		jumpDelayTime = 0;
 	}
 
-
-		renderer2d.currentCamera.follow(player.pos + (player.dimensions / 2.f), deltaTime * 110, 4 * BLOCK_SIZE, renderer2d.windowW, renderer2d.windowH);
+		renderer2d.currentCamera.follow(player.pos + (player.dimensions / 2.f), deltaTime * 100, 4 * BLOCK_SIZE, renderer2d.windowW, renderer2d.windowH);
 
 		player.applyGravity(deltaTime);
 		player.applyVelocity(deltaTime);
@@ -940,7 +939,7 @@ bool gameLogic(float deltaTime)
 
 		player.checkGrounded(mapData, deltaTime);
 
-		ilog(player.velocity.x);
+		//ilog(player.velocity.x);
 
 		if(!currentDialog.blockMovement())
 		{
@@ -1549,6 +1548,7 @@ bool gameLogic(float deltaTime)
 
 	bird.update(deltaTime);
 	bird.draw(renderer2d, deltaTime, birdTexture, player.pos);
+	
 
 #pragma endregion
 

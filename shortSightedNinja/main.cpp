@@ -116,6 +116,11 @@ int MAIN
 	int time1 = clock();
 	int time2 = clock();
 
+	timeBeginPeriod(1);
+	//todo probably end this when in menu
+	//todo also check if works if not, do not use sleep
+	//todo probably use opengl to implement this if supported https://www.khronos.org/opengl/wiki/Swap_Interval#In_Windows
+
 	while (!quit)
 	{
 		MSG msg;
@@ -130,7 +135,10 @@ int MAIN
 			int deltaTime = time2 - time1;
 			time1 = clock();
 			int endFrame = time1 + 8;
-		
+			//todo variable frame rate selector
+			//todo change to queryPerformance counter
+			//note real64 MSPerFrame = (((1000.0f*(real64)CounterElapsed) / (real64)PerfCountFrequency));
+
 			double dDeltaTime = (double)deltaTime / CLOCKS_PER_SEC;
 			static int count;
 			static double accum;
@@ -478,7 +486,6 @@ namespace platform
 			}
 		}
 	
-		
 		lastShow = show;
 	}
 

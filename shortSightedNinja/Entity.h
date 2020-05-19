@@ -20,6 +20,7 @@ struct Entity
 	bool blueGrab=0;
 	bool grayGrab=0;
 	int wallGrab = 0;
+	int iceGrab = 0;
 	int lastWallGrab = 0;
 
 	bool grounded;
@@ -60,7 +61,7 @@ struct Entity
 	
 	void strafe(int dir);
 
-	void run(float speed);
+	void run(float speed, float deltaTime);
 
 	void airRun(float speed);
 

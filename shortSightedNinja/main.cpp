@@ -125,10 +125,6 @@ int MAIN
 	QueryPerformanceCounter(&time1);
 	QueryPerformanceCounter(&time2);
 
-	//todo probably end this when in menu
-	//todo also check if works if not, do not use sleep
-	//todo probably use opengl to implement this if supported https://www.khronos.org/opengl/wiki/Swap_Interval#In_Windows
-
 	if(gl2d::setVsync(true))
 	{
 		openglVsync = true;
@@ -148,19 +144,12 @@ int MAIN
 			int deltaTime = time2.QuadPart - time1.QuadPart;
 			QueryPerformanceCounter(&time1);
 
-			float endFrame = (time1.QuadPart/ (float)queryFrequency.QuadPart) + 8;
-			//todo variable frame rate selector
-			//todo change to queryPerformance counter
-			//note real64 MSPerFrame = (((1000.0f*(real64)CounterElapsed) / (real64)PerfCountFrequency));
-
 			double dDeltaTime = (double)deltaTime / (double)queryFrequency.QuadPart;
 			static int count;
 			static double accum;
 			accum += dDeltaTime;
 			count++;
 		
-
-			//todo
 			float fDeltaTime = std::min(dDeltaTime, 1.0 / 20.0);
 		
 			input::updateInput();
@@ -202,15 +191,31 @@ int MAIN
 		
 			if (!openglVsync) 
 			{
-				timeBeginPeriod(1);
+				if(timeBeginPeriod(1) == TIMERR_NOERROR)
+				{
+					QueryPerformanceCounter(&time2);
+					int deltaTime2 = time2.QuadPart - time1.QuadPart;
+					double dDeltaTime2 = (double)deltaTime2 / (double)queryFrequency.QuadPart;
+				
+					int sleep = (1000.0 / 60.0) - (dDeltaTime2 * 1000.0);
+					if (sleep > 0) { Sleep(sleep); }
+					timeEndPeriod(1);
+				}
+				else 
+				{
+					int sleep = 0;
+					do 
+					{
+						QueryPerformanceCounter(&time2);
+						int deltaTime2 = time2.QuadPart - time1.QuadPart;
+						double dDeltaTime2 = (double)deltaTime2 / (double)queryFrequency.QuadPart;
 
-				QueryPerformanceCounter(&time2);
-				int deltaTime2 = time2.QuadPart - time1.QuadPart;
-				double dDeltaTime2 = (double)deltaTime2/ (double)queryFrequency.QuadPart;
+						sleep = (1000.0 / 60.0) - (dDeltaTime2 * 1000.0);
+					}
+					while (sleep > 0);
+				}
 
-				int sleep = (1000.0 / 60.0) - (dDeltaTime2 * 1000.0);
-				if (sleep > 0) { Sleep(sleep); }
-				timeEndPeriod(1);
+				
 			}
 
 			lbuttonPressed = false;

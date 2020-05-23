@@ -12,6 +12,7 @@ void DialogInteraction::resetDialogData()
 	currentDialogPos = 0;
 	mTextToShow.clear();
 	mNextLetter = 0;
+	hasFinishedDialog = 0;
 	text = {};
 }
 

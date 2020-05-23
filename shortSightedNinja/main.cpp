@@ -125,7 +125,6 @@ int MAIN
 	QueryPerformanceCounter(&time1);
 	QueryPerformanceCounter(&time2);
 
-	timeBeginPeriod(1);
 	//todo probably end this when in menu
 	//todo also check if works if not, do not use sleep
 	//todo probably use opengl to implement this if supported https://www.khronos.org/opengl/wiki/Swap_Interval#In_Windows
@@ -154,7 +153,7 @@ int MAIN
 			//todo change to queryPerformance counter
 			//note real64 MSPerFrame = (((1000.0f*(real64)CounterElapsed) / (real64)PerfCountFrequency));
 
-			double dDeltaTime = (double)deltaTime / queryFrequency.QuadPart;
+			double dDeltaTime = (double)deltaTime / (double)queryFrequency.QuadPart;
 			static int count;
 			static double accum;
 			accum += dDeltaTime;
@@ -203,12 +202,15 @@ int MAIN
 		
 			if (!openglVsync) 
 			{
-				LARGE_INTEGER actualEnd;
-				QueryPerformanceCounter(&actualEnd);
+				timeBeginPeriod(1);
 
-				//int sleep = endFrame - (actualEnd.QuadPart / queryFrequency.QuadPart);
-				int sleep = (1000.0 / 60.0) - (dDeltaTime * 1000.0);
+				QueryPerformanceCounter(&time2);
+				int deltaTime2 = time2.QuadPart - time1.QuadPart;
+				double dDeltaTime2 = (double)deltaTime2/ (double)queryFrequency.QuadPart;
+
+				int sleep = (1000.0 / 60.0) - (dDeltaTime2 * 1000.0);
 				if (sleep > 0) { Sleep(sleep); }
+				timeEndPeriod(1);
 			}
 
 			lbuttonPressed = false;

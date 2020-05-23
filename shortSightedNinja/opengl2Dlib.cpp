@@ -5,9 +5,6 @@
 #include "tools.h"
 #include <algorithm>
 
-GLint maskSamplerUniform = 0;
-gl2d::internal::ShaderProgram maskShader = {};
-
 #undef max
 
 namespace gl2d
@@ -215,8 +212,6 @@ namespace gl2d
 		}
 
 		defaultShader = internal::createShaderProgram(defaultVertexShader, defaultFragmentShader);
-		maskShader = internal::createShaderProgram(defaultVertexShader, maskFragmentShader);
-		maskSamplerUniform = glGetUniformLocation(maskShader.id, "u_mask");
 		enableNecessaryGLFeatures();
 	}
 

@@ -6,13 +6,17 @@
 #include <algorithm>
 //#include <io.h>
 //#include <fcntl.h>
+#include "buildConfig.h"
 
 #include "tools.h"
 #include "opengl2Dlib.h"
 
+#ifndef RemoveImgui
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_win32.h"
+
+#endif
 
 #include "input.h"
 
@@ -40,6 +44,12 @@ extern "C"
 //	__declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 
+const float width = 960;
+const float heigth = 680;
+
+static LARGE_INTEGER queryFrequency;
+static bool openglVsync = 0;
+
 int MAIN
 {
 
@@ -55,8 +65,6 @@ int MAIN
 
 	RegisterClass(&wc);
 
-	float width = 960;
-	float heigth = 680;
 
 	wind = CreateWindow(
 		wc.lpszClassName,
@@ -85,6 +93,8 @@ int MAIN
 	gl2d::setErrorFuncCallback([](const char* c) {elog(c); });
 	gl2d::init();
 
+#ifndef RemoveImgui
+
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
@@ -96,6 +106,9 @@ int MAIN
 	ImGui_ImplOpenGL3_Init(glslVersion);
 	ImGui::StyleColorsDark();
 
+#endif // !RemoveImgui
+
+
 	input::loadXinput();
 
 	if (!initGame())
@@ -103,8 +116,19 @@ int MAIN
 		return 0;
 	}
 
-	int time1 = clock();
-	int time2 = clock();
+
+	QueryPerformanceFrequency(&queryFrequency);
+
+	LARGE_INTEGER time1 = {};
+	LARGE_INTEGER time2 = {};
+
+	QueryPerformanceCounter(&time1);
+	QueryPerformanceCounter(&time2);
+
+	if(gl2d::setVsync(true))
+	{
+		openglVsync = true;
+	}
 
 	while (!quit)
 	{
@@ -116,32 +140,42 @@ int MAIN
 		}
 		else
 		{
-			time2 = clock();
-			int deltaTime = time2 - time1;
-			time1 = clock();
-			int endFrame = time1 + 8;
-		
-			double dDeltaTime = (double)deltaTime / CLOCKS_PER_SEC;
+			QueryPerformanceCounter(&time2);
+			int deltaTime = time2.QuadPart - time1.QuadPart;
+			QueryPerformanceCounter(&time1);
+
+			double dDeltaTime = (double)deltaTime / (double)queryFrequency.QuadPart;
 			static int count;
 			static double accum;
 			accum += dDeltaTime;
 			count++;
-			if(accum>1)
-			{
-				accum -= 1;
-				//
-				(count);
-				count = 0;
-			}
-			//todo
+		
 			float fDeltaTime = std::min(dDeltaTime, 1.0 / 20.0);
 		
 			input::updateInput();
+
+			if(input::isControllerInput())
+			{
+				platform::showMouse(false);
+			}
+			else 
+			{
+				platform::showMouse(true);
+			}
+
+			if (accum > 1)
+			{
+				accum -= 1;
+				ilog(count);
+				count = 0;
+			}
 
 			if (!gameLogic(fDeltaTime))
 			{
 				quit = true;
 			}
+
+#ifndef RemoveImgui
 
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplWin32_NewFrame();
@@ -151,12 +185,38 @@ int MAIN
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+#endif
 
 			SwapBuffers(hdc);
 		
-			int actualEnd = clock();
-			int sleep = endFrame - actualEnd;
-			if (sleep > 0) { Sleep(sleep); }
+			if (!openglVsync) 
+			{
+				if(timeBeginPeriod(1) == TIMERR_NOERROR)
+				{
+					QueryPerformanceCounter(&time2);
+					int deltaTime2 = time2.QuadPart - time1.QuadPart;
+					double dDeltaTime2 = (double)deltaTime2 / (double)queryFrequency.QuadPart;
+				
+					int sleep = (1000.0 / 60.0) - (dDeltaTime2 * 1000.0);
+					if (sleep > 0) { Sleep(sleep); }
+					timeEndPeriod(1);
+				}
+				else 
+				{
+					int sleep = 0;
+					do 
+					{
+						QueryPerformanceCounter(&time2);
+						int deltaTime2 = time2.QuadPart - time1.QuadPart;
+						double dDeltaTime2 = (double)deltaTime2 / (double)queryFrequency.QuadPart;
+
+						sleep = (1000.0 / 60.0) - (dDeltaTime2 * 1000.0);
+					}
+					while (sleep > 0);
+				}
+
+				
+			}
 
 			lbuttonPressed = false;
 			rbuttonPressed = false;
@@ -175,6 +235,7 @@ int MAIN
 
 LRESULT CALLBACK windProc(HWND wind, UINT m, WPARAM wp, LPARAM lp)
 {
+#ifndef RemoveImgui
 	if (ImGui::GetCurrentContext() == NULL)
 		goto endImgui;
 	
@@ -242,7 +303,8 @@ LRESULT CALLBACK windProc(HWND wind, UINT m, WPARAM wp, LPARAM lp)
 			goto endImgui;
 		}
 	}
-	endImgui:
+endImgui:
+#endif
 
 	LRESULT l = 0;
 
@@ -263,7 +325,13 @@ LRESULT CALLBACK windProc(HWND wind, UINT m, WPARAM wp, LPARAM lp)
 		lbutton = false;
 		lbuttonReleased = true;
 		break;
-
+	case WM_GETMINMAXINFO:
+	{
+		LPMINMAXINFO lpMMI = (LPMINMAXINFO)lp;
+		lpMMI->ptMinTrackSize.x = width;
+		lpMMI->ptMinTrackSize.y = heigth;
+	}
+		break;
 	case WM_CLOSE:
 		quit = true;
 		break;
@@ -377,31 +445,46 @@ namespace platform
 
 	int isKeyHeld(int key)
 	{
-		return GetAsyncKeyState(key)&& platform::isFocused();
+		return GetAsyncKeyState(key) && platform::isFocused();
 	}
 
 	int isKeyPressedOn(int key)
 	{
-		return ( GetAsyncKeyState(key) & 0x8000) &&platform::isFocused();
+		return ( GetAsyncKeyState(key) & 0x8000) && platform::isFocused();
 	}
 
 	int isLMouseButtonPressed()
 	{
+
+#ifndef RemoveImgui
 		ImGuiIO& io = ImGui::GetIO();
 		return (!io.WantCaptureMouse) && lbuttonPressed && platform::isFocused();
+#else
+		return  lbuttonPressed && platform::isFocused();
+#endif
+	
 	}
 
 	int isLMouseButtonReleased()
 	{
+#ifndef RemoveImgui
 		ImGuiIO& io = ImGui::GetIO();
 		return (!io.WantCaptureMouse) && lbuttonReleased && platform::isFocused();
+#else
+		return  lbuttonReleased && platform::isFocused();
+#endif
+
 	}
 
 	int isLMouseHeld()
 	{
+#ifndef RemoveImgui
 		ImGuiIO& io = ImGui::GetIO();
-	
 		return (!io.WantCaptureMouse) && lbutton && platform::isFocused();
+#else
+		return lbutton && platform::isFocused();
+#endif
+	
 	}
 
 	int isRMouseButtonPressed()
@@ -415,13 +498,28 @@ namespace platform
 		return rbutton && platform::isFocused();
 	}
 
+	static bool lastShow = 1;
 	void showMouse(bool show)
 	{
-		ShowCursor(show);
+		if(lastShow != show)
+		{
+			ShowCursor(show);
+
+			if (show)
+			{
+				SetCursor(LoadCursor(NULL, IDC_ARROW));
+				SendMessage(wind, WM_SETCURSOR, (WPARAM)wind, MAKELPARAM(HTCLIENT, WM_MOUSEMOVE));
+				//SetCursor(LoadCursor(GetModuleHandle(0), IDC_HAND));
+			}
+		}
+	
+		lastShow = show;
 	}
 
+	//todo probably rework
 	bool isFocused()
 	{
+		//return 1;
 		return GetActiveWindow() == wind;
 	}
 

@@ -8,9 +8,13 @@
 #include "input.h"
 #include "Ui.h"
 #include "Particle.h"
+#include "DialogInteraction.h"
 #include <algorithm>
 #include <string>
 #include <sstream>
+#include "menu.h"
+#include "Settings.h"
+#include "Sound.h"
 
 extern float gravitationalAcceleration;
 extern float jumpSpeed;
@@ -24,39 +28,43 @@ extern float grabMargin;
 extern float notGrabTimeVal;
 extern bool snapWallGrab;
 
+
 extern gl2d::internal::ShaderProgram maskShader;
 extern GLint maskSamplerUniform;
 
+extern int currentSettingsMenu;
+
 gl2d::Renderer2D renderer2d;
 //gl2d::Renderer2D stencilRenderer2d;
+
+#pragma region music
+
 
 //music
 sf::SoundBuffer pickupSoundbuffer;
 sf::SoundBuffer leavesSoundbuffer;
 sf::Sound soundPlayer;
-sf::Music waterPlayer;
-sf::Music tikiPlayer;
-sf::Music greenPlayer;
-sf::Music redPlayer;
-sf::Music grayPlayer;
 
-enum Sounds
-{
-	none
-	//todo
-};
+SoundManager soundManager;
+
+#pragma endregion
 
 MapRenderer mapRenderer;
 MapData mapData;
 Entity player;
 
+#ifndef RemoveImgui
 #include "imgui.h"
+#endif 
+
+#pragma region Textures
 
 gl2d::Texture sprites;
 gl2d::Texture characterSprite;
 gl2d::Texture arrowSprite;
 gl2d::Texture particlesSprite;
 gl2d::Texture crackTexture;
+gl2d::Texture birdTexture;
 
 gl2d::Texture uiFrame;
 gl2d::Texture uiForest;
@@ -70,6 +78,16 @@ gl2d::Texture uiButton;
 gl2d::Texture uiItch;
 gl2d::Texture uiMusic;
 gl2d::Texture uiArt;
+gl2d::Texture uiDialogBox;
+gl2d::Texture uiImages;
+gl2d::Texture uiButtons;
+
+textureDataWithUV tDDCaracter;
+textureDataWithUV tDDCaracterAnnoyed;
+textureDataWithUV tDDCaracterSurprized;
+textureDataWithUV tDDBird;
+
+#pragma endregion
 
 std::vector<Arrow> arrows;
 
@@ -86,12 +104,16 @@ glm::ivec2 playerSpawnPos = { 0,0 };
 Particle jumpParticle;
 std::vector<Particle>crackParticles;
 
+DialogInteraction currentDialog;
+
 // -2 if is main menu
 int currentLevel=-2;
 
 float jumpDelayTime = 0;
 
 int maxLevel=0;
+static int ingameMenuMainPage = 1;
+bool inGameMenu = 0;
 
 struct ArrowItem
 {
@@ -106,14 +128,26 @@ std::vector <ArrowItem> actualInventorty;
 
 std::vector <LightSource> wallLights;
 
-float playerLight = 6;
+const float playerLight = 5;
+float lightPerc = 1;
 
-const char* levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki tribe"};
+Bird bird;
+
+const char* levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki tribe", "Secret Level"};
 
 void respawn();
 
 void loadLevel()
 {
+	menu::resetMenuState();
+	ingameMenuMainPage = 1;
+	inGameMenu = 0;
+	//currentDialog.dialogData.push_back({{ "Dialog, Sample.\nFraze 2. Text3." }, textureDataForDialog["character"]});
+	//currentDialog.dialogData.push_back({ { "Nu stiu ce s azic.\nFraze 2. Text3." }, textureDataForDialog["character"] });
+	//currentDialog.dialogData.push_back({ {"Dialog, Sample3.\n epic moment aici."}, textureDataForDialog["character"] });
+	
+	//currentDialog.start();
+
 	inventory.clear();
 	//this vector should always have all arrows in order (and all of them there)
 	inventory.push_back({ 0,0,3 });
@@ -177,13 +211,15 @@ void loadLevel()
 	//player.updateMove();
 	player.lastPos = player.pos;
 
+	//todo refactor
 	player.dimensions = { 7, 7 };
 	player.dying = 0;
 	player.lockMovementDie = 0;
-	playerLight = 5;
+	lightPerc = 1;
 	player.velocity = {};
 	player.isExitingLevel = -1;
 	player.wallGrab = 0;
+	player.isSittingOnIce = 0;
 
 	wallLights.clear();
 	//setup light sources
@@ -193,38 +229,14 @@ void loadLevel()
 			if (isLitTorch(mapData.get(x, y).type))
 			{
 				wallLights.push_back({ {x,y}, 0, mapData.getTorchLight(x,y) });
+			}else if(unLitTorch(mapData.get(x, y).type))
+			{			
+				wallLights.push_back({ {x,y}, 0, 0 });
 			}
 		}
 
-	if(mapData.waterPos.size() > 0)
-	{
-		waterPlayer.play();
-		waterPlayer.setVolume(0);
-	}
+	soundManager.setMusicPositions(mapData);
 
-	if (mapData.tikiSoundPos.size() > 0)
-	{
-		tikiPlayer.play();
-		tikiPlayer.setVolume(0);
-	}
-
-	if (mapData.greenSoundPos.size() > 0)
-	{
-		greenPlayer.play();
-		greenPlayer.setVolume(0);
-	}
-
-	if (mapData.redSoundPos.size() > 0)
-	{
-		redPlayer.play();
-		redPlayer.setVolume(0);
-	}
-
-	if (mapData.caveSoundPos.size() > 0)
-	{
-		grayPlayer.play();
-		grayPlayer.setVolume(0);
-	}
 
 	saveState(playerSpawnPos, currentLevel);
 	respawn();
@@ -242,12 +254,14 @@ void respawn()
 	arrows.clear();
 
 	player.pos = { BLOCK_SIZE * playerSpawnPos.x, BLOCK_SIZE * playerSpawnPos.y };
-	player.updateMove();
+	player.updateMove(0);
 	player.dimensions = { 7, 7 };
 	player.dying = 0;
 	player.lockMovementDie = 0;
-	playerLight = 5;
+	lightPerc = 1;
 	player.velocity = {};
+	player.wallGrab = 0;
+	player.isSittingOnIce = 0;
 
 }
 
@@ -279,6 +293,7 @@ bool initGame()
 	arrowSprite.loadFromFile("resources//arrow.png");
 	particlesSprite.loadFromFileWithPixelPadding("resources//particles.png", 8);
 	crackTexture.loadFromFileWithPixelPadding("resources//crackAnim.png", 8);
+	birdTexture.loadFromFileWithPixelPadding("resources//bird.png", 8);
 
 	uiFrame.loadFromFile("resources//ui//uiFrame.png");
 	uiForest.loadFromFile("resources//ui//forest.png");
@@ -292,7 +307,18 @@ bool initGame()
 	uiItch.loadFromFile("resources//ui//itch.png");
 	uiMusic.loadFromFile("resources//ui//music.jpg");
 	uiArt.loadFromFile("resources//ui//art.png");
+	uiDialogBox.loadFromFile("resources//ui//uiDialogFrame.png");
+	uiImages.loadFromFileWithPixelPadding("resources//ui//uiImages.png", 8);
+	uiButtons.loadFromFileWithPixelPadding("resources//ui//uiButtons.png", 16);
 
+	gl2d::TextureAtlasPadding uiImagesAtlas(4, 1, uiImages.GetSize().x, uiImages.GetSize().y);
+
+	tDDCaracter = { uiImages, uiImagesAtlas.get(0,0) };
+	tDDCaracterAnnoyed = { uiImages, uiImagesAtlas.get(1,0) };
+	tDDCaracterSurprized = { uiImages, uiImagesAtlas.get(2,0) };
+	tDDBird = { uiImages, uiImagesAtlas.get(3,0) };
+
+	
 	const char buff[] =
 	{
 		BACKGROUND_R,
@@ -310,22 +336,9 @@ bool initGame()
 		pickupSoundbuffer.loadFromFile("resources//pick_up.wav");
 		leavesSoundbuffer.loadFromFile("resources//leaves.wav");
 	
-		waterPlayer.openFromFile("resources//water.wav");
-		waterPlayer.setLoop(1);
-		
-		tikiPlayer.openFromFile("resources//tikiForest.wav");
-		tikiPlayer.setLoop(1);
-
-		greenPlayer.openFromFile("resources//rainForest.wav");
-		greenPlayer.setLoop(1);
-
-		redPlayer.openFromFile("resources//jungle.wav");
-		redPlayer.setLoop(1);
-
-		grayPlayer.openFromFile("resources//cave.wav");
-		grayPlayer.setLoop(1);
-
 		soundPlayer.setVolume(2);
+	
+		soundManager.loadMusic();
 	}
 
 	//if (loadLevelFromLastState(currentLevel, playerSpawnPos))
@@ -349,28 +362,14 @@ enum MenuState :int
 {
 	mainMenu = 1,
 	levelSelector,
-	creditsAres,
+	settingsMenu,
 
 }; int menuState = MenuState::mainMenu;
 
-bool isInButton(const glm::vec2 &p, const glm::vec4 &box)
-{
-	return(p.x >= box.x && p.x <= box.x + box.z
-		&&
-		p.y >= box.y && p.y <= box.y + box.w
-		);
-}
-
-bool isButtonReleased(const glm::vec2 &p, const glm::vec4 &box)
-{
-	return(p.x >= box.x && p.x <= box.x + box.z
-		&&
-		p.y >= box.y && p.y <= box.y + box.w
-		) && platform::isLMouseButtonReleased();
-}
 
 bool gameLogic(float deltaTime)
 {
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	int w, h;
 	w = getWindowSizeX();
@@ -382,7 +381,7 @@ bool gameLogic(float deltaTime)
 
 	static int selectedLevel;
 
-	if(input::isKeyReleased(input::Buttons::esc))
+	if(input::isKeyReleased(input::Buttons::esc) && menuState != MenuState::settingsMenu)
 	{
 		menuState = MenuState::mainMenu;
 	}
@@ -390,18 +389,10 @@ bool gameLogic(float deltaTime)
 	//main menu
 	if (currentLevel == -2)
 	{
+		
+		soundManager.stoppMusic();
 
-		waterPlayer.stop();
-		greenPlayer.stop();
-		tikiPlayer.stop();
-		redPlayer.stop();
-		grayPlayer.stop();
 		soundPlayer.stop();
-		waterPlayer.setVolume(0);
-		greenPlayer.setVolume(0);
-		redPlayer.setVolume(0);
-		grayPlayer.setVolume(0);
-		tikiPlayer.setVolume(0);
 
 		renderer2d.currentCamera = gl2d::cameraCreateDefault();
 
@@ -420,28 +411,19 @@ bool gameLogic(float deltaTime)
 			bool creditsSelectButton = 0;
 
 			//todo refactor
-			if (isInButton(p, button1))
+			if (Ui::isButtonReleased(p, button1))
 			{
-				if (platform::isLMouseButtonReleased())
-				{
 					playButton = 1;
-				}
 			}
 
-			if (isInButton(p, button2))
+			if (Ui::isButtonReleased(p, button2))
 			{
-				if (platform::isLMouseButtonReleased())
-				{
-					levelSelectButton = 1;
-				}
+				levelSelectButton = 1;
 			}
 
-			if (isInButton(p, button3))
+			if (Ui::isButtonReleased(p, button3))
 			{
-				if (platform::isLMouseButtonReleased())
-				{
-					creditsSelectButton = 1;
-				}
+				creditsSelectButton = 1;
 			}
 
 			renderer2d.render9Patch2( button1,
@@ -455,14 +437,15 @@ bool gameLogic(float deltaTime)
 
 
 			renderer2d.renderText({button1.x + button1.z/2,button1.y + button1.w/2}, 
-				"Continue jurney", font, {1,1,1,1}, 0.7);
+				"Continue jurney", font, {1,1,1,1}, 0.6, 4, 3, true, { 0.1,0.1,0.1,1 });
 
 
 			renderer2d.renderText({ button2.x + button2.z / 2,button2.y + button2.w / 2 },
-				"Select zone", font, { 1,1,1,1 }, 0.7);
+				"Select zone", font, { 1,1,1,1 }, 0.6, 4, 3, true, { 0.1,0.1,0.1,1 });
 
 			renderer2d.renderText({ button3.x + button3.z / 2,button3.y + button3.w / 2 },
-				"Credits", font, { 1,1,1,1 }, 0.7);
+				"Settings", font, { 1,1,1,1 }, 0.6, 4, 3, true, { 0.1,0.1,0.1,1 });
+
 
 			if (playButton)
 			{
@@ -491,7 +474,8 @@ bool gameLogic(float deltaTime)
 
 			if(creditsSelectButton)
 			{
-				menuState = MenuState::creditsAres;
+				menuState = MenuState::settingsMenu;
+				settings::setMainSettingsPage();
 			}
 
 		}else if (menuState == MenuState::levelSelector)
@@ -547,7 +531,7 @@ bool gameLogic(float deltaTime)
 			renderer2d.render9Patch2(playBox,
 				8, { 1,1,1,1 }, {}, 0, uiButton, { 0,1,1,0 }, { 0,0.8,0.8,0 });
 			renderer2d.renderText({ playBox.x + playBox.z /2 ,playBox.y + playBox.w / 2 },
-				temp.c_str(), font, { 1,1,1,1 }, 0.7);
+				temp.c_str(), font, { 1,1,1,1 }, 0.6, 4, 3, true, { 0.1,0.1,0.1,1 });
 
 			gl2d::TextureAtlas arrowsAtlas(1, 2);
 			int leftPressed = 0;
@@ -642,14 +626,22 @@ bool gameLogic(float deltaTime)
 			}
 
 			if (selectedLevel <= maxLevel)
-			if(isButtonReleased(p, playBox))
+			if(Ui::isButtonReleased(p, playBox))
 			{
 				currentLevel = selectedLevel;
 				loadLevel();
 			}
 
-		}else if (menuState == MenuState::creditsAres)
+		}else if (menuState == MenuState::settingsMenu)
 		{
+			settings::displaySettings(renderer2d, deltaTime);
+
+			if(currentSettingsMenu == 0)
+			{
+				menuState = MenuState::mainMenu;
+			}
+
+			/*
 			auto p = platform::getRelMousePosition();
 
 			Ui::Frame f({ 0, 0, w, h });
@@ -669,21 +661,21 @@ bool gameLogic(float deltaTime)
 
 
 			renderer2d.renderText({ button1.x + button1.z + 200 ,button1.y + button1.w / 2 },
-				"Our page", font, { 1,1,1,1 }, 0.7);
+				"Our page", font, { 1,1,1,1 }, 0.6);
 
 
 			renderer2d.renderText({ button2.x + button2.z + 200 ,button2.y + button2.w / 2 },
-				"Music", font, { 1,1,1,1 }, 0.7);
+				"Music", font, { 1,1,1,1 }, 0.6);
 
 			renderer2d.renderText({ button3.x + button3.z + 200 ,button3.y + button3.w / 2 },
-				"Art", font, { 1,1,1,1 }, 0.7);
+				"Art", font, { 1,1,1,1 }, 0.6);
 		
 
 		https://wuxia.itch.io/
 			if (isButtonReleased(p, button1)) {system("start https://wuxia.itch.io/"); };
 			if (isButtonReleased(p, button2)) {system("start https://www.youtube.com/channel/UCEXX5i6961zc4-L8thTctBg");};
 			if (isButtonReleased(p, button3)) {system("start https://itch.io/profile/adamatomic"); };
-
+			*/
 		}
 
 
@@ -693,6 +685,78 @@ bool gameLogic(float deltaTime)
 
 #pragma endregion
 
+	
+	{
+	
+		if (inGameMenu)
+		{
+
+			if(ingameMenuMainPage)
+			{
+				
+				menu::startMenu();
+			
+				menu::uninteractableCentreText("Menu");
+				bool s = 0;
+				bool exit = 0;
+
+				menu::interactableText("Settings", &s);
+				menu::interactableText("Exit level", &exit);
+
+				bool back = 0;
+				menu::endMenu(renderer2d, uiDialogBox, font, &back, deltaTime);
+				
+				if(back)
+				{
+					inGameMenu = false;
+				}
+				if(s)
+				{
+					ingameMenuMainPage = 0;
+					menu::resetMenuState();
+					settings::setMainSettingsPage();
+				}
+				if (exit)
+				{
+					mapData.cleanup();
+					currentLevel = -2;
+					loadLevel();
+				}
+			}else
+			{
+				settings::displaySettings(renderer2d, deltaTime);
+				if (currentSettingsMenu == 0) 
+				{
+					menu::resetMenuState();
+					ingameMenuMainPage = 1;
+				};
+			}
+
+			renderer2d.flush();
+
+			if (input::isControllerInput()
+				&& input::isKeyReleased(input::Buttons::menu)
+				)
+			{
+				inGameMenu = false;
+			}
+
+			soundManager.settings.musicVolume = settings::getMusicSound();
+			soundManager.settings.ambientVolume = settings::getAmbientSound();
+			soundManager.updateSoundVolume();
+
+			return 1;
+		}
+
+		if (input::isKeyReleased(input::Buttons::menu))
+		{
+			inGameMenu = true;
+			menu::resetMenuState();
+			ingameMenuMainPage = 1;
+			settings::setMainSettingsPage();
+		}
+	}
+
 	//if (platform::isKeyPressedOn('T'))
 	//{
 	//	loadLevel();
@@ -700,8 +764,8 @@ bool gameLogic(float deltaTime)
 
 	if (player.dying || player.isExitingLevel != -1)
 	{
-		playerLight -= deltaTime * 2;
-		if (playerLight < 1)
+		lightPerc -= deltaTime * 0.8;
+		if (lightPerc < 0)
 		{
 			if(player.dying)
 			{
@@ -726,13 +790,19 @@ bool gameLogic(float deltaTime)
 	}
 
 #pragma region music
-	
-	waterPlayer.setVolume(mapData.getWaterPercentage(player.pos));
-	greenPlayer.setVolume(mapData.getGreenPercentage(player.pos));
-	redPlayer.setVolume(mapData.getRedPercentage(player.pos));
-	grayPlayer.setVolume(mapData.getCavePercentage(player.pos));
-	tikiPlayer.setVolume(mapData.getTikiPercentage(player.pos));
+	 
+	soundManager.settings.musicVolume = settings::getMusicSound();
+	soundManager.settings.ambientVolume = settings::getAmbientSound();
 
+	//greenPlayer.setVolume(mapData.getGreenPercentage(player.pos)* settings::getMusicSound());
+	//redPlayer.setVolume(mapData.getRedPercentage(player.pos)    * settings::getMusicSound());
+	//grayPlayer.setVolume(mapData.getCavePercentage(player.pos)  * settings::getMusicSound());
+	//tikiPlayer.setVolume(mapData.getTikiPercentage(player.pos)  * settings::getMusicSound());
+
+	soundManager.setMusicAndEffectVolume(player.pos);
+	soundManager.updateSoundTransation(deltaTime);
+
+	soundPlayer.setVolume(4 * settings::getAmbientSound());
 
 #pragma endregion
 
@@ -746,115 +816,222 @@ bool gameLogic(float deltaTime)
 	//renderer2d.currentCamera.position = { -500,-100 };
 
 #pragma region controlls
-
-	if (player.wallGrab == 0)
+	
+	if(!currentDialog.blockMovement())
 	{
-		if (player.grounded)
+		if (player.wallGrab == 0)
 		{
-			player.run(deltaTime * input::getMoveDir());
+			if (player.grounded)
+			{
+				player.run(deltaTime * input::getMoveDir(), deltaTime);
+			}
+			else
+			{
+				player.airRun(deltaTime * input::getMoveDir());
+			}
+		}
+
+		renderer2d.currentCamera.zoom = settings::getZoom();
+
+		if (jumpDelayTime > 0)
+		{
+			jumpDelayTime -= deltaTime;
+		}
+		if (jumpDelayTime < 0) { jumpDelayTime = -1; }
+
+		if (player.isExitingLevel == -1 && (input::isKeyPressedOn(input::Buttons::jump) || jumpDelayTime > 0))
+		{
+			if (input::isKeyPressedOn(input::Buttons::jump) && player.wallGrab == 0)
+			{
+				jumpDelayTime = 0.2;
+			}
+
+			if (player.wallGrab == 0)
+			{
+				if (player.canJump)
+				{
+					jumpDelayTime = 0;
+					player.jump();
+					player.canJump = 0;
+					jumpParticle.set(player.pos, 0, player.movingRight);
+				}
+			}
+			else if (player.wallGrab == 1)
+			{
+				jumpDelayTime = 0;
+				player.strafe(-1);
+				player.jumpFromWall();
+				player.wallGrab = 0;
+				player.redGrab = 0;
+				player.grayGrab = 0;
+				player.blueGrab = 0;
+				jumpParticle.set(player.pos, 1, !player.movingRight);
+
+			}
+			else if (player.wallGrab == -1)
+			{
+				jumpDelayTime = 0;
+				player.strafe(1);
+				player.jumpFromWall();
+				player.wallGrab = 0;
+				player.redGrab = 0;
+				player.grayGrab = 0;
+				player.blueGrab = 0;
+				jumpParticle.set(player.pos, 1, !player.movingRight);
+
+			}
+		}
+
+		if (input::isKeyReleased(input::Buttons::jump))
+		{
+			if (player.velocity.y < 0)
+			{
+				player.velocity.y *= 0.4;
+			}
+		}
+
+		if (input::isKeyPressedOn(input::Buttons::shoot) && currentArrow > -1 && !player.dying
+			&& player.isExitingLevel == -1)
+		{
+			player.idleTime = 0;
+			{
+
+				for (auto& i : inventory)
+				{
+					if (i.type == actualInventorty[currentArrow].type)
+					{
+
+						i.count--;
+						break;
+					}
+				}
+
+				Arrow a;
+				a.type = (Arrow::ArrowTypes)actualInventorty[currentArrow].type;
+				a.pos = player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2);
+				a.shootDir = input::getShootDir({ w / 2,h / 2 });
+				//a.pos.x += a.shootDir.x * BLOCK_SIZE * 0.9;
+				//a.pos.y += a.shootDir.y * BLOCK_SIZE * 0.9;
+				arrows.push_back(a);
+			}
+		}
+
+	}else
+	{
+	player.idleTime = 0;
+	jumpDelayTime = 0;
+	}
+
+	if (!platform::isFocused())
+	{
+		player.idleTime = 0;
+		jumpDelayTime = 0;
+	}
+
+		renderer2d.currentCamera.follow(player.pos + (player.dimensions / 2.f), deltaTime * 100, 4 * BLOCK_SIZE, renderer2d.windowW, renderer2d.windowH);
+
+		player.applyGravity(deltaTime);
+		player.applyVelocity(deltaTime);
+
+		player.resolveConstrains(mapData);
+
+		player.updateMove(deltaTime);
+
+		player.checkGrounded(mapData, deltaTime);
+
+		//ilog(player.velocity.x);
+
+		if(!currentDialog.blockMovement())
+		{
+
+			if (input::isKeyHeld(input::Buttons::down))
+			{
+				player.wallGrab = 0;
+			}
+			else
+			{
+				player.checkWall(mapData, input::getMoveDir());
+			}
+
+
+
+#pragma region jump prticle
+
+
+		{
+			static bool animateFall;
+			static float animReloadTime;
+			if (player.velocity.y >= 230)
+			{
+				if (animateFall)
+				{
+					jumpParticle.set(player.pos, 2, player.movingRight);
+					animateFall = 0;
+					animReloadTime = 0.2;
+				}
+				animReloadTime -= deltaTime;
+				if (animReloadTime <= 0)
+				{
+					animateFall = 1;
+					animReloadTime = 0.92;
+				}
+			}
+			else
+			{
+				animateFall = 1;
+			}
+		}
+
+#pragma endregion
+		
+		
+
+#pragma region inventory
+
+		if (!platform::isFocused())
+		{
+			currentArrow = -1;
+		}
+
+		if (input::isKeyPressedOn(input::Buttons::swapLeft))
+		{
+			currentArrow--;
+		}
+		else if (input::isKeyPressedOn(input::Buttons::swapRight))
+		{
+			currentArrow++;
+		}
+
+		if (currentArrow < -1)
+		{
+			currentArrow = actualInventorty.size() - 1;
+		}
+
+		if (currentArrow >= actualInventorty.size())
+		{
+			currentArrow = -1;
+		}
+
+		if (actualInventorty.size() == 0)
+		{
+			currentArrow = -1;
+		}
+
+#pragma endregion
+
+
+		
 		}
 		else
 		{
-			player.airRun(deltaTime * input::getMoveDir());
-		}
-	}
-
-	if (platform::isKeyHeld('Z'))
-	{
-		renderer2d.currentCamera.zoom -= deltaTime*2;
-	}
-	if (platform::isKeyHeld('X'))
-	{
-		renderer2d.currentCamera.zoom += deltaTime*2;
-	}
-	renderer2d.currentCamera.zoom = glm::clamp(renderer2d.currentCamera.zoom, 3.f, 7.f);
-
-
-	if(jumpDelayTime>0)
-	{
-		jumpDelayTime -= deltaTime;
-	}
-	if (jumpDelayTime < 0) { jumpDelayTime = -1; }
-	
-	if ( player.isExitingLevel == -1 &&(input::isKeyPressedOn(input::Buttons::jump) || jumpDelayTime > 0))
-	{
-		if (input::isKeyPressedOn(input::Buttons::jump) && player.wallGrab == 0)
-		{
-			jumpDelayTime = 0.2;
+			currentArrow = -1;
 		}
 
-		if (player.wallGrab == 0)
-		{
-			if (player.canJump)
-			{
-				jumpDelayTime = 0;
-				player.jump();
-				player.canJump = 0;
-				jumpParticle.set(player.pos, 0, player.movingRight);
-			}
-		}
-		else if (player.wallGrab == 1)
-		{
-			jumpDelayTime = 0;
-			player.strafe(-1);
-			player.jumpFromWall();
-			player.wallGrab = 0;
-			player.redGrab = 0;
-			player.grayGrab = 0;
-			player.blueGrab = 0;
-			jumpParticle.set(player.pos, 1, !player.movingRight);
 
-		}
-		else if (player.wallGrab == -1)
-		{
-			jumpDelayTime = 0;
-			player.strafe(1);
-			player.jumpFromWall();
-			player.wallGrab = 0;
-			player.redGrab = 0;
-			player.grayGrab = 0;
-			player.blueGrab = 0;
-			jumpParticle.set(player.pos, 1, !player.movingRight);
+#pragma endregion
 
-		}
-	}
-
-	if (input::isKeyReleased(input::Buttons::jump))
-	{
-		if (player.velocity.y < 0)
-		{
-			player.velocity.y *= 0.4;
-		}
-	}
-
-	if (input::isKeyPressedOn(input::Buttons::shoot) && currentArrow > -1 && !player.dying
-		&& player.isExitingLevel == -1)
-	{
-		player.idleTime = 0;
-		{
-
-			for (auto& i : inventory)
-			{
-				if (i.type == actualInventorty[currentArrow].type)
-				{
-				
-					i.count--;
-					break;
-				}
-			}
-
-			Arrow a;
-			a.type = (Arrow::ArrowTypes)actualInventorty[currentArrow].type;
-			a.pos = player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2);
-			a.shootDir = input::getShootDir({ w / 2,h / 2 });
-			//a.pos.x += a.shootDir.x * BLOCK_SIZE * 0.9;
-			//a.pos.y += a.shootDir.y * BLOCK_SIZE * 0.9;
-			arrows.push_back(a);
-		}
-	}
 
 	actualInventorty.clear();
-
 	for (auto i : inventory)
 	{
 		if (i.count)
@@ -863,94 +1040,18 @@ bool gameLogic(float deltaTime)
 		}
 	}
 
-#pragma endregion
 	
 
-	renderer2d.currentCamera.follow(player.pos + (player.dimensions / 2.f), deltaTime * 120, 30, renderer2d.windowW, renderer2d.windowH);
 	//stencilRenderer2d.currentCamera = renderer2d.currentCamera;
 
-	player.applyGravity(deltaTime);
-	player.applyVelocity(deltaTime);
 
-	player.resolveConstrains(mapData);
-
-	player.updateMove();
-
-	player.checkGrounded(mapData, deltaTime);
-
-	if (input::isKeyHeld(input::Buttons::down))
-	{
-		player.wallGrab = 0;
-	}
-	else
-	{
-		player.checkWall(mapData, input::getMoveDir());
-	}
-
-
-	{
-		static bool animateFall;
-		static float animReloadTime;
-		if (player.velocity.y >= 230)
-		{
-			if (animateFall)
-			{
-				jumpParticle.set(player.pos, 2, player.movingRight);
-				animateFall = 0;
-				animReloadTime = 0.2;
-			}
-			animReloadTime -= deltaTime;
-			if (animReloadTime <= 0)
-			{
-				animateFall = 1;
-				animReloadTime = 0.92;
-			}
-		}
-		else
-		{
-			animateFall = 1;
-		}
-	}
 	//mapRenderer.addBlock(renderer2d.toScreen({ 100,100,100,100 }), { 0,1,1,0 }, {1,1,1,1});
 	//mapRenderer.render();
 
 	mapData.clearColorData();
 
 	simuleteLightSpot(player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2),
-		playerLight, mapData, arrows, pickups, 0);
-
-#pragma region inventory
-
-	if (!platform::isFocused()) 
-	{
-		currentArrow = -1;
-	}
-
-	if (input::isKeyPressedOn(input::Buttons::swapLeft))
-	{
-		currentArrow--;
-	}
-	else if (input::isKeyPressedOn(input::Buttons::swapRight))
-	{
-		currentArrow++;
-	}
-
-	if (currentArrow < -1)
-	{
-		currentArrow = actualInventorty.size() - 1;
-	}
-
-	if (currentArrow >= actualInventorty.size())
-	{
-		currentArrow = -1;
-	}
-
-	if (actualInventorty.size() == 0)
-	{
-		currentArrow = -1;
-	}
-
-#pragma endregion
+		playerLight * lightPerc, mapData, arrows, pickups, 0);
 
 #pragma region lights
 
@@ -990,7 +1091,18 @@ bool gameLogic(float deltaTime)
 				if (unLitTorch(g.type))
 				{
 					g.type++;
-					wallLights.push_back({ { x,y }, mapData.getTorchLight(x,y) });
+
+					auto it = std::find_if(wallLights.begin(), wallLights.end(), [x, y](LightSource &ls)
+					{
+						return ls.pos.x == x && ls.pos.y == y;
+					});
+
+					if(it!= wallLights.end())
+					{
+						it->animationDuration = it->animationStartTime;
+						it->intensity = mapData.getTorchLight(x, y);
+					}
+
 				}
 
 				g.playerEntered = 1;
@@ -1055,6 +1167,7 @@ bool gameLogic(float deltaTime)
 					}
 				}
 
+				//todo delegate this render text for later
 				if(isSign(g.type))
 				{
 					auto iter = std::find_if(mapData.signDataVector.begin(), mapData.signDataVector.end(), 
@@ -1063,7 +1176,17 @@ bool gameLogic(float deltaTime)
 					if(iter!=mapData.signDataVector.end())
 					{
 						renderer2d.renderText({ BLOCK_SIZE*(x), BLOCK_SIZE*(y - 1) },
-							iter->text.c_str(), font, { 1,1,1,1 }, 0.09);
+							iter->text.c_str(), font, { 1,1,1,1 }, 0.09, 4, 3, true, { 0.1,0.1,0.1,1 });
+
+						if(iter->button>=0)
+						{
+							glm::vec2 pos = renderer2d.getTextSize(iter->text.c_str(), font, 0.09, 4, 3);
+							pos.y = 0;
+							pos.x /= 2;
+							pos += glm::vec2(BLOCK_SIZE*(x), BLOCK_SIZE*(y - 1));
+							input::drawButtonWithHover(renderer2d, pos, BLOCK_SIZE, iter->button);
+						}
+
 					}
 				}
 
@@ -1082,11 +1205,19 @@ bool gameLogic(float deltaTime)
 						}
 					}else
 					{
-						player.isExitingLevel = -2;
+						if (input::isKeyPressedOn(input::Buttons::up))
+						{
+							player.isExitingLevel = -2;
+						}
 					}
-					
-					renderer2d.renderText({ BLOCK_SIZE*(x), BLOCK_SIZE*(y - 1) },
-						"Press Up to exit", font, { 1,1,1,1 }, 0.09);
+
+					//todo delegate this render text for later
+
+					input::drawButtonWithHover(renderer2d, { BLOCK_SIZE*(x), BLOCK_SIZE*(y - 1.2) }, BLOCK_SIZE,
+						input::Buttons::up);
+
+					//renderer2d.renderText({ BLOCK_SIZE*(x), BLOCK_SIZE*(y - 1) },
+					//	"Press Up to exit", font, { 1,1,1,1 }, 0.09, 4, 3, true, { 0.1,0.1,0.1,1 });
 				}
 
 			}
@@ -1102,8 +1233,65 @@ bool gameLogic(float deltaTime)
 
 	}
 
+#pragma region dialogs
+
+	for(auto &i : mapData.dialogs)
+	{
+		if(!i.second.hasShown)
+		{
+			glm::vec2 dist = i.first;
+			dist *= BLOCK_SIZE;
+			if (glm::distance(player.pos, dist) < 5 * BLOCK_SIZE)
+			{
+				i.second.hasShown = true;
+				currentDialog.resetDialogData();
+				currentDialog.dialogData = i.second.data;
+				if (i.second.birdPos.x >= 0 && i.second.birdPos.y >= 0)
+				{
+					bird.startMove(getDiagonalBirdPos({ i.second.birdPos.x * BLOCK_SIZE, i.second.birdPos.y * BLOCK_SIZE }
+						, player.pos), {i.second.birdPos.x * BLOCK_SIZE, i.second.birdPos.y * BLOCK_SIZE });
+				}
+				currentDialog.start();
+			}
+		}
+	}
+
+#pragma endregion
+
+
 	for (auto& i : wallLights)
 	{
+
+#pragma region checkLightBoxes
+
+		if (i.intensity == 0 && i.boxW != 0 && i.boxH != 0)
+		{
+
+			glm::vec4 box = { (i.pos.x * BLOCK_SIZE + BLOCK_SIZE / 2) - (i.boxW*BLOCK_SIZE / 2),
+				(i.pos.y * BLOCK_SIZE + BLOCK_SIZE / 2) - (i.boxH*BLOCK_SIZE / 2),
+				i.boxW*BLOCK_SIZE,
+				i.boxH*BLOCK_SIZE,
+			};
+
+			if (aabb(glm::vec4{player.pos, player.dimensions}, box))
+			{
+				auto &b = mapData.get(i.pos.x, i.pos.y);
+				if(unLitTorch(b.type))
+				{
+					b.type++;
+				}
+
+				i.intensity = mapData.getTorchLight(i.pos.x, i.pos.y);
+				i.animationDuration = i.animationStartTime;
+			}
+		}
+
+#pragma endregion
+
+
+#pragma region light animation
+
+
 		float r = i.intensity;
 
 		if (i.animationDuration <= 0)
@@ -1113,29 +1301,33 @@ bool gameLogic(float deltaTime)
 		else
 		{
 			float perc;
+			float bonusPerc = 0.2;
 
 			if (i.animationDuration > i.animationStartTime / 2.f)
 			{
 				perc = i.animationDuration - (i.animationStartTime / 2.f);
 				perc = perc / (i.animationStartTime / 2.f);
 				perc = 1 - perc;
-				r *= perc * 1.2;
+				r *= perc * (1 + bonusPerc);
 				r = std::max(r, 0.3f);
 			}
 			else
 			{
-				perc = i.animationStartTime / 2.f - i.animationDuration;
+				perc = i.animationDuration - i.animationStartTime / 2.f ;
 				perc = perc / (i.animationStartTime / 2.f);
-				perc = 1 - perc;
-				r *= (perc + 1);
+				perc = perc+1;
+				r += r* (perc) * bonusPerc;
 			}
 
 			i.animationDuration -= deltaTime;
+
 		}
+
+#pragma endregion
 
 		//todo remove intensity
 		simuleteLightSpot({ i.pos.x * BLOCK_SIZE + BLOCK_SIZE / 2,i.pos.y * BLOCK_SIZE + BLOCK_SIZE / 2 },
-			r, mapData, arrows, pickups, 0);
+			r * lightPerc, mapData, arrows, pickups, 0);
 
 	}
 
@@ -1158,7 +1350,7 @@ bool gameLogic(float deltaTime)
 			if (r > 0)
 			{
 				simuleteLightSpot({ i.pos },
-					r, mapData, arrows, pickups, 0.1);
+					r * lightPerc, mapData, arrows, pickups, 0.1);
 			}
 
 		}
@@ -1209,7 +1401,9 @@ bool gameLogic(float deltaTime)
 				}
 				else
 				{
-					if (isCollidable(mapData.get(pos.x / BLOCK_SIZE, pos.y / BLOCK_SIZE).type))
+					if (isCollidableForArrows(mapData.get(pos.x / BLOCK_SIZE, pos.y / BLOCK_SIZE).type)
+						|| mapData.get(pos.x / BLOCK_SIZE, pos.y / BLOCK_SIZE).type == Block::webBlock
+						)
 					{
 						dist = i;
 						break;
@@ -1238,7 +1432,20 @@ bool gameLogic(float deltaTime)
 
 		//glUseProgram(mapRenderer.shader.id);
 		//glUniform1i(glGetUniformLocation(mapRenderer.shader.id, "u_time"), clock());
+
+		//renderer2d.flush();
+		auto c = renderer2d.currentCamera;
+
 		mapRenderer.drawFromMapData(renderer2d, mapData, deltaTime, animPos);
+
+		//for(int i=0; i<3; i++)
+		//{
+		//	renderer2d.currentCamera.zoom *= 0.99;
+		//	mapRenderer.drawFromMapData(renderer2d, mapData, deltaTime, animPos);
+		//	renderer2d.flush();
+		//
+		//}
+		//renderer2d.currentCamera = c;
 	}
 #pragma endregion
 
@@ -1337,6 +1544,14 @@ bool gameLogic(float deltaTime)
 
 #pragma endregion
 
+#pragma region bird
+
+	bird.update(deltaTime);
+	bird.draw(renderer2d, deltaTime, birdTexture, player.pos);
+	
+
+#pragma endregion
+
 #pragma region ui
 
 	{
@@ -1347,7 +1562,17 @@ bool gameLogic(float deltaTime)
 
 		//ui
 		{
-			Ui::Frame cornerLeft(Ui::Box().xLeft(20).yBottom(-20).xDimensionPercentage(0.1f).yAspectRatio(0.5f)());
+			glm::vec4 uiBox;
+			
+			if(settings::showArrowIndicators())
+			{
+				uiBox = Ui::Box().xLeftPerc(0.08).yBottom(-20).xDimensionPercentage(0.1f).yAspectRatio(0.5f)();
+			}else
+			{
+				uiBox = Ui::Box().xLeft(20).yBottom(-20).xDimensionPercentage(0.1f).yAspectRatio(0.5f)();
+			}
+			
+			Ui::Frame cornerLeft(uiBox);
 
 			int centerCount = 1;
 			int leftCount = 1;
@@ -1449,10 +1674,47 @@ bool gameLogic(float deltaTime)
 
 		}
 
+		//the 2 buttons
+		if(actualInventorty.size() != 0 && settings::showArrowIndicators())
+		{
+			auto left = Ui::Box().xLeft(10).yBottom(-20).xDimensionPercentage(0.04f).yAspectRatio(1.f)();
+			auto right = Ui::Box().xLeftPerc(0.2).yBottom(-20).xDimensionPercentage(0.04f).yAspectRatio(1.f)();
+			right.x += 10;
+
+			input::drawButton(renderer2d, left, left.z, input::Buttons::swapLeft, 0.4f);
+			input::drawButton(renderer2d, right, right.z, input::Buttons::swapRight, 0.4f);
+			
+		}
+
 		renderer2d.currentCamera = c;
 	}
 
 #pragma endregion
+
+#pragma region dialog
+
+	currentDialog.draw(renderer2d, w, h, deltaTime);
+
+	
+	if( input::isKeyReleased(input::Buttons::jump)
+		 && currentDialog.hasFinishedDialog)
+	{
+		if(!currentDialog.updateDialog())
+		{
+			currentDialog.close();
+			
+			//todo check if bird is in dialog
+			if(bird.showing)
+			{
+				bird.startEndMove(bird.position, getDiagonalBirdPos(bird.position, player.pos));
+			}
+		}
+		//currentDialog.setNewDialog("Partea a doua a dialogului");
+		 
+	}
+
+#pragma endregion
+
 
 	renderer2d.flush();
 
@@ -1462,12 +1724,10 @@ bool gameLogic(float deltaTime)
 
 void closeGame()
 {
-	waterPlayer.stop();
-	greenPlayer.stop();
-	tikiPlayer.stop();
-	redPlayer.stop();
-	grayPlayer.stop();
+	
 	soundPlayer.stop();
+
+	soundManager.stoppMusic();
 
 	saveState(playerSpawnPos, currentLevel);
 
@@ -1475,6 +1735,8 @@ void closeGame()
 
 void imguiFunc(float deltaTime)
 {
+
+#ifndef RemoveImgui
 
 	static bool active = 0;
 	static glm::vec4 color;
@@ -1500,7 +1762,7 @@ extern bool snapWallGrab;
 
 	//ImGui::Begin("image");
 	//ImGui::Image((void*)(intptr_t)characterSprite.id,
-	//	{ 120,120 });
+	//	{ 4 * 60, 8*60 });
 	//ImGui::End();
 
 	//ImGui::Begin("Move settings");
@@ -1557,5 +1819,7 @@ extern bool snapWallGrab;
 	//	ImGui::Text("%04d: Some text", n);
 	//ImGui::EndChild();
 	//ImGui::End();
+#endif 
+
 
 }

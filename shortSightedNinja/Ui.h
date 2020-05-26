@@ -1,5 +1,7 @@
 #pragma once
 #include "glm/vec4.hpp"
+#include "glm/vec2.hpp"
+
 
 namespace Ui
 {
@@ -44,7 +46,9 @@ namespace Ui
 		Box &xCenter(int dist = 0);
 		Box &yCenter(int dist = 0);
 		Box &xLeft(int dist = 0);
+		Box &xLeftPerc(float perc = 0);
 		Box &yTop(int dist = 0);
+		Box &yTopPerc(float perc = 0);
 		Box &xRight(int dist = 0);
 		Box &yBottom(int dist = 0);
 
@@ -62,6 +66,8 @@ namespace Ui
 		operator glm::vec4() { return (*this)(); }
 	};
 
+	bool isInButton(const glm::vec2 &p, const glm::vec4 &box);
 
+	bool isButtonReleased(const glm::vec2 &p, const glm::vec4 &box);
 };
 

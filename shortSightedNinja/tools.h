@@ -12,11 +12,11 @@
 ///define ERRORS_ONLY
 ///to only display error messages
 
-#define ERRORS_ONLY
 
 #include <iostream>
 #include <Windows.h>
 #include <sstream>
+#include "buildConfig.h"
 
 #ifdef _DEBUG
 #define FORCE_LOG

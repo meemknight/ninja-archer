@@ -2,7 +2,6 @@
 #pragma once
 #include <glm/vec2.hpp>
 
-//todo remove
 void errorMessage(const char *c);
 
 ///sets the mouse pos relative to the window's drawing area

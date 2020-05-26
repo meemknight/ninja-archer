@@ -1,11 +1,9 @@
 #include "opengl2Dlib.h"
+#include <GL/wglew.h>
 #include <fstream>
 #include <sstream>
 #include "tools.h"
 #include <algorithm>
-
-GLint maskSamplerUniform = 0;
-gl2d::internal::ShaderProgram maskShader = {};
 
 #undef max
 
@@ -88,11 +86,14 @@ namespace gl2d
 		stbtt_aligned_quad fontGetGlyphQuad(const Font font, const char c)
 		{
 			stbtt_aligned_quad quad = { 0 };
-			float xoffset = 0;
-			float yoffset = 0;
+		
+			float x=0;
+			float y=0;
 
-			stbtt_GetPackedQuad(font.packedCharsBuffer, font.size.x, font.size.y, c - ' ', &xoffset, &yoffset, &quad, 1);
-
+			stbtt_GetPackedQuad(font.packedCharsBuffer,
+				font.size.x, font.size.y, c - ' ', &x, &y, &quad, 1);
+			
+			
 			return quad;
 		}
 
@@ -185,12 +186,46 @@ namespace gl2d
 		}
 	}
 
+	struct
+	{
+		bool WGL_EXT_swap_control_ext;
+	}extensions = {};
+
 	void init()
 	{
+		//int last = 0;
+		//glGetIntegerv(GL_NUM_EXTENSIONS, &last);
+		//for(int i=0; i<last; i++)
+		//{
+		//	const char *c = (const char*)glGetStringi(GL_EXTENSIONS, i);
+		//	if(strcmp(c, "WGL_EXT_swap_control") == 0)
+		//	{
+		//		extensions.WGL_EXT_swap_control_ext = true;
+		//		break;
+		//	}
+		//}
+		//todo check ?
+
+		if (wglGetProcAddress("wglSwapIntervalEXT") != nullptr)
+		{
+			extensions.WGL_EXT_swap_control_ext = true;
+		}
+
 		defaultShader = internal::createShaderProgram(defaultVertexShader, defaultFragmentShader);
-		maskShader = internal::createShaderProgram(defaultVertexShader, maskFragmentShader);
-		maskSamplerUniform = glGetUniformLocation(maskShader.id, "u_mask");
 		enableNecessaryGLFeatures();
+	}
+
+	bool setVsync(bool b)
+	{
+		if(extensions.WGL_EXT_swap_control_ext)
+		{
+			wglSwapIntervalEXT(b);
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	glm::vec2 rotateAroundPoint(glm::vec2 vec, glm::vec2 point, const float degrees)
@@ -438,6 +473,8 @@ namespace gl2d
 	void enableNecessaryGLFeatures()
 	{
 		glEnable(GL_BLEND);
+
+		glDisable(GL_DEPTH_TEST);
 
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -716,6 +753,37 @@ namespace gl2d
 		upperTexPos.w = inner_texture_coords.y;
 		renderRectangle(topPos, colorData, Position2D{ 0, 0 }, 0, texture, upperTexPos);
 
+		//Rect topPos = position;
+		//topPos.x += leftBorder;
+		//topPos.w = topBorder;
+		//topPos.z = topBorder;
+		//float end = rightBorder;
+		//float size = topBorder;
+		//
+		////todo replace with 1
+		//while(1)
+		//{
+		//	if(topPos.x + size <= end)
+		//	{
+		//
+		//		//draw
+		//		renderRectangle(topPos, colorData, Position2D{ 0, 0 }, 0, texture, upperTexPos);
+		//
+		//		topPos += size;
+		//	}else
+		//	{
+		//		float newW = end - topPos.x;
+		//		if(newW>0)
+		//		{
+		//			topPos.z = newW;
+		//			renderRectangle(topPos, colorData, Position2D{ 0, 0 }, 0, texture, upperTexPos);
+		//		}
+		//		break;
+		//	}
+		//
+		//}
+
+
 		//bottom
 		Rect bottom = position;
 		bottom.x += leftBorder;
@@ -764,6 +832,8 @@ namespace gl2d
 		topleftTexPos.z = inner_texture_coords.x;
 		topleftTexPos.w = inner_texture_coords.y;
 		renderRectangle(topleft, colorData, Position2D{ 0, 0 }, 0, texture, topleftTexPos);
+		//todo repair
+
 
 		//topright
 		Rect topright = position;
@@ -879,19 +949,22 @@ namespace gl2d
 		return glm::vec4(v1.x, v1.y, v3.x, v3.y);
 	}
 
-	void Renderer2D::renderText(glm::vec2 position, const char * text, const Font font, const Color4f color, const float size, const float spacing, const float line_space)
+	glm::vec2 Renderer2D::getTextSize(const char * text, const Font font,
+		const float size, const float spacing, const float line_space)
 	{
+		glm::vec2 position = {};
+
 		const int text_length = strlen(text);
 		Rect rectangle;
 		rectangle.x = position.x;
+		float linePositionY = position.y;
 
 		//This is the y position we render at because it advances when we encounter newlines
-		float linePositionY = position.y;
 
 		float maxPos = 0;
 		float maxPosY = 0;
 
-		for (int i = 0; i < text_length-1; i++)
+		for (int i = 0; i < text_length; i++)
 		{
 			if (text[i] == '\n')
 			{
@@ -900,15 +973,24 @@ namespace gl2d
 			}
 			else if (text[i] == '\t')
 			{
-				rectangle.x += spacing * 3 * size * 4;
+				const stbtt_aligned_quad quad = internal::fontGetGlyphQuad
+				(font, '_');
+				auto x = quad.x1 - quad.x0;
+
+				rectangle.x += x * size * 3 + spacing * size;
 			}
 			else if (text[i] == ' ')
 			{
-				rectangle.x += spacing * 3 * size;
+				const stbtt_aligned_quad quad = internal::fontGetGlyphQuad
+				(font, '_');
+				auto x = quad.x1 - quad.x0;
+
+				rectangle.x += x * size + spacing * size;
 			}
 			else if (text[i] >= ' ' && text[i] <= '~')
 			{
-				const stbtt_aligned_quad quad = internal::fontGetGlyphQuad(font, text[i]);
+				const stbtt_aligned_quad quad = internal::fontGetGlyphQuad
+				(font, text[i]);
 
 				rectangle.z = quad.x1 - quad.x0;
 				rectangle.w = quad.y1 - quad.y0;
@@ -916,21 +998,92 @@ namespace gl2d
 				rectangle.z *= size;
 				rectangle.w *= size;
 
-				rectangle.y = linePositionY - rectangle.w;
+				rectangle.y = linePositionY + quad.y0 * size;
 
-				glm::vec4 colorData[4] = { color, color, color, color };
 				rectangle.x += rectangle.z + spacing * size;
 				maxPos = std::max(maxPos, rectangle.x);
 				maxPosY = std::max(maxPosY, rectangle.y);
 			}
 		}
 
-		float padd = maxPos - position.x;
-		padd /= 2;
-		position.x -= padd;
+		float paddX = maxPos;
 
-		float paddY = maxPosY - position.y;
-		position.y -= paddY;
+		float paddY = maxPosY;
+
+		paddY += font.max_height * size;
+
+		return glm::vec2{ paddX, paddY };
+		
+	}
+
+	void Renderer2D::renderText(glm::vec2 position, const char * text, const Font font,
+		const Color4f color, const float size, const float spacing, const float line_space, bool showInCenter,
+		const Color4f ShadowColor
+		, const Color4f LightColor
+		)
+	{
+		const int text_length = strlen(text);
+		Rect rectangle;
+		rectangle.x = position.x;
+		float linePositionY = position.y;
+
+		if(showInCenter)
+		{
+			//This is the y position we render at because it advances when we encounter newlines
+
+			float maxPos = 0;
+			float maxPosY = 0;
+
+			for (int i = 0; i < text_length; i++)
+			{
+				if (text[i] == '\n')
+				{
+					rectangle.x = position.x;
+					linePositionY += (font.max_height + line_space) * size;
+				}
+				else if (text[i] == '\t')
+				{
+					const stbtt_aligned_quad quad = internal::fontGetGlyphQuad
+					(font, '_');
+					auto x = quad.x1 - quad.x0;
+
+					rectangle.x += x * size * 3 + spacing * size;
+				}
+				else if (text[i] == ' ')
+				{
+					const stbtt_aligned_quad quad = internal::fontGetGlyphQuad
+					(font, '_');
+					auto x = quad.x1 - quad.x0;
+
+					rectangle.x += x * size+ spacing*size;
+				}
+				else if (text[i] >= ' ' && text[i] <= '~')
+				{
+					const stbtt_aligned_quad quad = internal::fontGetGlyphQuad
+					(font, text[i]);
+
+					rectangle.z = quad.x1 - quad.x0;
+					rectangle.w = quad.y1 - quad.y0;
+
+					rectangle.z *= size;
+					rectangle.w *= size;
+
+					rectangle.y = linePositionY + quad.y0 * size;
+
+
+					rectangle.x += rectangle.z + spacing * size;
+					maxPos = std::max(maxPos, rectangle.x);
+					maxPosY = std::max(maxPosY, rectangle.y);
+				}
+			}
+
+			float padd = maxPos - position.x;
+			padd /= 2;
+			position.x -= padd;
+
+			float paddY = maxPosY - position.y;
+			position.y -= paddY;
+		}
 
 		rectangle = {};
 		rectangle.x = position.x;
@@ -947,15 +1100,24 @@ namespace gl2d
 			}
 			else if (text[i] == '\t')
 			{
-				rectangle.x += spacing * 3 * size * 4;
+				const stbtt_aligned_quad quad = internal::fontGetGlyphQuad
+				(font, '_');
+				auto x = quad.x1 - quad.x0;
+
+				rectangle.x += x * size * 3 + spacing * size;
 			}
 			else if (text[i] == ' ')
 			{
-				rectangle.x += spacing * 3 * size;
+				const stbtt_aligned_quad quad = internal::fontGetGlyphQuad
+				(font, '_');
+				auto x = quad.x1 - quad.x0;
+				rectangle.x += x * size + spacing * size;
 			}
 			else if (text[i] >= ' ' && text[i] <= '~')
 			{
-				const stbtt_aligned_quad quad = internal::fontGetGlyphQuad(font, text[i]);
+
+				const stbtt_aligned_quad quad = internal::fontGetGlyphQuad
+				(font, text[i]);
 
 				rectangle.z = quad.x1 - quad.x0;
 				rectangle.w = quad.y1 - quad.y0;
@@ -963,10 +1125,34 @@ namespace gl2d
 				rectangle.z *= size;
 				rectangle.w *= size;
 
-				rectangle.y = linePositionY - rectangle.w;
+				//rectangle.y = linePositionY - rectangle.w;
+				rectangle.y = linePositionY + quad.y0 * size;
 
-				glm::vec4 colorData[4] = { color, color, color, color };
+				glm::vec4 colorData[4] = { color, color, color, color };				
+				
+				if(ShadowColor.w)
+				{
+					glm::vec2 pos = { -5, 3 };
+					pos *= size;
+					renderRectangle({ rectangle.x + pos.x, rectangle.y + pos.y,  rectangle.z, rectangle.w},
+						ShadowColor, glm::vec2{ 0, 0 }, 0, font.texture,
+						glm::vec4{ quad.s0, quad.t0, quad.s1, quad.t1 });
+
+				}
+
 				renderRectangle(rectangle, colorData, glm::vec2{ 0, 0 }, 0, font.texture, glm::vec4{ quad.s0, quad.t0, quad.s1, quad.t1 });
+
+				if(LightColor.w)
+				{
+					glm::vec2 pos = { -2, 1 };
+					pos *= size;
+					renderRectangle({ rectangle.x + pos.x, rectangle.y + pos.y,  rectangle.z, rectangle.w },
+						LightColor, glm::vec2{ 0, 0 }, 0, font.texture,
+						glm::vec4{ quad.s0, quad.t0, quad.s1, quad.t1 });
+
+				}
+
+				
 				rectangle.x += rectangle.z + spacing * size;
 			}
 		}
@@ -1071,6 +1257,7 @@ namespace gl2d
 
 		const unsigned char* decodedImage = stbi_load_from_memory(image_file_data, image_file_size, &width, &height, &channels, 4);
 
+		/*
 		int newW = width + (width / blockSize);
 		int newH = height + (height / blockSize);
 
@@ -1113,6 +1300,133 @@ namespace gl2d
 			}
 			
 		}
+		*/
+		
+		int newW = width + ((width * 2) / blockSize);
+		int newH = height + ((height * 2) / blockSize);
+
+		auto getOld = [decodedImage, width](int x, int y, int c)->const unsigned char
+		{
+			return decodedImage[4*(x + (y * width)) + c];
+		};
+
+		
+		unsigned char *newData = new unsigned char[newW * newH * 4];
+		ZeroMemory(newData, newW * newH * 4);
+
+		auto getNew = [newData, newW](int x, int y, int c)
+		{
+			return &newData[4 * (x + (y * newW)) + c];
+		};
+
+		int newDataCursor = 0;
+		int dataCursor = 0;
+
+		//first copy data
+		for(int y=0; y < newH; y++)
+		{
+			int yNo = 0;
+			if((y==0 || y== newH-1
+				|| ((y)%(blockSize+2))==0||
+				((y+1) % (blockSize + 2)) == 0
+				))
+			{
+				yNo = 1;
+			}
+			
+			for (int x = 0; x < newW; x++)
+			{
+				if (
+					yNo||
+					
+					((
+					x == 0 || x == newW - 1
+					|| (x % (blockSize + 2)) == 0 ||
+					((x + 1) % (blockSize + 2)) == 0
+					) 
+						)
+					
+					)
+				{
+					newData[newDataCursor++] = 0;
+					newData[newDataCursor++] = 0;
+					newData[newDataCursor++] = 0;
+					newData[newDataCursor++] = 0;
+				}else
+				{
+					newData[newDataCursor++] = decodedImage[dataCursor++];
+					newData[newDataCursor++] = decodedImage[dataCursor++];
+					newData[newDataCursor++] = decodedImage[dataCursor++];
+					newData[newDataCursor++] = decodedImage[dataCursor++];
+				}
+
+			}
+		
+		}
+
+		//then add margins
+		
+
+		for(int x =1; x< newW-1; x++)
+		{
+			//copy on left
+			if (x == 1 || 
+				(x%(blockSize+2)) == 1
+				)
+			{
+				for(int y=0; y< newH; y++)
+				{
+					*getNew(x - 1, y, 0) = *getNew(x, y, 0);
+					*getNew(x - 1, y, 1) = *getNew(x, y, 1);
+					*getNew(x - 1, y, 2) = *getNew(x, y, 2);
+					*getNew(x - 1, y, 3) = *getNew(x, y, 3);
+				}
+
+			}else //copy on rigght
+				if (x == newW - 2 ||
+					(x % (blockSize + 2)) == blockSize
+					)
+				{
+					for (int y = 0; y < newH; y++)
+					{
+						*getNew(x+1, y, 0) = *getNew(x, y, 0);
+						*getNew(x+1, y, 1) = *getNew(x, y, 1);
+						*getNew(x+1, y, 2) = *getNew(x, y, 2);
+						*getNew(x+1, y, 3) = *getNew(x, y, 3);
+					}
+				}
+		}
+
+		for(int y=1; y< newH -1; y++)
+		{
+			if (y == 1 ||
+				(y % (blockSize + 2)) == 1
+				)
+			{
+				for (int x = 0; x < newW; x++)
+				{
+					*getNew(x, y-1, 0) = *getNew(x, y, 0);
+					*getNew(x, y-1, 1) = *getNew(x, y, 1);
+					*getNew(x, y-1, 2) = *getNew(x, y, 2);
+					*getNew(x, y-1, 3) = *getNew(x, y, 3);
+				}
+			}
+			else
+				if (y == newH - 2 ||
+					(y % (blockSize + 2)) == blockSize
+					)
+				{
+					for (int x = 0; x < newW; x++)
+					{
+						*getNew(x ,y+1, 0) = *getNew(x, y , 0);
+						*getNew(x, y+1, 1) = *getNew(x, y , 1);
+						*getNew(x, y+1, 2) = *getNew(x, y , 2);
+						*getNew(x, y+1, 3) = *getNew(x, y , 3);
+					}
+				}
+		
+		}
+
 
 		createFromBuffer((const char*)newData, newW, newH);
 
@@ -1312,11 +1626,11 @@ namespace gl2d
 		//todo
 		if (flip)
 		{
-			return { (x + 1) * xSize - Xpadding, 1 - (y * ySize) - Ypadding, (x)* xSize, 1.f - ((y + 1) * ySize) };
+			return { (x + 1) * xSize - Xpadding, 1 - (y * ySize) - Ypadding, (x)* xSize + Xpadding, 1.f - ((y + 1) * ySize) + Ypadding };
 		}
 		else
 		{
-			return { x * xSize, 1 - (y * ySize) - Ypadding, (x + 1) * xSize - Xpadding, 1.f - ((y + 1) * ySize) };
+			return { x * xSize + Xpadding, 1 - (y * ySize) - Ypadding, (x + 1) * xSize - Xpadding, 1.f - ((y + 1) * ySize) + Ypadding };
 		}
 	}
 

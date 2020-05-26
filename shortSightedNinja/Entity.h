@@ -2,7 +2,10 @@
 #include "glm/vec2.hpp"
 #include "mapData.h"
 #include "mapRenderer.h"
+#include <algorithm>
 
+#undef min
+#undef max
 
 struct Entity
 {
@@ -17,6 +20,7 @@ struct Entity
 	bool blueGrab=0;
 	bool grayGrab=0;
 	int wallGrab = 0;
+	int iceGrab = 0;
 	int lastWallGrab = 0;
 
 	bool grounded;
@@ -39,38 +43,25 @@ struct Entity
 
 	float notGrabTime = 0;
 
+	float accelerateTime = 0;
+	float maxAccelerationTime = 0.15;
+
 	bool moving = 0;
 	bool dying = 0;
 	bool lockMovementDie = 0;
 	int isExitingLevel = -1;
+	bool accelerating = 0;
+	bool isSittingOnIce = 0;
+
+	float getAcceleration();
 
 	bool iswebs;
 
-	void updateMove() 
-	{
-		if(lastPos.x - pos.x < 0)
-		{
-			movingRight = 1;
-		}else if(lastPos.x - pos.x > 0)
-		{
-			movingRight = 0;
-		}
-
-		if(wallGrab == -1)
-		{
-			movingRight = 0;
-		}
-		if (wallGrab == 1)
-		{
-			movingRight = 1;
-		}
-
-		lastPos = pos; 
-	}
+	void updateMove(float deltaTime);
 	
 	void strafe(int dir);
 
-	void run(float speed);
+	void run(float speed, float deltaTime);
 
 	void airRun(float speed);
 
@@ -92,6 +83,8 @@ private:
 	glm::vec2 performCollision(MapData &mapDat, glm::vec2 pos, glm::vec2 size, glm::vec2 delta,
 	bool &upTouch, bool &downTouch, bool &leftTouch, bool &rightTouch);
 };
+
+bool aabb(glm::vec4 b1, glm::vec4 b2);
 
 struct Arrow
 {
@@ -148,5 +141,50 @@ struct Pickup
 	bool colidePlayer(Entity &player);
 
 	void draw(gl2d::Renderer2D &renderer2d, gl2d::Texture arrowTexture, float deltaTime);
+
+};
+
+//gets a position diagonal of the player
+static glm::vec2 getDiagonalBirdPos(glm::vec2 position, glm::vec2 playerPos)
+{
+
+	if(playerPos.x < position.x) // go right
+	{
+		return position - glm::vec2{ -9 * BLOCK_SIZE, 7 * BLOCK_SIZE };
+	}else // go left
+	{
+		return position - glm::vec2{ +9 * BLOCK_SIZE, 7 * BLOCK_SIZE };
+	}
+
+}
+
+constexpr float birdFrameDuration = 0.10f;
+
+struct Bird
+{
+	glm::vec2 position;
+
+	glm::vec2 destination;
+	glm::vec2 startPos;
+
+	//1 ender 2 leave
+	int isMovingType = 0;
+
+	void update(float deltaTime);
+
+	void startMove(glm::vec2 start, glm::vec2 dest);
+
+	void startEndMove(glm::vec2 start, glm::vec2 dest);
+
+	void draw(gl2d::Renderer2D &renderer, float deltaTime, gl2d::Texture t, glm::vec2 playerPos);
+
+	glm::ivec2 texturePos = {};
+
+	float frameTime = 0;
+
+	bool showing = 0;
+	float changeTime = 0;
+
+	float getShowPerc();
 
 };

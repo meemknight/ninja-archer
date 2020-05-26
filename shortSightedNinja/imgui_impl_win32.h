@@ -22,8 +22,8 @@ bool ImGui_ImplWin32_UpdateMouseCursor();
 #endif
 
 // Configuration: Disable gamepad support or linking with xinput.lib
-//#define IMGUI_IMPL_WIN32_DISABLE_GAMEPAD
-//#define IMGUI_IMPL_WIN32_DISABLE_LINKING_XINPUT
+#define IMGUI_IMPL_WIN32_DISABLE_GAMEPAD
+#define IMGUI_IMPL_WIN32_DISABLE_LINKING_XINPUT
 
 // Handler for Win32 messages, update mouse/keyboard data.
 // You may or not need this for your implementation, but it can serve as reference for handling inputs.

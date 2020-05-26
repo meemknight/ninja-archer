@@ -3,10 +3,15 @@
 #include "glm/vec2.hpp"
 #include <vector>
 #include <string>
+#include <unordered_map>
+#include "DialogInteraction.h"
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/gtx/hash.hpp"
 
 #define BLOCK_SIZE 8
 #define BLOCK_COUNT 424
-#define LEVELS 4
+#define LEVELS 5
 
 namespace Block
 {
@@ -130,13 +135,10 @@ namespace Block
 		woodSolid16,
 		woodSolid17,
 		woodSolid18,
+		ice1,ice2, ice3, ice4, ice5, ice6, ice7, ice8, ice9, ice10, ice11,
+			ice12, ice13, ice14, ice15, iceDino1, iceDino2, iceDino3, iceDino4, iceDino5, iceDino6, iceDino7,
 #pragma region unfinished
-		unfinished5,
-		unfinished6, unfinished7, unfinished8, unfinished9, unfinished10,
-		unfinished11, unfinished12, unfinished13, unfinished14, unfinished15,
-		unfinished16, unfinished17, unfinished18, unfinished19, unfinished20,
-		unfinished21, unfinished22, unfinished23, unfinished24, unfinished25,
-		unfinished26, unfinished27, unfinished28, unfinished29, unfinished30,
+			unfinished27, unfinished28, unfinished29, unfinished30,
 		unfinished31, unfinished32, unfinished33, unfinished34, unfinished35,
 		unfinished36, unfinished37, unfinished38, unfinished39, unfinished40,
 		unfinished41, unfinished42, unfinished43, unfinished44, unfinished45,
@@ -226,7 +228,7 @@ namespace Block
 		woddenDecoration5,
 		woddenDecoration6,
 		woddenDecoration7,
-		musicGreen,
+		musicEffectGreen,
 		musicRed,
 		musicTiki,
 		musicSnow,
@@ -261,7 +263,50 @@ namespace Block
 		spike2,
 		spike3,
 		spike4,
+		icicle1,
+		icicle2,
+		iceBackground1,
+		iceBackground2,
+		iceBackground3,
+		iceBackground4,
+		iceBackground5,
+		iceBackground6,
+		iceBackground7,
+		iceBackground8,
+		iceBackground9,
+		iceBackground10,
+		iceBackground11,
+		iceBackground12,
+		iceBackground13,
+		iceBackground14,
+		iceBackground15,
+		iceBackground16,
+		iceBackground17,
+		iceBackground18,
+		snowPlant1,
+		snowPlant2,
+		snowBackgroun1,
+		snowBackgroun2,
+		snowBackgroun3,
+		snowBackgroun4,
+		snowBackgroun5,
+		snowBackgroun6,
+		snowBackgroun7,
+		snowBackgroun8,
+		snowUnlitTorch,
+		snowLitTorch,
+		musicIce,
+		musicBlue,
+		musicCrimson,
+		musicKhaki,
+		musicDarkGreen,
+		musicGreen,
+		musicLightGray,
+		musicEffecSnow,
+		musicEffecWater,
+		musicEffecCave,
 		lastBlock,
+
 	};
 };
 
@@ -287,7 +332,8 @@ inline bool isWaterMusicSource(unsigned short b)
 		b == Block::waterFallBegin ||
 		b == Block::waterFallEnd ||
 		b == Block::water7 ||
-		b == Block::water4
+		b == Block::water4 ||
+		b == Block::musicEffecWater
 		)
 	{
 		return true;
@@ -431,13 +477,13 @@ inline bool isOpaque(unsigned short  b)
 inline bool isLitTorch(unsigned short b)
 {
 	return b == Block::torceTopBrickLit || b == Block::torceTopLeavesLit || b == Block::litLantern
-		|| b == Block::torchLitWood;
+		|| b == Block::torchLitWood || b == Block::snowLitTorch;
 }
 
 inline bool unLitTorch(unsigned short b)
 {
 	return b == Block::torceTopBrickUnlit || b == Block::torceTopLeavesUnlit || b == Block::unlitLantern
-		|| b == Block::torchUnlitWood;
+		|| b == Block::torchUnlitWood || b == Block::snowUnlitTorch;
 
 }
 
@@ -451,7 +497,9 @@ inline bool isInteractableGrass(unsigned short b)
 		b == Block::vines2 ||
 		b == Block::grassDecoration2 ||
 		b == Block::grassDecoration3 ||
-		b == Block::grassDecoration4;
+		b == Block::grassDecoration4 ||
+		b == Block::snowPlant1 ||
+		b == Block::snowPlant2;
 }
 
 inline bool isSign(unsigned short b)
@@ -462,6 +510,21 @@ inline bool isSign(unsigned short b)
 		b == Block::signDecoration3 ||
 		b == Block::signDecoration4 ||
 		b == Block::signDecoration5;
+}
+
+inline bool isIce(unsigned short b)
+{
+	return (b == Block::ice1
+		|| b == Block::ice2
+		|| b == Block::ice3
+		|| b == Block::ice4
+		|| b == Block::ice5
+		|| b == Block::ice6
+		|| b == Block::ice7
+		|| b == Block::ice8
+		|| b == Block::ice9
+		|| b == Block::ice10
+		|| b == Block::ice11);
 }
 
 struct BlockInfo
@@ -499,8 +562,12 @@ struct signData
 	signData(glm::ivec2 p,const std::string &t):
 		pos(p),text(t){};
 
+	signData(glm::ivec2 p, const std::string &t, int button) :
+		pos(p), text(t), button(button){};
+
 	glm::ivec2 pos;
 	std::string text;
+	int button = -1;
 };
 
 struct exitData
@@ -533,6 +600,9 @@ struct MapData
 	std::vector<glm::vec2> tikiSoundPos;
 	std::vector<glm::vec2> snowSoundPos;
 	std::vector<glm::vec2> caveSoundPos;
+
+	std::unordered_map<glm::ivec2, FullDialogData> dialogs;
+
 	float getWaterPercentage(glm::vec2 pos);
 	float getGreenPercentage(glm::vec2 pos);
 	float getTikiPercentage(glm::vec2 pos);

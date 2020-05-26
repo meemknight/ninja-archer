@@ -4,6 +4,12 @@
 #include <math.h>
 #include <algorithm>
 #include "glm/glm.hpp"
+#include "tools.h"
+#include <cmath>
+#include <ctime>
+
+extern gl2d::Texture uiButtons;
+extern gl2d::Font font;
 
 namespace input
 {
@@ -16,10 +22,11 @@ namespace input
 	XInputGetKeystroke_t *DynamicXInputGetKeystroke;
 
 	static bool xInputLoaded = 0;
+	static bool usedController = 0;
 
 	void loadXinput()
 	{
-
+		//todo also load 9-0-1
 		HMODULE xinputLib = LoadLibrary("xinput1_4.dll");
 		if (!xinputLib)
 		{
@@ -39,12 +46,12 @@ namespace input
 
 	}
 
-	int bindings[Buttons::buttonsCount] = { 0, 'S', 'A', 'D', VK_SPACE, 0, 'W', 'Q', 'E', VK_ESCAPE };
+	int bindings[Buttons::buttonsCount] = { 0, 'S', 'A', 'D', VK_SPACE, 0, 'W', 'Q', 'E', VK_ESCAPE, VK_ESCAPE };
 	WORD bindingsController[Buttons::buttonsCount] = { 0, XINPUT_GAMEPAD_DPAD_DOWN
 		, XINPUT_GAMEPAD_DPAD_LEFT, XINPUT_GAMEPAD_DPAD_RIGHT, XINPUT_GAMEPAD_A, 0, XINPUT_GAMEPAD_DPAD_UP,
-	XINPUT_GAMEPAD_LEFT_SHOULDER, XINPUT_GAMEPAD_RIGHT_SHOULDER, XINPUT_GAMEPAD_B };
-	float deadZone = 0.18f;
-	float moveSensitivity = 0.20f;
+	XINPUT_GAMEPAD_LEFT_SHOULDER, XINPUT_GAMEPAD_RIGHT_SHOULDER, XINPUT_GAMEPAD_B, XINPUT_GAMEPAD_START };
+	float deadZone = 0.28f;
+	float moveSensitivity = 0.25f;
 
 	int buttonsHeld[Buttons::buttonsCount] = {};
 	int buttonsPressed[Buttons::buttonsCount] = {};
@@ -70,6 +77,11 @@ namespace input
 		return -isKeyHeld(Buttons::left) + isKeyHeld(Buttons::right);
 	}
 
+	bool isControllerInput()
+	{
+		return usedController;
+	}
+
 	glm::vec2 lastShootDir = {1,0};
 
 	glm::vec2 getShootDir(glm::vec2 centre)
@@ -88,14 +100,74 @@ namespace input
 	void updateInput()
 	{
 		XINPUT_STATE s;
-		bool read = 1;
-		if (xInputLoaded == 0 || DynamicXinputGetState(0, &s) != ERROR_SUCCESS)
+		bool read = 0;
+		if (xInputLoaded != 0)
 		{
-			read = 0;
+			for(int i=0; i<3; i++)
+			{
+				if (DynamicXinputGetState(i, &s) != ERROR_SUCCESS)
+				{
+					read = 1;
+					break;
+				}
+			}
+
 		}
+
+#pragma region determin whether controller or not
+		if(read)
+		{
+			
+
+			XINPUT_KEYSTROKE ks = {};
+			if(DynamicXInputGetKeystroke && DynamicXInputGetKeystroke(0, 0, &ks) == ERROR_SUCCESS)
+			{
+				if(ks.Flags & (XINPUT_KEYSTROKE_REPEAT | XINPUT_KEYSTROKE_KEYDOWN | XINPUT_KEYSTROKE_KEYUP))
+				{
+					usedController = true;
+				}
+			}
+
+			for(int i='0'; i<='z';i++)
+			{
+				if(GetAsyncKeyState(i))
+				{
+					usedController = false;
+					break;
+				}
+			}
+			if(GetAsyncKeyState(VK_SPACE) ||
+				GetAsyncKeyState(VK_BACK) ||
+				GetAsyncKeyState(VK_CONTROL) ||
+				GetAsyncKeyState(VK_DOWN) ||
+				GetAsyncKeyState(VK_UP) ||
+				GetAsyncKeyState(VK_LEFT) ||
+				GetAsyncKeyState(VK_RIGHT) ||
+				GetAsyncKeyState(VK_LSHIFT) ||
+				GetAsyncKeyState(VK_SHIFT)||
+				GetAsyncKeyState(VK_ACCEPT)
+				)
+			{
+				usedController = false;
+			}
+
+			if(platform::isLMouseHeld() 
+				|| platform::isRMouseHeld()
+				||platform::mouseMoved()
+				)
+			{
+				usedController = false;
+			}
+
+		}else
+		{
+			usedController = false;
+		}
+#pragma endregion
 
 		if (read)
 		{
+			//todo proper normalize
 			const XINPUT_GAMEPAD *pad = &s.Gamepad;
 			float retValX = pad->sThumbRX / (float)SHRT_MAX;
 			float retValY = -pad->sThumbRY / (float)SHRT_MAX;
@@ -123,7 +195,7 @@ namespace input
 		for (int i = 0; i < Buttons::buttonsCount; i++)
 		{
 			bool state;
-			if (read == 1)
+			if (read)
 			{
 				state = internal::getisKeyHeldDirect(i, &s);
 			}
@@ -149,9 +221,36 @@ namespace input
 					buttonsPressed[i] = 1;
 				}
 			}
+
 			buttonsHeld[i] = state;
 
 		}
+
+	}
+
+	void drawButton(gl2d::Renderer2D &renderer, glm::vec2 pos, float size, int button, float a)
+	{
+		drawButton(renderer, pos, size, button, input::isControllerInput(),a);
+	}
+
+	void drawButtonWithHover(gl2d::Renderer2D & renderer, glm::vec2 pos, float size, int button, float a)
+	{
+		float f = (std::sin(clock() / 220.f) / 2.f + 1) * 3.5;
+		pos.y -= f;
+		drawButton(renderer, pos, size, button, a);
+	}
+
+	void drawButton(gl2d::Renderer2D &renderer, glm::vec2 pos, float size, int button, bool isController, float a)
+	{
+		glm::ivec2 s = uiButtons.GetSize();
+		gl2d::TextureAtlasPadding uiAtlas(Buttons::buttonsCount, 2, s.x, s.y);
+
+		renderer.renderRectangle({ pos.x, pos.y, size, size }, {0,0,0,a}, {}, 0, uiButtons, uiAtlas.get(button, isController));
+		
+		pos.y -= 1;
+		pos.x += 1;
+		
+		renderer.renderRectangle({ pos.x, pos.y, size, size }, {1,1,1,a}, {}, 0, uiButtons, uiAtlas.get(button, isController));
 
 	}
 
@@ -221,7 +320,7 @@ namespace input
 						retValY = 0.f;
 					}
 
-					val = retValY < (-moveSensitivity * 2.8);
+					val = retValY < (-moveSensitivity * 3.8);
 					val = val | (pad->wButtons & bindingsController[b]);
 				}else if (b == input::Buttons::up)
 				{
@@ -235,7 +334,7 @@ namespace input
 						retValY = 0.f;
 					}
 
-					val = retValY > moveSensitivity * 2.8;
+					val = retValY > moveSensitivity * 3.8;
 					val = val | (pad->wButtons & bindingsController[b]);
 				}
 				else
@@ -247,7 +346,7 @@ namespace input
 			
 			if (b == input::Buttons::shoot)
 			{
-				val = val || platform::isLMouseButtonPressed();
+				val = val || platform::isLMouseHeld();
 			}
 			else
 			{

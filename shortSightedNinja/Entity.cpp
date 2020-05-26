@@ -9,19 +9,21 @@
 float gravitationalAcceleration = 64;
 float jumpSpeed = 22;
 float jumpFromWallSpeed = 22;
-float velocityClamp = 30;
+float velocityClampY = 30;
+float velocityClampX = 10;
 float drag = 0.15f;
-float strafeSpeed = 10;
+float dragX = 0.20f;
+float strafeSpeed = 8;
 float strafeSpeedMove = 10;
 float runSpeed = 14;
 float airRunSpeed = 10;
-float grabMargin = 0.25f;
-float notGrabTimeVal = 0.08;
+float grabMargin = 0.55f;
+float notGrabTimeVal = 0.06;
 bool snapWallGrab = 0;
 float ghostJumpTime = 0.08;
-float blockTouchDownMargin = 0;
+float iceSlipX = 3;
 
-float arrowSpeed = 25;
+float arrowSpeed = 20;
 
 #undef max;
 #undef min;
@@ -138,12 +140,66 @@ void Entity::resolveConstrains(MapData & mapData)
 
 }
 
+float Entity::getAcceleration()
+{
+	float a = std::max((accelerateTime / maxAccelerationTime), 0.6f);
+	if (a <= 0.9) { return a; }
+	return a;
+}
+
+void Entity::updateMove(float deltaTime)
+{
+	if (lastPos.x - pos.x < 0)
+	{
+		movingRight = 1;
+	}
+	else if (lastPos.x - pos.x > 0)
+	{
+		movingRight = 0;
+	}
+
+	if (wallGrab == -1)
+	{
+		movingRight = 0;
+	}
+	if (wallGrab == 1)
+	{
+		movingRight = 1;
+	}
+
+	lastPos = pos;
+
+	if (!accelerating)
+	{
+		if (accelerateTime>0)
+		{
+			accelerateTime -= deltaTime;
+		}
+		else
+		{
+			accelerateTime = 0;
+		}
+	}
+	else
+	{
+		accelerateTime += deltaTime;
+		if (accelerateTime > maxAccelerationTime)
+		{
+			accelerateTime = maxAccelerationTime;
+		}
+	}
+
+	accelerating = 0;
+}
+
 void Entity::strafe(int dir)
 {
 	velocity.x = dir * strafeSpeed * BLOCK_SIZE;
 }
 
-void Entity::run(float speed)
+constexpr float iceAcceleration = 10;
+
+void Entity::run(float speed, float deltaTime)
 {
 	if (isExitingLevel != -1 || lockMovementDie)
 	{
@@ -152,12 +208,37 @@ void Entity::run(float speed)
 
 	if(iswebs)
 	{
-		pos.x += speed * runSpeed * BLOCK_SIZE * 0.1;
+		pos.x += speed * runSpeed * BLOCK_SIZE * 0.1 * getAcceleration();
 	}else
 	{
-		pos.x += speed * runSpeed * BLOCK_SIZE;
+		pos.x += speed * runSpeed * BLOCK_SIZE * getAcceleration();
 	}
 	moving = (bool)speed;
+
+	if (speed) { accelerating = true; }
+
+	if(isSittingOnIce && speed)
+	{
+		float f = speed < 0 ? -1 : 1;
+
+		velocity.x += f * iceSlipX * BLOCK_SIZE * deltaTime * iceAcceleration;
+
+		if(speed < 0)
+		{
+			velocity.x = std::max(-1 * iceSlipX * BLOCK_SIZE, velocity.x);
+		}else
+		{
+			velocity.x = std::min(1 * iceSlipX * BLOCK_SIZE, velocity.x);
+		}
+
+	}
+
+	//todo check what i did earlier
+	//if(!isSittingOnIce && speed)
+	//{
+	//	velocity.x = 0;
+	//}
+
 }
 
 void Entity::airRun(float speed)
@@ -177,6 +258,11 @@ void Entity::airRun(float speed)
 		speed *= 0.5;
 	}
 
+	if(speed)
+	{
+		accelerating = 1;
+	}
+
 	if(speed > 0)
 	{
 		if(velocity.x < -strafeSpeedMove * BLOCK_SIZE)
@@ -192,7 +278,14 @@ void Entity::airRun(float speed)
 		}
 	}
 	
-	if (speed) { velocity.x = 0; }
+	float dir = speed < 0 ? -1 : 1;
+	float velocityDir = velocity.x < 0 ? -1 : 1;
+
+
+	if((grounded && !isSittingOnIce) || ((dir != velocityDir) && speed)) { velocity.x = 0; }
+	
+	//this removes velocity
+	if (speed && !isSittingOnIce ) { velocity.x = 0; }
 
 	if(iswebs)
 	{
@@ -227,8 +320,9 @@ void Entity::applyVelocity(float deltaTime)
 		notGrabTime -= deltaTime;
 	}
 
-	const float c = velocityClamp * BLOCK_SIZE;
-	velocity = glm::clamp(velocity, { -c,-c }, { c, c });
+	const float cx = velocityClampX * BLOCK_SIZE;
+	const float cy = velocityClampY * BLOCK_SIZE;
+	velocity = glm::clamp(velocity, { -cx,-cy }, { cx, cy });
 
 	if(wallGrab != 0)
 	{
@@ -238,25 +332,33 @@ void Entity::applyVelocity(float deltaTime)
 	pos += velocity * deltaTime;
 
 	//drag
+	float newDrag = dragX;
+
 	if(iswebs)
 	{
-		velocity.x += velocity.x * (-drag * deltaTime * BLOCK_SIZE *2);
-	}else
-	{
-		velocity.x += velocity.x * (-drag * deltaTime * BLOCK_SIZE);
+		newDrag *= 2;
 	}
+
+	if(isSittingOnIce)
+	{
+		//newDrag /= 2.f;
+	}
+
+	velocity.x += velocity.x * (-newDrag * deltaTime * BLOCK_SIZE);
+
 
 	if(iswebs)
 	{
 		velocity.y += velocity.y * (-drag * deltaTime * BLOCK_SIZE*4);
 	}
 
-	if(grounded || wallGrab)
+	if((grounded && !isSittingOnIce) || wallGrab)
 	{
 		velocity.x = 0;
 	}
 
-	if (std::fabs(velocity.x) < 10)
+
+	if (std::fabs(velocity.x) < 0.1)
 	{
 		velocity.x = 0;
 	}
@@ -289,14 +391,20 @@ void Entity::checkGrounded(MapData &mapDat, float deltaTime)
 	minx = std::max(minx, 0);
 	maxx = std::min(maxx, mapDat.w);
 
+	isSittingOnIce = false;
+
 	for (int x = minx; x <= maxx; x++)
 	{
-		if (isCollidable(mapDat.get(x, floor((pos.y + dimensions.y + blockTouchDownMargin) / BLOCK_SIZE)).type))
+		if(isIce(mapDat.get(x, floor((pos.y + dimensions.y) / BLOCK_SIZE)).type))
+		{
+			isSittingOnIce = true;
+		}
+		
+		if (isCollidable(mapDat.get(x, floor((pos.y + dimensions.y) / BLOCK_SIZE)).type))
 		{
 			grounded = 1;
 			canJump = 1;
 			hasTouchGround = 1;
-			break;
 		}
 	}
 
@@ -329,7 +437,7 @@ void Entity::checkWall(MapData & mapData, int move)
 		return;
 	}
 
-	int minY = floor((pos.y /BLOCK_SIZE)+0.1f);
+	int minY = floor(((pos.y )/BLOCK_SIZE)+0.1f);
 	float dist = (pos.y / BLOCK_SIZE) + 0.1f - floor((pos.y / BLOCK_SIZE) + 0.1f);
 	
 	if(minY <0)
@@ -360,7 +468,6 @@ void Entity::checkWall(MapData & mapData, int move)
 		checkLeft = 1;
 	}
 
-	int maxY = minY + 1;
 	int rightX = floor((pos.x + dimensions.x) / BLOCK_SIZE);
 	int leftX = floor((pos.x-2) / BLOCK_SIZE);
 	if (leftX < 0) { return; }
@@ -789,10 +896,21 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 			{
 				if (type == Arrow::ArrowTypes::fireArrow)
 				{
-					//todo check bigger lights if added
 					t++;
-					wallLights.push_back({ { curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE }, 0, 
-						mapData.getTorchLight( curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE ) });
+					int x = curPos.x / BLOCK_SIZE;
+					int y = curPos.y / BLOCK_SIZE;
+					auto it = std::find_if(wallLights.begin(), wallLights.end(), [x, y](LightSource &ls)
+					{
+						return ls.pos.x == x && ls.pos.y == y;
+					});
+
+					if (it != wallLights.end())
+					{
+						it->animationDuration = it->animationStartTime;
+						it->intensity = mapData.getTorchLight(x, y);
+					}
+					//wallLights.push_back({ { curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE }, 0, 
+					//	mapData.getTorchLight( curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE ) });
 				}
 
 			}
@@ -920,4 +1038,155 @@ void Pickup::draw(gl2d::Renderer2D & renderer2d, gl2d::Texture arrowTexture, flo
 		cullDown -= deltaTime;
 	}
 	
+}
+
+float birdSpeed = BLOCK_SIZE * 7;
+
+void Bird::update(float deltaTime)
+{
+	if(isMovingType != 0 )
+	{
+		texturePos.y = 2;
+
+		if(glm::distance(position, destination) > birdSpeed * deltaTime)
+		{
+			if (glm::distance(position, destination) > BLOCK_SIZE * 4.5)
+			{
+				texturePos.y = 2;
+			}
+			else
+			{
+				if (isMovingType == 1)
+				{
+					texturePos.y = 1;
+				}else
+				{
+					texturePos.y = 2;
+				}
+
+			}
+
+			glm::vec2 dir = destination - startPos;
+			dir = glm::normalize(dir);
+			dir *= deltaTime * birdSpeed;
+			position += dir;
+		}else
+		{
+			position = destination;
+
+			texturePos.y = 0;
+			
+			if (isMovingType == 2)
+			{
+				showing = 0;
+			}
+			
+			isMovingType = 0;
+			//todo clamp pos
+		}
+
+	}else
+	{
+
+		changeTime -= deltaTime;
+		if(changeTime <= 0)
+		{
+			changeTime = rand() % 5 + 3;
+			if(texturePos.y == 0)
+			{
+				texturePos.y = 3;
+			}else
+			{
+				texturePos.y = 0;
+			}
+
+		}
+
+
+
+		//todo animate stationary bird
+	}
+
+}
+
+void Bird::startMove(glm::vec2 start, glm::vec2 dest)
+{
+
+	showing = true;
+	position = start;
+	startPos = start;
+	destination = dest;
+	isMovingType = 1;
+
+}
+
+void Bird::startEndMove(glm::vec2 start, glm::vec2 dest)
+{
+	startMove(start, dest);
+	isMovingType = 2;
+}
+
+void Bird::draw(gl2d::Renderer2D & renderer, float deltaTime, gl2d::Texture t, glm::vec2 playerPos)
+{
+
+	if (!showing)
+	{
+		return;
+	}
+
+	//animate
+
+	frameTime -= deltaTime;
+
+	if (frameTime <= 0)
+	{
+		frameTime += birdFrameDuration;
+		texturePos.x++;
+	}
+	texturePos.x %= 4;
+
+	auto size = t.GetSize();
+	gl2d::TextureAtlasPadding ta(4, 4, size.x, size.y);
+
+	bool rotate = 0;
+	if (playerPos.x < position.x)
+	{
+		rotate = true;
+	}
+	else
+	{
+		rotate = false;
+	}
+
+	if (isMovingType == 2)
+	{
+		rotate = !rotate;
+	}
+
+	float perc = getShowPerc();
+
+	if (isMovingType == 1)
+	{
+		perc = 1 - perc;
+	}
+	else if (isMovingType == 0)
+	{
+		perc = 1;
+	}
+
+
+	renderer.renderRectangle({ position,BLOCK_SIZE,BLOCK_SIZE },
+		{1,1,1,perc},		
+		{}, 0, t, ta.get(texturePos.x, texturePos.y, rotate)
+	);
+
+
+
+}
+
+float Bird::getShowPerc()
+{
+
+	return glm::distance(position, destination) / glm::distance(startPos, destination);
+
 }

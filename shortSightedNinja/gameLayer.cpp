@@ -1051,7 +1051,7 @@ bool gameLogic(float deltaTime)
 	mapData.clearColorData();
 
 	simuleteLightSpot(player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2),
-		playerLight * lightPerc, mapData, arrows, pickups, 0);
+		playerLight * lightPerc, mapData, arrows, pickups);
 
 #pragma region lights
 
@@ -1327,7 +1327,7 @@ bool gameLogic(float deltaTime)
 
 		//todo remove intensity
 		simuleteLightSpot({ i.pos.x * BLOCK_SIZE + BLOCK_SIZE / 2,i.pos.y * BLOCK_SIZE + BLOCK_SIZE / 2 },
-			r * lightPerc, mapData, arrows, pickups, 0);
+			r * lightPerc, mapData, arrows, pickups);
 
 	}
 
@@ -1350,7 +1350,7 @@ bool gameLogic(float deltaTime)
 			if (r > 0)
 			{
 				simuleteLightSpot({ i.pos },
-					r * lightPerc, mapData, arrows, pickups, 0.1);
+					r * lightPerc, mapData, arrows, pickups);
 			}
 
 		}

@@ -108,7 +108,6 @@ int MAIN
 
 #endif // !RemoveImgui
 
-
 	input::loadXinput();
 
 	if (!initGame())
@@ -166,7 +165,7 @@ int MAIN
 			if (accum > 1)
 			{
 				accum -= 1;
-				ilog(count);
+				//ilog(count);
 				count = 0;
 			}
 

@@ -540,9 +540,7 @@ struct BlockInfo
 	//top down left right
 	glm::vec4 directionalLight;
 
-	float heat;
-
-	glm::vec4 mainColor;
+	float mainColor;
 	glm::vec4 sideColors;
 
 	bool startAnim = 0;

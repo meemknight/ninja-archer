@@ -170,7 +170,7 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData,
 		for(int w= minPos.x;w<maxPos.x; w++)
 		{
 			auto &g = mapData.get(w, h);
-			if(g.type != Block::none && g.mainColor.w != 0)
+			if(g.type != Block::none && g.mainColor != 0)
 			{
 				glm::vec4 sideC = g.sideColors;
 
@@ -185,12 +185,7 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData,
 					if (g.hasNeighborRight()) { sideC.w = 0; }
 				}
 
-				auto color = g.mainColor;
-
-				//color.g *= g.heat;
-				//color.b *= g.heat;
-
-				color = { 1,1,1,color.r };
+				glm::vec4 color = { 1,1,1,g.mainColor };
 
 				auto &data = mapData.get(w, h);
 				

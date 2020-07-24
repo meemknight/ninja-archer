@@ -15,4 +15,6 @@ float getMusicSound();
 float getAmbientSound();
 float getButtonSound();
 
+bool isFullScreen();
+
 };

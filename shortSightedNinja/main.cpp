@@ -4,6 +4,7 @@
 #include <ctime>
 #include <stdio.h>
 #include <algorithm>
+#include <vector>
 //#include <io.h>
 //#include <fcntl.h>
 #include "buildConfig.h"
@@ -19,6 +20,7 @@
 #endif
 
 #include "input.h"
+#include "Settings.h"
 
 extern bool g_WantUpdateHasGamepad;
 
@@ -38,6 +40,8 @@ static int bMouseMoved = 0;
 
 static bool isFocus = 0;
 
+static bool fullScreen = false;
+
 extern "C"
 {
 //	__declspec(dllexport) unsigned long NvOptimusEnablement = 1;
@@ -49,6 +53,8 @@ const float heigth = 680;
 
 static LARGE_INTEGER queryFrequency;
 static bool openglVsync = 0;
+
+WINDOWPLACEMENT windowPlacementPrev = { sizeof(windowPlacementPrev) };
 
 int MAIN
 {
@@ -99,10 +105,10 @@ int MAIN
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
 	ImGui_ImplWin32_Init(wind);
-	const char *glslVersion = "#version 330";
+	const char* glslVersion = "#version 330";
 	ImGui_ImplOpenGL3_Init(glslVersion);
 	ImGui::StyleColorsDark();
 
@@ -110,11 +116,91 @@ int MAIN
 
 	input::loadXinput();
 
+#pragma region setupFullscreenSettings
+
+	//MONITORINFO monitorInfo = { sizeof(monitorInfo) };
+
+	//GetMonitorInfo(MonitorFromWindow(wind, MONITOR_DEFAULTTOPRIMARY), &monitorInfo);
+
+
+	//HMONITOR windowMonitor = MonitorFromWindow(wind, MONITOR_DEFAULTTONEAREST);
+	DISPLAY_DEVICE displayDevice = {};
+	displayDevice.cb = sizeof(displayDevice);
+	bool foundPrimaryDevice = false;
+
+	for (int i = 0; EnumDisplayDevices(nullptr, i, &displayDevice, EDD_GET_DEVICE_INTERFACE_NAME); i++)
+	{
+		if ((displayDevice.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE) != 0) 
+		{
+			foundPrimaryDevice = true;
+			break;
+		}
+	
+	}
+
+	const char* monitorName = nullptr;
+
+	if (foundPrimaryDevice) 
+	{
+		monitorName = displayDevice.DeviceName;
+	}
+
+	//EnumDisplayMonitors(NULL, {}, )
+
+
+	std::vector<DEVMODE> monitorSettingsVector;
+
+	{
+		DEVMODE monitorSettings = { };
+		monitorSettings.dmSize = sizeof(monitorSettings);
+		monitorSettings.dmDriverExtra = 0;
+
+		for (int i = 0; EnumDisplaySettings(monitorName, i, &monitorSettings); i++)
+		{
+
+			if (monitorSettings.dmDisplayFixedOutput == DMDFO_DEFAULT)
+			{
+				monitorSettingsVector.push_back(monitorSettings);
+			}
+
+		}
+	}
+
+	for (int i = 0; i< monitorSettingsVector.size(); i++) 
+	{
+		auto& ms = monitorSettingsVector[i];
+		std::cout << i << "  x:" << ms.dmPelsWidth << "   y:" << ms.dmPelsHeight;
+
+		std::cout << "\n";
+	}
+
+	//monitorSettings.dmPelsWidth = 800;
+	//monitorSettings.dmPelsHeight = 800;
+
+	//DEVMODE ds = {};
+	//ds.
+
+	//monitor.dmYResolution = 1080;
+	//monitor.dmDisplayFixedOutput.
+	
+	int id = 0;
+
+	std::cin >> id;
+
+	ChangeDisplaySettings(&monitorSettingsVector[id], CDS_FULLSCREEN);
+
+	//ChangeDisplaySettings(0, 0);
+	
+
+#pragma endregion
+
+
+
+
 	if (!initGame())
 	{
 		return 0;
 	}
-
 
 	QueryPerformanceFrequency(&queryFrequency);
 
@@ -217,6 +303,48 @@ int MAIN
 				
 			}
 
+#pragma region fullScreen
+
+			if (fullScreen != settings::isFullScreen()) 
+			{
+				DWORD dwStyle = GetWindowLong(wind, GWL_STYLE);
+				if (dwStyle & (WS_OVERLAPPEDWINDOW))
+				{
+					MONITORINFO mi = { sizeof(mi) };
+					if (
+						GetWindowPlacement(wind, &windowPlacementPrev) &&
+						GetMonitorInfo(MonitorFromWindow(wind,
+							//MONITOR_DEFAULTTONEAREST
+							MONITOR_DEFAULTTOPRIMARY
+							),&mi)
+						) 
+					{
+						SetWindowLong(wind, GWL_STYLE,
+							dwStyle & ~WS_OVERLAPPEDWINDOW);
+						SetWindowPos(wind, HWND_TOP,
+							mi.rcMonitor.left, mi.rcMonitor.top,
+							mi.rcMonitor.right - mi.rcMonitor.left,
+							mi.rcMonitor.bottom - mi.rcMonitor.top,
+							SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+					}
+					fullScreen = 1;
+				}
+				else 
+				{
+					SetWindowLong(wind, GWL_STYLE,
+						dwStyle | (WS_OVERLAPPEDWINDOW));
+
+					SetWindowPlacement(wind, &windowPlacementPrev);
+					SetWindowPos(wind, NULL, 0, 0, 0, 0,
+						SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
+						SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+					fullScreen = 0;
+				}
+			}
+
+#pragma endregion
+
+
 			lbuttonPressed = false;
 			rbuttonPressed = false;
 			bMouseMoved = false;
@@ -228,6 +356,7 @@ int MAIN
 	CloseWindow(wind);
 
 	closeGame();
+
 
 	return 0;
 }

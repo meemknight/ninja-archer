@@ -6,28 +6,33 @@ extern gl2d::Texture uiDialogBox;
 extern gl2d::Font font;
 
 int currentSettingsMenu = 0;
+
+struct SettingsData
+{
 float zoom = 0.5;
 float uiScale = 1;
 bool bShowArrowsIndicators = 1;
 float musicSound=0.5;
 float ambientSound = 0.5;
 float buttonSound=0.5;
+bool fullScreen = 1;
+}sData;
 
 namespace settings {
 
 	float getZoom()
 	{
-		return 3 + zoom * 4;
+		return 3 + sData.zoom * 4;
 	}
 
 	float getUiScale()
 	{
-		return 3 + zoom * 4;
+		return 3 + sData.zoom * 4;
 	}
 
 	bool showArrowIndicators()
 	{
-		return bShowArrowsIndicators;
+		return sData.bShowArrowsIndicators;
 	}
 
 	void setMainSettingsPage()
@@ -37,17 +42,22 @@ namespace settings {
 
 	float getMusicSound()
 	{
-		return musicSound;
+		return sData.musicSound;
 	}
 
 	float getAmbientSound()
 	{
-		return ambientSound;
+		return sData.ambientSound;
 	}
 
 	float getButtonSound()
 	{
-		return buttonSound;
+		return sData.buttonSound;
+	}
+
+	bool isFullScreen()
+	{
+		return sData.fullScreen;
 	}
 
 	void displaySettings(gl2d::Renderer2D &renderer, float deltaTime)
@@ -93,13 +103,28 @@ namespace settings {
 		}
 		else if (currentSettingsMenu == 2)
 		{
+			bool pressedWindowed = 0;
+			bool pressedFullScreen = 0;
+
 			menu::startMenu();
 
 			menu::uninteractableCentreText("Visual settings");
 
-			menu::slider0_1("Zoom", &zoom);
-			menu::slider0_1("Ui scale", &uiScale);
-			menu::booleanTextBox("Show arrow switch\n buttons", &bShowArrowsIndicators);
+			menu::slider0_1("Zoom", &sData.zoom);
+			menu::slider0_1("Ui scale", &sData.uiScale);
+
+			if(sData.fullScreen)
+			{
+				menu::interactableText("Go windowed", &pressedWindowed);
+				
+
+			}else
+			{
+				menu::interactableText("Go full screen", &pressedFullScreen);
+				
+			}
+
+			menu::booleanTextBox("Show arrow switch\n buttons", &sData.bShowArrowsIndicators);
 
 			bool backPressed = 0;
 			menu::endMenu(renderer, uiDialogBox, font, &backPressed, deltaTime);
@@ -108,7 +133,14 @@ namespace settings {
 			{
 				currentSettingsMenu = 1;
 			}
-
+			if (pressedWindowed)
+			{
+				sData.fullScreen = 0;
+			}
+			if (pressedFullScreen)
+			{
+				sData.fullScreen = 1;
+			}
 		}
 		else if (currentSettingsMenu == 3)
 		{
@@ -117,9 +149,9 @@ namespace settings {
 
 			menu::uninteractableCentreText("Sound settings");
 
-			menu::slider0_1("Music", &musicSound);
-			menu::slider0_1("Ambient", &ambientSound);
-			menu::slider0_1("Buttons", &buttonSound);
+			menu::slider0_1("Music", &sData.musicSound);
+			menu::slider0_1("Ambient", &sData.ambientSound);
+			menu::slider0_1("Buttons", &sData.buttonSound);
 
 			bool backPressed = 0;
 			menu::endMenu(renderer, uiDialogBox, font, &backPressed, deltaTime);

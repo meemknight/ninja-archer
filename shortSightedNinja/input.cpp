@@ -19,7 +19,7 @@ namespace input
 	typedef DWORD WINAPI XInputSetState_t(DWORD dwUserIndex, XINPUT_VIBRATION* pState);
 	static XInputSetState_t *DynamicXinputSetState;
 	typedef DWORD WINAPI XInputGetKeystroke_t(DWORD dwUserIndex, DWORD dwReserved, PXINPUT_KEYSTROKE pKeystroke);
-	XInputGetKeystroke_t *DynamicXInputGetKeystroke;
+	static XInputGetKeystroke_t *DynamicXInputGetKeystroke;
 
 	static bool xInputLoaded = 0;
 	static bool usedController = 0;

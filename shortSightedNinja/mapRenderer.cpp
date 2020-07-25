@@ -134,7 +134,7 @@ void MapRenderer::render()
 	clearBlockDrawData();
 }
 
-float animDuration = 0.12;
+float animDuration = 0.11;
 
 void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData, float deltaTime, int curPos)
 {

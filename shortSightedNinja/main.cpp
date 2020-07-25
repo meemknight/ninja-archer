@@ -56,6 +56,58 @@ static bool openglVsync = 0;
 
 WINDOWPLACEMENT windowPlacementPrev = { sizeof(windowPlacementPrev) };
 
+void setupFullscreen()
+{
+
+	DISPLAY_DEVICE displayDevice = {};
+	displayDevice.cb = sizeof(displayDevice);
+	bool foundPrimaryDevice = false;
+
+	for (int i = 0; EnumDisplayDevices(nullptr, i, &displayDevice, EDD_GET_DEVICE_INTERFACE_NAME); i++)
+	{
+		if ((displayDevice.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE) != 0)
+		{
+			foundPrimaryDevice = true;
+			break;
+		}
+
+	}
+
+	const char* monitorName = nullptr;
+
+	if (foundPrimaryDevice)
+	{
+		monitorName = displayDevice.DeviceName;
+	}
+
+	DEVMODE monitorSettings = { };
+	monitorSettings.dmSize = sizeof(monitorSettings);
+	monitorSettings.dmDriverExtra = 0;
+	bool found = 0;
+
+	for (int i = 0; EnumDisplaySettings(monitorName, i, &monitorSettings); i++)
+	{
+
+		if (monitorSettings.dmDisplayFixedOutput == DMDFO_DEFAULT
+			&& monitorSettings.dmPanningWidth == 1920 
+			&& monitorSettings.dmPanningHeight == 1080
+			)
+		{
+			found = 1;
+			break;
+		}
+
+	}
+
+
+	if (found) 
+	{
+		ChangeDisplaySettings(&monitorSettings, CDS_FULLSCREEN);
+	}
+
+
+}
+
 int MAIN
 {
 
@@ -115,84 +167,6 @@ int MAIN
 #endif // !RemoveImgui
 
 	input::loadXinput();
-
-#pragma region setupFullscreenSettings
-
-	//MONITORINFO monitorInfo = { sizeof(monitorInfo) };
-
-	//GetMonitorInfo(MonitorFromWindow(wind, MONITOR_DEFAULTTOPRIMARY), &monitorInfo);
-
-
-	//HMONITOR windowMonitor = MonitorFromWindow(wind, MONITOR_DEFAULTTONEAREST);
-	DISPLAY_DEVICE displayDevice = {};
-	displayDevice.cb = sizeof(displayDevice);
-	bool foundPrimaryDevice = false;
-
-	for (int i = 0; EnumDisplayDevices(nullptr, i, &displayDevice, EDD_GET_DEVICE_INTERFACE_NAME); i++)
-	{
-		if ((displayDevice.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE) != 0) 
-		{
-			foundPrimaryDevice = true;
-			break;
-		}
-	
-	}
-
-	const char* monitorName = nullptr;
-
-	if (foundPrimaryDevice) 
-	{
-		monitorName = displayDevice.DeviceName;
-	}
-
-	//EnumDisplayMonitors(NULL, {}, )
-
-
-	std::vector<DEVMODE> monitorSettingsVector;
-
-	{
-		DEVMODE monitorSettings = { };
-		monitorSettings.dmSize = sizeof(monitorSettings);
-		monitorSettings.dmDriverExtra = 0;
-
-		for (int i = 0; EnumDisplaySettings(monitorName, i, &monitorSettings); i++)
-		{
-
-			if (monitorSettings.dmDisplayFixedOutput == DMDFO_DEFAULT)
-			{
-				monitorSettingsVector.push_back(monitorSettings);
-			}
-
-		}
-	}
-
-	for (int i = 0; i< monitorSettingsVector.size(); i++) 
-	{
-		auto& ms = monitorSettingsVector[i];
-		std::cout << i << "  x:" << ms.dmPelsWidth << "   y:" << ms.dmPelsHeight;
-
-		std::cout << "\n";
-	}
-
-	//monitorSettings.dmPelsWidth = 800;
-	//monitorSettings.dmPelsHeight = 800;
-
-	//DEVMODE ds = {};
-	//ds.
-
-	//monitor.dmYResolution = 1080;
-	//monitor.dmDisplayFixedOutput.
-	
-	int id = 0;
-
-	std::cin >> id;
-
-	ChangeDisplaySettings(&monitorSettingsVector[id], CDS_FULLSCREEN);
-
-	//ChangeDisplaySettings(0, 0);
-	
-
-#pragma endregion
 
 
 
@@ -328,6 +302,8 @@ int MAIN
 							SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 					}
 					fullScreen = 1;
+
+					setupFullscreen();
 				}
 				else 
 				{
@@ -339,6 +315,8 @@ int MAIN
 						SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
 						SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 					fullScreen = 0;
+
+					ChangeDisplaySettings(nullptr, 0);
 				}
 			}
 
@@ -470,10 +448,19 @@ endImgui:
 		if (wp == WA_ACTIVE)
 		{
 			isFocus = true;
+			if (fullScreen) 
+			{
+				setupFullscreen();
+			}
 		}
 		else if (wp == WA_INACTIVE)
 		{
 			isFocus = false;
+
+			if(fullScreen)
+			{
+				ChangeDisplaySettings(0, 0);
+			}
 		}
 		break;
 

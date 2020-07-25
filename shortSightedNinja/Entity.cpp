@@ -1021,23 +1021,26 @@ void Pickup::draw(gl2d::Renderer2D & renderer2d, gl2d::Texture arrowTexture, flo
 	gl2d::TextureAtlas ta(5, 1);
 
 	float levitate = cos((animPos += deltaTime) / 0.7f);
+	float opacity = 1;
 
 	if(cullDown<=0)
 	{
 		cullDown = 0;
-
-		levitate += 1;
-		levitate /= 2.f;
-
-		levitate *= 0.8;
-
-		renderer2d.renderRectangle({ pos.x*BLOCK_SIZE,(pos.y - levitate)*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 1, 1, 1, light }, {}, 45,
-			arrowTexture, ta.get(type, 0));
+		opacity = 1;
 	}else
 	{
 		cullDown -= deltaTime;
+		opacity = 0.4;
 	}
 	
+	levitate += 1;
+	levitate /= 2.f;
+
+	levitate *= 0.8;
+
+	renderer2d.renderRectangle({ pos.x * BLOCK_SIZE,(pos.y - levitate) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, 
+		{ opacity, opacity, opacity, light * opacity }, {}, 45,
+		arrowTexture, ta.get(type, 0));
 }
 
 float birdSpeed = BLOCK_SIZE * 7;

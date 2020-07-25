@@ -1530,6 +1530,7 @@ namespace gl2d
 		{
 			len = max;
 			position = pos - (max * delta);
+			position += delta * speed;
 		}else
 		{
 			position += delta * speed;

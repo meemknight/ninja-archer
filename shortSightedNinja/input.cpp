@@ -348,6 +348,26 @@ namespace input
 			{
 				val = val || platform::isLMouseHeld();
 			}
+			else if(b == input::Buttons::left)
+			{
+				val = val || platform::isKeyHeld(bindings[b]) || platform::isKeyHeld(VK_LEFT);
+			}
+			else if (b == input::Buttons::right)
+			{
+				val = val || platform::isKeyHeld(bindings[b]) || platform::isKeyHeld(VK_RIGHT);
+			}
+			else if (b == input::Buttons::down)
+			{
+				val = val || platform::isKeyHeld(bindings[b]) || platform::isKeyHeld(VK_DOWN);
+			}
+			else if (b == input::Buttons::up)
+			{
+				val = val || platform::isKeyHeld(bindings[b]) || platform::isKeyHeld(VK_UP);
+			}
+			else if (b == input::Buttons::jump)
+			{
+				val = val || platform::isKeyHeld(bindings[b]) || platform::isKeyHeld(VK_RETURN);
+			}
 			else
 			{
 				val = val || platform::isKeyHeld(bindings[b]);

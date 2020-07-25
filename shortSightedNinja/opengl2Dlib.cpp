@@ -1001,10 +1001,11 @@ namespace gl2d
 				rectangle.y = linePositionY + quad.y0 * size;
 
 				rectangle.x += rectangle.z + spacing * size;
-				maxPos = std::max(maxPos, rectangle.x);
-				maxPosY = std::max(maxPosY, rectangle.y);
 			}
 		}
+
+		maxPos = std::max(maxPos, rectangle.x);
+		maxPosY = std::max(maxPosY, rectangle.y);
 
 		float paddX = maxPos;
 

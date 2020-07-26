@@ -231,6 +231,7 @@ void loadLevel(glm::ivec2 spawn = { 0, 0 }, bool setSpawn = 0)
 	player.velocity = {};
 	player.isExitingLevel = -1;
 	player.wallGrab = 0;
+	player.iceGrab = 0;
 	player.isSittingOnIce = 0;
 
 	wallLights.clear();
@@ -273,6 +274,7 @@ void respawn()
 	lightPerc = 1;
 	player.velocity = {};
 	player.wallGrab = 0;
+	player.iceGrab = 0;
 	player.isSittingOnIce = 0;
 
 }
@@ -825,6 +827,7 @@ bool gameLogic(float deltaTime)
 
 #pragma region controlls
 	
+
 	if(!currentDialog.blockMovement())
 	{
 		if (player.wallGrab == 0)
@@ -873,6 +876,7 @@ bool gameLogic(float deltaTime)
 				player.redGrab = 0;
 				player.grayGrab = 0;
 				player.blueGrab = 0;
+				player.iceGrab = 0;
 				jumpParticle.set(player.pos, 1, !player.movingRight);
 
 			}
@@ -882,6 +886,7 @@ bool gameLogic(float deltaTime)
 				player.strafe(1);
 				player.jumpFromWall();
 				player.wallGrab = 0;
+				player.iceGrab = 0;
 				player.redGrab = 0;
 				player.grayGrab = 0;
 				player.blueGrab = 0;
@@ -955,6 +960,7 @@ bool gameLogic(float deltaTime)
 			if (input::isKeyHeld(input::Buttons::down))
 			{
 				player.wallGrab = 0;
+				player.iceGrab = 0;
 			}
 			else
 			{

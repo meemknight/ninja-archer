@@ -15,7 +15,7 @@ bool bShowArrowsIndicators = 1;
 float musicSound=0.5;
 float ambientSound = 0.5;
 float buttonSound=0.5;
-bool fullScreen = 1;
+bool fullScreen = 0;
 }sData;
 
 namespace settings {

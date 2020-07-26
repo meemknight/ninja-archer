@@ -42,7 +42,7 @@ namespace settings {
 
 	float getMusicSound()
 	{
-		return sData.musicSound;
+		return sData.musicSound / 2;
 	}
 
 	float getAmbientSound()

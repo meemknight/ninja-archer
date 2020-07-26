@@ -1532,7 +1532,15 @@ namespace gl2d
 
 		delta = glm::normalize(delta);
 
-		if(len > 4)
+		if(len < 4)
+		{
+			speed /= 4;
+		}else if(len < 8)
+		{
+			speed /= 2;
+		}
+
+		if(len > 1)
 		if(len > max)
 		{
 			len = max;

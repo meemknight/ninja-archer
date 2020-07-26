@@ -540,9 +540,7 @@ struct BlockInfo
 	//top down left right
 	glm::vec4 directionalLight;
 
-	float heat;
-
-	glm::vec4 mainColor;
+	float mainColor;
 	glm::vec4 sideColors;
 
 	bool startAnim = 0;
@@ -560,14 +558,29 @@ struct signData
 {
 	signData() {};
 	signData(glm::ivec2 p,const std::string &t):
-		pos(p),text(t){};
+		pos(p), text(t)
+	{
+		button = -1; 
+		shouldDisplay = 0;
+		time = 0;
+	};
 
 	signData(glm::ivec2 p, const std::string &t, int button) :
-		pos(p), text(t), button(button){};
+		pos(p), text(t), button(button)
+	{
+		button = -1;
+		shouldDisplay = 0;
+		time = 0;
+	};
 
 	glm::ivec2 pos;
 	std::string text;
 	int button = -1;
+	int shouldDisplay = 0;
+
+	// from 0 to 1 
+	float time = 0;
+
 };
 
 struct exitData

@@ -19,7 +19,7 @@ namespace input
 	typedef DWORD WINAPI XInputSetState_t(DWORD dwUserIndex, XINPUT_VIBRATION* pState);
 	static XInputSetState_t *DynamicXinputSetState;
 	typedef DWORD WINAPI XInputGetKeystroke_t(DWORD dwUserIndex, DWORD dwReserved, PXINPUT_KEYSTROKE pKeystroke);
-	XInputGetKeystroke_t *DynamicXInputGetKeystroke;
+	static XInputGetKeystroke_t *DynamicXInputGetKeystroke;
 
 	static bool xInputLoaded = 0;
 	static bool usedController = 0;
@@ -347,6 +347,26 @@ namespace input
 			if (b == input::Buttons::shoot)
 			{
 				val = val || platform::isLMouseHeld();
+			}
+			else if(b == input::Buttons::left)
+			{
+				val = val || platform::isKeyHeld(bindings[b]) || platform::isKeyHeld(VK_LEFT);
+			}
+			else if (b == input::Buttons::right)
+			{
+				val = val || platform::isKeyHeld(bindings[b]) || platform::isKeyHeld(VK_RIGHT);
+			}
+			else if (b == input::Buttons::down)
+			{
+				val = val || platform::isKeyHeld(bindings[b]) || platform::isKeyHeld(VK_DOWN);
+			}
+			else if (b == input::Buttons::up)
+			{
+				val = val || platform::isKeyHeld(bindings[b]) || platform::isKeyHeld(VK_UP);
+			}
+			else if (b == input::Buttons::jump)
+			{
+				val = val || platform::isKeyHeld(bindings[b]) || platform::isKeyHeld(VK_RETURN);
 			}
 			else
 			{

@@ -26,7 +26,7 @@ void drawLine(glm::vec2 x, glm::vec2 y, glm::vec3 color, float width)
 
 }
 
-void simuleteLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vector<Arrow> &arrows, std::vector<Pickup> &pickups, float heat)
+void simuleteLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vector<Arrow> &arrows, std::vector<Pickup> &pickups)
 {
 	//stencilRenderer.renderRectangle({ 3 * BLOCK_SIZE, 3 * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 1,1,1,1 });
 
@@ -83,13 +83,7 @@ void simuleteLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vect
 				if (xPos >= 0 && yPos >= 0 && xPos < mapData.w && yPos < mapData.h)
 				{
 					float perc = dist / maxDist;
-					glm::vec4 color= { 1 - perc,1 - perc,1 - perc,1 };
-					
-					{
-						float heatPerc = std::max(0.08f, perc);
-						heatPerc = std::pow(heatPerc, heat);
-						mapData.get(xPos, yPos).heat = std::min( heatPerc, mapData.get(xPos, yPos).heat );
-					}
+					float color= { 1 - perc };
 
 					mapData.get(xPos, yPos).mainColor = glm::max(mapData.get(xPos, yPos).mainColor,
 						color);

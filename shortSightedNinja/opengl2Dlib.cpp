@@ -963,6 +963,7 @@ namespace gl2d
 
 		float maxPos = 0;
 		float maxPosY = 0;
+		float bonusY = 0;
 
 		for (int i = 0; i < text_length; i++)
 		{
@@ -970,6 +971,8 @@ namespace gl2d
 			{
 				rectangle.x = position.x;
 				linePositionY += (font.max_height + line_space) * size;
+				bonusY += (font.max_height + line_space) * size;
+				maxPosY = 0;
 			}
 			else if (text[i] == '\t')
 			{
@@ -1001,16 +1004,20 @@ namespace gl2d
 				rectangle.y = linePositionY + quad.y0 * size;
 
 				rectangle.x += rectangle.z + spacing * size;
-				maxPos = std::max(maxPos, rectangle.x);
+
 				maxPosY = std::max(maxPosY, rectangle.y);
+				maxPos = std::max(maxPos, rectangle.x);
 			}
 		}
+
+		maxPos = std::max(maxPos, rectangle.x);
+		maxPosY = std::max(maxPosY, rectangle.y);
 
 		float paddX = maxPos;
 
 		float paddY = maxPosY;
 
-		paddY += font.max_height * size;
+		paddY += font.max_height * size + bonusY;
 
 		return glm::vec2{ paddX, paddY };
 		
@@ -1525,11 +1532,20 @@ namespace gl2d
 
 		delta = glm::normalize(delta);
 
-		if(len > 4)
+		if(len < 4)
+		{
+			speed /= 4;
+		}else if(len < 8)
+		{
+			speed /= 2;
+		}
+
+		if(len > 1)
 		if(len > max)
 		{
 			len = max;
 			position = pos - (max * delta);
+			position += delta * speed;
 		}else
 		{
 			position += delta * speed;

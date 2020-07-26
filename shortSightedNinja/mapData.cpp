@@ -209,7 +209,7 @@ void MapData::create(int w, int h, unsigned short* d = 0)
 		for (int i = 0; i < w * h; i++)
 		{
 			data[i].type = d[i];
-			data[i].mainColor = glm::vec4(1, 1, 1, 1);
+			data[i].mainColor = 1;
 
 
 		}
@@ -283,8 +283,6 @@ void MapData::clearColorData()
 	{
 		for (int i = 0; i < w * h; i++)
 		{
-			data[i].mainColor = { 0,0,0,0 };
-			data[i].sideColors = { 0,0,0,0 };
 			data[i].resetColors();
 		}
 	}
@@ -332,9 +330,9 @@ bool BlockInfo::hasNeighborDown()
 
 void BlockInfo::resetColors()
 {
-	mainColor = { 0,0,0,0 };
+	mainColor = 0;
+	sideColors = {};
 	directionalLight = { 0,0,0,0 };
-	heat = 1;
 	sideColors = {};
 }
 

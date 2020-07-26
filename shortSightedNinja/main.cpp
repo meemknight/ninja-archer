@@ -4,6 +4,7 @@
 #include <ctime>
 #include <stdio.h>
 #include <algorithm>
+#include <vector>
 //#include <io.h>
 //#include <fcntl.h>
 #include "buildConfig.h"
@@ -19,6 +20,7 @@
 #endif
 
 #include "input.h"
+#include "Settings.h"
 
 extern bool g_WantUpdateHasGamepad;
 
@@ -38,6 +40,8 @@ static int bMouseMoved = 0;
 
 static bool isFocus = 0;
 
+static bool fullScreen = false;
+
 extern "C"
 {
 //	__declspec(dllexport) unsigned long NvOptimusEnablement = 1;
@@ -49,6 +53,60 @@ const float heigth = 680;
 
 static LARGE_INTEGER queryFrequency;
 static bool openglVsync = 0;
+
+WINDOWPLACEMENT windowPlacementPrev = { sizeof(windowPlacementPrev) };
+
+void setupFullscreen()
+{
+
+	DISPLAY_DEVICE displayDevice = {};
+	displayDevice.cb = sizeof(displayDevice);
+	bool foundPrimaryDevice = false;
+
+	for (int i = 0; EnumDisplayDevices(nullptr, i, &displayDevice, EDD_GET_DEVICE_INTERFACE_NAME); i++)
+	{
+		if ((displayDevice.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE) != 0)
+		{
+			foundPrimaryDevice = true;
+			break;
+		}
+
+	}
+
+	const char* monitorName = nullptr;
+
+	if (foundPrimaryDevice)
+	{
+		monitorName = displayDevice.DeviceName;
+	}
+
+	DEVMODE monitorSettings = { };
+	monitorSettings.dmSize = sizeof(monitorSettings);
+	monitorSettings.dmDriverExtra = 0;
+	bool found = 0;
+
+	for (int i = 0; EnumDisplaySettings(monitorName, i, &monitorSettings); i++)
+	{
+
+		if (monitorSettings.dmDisplayFixedOutput == DMDFO_DEFAULT
+			&& monitorSettings.dmPanningWidth == 1920 
+			&& monitorSettings.dmPanningHeight == 1080
+			)
+		{
+			found = 1;
+			break;
+		}
+
+	}
+
+
+	if (found) 
+	{
+		ChangeDisplaySettings(&monitorSettings, CDS_FULLSCREEN);
+	}
+
+
+}
 
 int MAIN
 {
@@ -99,23 +157,24 @@ int MAIN
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
 	ImGui_ImplWin32_Init(wind);
-	const char *glslVersion = "#version 330";
+	const char* glslVersion = "#version 330";
 	ImGui_ImplOpenGL3_Init(glslVersion);
 	ImGui::StyleColorsDark();
 
 #endif // !RemoveImgui
 
-
 	input::loadXinput();
+
+
+
 
 	if (!initGame())
 	{
 		return 0;
 	}
-
 
 	QueryPerformanceFrequency(&queryFrequency);
 
@@ -166,7 +225,7 @@ int MAIN
 			if (accum > 1)
 			{
 				accum -= 1;
-				ilog(count);
+				//ilog(count);
 				count = 0;
 			}
 
@@ -218,6 +277,52 @@ int MAIN
 				
 			}
 
+#pragma region fullScreen
+
+			if (fullScreen != settings::isFullScreen()) 
+			{
+				DWORD dwStyle = GetWindowLong(wind, GWL_STYLE);
+				if (dwStyle & (WS_OVERLAPPEDWINDOW))
+				{
+					MONITORINFO mi = { sizeof(mi) };
+					if (
+						GetWindowPlacement(wind, &windowPlacementPrev) &&
+						GetMonitorInfo(MonitorFromWindow(wind,
+							//MONITOR_DEFAULTTONEAREST
+							MONITOR_DEFAULTTOPRIMARY
+							),&mi)
+						) 
+					{
+						SetWindowLong(wind, GWL_STYLE,
+							dwStyle & ~WS_OVERLAPPEDWINDOW);
+						SetWindowPos(wind, HWND_TOP,
+							mi.rcMonitor.left, mi.rcMonitor.top,
+							mi.rcMonitor.right - mi.rcMonitor.left,
+							mi.rcMonitor.bottom - mi.rcMonitor.top,
+							SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+					}
+					fullScreen = 1;
+
+					setupFullscreen();
+				}
+				else 
+				{
+					SetWindowLong(wind, GWL_STYLE,
+						dwStyle | (WS_OVERLAPPEDWINDOW));
+
+					SetWindowPlacement(wind, &windowPlacementPrev);
+					SetWindowPos(wind, NULL, 0, 0, 0, 0,
+						SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER |
+						SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+					fullScreen = 0;
+
+					ChangeDisplaySettings(nullptr, 0);
+				}
+			}
+
+#pragma endregion
+
+
 			lbuttonPressed = false;
 			rbuttonPressed = false;
 			bMouseMoved = false;
@@ -229,6 +334,7 @@ int MAIN
 	CloseWindow(wind);
 
 	closeGame();
+
 
 	return 0;
 }
@@ -342,10 +448,19 @@ endImgui:
 		if (wp == WA_ACTIVE)
 		{
 			isFocus = true;
+			if (fullScreen) 
+			{
+				setupFullscreen();
+			}
 		}
 		else if (wp == WA_INACTIVE)
 		{
 			isFocus = false;
+
+			if(fullScreen)
+			{
+				ChangeDisplaySettings(0, 0);
+			}
 		}
 		break;
 

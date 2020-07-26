@@ -315,7 +315,7 @@ void SoundManager::updateSoundTransation(float deltaTime)
 	for (int i = 0; i < musicEffectsCount; i++)
 	{
 		effectsVect[i].currentVolume = effectsVect[i].desiredVolume;
-		effectsVect[i].setVolume(effectsVect[i].currentVolume * settings.musicVolume);
+		effectsVect[i].setVolume(effectsVect[i].currentVolume * settings.ambientVolume);
 	}
 }
 
@@ -328,7 +328,7 @@ void SoundManager::updateSoundVolume()
 
 	for (int i = 0; i < musicEffectsCount; i++)
 	{
-		effectsVect[i].setVolume(effectsVect[i].currentVolume * settings.musicVolume);
+		effectsVect[i].setVolume(effectsVect[i].currentVolume * settings.ambientVolume);
 	}
 
 }

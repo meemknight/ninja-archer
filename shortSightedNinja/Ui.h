@@ -2,6 +2,26 @@
 #include "glm/vec4.hpp"
 #include "glm/vec2.hpp"
 
+struct Colors
+{
+	const static glm::vec4 backgroundBlue;
+	const static glm::vec4 darkGreen;
+	const static glm::vec4 lightGreen;
+	const static glm::vec4 lightRed;
+	const static glm::vec4 darkRed;
+	const static glm::vec4 lightBlue;
+	const static glm::vec4 darkBlue;
+	const static glm::vec4 mediumGray;
+	const static glm::vec4 darkGray;
+	const static glm::vec4 brown;
+	const static glm::vec4 lightBrown;
+	const static glm::vec4 white;
+	const static glm::vec4 lightLightGray;
+	const static glm::vec4 lightIce;
+	const static glm::vec4 darkIce;
+
+};
+
 
 namespace Ui
 {

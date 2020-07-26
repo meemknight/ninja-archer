@@ -129,6 +129,7 @@ std::vector <ArrowItem> actualInventorty;
 std::vector <LightSource> wallLights;
 
 const float playerLight = 5;
+//this is also used to tell if the player died
 float lightPerc = 1;
 
 Bird bird;
@@ -137,7 +138,7 @@ const char* levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki
 
 void respawn();
 
-void loadLevel()
+void loadLevel(glm::ivec2 spawn = { 0, 0 }, bool setSpawn = 0)
 {
 	menu::resetMenuState();
 	ingameMenuMainPage = 1;
@@ -178,7 +179,13 @@ void loadLevel()
 		{
 			if (mapData.get(x, y).type == Block::flagUp)
 			{
-				playerSpawnPos = { x,y };
+				if(setSpawn)
+				{
+					mapData.get(x, y).type = Block::flagDown;
+				}else
+				{
+					playerSpawnPos = { x,y };
+				}
 			}
 
 			if (mapData.get(x, y).type == Block::woddenArrow)
@@ -206,6 +213,11 @@ void loadLevel()
 				mapData.get(x, y).type = Block::none;
 			}
 		}
+
+	if(setSpawn)
+	{
+		playerSpawnPos = spawn;
+	}
 
 	player.pos = { BLOCK_SIZE * playerSpawnPos.x, BLOCK_SIZE * playerSpawnPos.y };
 	//player.updateMove();
@@ -453,15 +465,11 @@ bool gameLogic(float deltaTime)
 				if(loadLevelFromLastState(currentLevel, playerSpawnPos))
 				{
 					glm::ivec2 i = playerSpawnPos;
-					loadLevel();
-					playerSpawnPos = i;
-					saveState(i, currentLevel);
-					respawn();
+					loadLevel(i, true);
 				}else
 				{
 					currentLevel = 0;
 					loadLevel();
-					respawn();
 				}
 
 			}
@@ -764,7 +772,7 @@ bool gameLogic(float deltaTime)
 
 	if (player.dying || player.isExitingLevel != -1)
 	{
-		lightPerc -= deltaTime * 0.8;
+		lightPerc -= deltaTime * 1.8;
 		if (lightPerc < 0)
 		{
 			if(player.dying)
@@ -1051,14 +1059,13 @@ bool gameLogic(float deltaTime)
 	mapData.clearColorData();
 
 	simuleteLightSpot(player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2),
-		playerLight * lightPerc, mapData, arrows, pickups, 0);
+		playerLight * lightPerc, mapData, arrows, pickups);
 
 #pragma region lights
 
 	bool isInRedBlock = 0;
 	bool isInBlueBlock = 0;
 	bool isInGrayBlock = 0;
-
 
 	//the big for
 	{
@@ -1166,30 +1173,7 @@ bool gameLogic(float deltaTime)
 						soundPlayer.play();
 					}
 				}
-
-				//todo delegate this render text for later
-				if(isSign(g.type))
-				{
-					auto iter = std::find_if(mapData.signDataVector.begin(), mapData.signDataVector.end(), 
-						[x, y](signData &d)->bool {return (d.pos.x == x && d.pos.y == y); });
-
-					if(iter!=mapData.signDataVector.end())
-					{
-						renderer2d.renderText({ BLOCK_SIZE*(x), BLOCK_SIZE*(y - 1) },
-							iter->text.c_str(), font, { 1,1,1,1 }, 0.09, 4, 3, true, { 0.1,0.1,0.1,1 });
-
-						if(iter->button>=0)
-						{
-							glm::vec2 pos = renderer2d.getTextSize(iter->text.c_str(), font, 0.09, 4, 3);
-							pos.y = 0;
-							pos.x /= 2;
-							pos += glm::vec2(BLOCK_SIZE*(x), BLOCK_SIZE*(y - 1));
-							input::drawButtonWithHover(renderer2d, pos, BLOCK_SIZE, iter->button);
-						}
-
-					}
-				}
-
+				
 				if (g.type == Block::levelExit)
 				{
 
@@ -1222,6 +1206,53 @@ bool gameLogic(float deltaTime)
 
 			}
 		}
+
+		//this code is for objects close from the player not necessariliy \
+		touching the player
+
+
+		minX = (player.pos.x) / BLOCK_SIZE;
+		maxX = (player.pos.x + player.dimensions.x) / BLOCK_SIZE;
+
+		minY = (player.pos.y - 2) / BLOCK_SIZE;
+		maxY = (player.pos.y + player.dimensions.y - 1) / BLOCK_SIZE;
+
+		minX -= 2;
+		minY -= 2;
+		maxX += 2;
+		maxY += 2;
+
+		minX = std::max(0, minX);
+		minY = std::max(0, minY);
+		maxX = std::min(mapData.w, maxX);
+		maxY = std::min(mapData.h, maxY);
+
+		for(auto &i: mapData.signDataVector)
+		{
+			i.shouldDisplay = 0;
+		}
+
+		for (int y = minY; y <= maxY; y++)
+		{
+			for (int x = minX; x <= maxX; x++)
+			{
+				auto& g = mapData.get(x, y);
+
+				//todo delegate this render text for later
+				if (isSign(g.type))
+				{
+					auto iter = std::find_if(mapData.signDataVector.begin(), mapData.signDataVector.end(),
+						[x, y](signData& d)->bool {return (d.pos.x == x && d.pos.y == y); });
+
+					if (iter != mapData.signDataVector.end())
+					{
+						iter->shouldDisplay = 1;
+					}
+				}
+
+			}
+		}
+
 
 		grassTimeDelay -= deltaTime;
 		if (grassTimeDelay < 0) { grassTimeDelay = 0; }
@@ -1327,7 +1358,7 @@ bool gameLogic(float deltaTime)
 
 		//todo remove intensity
 		simuleteLightSpot({ i.pos.x * BLOCK_SIZE + BLOCK_SIZE / 2,i.pos.y * BLOCK_SIZE + BLOCK_SIZE / 2 },
-			r * lightPerc, mapData, arrows, pickups, 0);
+			r * lightPerc, mapData, arrows, pickups);
 
 	}
 
@@ -1350,7 +1381,7 @@ bool gameLogic(float deltaTime)
 			if (r > 0)
 			{
 				simuleteLightSpot({ i.pos },
-					r * lightPerc, mapData, arrows, pickups, 0.1);
+					r * lightPerc, mapData, arrows, pickups);
 			}
 
 		}
@@ -1688,6 +1719,55 @@ bool gameLogic(float deltaTime)
 
 		renderer2d.currentCamera = c;
 	}
+
+#pragma endregion
+
+#pragma region sign
+
+	for(auto &iter: mapData.signDataVector)
+	{
+		if(iter.shouldDisplay || iter.time != 0)
+		{
+			const float ANIM_TIME = 0.2f;
+
+			if(iter.shouldDisplay)
+			{
+				if(iter.time < ANIM_TIME)
+				{
+					iter.time += deltaTime;
+					iter.time = std::min(iter.time, ANIM_TIME);
+				}
+			}else
+			{
+				if(iter.time > 0)
+				{
+					iter.time -= deltaTime;
+					iter.time = std::max(iter.time, 0.f);
+				}
+			
+			}
+
+			float c = iter.time / ANIM_TIME;
+
+			//render text from sign
+			renderer2d.renderText({ BLOCK_SIZE * (iter.pos.x), BLOCK_SIZE * (iter.pos.y - 1) },
+				iter.text.c_str(), font, { 1,1,1,c }, 0.09, 4, 3, true, { 0.1,0.1,0.1,c });
+
+			if (iter.button >= 0)
+			{
+				glm::vec2 pos = renderer2d.getTextSize(iter.text.c_str(), font, 0.09, 4, 3);
+				pos.y = 0;
+				pos.x /= 2;
+				pos += glm::vec2(BLOCK_SIZE * (iter.pos.x), BLOCK_SIZE * (iter.pos.y - 1));
+				input::drawButtonWithHover(renderer2d, pos, BLOCK_SIZE, iter.button, c);
+			}
+		
+		}
+
+
+		
+	}
+
 
 #pragma endregion
 

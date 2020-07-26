@@ -2,6 +2,28 @@
 #include "tools.h"
 #include "gameLayer.h"
 
+static inline glm::vec4 convert(unsigned char r, unsigned  char g, unsigned  char b)
+{
+	return glm::vec4(r / 255.f, g / 255.f, b / 255.f, 1.f);
+}
+
+
+const glm::vec4 Colors::backgroundBlue = convert(62, 61, 76);
+const glm::vec4 Colors::darkGreen = convert(58, 83, 57);
+const glm::vec4 Colors::lightGreen = convert(107, 123, 57);
+const glm::vec4 Colors::lightRed= convert(192, 70, 31);
+const glm::vec4 Colors::darkRed = convert(103, 51, 71);
+const glm::vec4 Colors::lightBlue = convert(64, 99, 178);
+const glm::vec4 Colors::darkBlue = convert(57, 64, 113);
+const glm::vec4 Colors::mediumGray = convert(132, 127, 127);
+const glm::vec4 Colors::darkGray = convert(90, 90, 99);
+const glm::vec4 Colors::brown = convert(108, 79, 64);
+const glm::vec4 Colors::lightBrown = convert(165, 132, 90);
+const glm::vec4 Colors::white = convert(239, 231, 206);
+const glm::vec4 Colors::lightLightGray = convert(188, 177, 159);
+const glm::vec4 Colors::lightIce = convert(77, 169, 178);
+const glm::vec4 Colors::darkIce = convert(37, 75, 97);
+
 namespace Ui
 {
 	static int xPadd = 0;

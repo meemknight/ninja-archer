@@ -126,6 +126,7 @@ namespace settings {
 
 			menu::booleanTextBox("Show arrow switch\n buttons", &sData.bShowArrowsIndicators);
 
+
 			bool backPressed = 0;
 			menu::endMenu(renderer, uiDialogBox, font, &backPressed, deltaTime);
 

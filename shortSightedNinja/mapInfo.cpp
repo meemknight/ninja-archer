@@ -4,6 +4,8 @@
 #include "input.h"
 #include "tools.h"
 
+#pragma region levelData
+
 unsigned short level0[] = 
 {
 
@@ -507,6 +509,9 @@ unsigned short level4[] =
 
 };
 
+#pragma endregion
+
+
 unsigned short *levelVect[LEVELS] = { level0, level1, level2, level3, level4 };
 glm::ivec2 levelSizes[LEVELS] = { { 185, 46 }, {120, 80}, {135, 76}, {180, 70}, {600, 200} };
 
@@ -582,8 +587,8 @@ void setupMap(MapData &md, int levelId)
 	{
 
 
-		md.signDataVector.emplace_back(glm::ivec2{ 24, 16 }, "Find the key and shoot it to the target to open the trapdoor");
-		md.signDataVector.emplace_back(glm::ivec2{ 76, 11 }, "Be carreful, don't shoot with the key\nCome back if you lost it");
+		md.signDataVector.emplace_back(glm::ivec2{ 24, 16 }, "Find the key and shoot it to the target\nto open the trapdoor");
+		md.signDataVector.emplace_back(glm::ivec2{ 76, 11 }, "Be carreful, don't shoot with the key\nCome back if you loose it");
 		md.signDataVector.emplace_back(glm::ivec2{ 78, 6 }, "This arrow can bounce on walls");
 
 

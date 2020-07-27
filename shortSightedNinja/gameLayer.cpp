@@ -140,7 +140,6 @@ void respawn();
 
 void loadLevel(glm::ivec2 spawn = { 0, 0 }, bool setSpawn = 0)
 {
-	menu::resetMenuState();
 	ingameMenuMainPage = 1;
 	inGameMenu = 0;
 	//currentDialog.dialogData.push_back({{ "Dialog, Sample.\nFraze 2. Text3." }, textureDataForDialog["character"]});
@@ -704,7 +703,7 @@ bool gameLogic(float deltaTime)
 			if(ingameMenuMainPage)
 			{
 				
-				menu::startMenu();
+				menu::startMenu(1);
 			
 				menu::uninteractableCentreText("Menu");
 				bool s = 0;
@@ -723,7 +722,6 @@ bool gameLogic(float deltaTime)
 				if(s)
 				{
 					ingameMenuMainPage = 0;
-					menu::resetMenuState();
 					settings::setMainSettingsPage();
 				}
 				if (exit)
@@ -737,7 +735,6 @@ bool gameLogic(float deltaTime)
 				settings::displaySettings(renderer2d, deltaTime);
 				if (currentSettingsMenu == 0) 
 				{
-					menu::resetMenuState();
 					ingameMenuMainPage = 1;
 				};
 			}
@@ -761,7 +758,6 @@ bool gameLogic(float deltaTime)
 		if (input::isKeyReleased(input::Buttons::menu))
 		{
 			inGameMenu = true;
-			menu::resetMenuState();
 			ingameMenuMainPage = 1;
 			settings::setMainSettingsPage();
 		}
@@ -1129,7 +1125,7 @@ bool gameLogic(float deltaTime)
 					glm::vec2 playerP = player.pos;
 					glm::vec2 blockP = { x*BLOCK_SIZE , y*BLOCK_SIZE };
 
-					if(glm::distance(playerP, blockP) < (BLOCK_SIZE * 0.7))
+					if(glm::distance(playerP, blockP) < (BLOCK_SIZE * 0.65))
 					{
 						player.dying = 1;
 						player.lockMovementDie = 1;

@@ -68,7 +68,7 @@ namespace settings {
 
 		if (currentSettingsMenu == 1)
 		{
-			menu::startMenu();
+			menu::startMenu(2);
 
 			menu::uninteractableCentreText("Settings page");
 
@@ -106,7 +106,7 @@ namespace settings {
 			bool pressedWindowed = 0;
 			bool pressedFullScreen = 0;
 
-			menu::startMenu();
+			menu::startMenu(3);
 
 			menu::uninteractableCentreText("Visual settings");
 
@@ -146,7 +146,7 @@ namespace settings {
 		else if (currentSettingsMenu == 3)
 		{
 
-			menu::startMenu();
+			menu::startMenu(4);
 
 			menu::uninteractableCentreText("Sound settings");
 
@@ -167,7 +167,7 @@ namespace settings {
 		else if (currentSettingsMenu == 4)
 		{
 
-			menu::startMenu();
+			menu::startMenu(5);
 
 			menu::uninteractableCentreText("Controlls");
 

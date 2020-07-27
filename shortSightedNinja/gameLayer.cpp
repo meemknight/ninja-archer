@@ -411,54 +411,19 @@ bool gameLogic(float deltaTime)
 
 		if(menuState == MenuState::mainMenu)
 		{
-			Ui::Frame f({ 0, 0, w, h });
-			
-			auto button1 = Ui::Box().xCenter().yCenter( - 200).xDimensionPercentage(0.5).yDimensionPixels(150)();
-			auto button2 = Ui::Box().xCenter().yCenter().xDimensionPercentage(0.5).yDimensionPixels(150)();
-			auto button3 = Ui::Box().xCenter().yCenter(+200).xDimensionPercentage(0.5).yDimensionPixels(150)();
-
-			auto p = platform::getRelMousePosition();
 			
 			bool playButton = 0;
 			bool levelSelectButton = 0;
-			bool creditsSelectButton = 0;
+			bool settingsButton = 0;
 
-			//todo refactor
-			if (Ui::isButtonReleased(p, button1))
-			{
-					playButton = 1;
-			}
+			menu::startMenu(6);
+		
+			menu::uninteractableCentreText("Midnight arrow");
+			menu::interactableText("Continue jurney", &playButton);
+			menu::interactableText("Select zone", &levelSelectButton);
+			menu::interactableText("Settings", &settingsButton);
 
-			if (Ui::isButtonReleased(p, button2))
-			{
-				levelSelectButton = 1;
-			}
-
-			if (Ui::isButtonReleased(p, button3))
-			{
-				creditsSelectButton = 1;
-			}
-
-			renderer2d.render9Patch2( button1,
-				8, { 1,1,1,1 }, {}, 0, uiButton, {0,1,1,0}, { 0,0.8,0.8,0 });
-
-			renderer2d.render9Patch2(button2,
-				8, { 1,1,1,1 }, {}, 0, uiButton, { 0,1,1,0 }, { 0,0.8,0.8,0 });
-
-			renderer2d.render9Patch2(button3,
-				8, { 1,1,1,1 }, {}, 0, uiButton, { 0,1,1,0 }, { 0,0.8,0.8,0 });
-
-
-			renderer2d.renderText({button1.x + button1.z/2,button1.y + button1.w/2}, 
-				"Continue jurney", font, {1,1,1,1}, 0.6, 4, 3, true, { 0.1,0.1,0.1,1 });
-
-
-			renderer2d.renderText({ button2.x + button2.z / 2,button2.y + button2.w / 2 },
-				"Select zone", font, { 1,1,1,1 }, 0.6, 4, 3, true, { 0.1,0.1,0.1,1 });
-
-			renderer2d.renderText({ button3.x + button3.z / 2,button3.y + button3.w / 2 },
-				"Settings", font, { 1,1,1,1 }, 0.6, 4, 3, true, { 0.1,0.1,0.1,1 });
-
+			menu::endMenu(renderer2d, uiDialogBox, font, nullptr, deltaTime);
 
 			if (playButton)
 			{
@@ -481,7 +446,7 @@ bool gameLogic(float deltaTime)
 				selectedLevel = 0;
 			}
 
-			if(creditsSelectButton)
+			if(settingsButton)
 			{
 				menuState = MenuState::settingsMenu;
 				settings::setMainSettingsPage();

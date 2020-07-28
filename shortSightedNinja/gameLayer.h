@@ -1,6 +1,8 @@
 #pragma once
 #pragma once
 #include <glm/vec2.hpp>
+#include <unordered_map>
+#include "DialogInteraction.h"
 
 void errorMessage(const char *c);
 
@@ -34,6 +36,9 @@ int isRMouseHeld();
 void showMouse(bool show);
 bool isFocused();
 bool mouseMoved();
+
+bool writeEntireFile(const char* name, void* buffer, size_t size);
+bool readEntireFile(const char* name, void* buffer, size_t size);
 };
 
 // game functions
@@ -42,5 +47,5 @@ bool gameLogic(float deltaTime);
 void closeGame();
 void imguiFunc(float deltaTime);
 
-void saveState(glm::ivec2 playerSpawnPos, int levelId);
-bool loadLevelFromLastState(int &level, glm::ivec2 &spawn);
+void saveState(glm::ivec2 playerSpawnPos, int levelId, std::unordered_map<glm::ivec2, FullDialogData> &dialogData);
+bool loadLevelFromLastState(int &level, glm::ivec2 &spawn, glm::ivec2 *dialogs);

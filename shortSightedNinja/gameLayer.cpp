@@ -111,7 +111,6 @@ int currentLevel=-2;
 
 float jumpDelayTime = 0;
 
-int maxLevel=0;
 static int ingameMenuMainPage = 1;
 bool inGameMenu = 0;
 
@@ -250,7 +249,7 @@ void loadLevel(glm::ivec2 spawn = { 0, 0 }, bool setSpawn = 0)
 	soundManager.setMusicPositions(mapData);
 
 
-	saveState(playerSpawnPos, currentLevel);
+	saveState(playerSpawnPos, currentLevel, mapData.dialogs);
 	respawn();
 }
 
@@ -276,6 +275,11 @@ void respawn()
 	player.iceGrab = 0;
 	player.isSittingOnIce = 0;
 
+	//reset pickups
+	for (auto& i : pickups)
+	{
+		i.cullDown = 0;
+	}
 }
 
 bool initGame()
@@ -366,7 +370,7 @@ bool initGame()
 		//loadLevel();
 	}
 
-	loadProgress(maxLevel);
+	//loadProgress(maxLevel);
 
 	return true;
 }
@@ -428,10 +432,29 @@ bool gameLogic(float deltaTime)
 			if (playButton)
 			{
 				
-				if(loadLevelFromLastState(currentLevel, playerSpawnPos))
+				glm::ivec2 dialogPos[20];
+
+				if(loadLevelFromLastState(currentLevel, playerSpawnPos, dialogPos))
 				{
 					glm::ivec2 i = playerSpawnPos;
 					loadLevel(i, true);
+
+					for(int i=0; i<20; i++)
+					{
+						if(dialogPos[i].x == -1)
+						{
+							break;
+						}
+
+						auto it = mapData.dialogs.find(dialogPos[i]);
+
+						if(it != mapData.dialogs.end())
+						{
+							it->second.hasShown = true;
+						}
+
+					}
+
 				}else
 				{
 					currentLevel = 0;
@@ -492,15 +515,8 @@ bool gameLogic(float deltaTime)
 			glm::vec4 playBox= Ui::Box().xCenter().yBottom(-20).yDimensionPixels(100).xDimensionPercentage(0.8);
 			
 			std::string temp;
-			if(selectedLevel > maxLevel)
-			{
-				temp = (std::string("Locked area: ") + (levelNames[selectedLevel]));
-
-			}else
-			{
-				temp = (std::string("Play area: ") + (levelNames[selectedLevel]));
-
-			}
+			
+			temp = (std::string("Play area: ") + (levelNames[selectedLevel]));
 
 			renderer2d.render9Patch2(playBox,
 				8, { 1,1,1,1 }, {}, 0, uiButton, { 0,1,1,0 }, { 0,0.8,0.8,0 });
@@ -599,7 +615,6 @@ bool gameLogic(float deltaTime)
 				//loadLevel();
 			}
 
-			if (selectedLevel <= maxLevel)
 			if(Ui::isButtonReleased(p, playBox))
 			{
 				currentLevel = selectedLevel;
@@ -1105,7 +1120,7 @@ bool gameLogic(float deltaTime)
 						mapData.get(playerSpawnPos.x, playerSpawnPos.y).type = Block::flagDown;
 					}
 
-					saveState({ x,y }, currentLevel);
+					saveState({ x,y }, currentLevel, mapData.dialogs);
 
 					playerSpawnPos = { x,y };
 					g.type = Block::flagUp;
@@ -1152,7 +1167,7 @@ bool gameLogic(float deltaTime)
 						if (input::isKeyPressedOn(input::Buttons::up))
 						{
 							player.isExitingLevel = iter->levelId;	
-							saveProgress(iter->levelId);
+							//saveProgress(iter->levelId);
 						}
 					}else
 					{
@@ -1755,8 +1770,9 @@ bool gameLogic(float deltaTime)
 			{
 				bird.startEndMove(bird.position, getDiagonalBirdPos(bird.position, player.pos));
 			}
+		
+			saveState( playerSpawnPos, currentLevel, mapData.dialogs);
 		}
-		//currentDialog.setNewDialog("Partea a doua a dialogului");
 		 
 	}
 
@@ -1776,7 +1792,7 @@ void closeGame()
 
 	soundManager.stoppMusic();
 
-	saveState(playerSpawnPos, currentLevel);
+	saveState(playerSpawnPos, currentLevel, mapData.dialogs);
 
 }
 

@@ -634,7 +634,3 @@ struct MapData
 };
 
 void setupMap(MapData &md, int levelId);
-
-void saveProgress(int nextLevel);
-
-void loadProgress(int & nextLevel);

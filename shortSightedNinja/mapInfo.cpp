@@ -667,8 +667,11 @@ struct SaveLevelData
 	glm::ivec2 dialogs[20];
 };
 
+
 void saveState(glm::ivec2 playerSpawnPos, int levelId, std::unordered_map<glm::ivec2, FullDialogData> &dialogData)
 {
+
+	settings::saveSettings();
 
 	if(levelId == -2 || levelId >= LEVELS)
 	{
@@ -725,6 +728,7 @@ bool loadLevelFromLastState(int &level, glm::ivec2 &spawn, glm::ivec2* dialogs)
 
 		memcpy(dialogs, data.dialogs, sizeof(data.dialogs));
 	}
+
 
 	return status;
 }

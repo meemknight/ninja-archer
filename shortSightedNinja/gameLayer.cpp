@@ -41,9 +41,7 @@ gl2d::Renderer2D renderer2d;
 
 
 //music
-sf::SoundBuffer pickupSoundbuffer;
-sf::SoundBuffer leavesSoundbuffer;
-sf::Sound soundPlayer;
+
 
 SoundManager soundManager;
 
@@ -350,11 +348,7 @@ bool initGame()
 
 
 	{//music
-		pickupSoundbuffer.loadFromFile("resources//pick_up.wav");
-		leavesSoundbuffer.loadFromFile("resources//leaves.wav");
-	
-		soundPlayer.setVolume(2);
-	
+		
 		soundManager.loadMusic();
 	}
 
@@ -371,6 +365,8 @@ bool initGame()
 	}
 
 	//loadProgress(maxLevel);
+
+	settings::loadSettings();
 
 	return true;
 }
@@ -409,8 +405,6 @@ bool gameLogic(float deltaTime)
 		
 		soundManager.stoppMusic();
 
-		soundPlayer.stop();
-
 		renderer2d.currentCamera = gl2d::cameraCreateDefault();
 
 		if(menuState == MenuState::mainMenu)
@@ -419,6 +413,7 @@ bool gameLogic(float deltaTime)
 			bool playButton = 0;
 			bool levelSelectButton = 0;
 			bool settingsButton = 0;
+			bool exitButton = 0;
 
 			menu::startMenu(6);
 		
@@ -426,6 +421,7 @@ bool gameLogic(float deltaTime)
 			menu::interactableText("Continue jurney", &playButton);
 			menu::interactableText("Select zone", &levelSelectButton);
 			menu::interactableText("Settings", &settingsButton);
+			menu::interactableText("Exit", &exitButton);
 
 			menu::endMenu(renderer2d, uiDialogBox, font, nullptr, deltaTime);
 
@@ -475,6 +471,11 @@ bool gameLogic(float deltaTime)
 				settings::setMainSettingsPage();
 			}
 
+			if(exitButton)
+			{
+				return 0;
+			}
+			
 		}else if (menuState == MenuState::levelSelector)
 		{
 
@@ -788,7 +789,7 @@ bool gameLogic(float deltaTime)
 	soundManager.setMusicAndEffectVolume(player.pos);
 	soundManager.updateSoundTransation(deltaTime);
 
-	soundPlayer.setVolume(4 * settings::getAmbientSound());
+	soundManager.soundPlayer.setVolume(10 * settings::getAmbientSound());
 
 #pragma endregion
 
@@ -1147,12 +1148,12 @@ bool gameLogic(float deltaTime)
 				if (isInteractableGrass(g.type))
 				{
 					playedGrassSoundThisFrame = 1;
-					if (soundPlayer.getStatus() == sf::Sound::Status::Stopped && !playedGrassSound && grassTimeDelay <=0)
+					if (soundManager.soundPlayer.getStatus() == sf::Sound::Status::Stopped && !playedGrassSound && grassTimeDelay <=0)
 					{
 						grassTimeDelay = rand()%5+1;
-						soundPlayer.setBuffer(leavesSoundbuffer);
+						soundManager.soundPlayer.setBuffer(soundManager.leavesSoundbuffer);
 						playedGrassSound = 1;
-						soundPlayer.play();
+						soundManager.soundPlayer.play();
 					}
 				}
 				
@@ -1473,10 +1474,10 @@ bool gameLogic(float deltaTime)
 		{
 			i.cullDown = arrowPickupCullDown;
 			inventory[i.type].count = inventory[i.type].maxCount;
-			if (soundPlayer.getStatus() == sf::Sound::Status::Stopped)
+			if (soundManager.soundPlayer.getStatus() == sf::Sound::Status::Stopped)
 			{
-				soundPlayer.setBuffer(pickupSoundbuffer);
-				soundPlayer.play();
+				soundManager.soundPlayer.setBuffer(soundManager.pickupSoundbuffer);
+				soundManager.soundPlayer.play();
 			}
 		}
 	}
@@ -1787,8 +1788,6 @@ bool gameLogic(float deltaTime)
 
 void closeGame()
 {
-	
-	soundPlayer.stop();
 
 	soundManager.stoppMusic();
 

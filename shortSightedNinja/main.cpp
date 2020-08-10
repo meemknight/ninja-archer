@@ -441,6 +441,9 @@ endImgui:
 	case WM_CLOSE:
 		quit = true;
 		break;
+	case WM_DESTROY:
+		quit = true;
+		break;
 	case WM_MOUSEMOVE:
 		bMouseMoved = 1;
 		break;

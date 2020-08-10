@@ -73,6 +73,11 @@ struct SoundManager
 		void setVolume(float f) { if (loaded)m.setVolume(f * 100); }
 	};
 
+
+	sf::SoundBuffer pickupSoundbuffer;
+	sf::SoundBuffer leavesSoundbuffer;
+	sf::Sound soundPlayer;
+
 	//this vector holds music players
 	MusicStruct musicVect[musicTapesCount] = {};
 	MusicStruct effectsVect[musicEffectsCount] = {};
@@ -88,7 +93,7 @@ struct SoundManager
 	void setMusicAndEffectVolume(glm::vec2 pos);
 
 	void updateSoundTransation(float deltaTime);
-	
+		
 	void updateSoundVolume();
 
 	void stoppMusic();

@@ -47,7 +47,7 @@ void menu::startMenu(int id)
 
 	lastId = id;
 
-	perFrameData = {};
+	perFrameData.lines.clear();
 }
 
 void menu::uninteractableCentreText(const char * text)

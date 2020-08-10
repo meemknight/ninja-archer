@@ -1,22 +1,14 @@
 #include "Settings.h"
 #include "opengl2Dlib.h"
 #include "menu.h"
+#include "gameLayer.h"
 
 extern gl2d::Texture uiDialogBox;
 extern gl2d::Font font;
 
 int currentSettingsMenu = 0;
 
-struct SettingsData
-{
-float zoom = 0.5;
-float uiScale = 1;
-bool bShowArrowsIndicators = 1;
-float musicSound=0.5;
-float ambientSound = 0.5;
-float buttonSound=0.5;
-bool fullScreen = 0;
-}sData;
+settings::SettingsData sData;
 
 namespace settings {
 
@@ -59,6 +51,30 @@ namespace settings {
 	{
 		return sData.fullScreen;
 	}
+
+	SettingsData &getSettingsData()
+	{
+		return sData;
+	}
+
+	void saveSettings()
+	{
+
+		platform::writeEntireFile("resources//settings",
+			(void*)&settings::getSettingsData(), sizeof(settings::getSettingsData()));
+
+	}
+
+	void loadSettings()
+	{
+		if (!platform::readEntireFile("resources//settings",
+			(void*)&settings::getSettingsData(), sizeof(settings::getSettingsData())))
+		{
+			settings::getSettingsData() = SettingsData();
+		}
+
+	}
+
 
 	void displaySettings(gl2d::Renderer2D &renderer, float deltaTime)
 	{

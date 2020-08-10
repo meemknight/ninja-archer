@@ -3,6 +3,7 @@
 #include <glm/vec2.hpp>
 #include <unordered_map>
 #include "DialogInteraction.h"
+#include "Settings.h"
 
 void errorMessage(const char *c);
 

@@ -105,6 +105,12 @@ void SoundManager::setMusicPositions(MapData & mapData)
 void SoundManager::loadMusic()
 {
 
+	pickupSoundbuffer.loadFromFile("resources//pick_up.wav");
+	leavesSoundbuffer.loadFromFile("resources//leaves.wav");
+
+	soundPlayer.setVolume(2);
+
+
 	for(int i=0; i<musicTapesCount; i++)
 	{
 		if(tapesNames[i] != nullptr)
@@ -345,4 +351,5 @@ void SoundManager::stoppMusic()
 		effectsVect[i].stop();
 	}
 
+	soundPlayer.stop();
 }

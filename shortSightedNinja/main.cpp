@@ -170,7 +170,6 @@ int MAIN
 
 
 
-
 	if (!initGame())
 	{
 		return 0;
@@ -334,7 +333,7 @@ int MAIN
 	CloseWindow(wind);
 
 	closeGame();
-
+	//todo not always workking
 
 	return 0;
 }

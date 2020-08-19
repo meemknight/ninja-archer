@@ -88,13 +88,14 @@ void menu::interactableText(const char * text, bool *hasPressed)
 
 float speed = 0.3f;
 
-const glm::vec4 selectedButtonColor = Colors::lightGreen;
-const glm::vec4 selectedArrowColor = Colors::darkGreen;
-const glm::vec4 uninteractebleTextColor = Colors::darkGray;
-const glm::vec4 dropShadowColor = { 0.1f,0.1f,0.1f,1.f };
 
 void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture, gl2d::Font f, bool * backPressed, float deltaTime)
 {
+	const glm::vec4 selectedButtonColor = Colors::lightGreen;
+	const glm::vec4 selectedArrowColor = Colors::darkGreen;
+	const glm::vec4 uninteractebleTextColor = Colors::darkGray;
+	const glm::vec4 dropShadowColor = { 0.1f,0.1f,0.1f,1.f };
+
 	//input bindings
 	///todo add your own functions here
 

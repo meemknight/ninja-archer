@@ -729,8 +729,6 @@ bool gameLogic(float deltaTime)
 				inGameMenu = false;
 			}
 
-			soundManager.settings.musicVolume = settings::getMusicSound();
-			soundManager.settings.ambientVolume = settings::getAmbientSound();
 			soundManager.updateSoundVolume();
 
 			return 1;
@@ -778,29 +776,15 @@ bool gameLogic(float deltaTime)
 
 #pragma region music
 	 
-	soundManager.settings.musicVolume = settings::getMusicSound();
-	soundManager.settings.ambientVolume = settings::getAmbientSound();
 
-	//greenPlayer.setVolume(mapData.getGreenPercentage(player.pos)* settings::getMusicSound());
-	//redPlayer.setVolume(mapData.getRedPercentage(player.pos)    * settings::getMusicSound());
-	//grayPlayer.setVolume(mapData.getCavePercentage(player.pos)  * settings::getMusicSound());
-	//tikiPlayer.setVolume(mapData.getTikiPercentage(player.pos)  * settings::getMusicSound());
+	soundManager.updateSoundVolume();
 
 	soundManager.setMusicAndEffectVolume(player.pos);
 	soundManager.updateSoundTransation(deltaTime);
 
-	soundManager.soundPlayer.setVolume(10 * settings::getAmbientSound());
-
 #pragma endregion
 
-	//stencilRenderer2d.updateWindowMetrics(backGroundFBO.texture.GetSize().x, 
-	//	backGroundFBO.texture.GetSize().y);
 
-	//renderer2d.renderRectangle({ 100,100,100,100 }, Colors_Green);
-	//renderer2d.flush();
-
-
-	//renderer2d.currentCamera.position = { -500,-100 };
 
 #pragma region controlls
 	
@@ -1148,13 +1132,14 @@ bool gameLogic(float deltaTime)
 				if (isInteractableGrass(g.type))
 				{
 					playedGrassSoundThisFrame = 1;
-					if (soundManager.soundPlayer.getStatus() == sf::Sound::Status::Stopped && !playedGrassSound && grassTimeDelay <=0)
+
+					if(!playedGrassSound && grassTimeDelay <= 0)
 					{
-						grassTimeDelay = rand()%5+1;
-						soundManager.soundPlayer.setBuffer(soundManager.leavesSoundbuffer);
+						grassTimeDelay = rand() % 5 + 1;
 						playedGrassSound = 1;
-						soundManager.soundPlayer.play();
+						soundManager.playSound(SoundManager::soundEffects::soundEffectGrass);
 					}
+
 				}
 				
 				if (g.type == Block::levelExit)
@@ -1474,11 +1459,8 @@ bool gameLogic(float deltaTime)
 		{
 			i.cullDown = arrowPickupCullDown;
 			inventory[i.type].count = inventory[i.type].maxCount;
-			if (soundManager.soundPlayer.getStatus() == sf::Sound::Status::Stopped)
-			{
-				soundManager.soundPlayer.setBuffer(soundManager.pickupSoundbuffer);
-				soundManager.soundPlayer.play();
-			}
+			
+			soundManager.playSound(SoundManager::soundEffects::soundEffectPickUp);
 		}
 	}
 

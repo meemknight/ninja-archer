@@ -510,7 +510,7 @@ bool gameLogic(float deltaTime)
 					{}, 0, uiTiki);
 
 
-				uiArrows;
+				//uiArrows
 			}
 
 			glm::vec4 playBox= Ui::Box().xCenter().yBottom(-20).yDimensionPixels(100).xDimensionPercentage(0.8);
@@ -1450,30 +1450,41 @@ bool gameLogic(float deltaTime)
 
 
 #pragma region pickups
-	for (auto& i : pickups)
 	{
-		i.draw(renderer2d, arrowSprite, deltaTime);
-		i.light = 0;
+		bool pickedUpNow = 0;
 
-		if (i.colidePlayer(player) && i.cullDown <= 0)
+		for (auto& i : pickups)
 		{
-			i.cullDown = arrowPickupCullDown;
-			inventory[i.type].count = inventory[i.type].maxCount;
-			
-			soundManager.playSound(SoundManager::soundEffects::soundEffectPickUp);
+			i.draw(renderer2d, arrowSprite, deltaTime);
+			i.light = 0;
+
+			if (i.colidePlayer(player) && i.cullDown <= 0)
+			{
+				pickedUpNow = 1;
+
+				i.cullDown = arrowPickupCullDown;
+				inventory[i.type].count = inventory[i.type].maxCount;
+
+				soundManager.playSound(SoundManager::soundEffects::soundEffectPickUp);
+			}
 		}
-	}
 
-	actualInventorty.clear();
+		actualInventorty.clear();
 
-	for (auto i : inventory)
-	{
-		if (i.count)
+		for (auto i : inventory)
 		{
-			actualInventorty.push_back(i);
+			if (i.count)
+			{
+				actualInventorty.push_back(i);
+			}
 		}
-	}
+	
+		if(actualInventorty.size() == 1 && pickedUpNow)
+		{
+			currentArrow = 0;
+		}
 
+	}
 #pragma endregion
 
 #pragma region particles
@@ -1578,8 +1589,16 @@ bool gameLogic(float deltaTime)
 			{
 
 				int left = currentArrow - 1;
-				if (left <= -1)
+				if (left == -1)
 				{
+
+				}else if(left < -1)
+				{
+					if (actualInventorty.size() > 1)
+					{
+						leftCount = (actualInventorty.end()-1)->count;
+						left = (actualInventorty.end()-1)->type;
+					}
 				}
 				else
 				{
@@ -1620,15 +1639,17 @@ bool gameLogic(float deltaTime)
 					right = actualInventorty[right].type;
 				}
 
+				float angle = 45.f;
+
 				if (left > -1)
 				{
 					float dim = 0.2;
-					for (int i = -1; i < leftCount - 1; i++)
+					for (int i = -1; i < leftCount -1; i++)
 					{
 						renderer2d.renderRectangle(
 							Ui::Box().xLeft(i * 8).yCenter().yDimensionPercentage(0.7f).xAspectRatio(1)
 							, { 0.4 * dim,0.4 * dim,0.4 * dim,1 }
-						, {}, 45, arrowSprite, gl2d::computeTextureAtlas(Arrow::lastArror, 1, left, 0));
+						, {}, angle, arrowSprite, gl2d::computeTextureAtlas(Arrow::lastArror, 1, left, 0));
 						dim += 0.1;
 					}
 				}
@@ -1642,7 +1663,7 @@ bool gameLogic(float deltaTime)
 						renderer2d.renderRectangle(
 							Ui::Box().xRight(i * 8).yCenter().yDimensionPercentage(0.7f).xAspectRatio(1)
 							, { 0.4 * dim,0.4 * dim,0.4 * dim,1 }
-						, {}, 45, arrowSprite, gl2d::computeTextureAtlas(Arrow::lastArror, 1, right, 0));
+						, {}, angle, arrowSprite, gl2d::computeTextureAtlas(Arrow::lastArror, 1, right, 0));
 						dim += 0.1;
 					}
 				}
@@ -1657,7 +1678,7 @@ bool gameLogic(float deltaTime)
 						renderer2d.renderRectangle(
 							Ui::Box().xCenter(i * 10).yCenter().yDimensionPercentage(0.9f).xAspectRatio(1),
 							{ dim,dim,dim,1 },
-							{}, 45, arrowSprite, gl2d::computeTextureAtlas(Arrow::lastArror, 1, center, 0));
+							{}, angle, arrowSprite, gl2d::computeTextureAtlas(Arrow::lastArror, 1, center, 0));
 						dim += 0.1;
 					}
 
@@ -1673,12 +1694,28 @@ bool gameLogic(float deltaTime)
 		//the 2 buttons
 		if(actualInventorty.size() != 0 && settings::showArrowIndicators())
 		{
+			float leftDim = 0.6;
+			float righttDim = 0.6;
+
 			auto left = Ui::Box().xLeft(10).yBottom(-20).xDimensionPercentage(0.04f).yAspectRatio(1.f)();
 			auto right = Ui::Box().xLeftPerc(0.2).yBottom(-20).xDimensionPercentage(0.04f).yAspectRatio(1.f)();
+
+			if(input::isKeyHeld(input::Buttons::swapLeft))
+			{
+				left = Ui::Box().xLeft(10).yBottom(-15).xDimensionPercentage(0.04f).yAspectRatio(1.f)();
+				leftDim = 0.4;
+			}
+
+			if (input::isKeyHeld(input::Buttons::swapRight))
+			{
+				right = Ui::Box().xLeftPerc(0.2).yBottom(-15).xDimensionPercentage(0.04f).yAspectRatio(1.f)();
+				righttDim = 0.4;
+			}
+
 			right.x += 10;
 
-			input::drawButton(renderer2d, left, left.z, input::Buttons::swapLeft, 0.4f);
-			input::drawButton(renderer2d, right, right.z, input::Buttons::swapRight, 0.4f);
+			input::drawButton(renderer2d, left, left.z, input::Buttons::swapLeft, input::isControllerInput(), leftDim, {3.f, 3.f}, 1.f);
+			input::drawButton(renderer2d, right, right.z, input::Buttons::swapRight, input::isControllerInput(), righttDim, { 3.f, 3.f }, 1.f);
 			
 		}
 

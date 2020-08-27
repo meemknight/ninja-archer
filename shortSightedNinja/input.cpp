@@ -254,6 +254,20 @@ namespace input
 
 	}
 
+	void drawButton(gl2d::Renderer2D& renderer, glm::vec2 pos, float size, int button, bool isController, float a, glm::vec2 shadow, float shadowA)
+	{
+		glm::ivec2 s = uiButtons.GetSize();
+		gl2d::TextureAtlasPadding uiAtlas(Buttons::buttonsCount, 2, s.x, s.y);
+
+		renderer.renderRectangle({ pos.x, pos.y, size, size }, { 0,0,0,shadowA }, {}, 0, uiButtons, uiAtlas.get(button, isController));
+
+		pos.y -= shadow.y;
+		pos.x += shadow.x;
+
+		renderer.renderRectangle({ pos.x, pos.y, size, size }, { 1,1,1,a }, {}, 0, uiButtons, uiAtlas.get(button, isController));
+
+	}
+
 	namespace internal
 	{
 

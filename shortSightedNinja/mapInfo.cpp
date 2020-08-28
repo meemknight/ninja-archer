@@ -663,12 +663,15 @@ void setupMap(MapData &md, int levelId)
 struct SaveLevelData
 {
 	glm::ivec2 playerSpawnPos;
-	int levelId;
 	glm::ivec2 dialogs[20];
+	int levelId;
+	char blueChanged;
+	char redChanged;
+	char grayChanged;
 };
 
 
-void saveState(glm::ivec2 playerSpawnPos, int levelId, std::unordered_map<glm::ivec2, FullDialogData> &dialogData)
+void saveState(glm::ivec2 playerSpawnPos, int levelId, std::unordered_map<glm::ivec2, FullDialogData> &dialogData, int blueChanged, int redChanged, int grayChanged)
 {
 
 	settings::saveSettings();
@@ -693,6 +696,9 @@ void saveState(glm::ivec2 playerSpawnPos, int levelId, std::unordered_map<glm::i
 
 	data.playerSpawnPos = playerSpawnPos;
 	data.levelId = levelId;
+	data.blueChanged = blueChanged;
+	data.redChanged = redChanged;
+	data.grayChanged = grayChanged;
 
 	for(int i=0; i< sizeof(data.dialogs) / sizeof(glm::ivec4); i++)
 	{
@@ -712,7 +718,8 @@ void saveState(glm::ivec2 playerSpawnPos, int levelId, std::unordered_map<glm::i
 
 }
 
-bool loadLevelFromLastState(int &level, glm::ivec2 &spawn, glm::ivec2* dialogs)
+bool loadLevelFromLastState(int &level, glm::ivec2 &spawn, glm::ivec2* dialogs,
+	int& blueChanged, int& redChanged, int& grayChanged)
 {
 	level = -2;
 	spawn = {};
@@ -725,6 +732,10 @@ bool loadLevelFromLastState(int &level, glm::ivec2 &spawn, glm::ivec2* dialogs)
 	{
 		level = data.levelId;
 		spawn = data.playerSpawnPos;
+
+		blueChanged = data.blueChanged;
+		redChanged = data.redChanged;
+		grayChanged = data.grayChanged;
 
 		memcpy(dialogs, data.dialogs, sizeof(data.dialogs));
 	}

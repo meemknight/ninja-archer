@@ -754,7 +754,8 @@ void Arrow::move(float deltaTime)
 	}
 }
 
-void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool grayTouch)
+void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool grayTouch,
+	int& redChanged, int& blueChanged, int& grayChanged)
 {
 	if(stuckInWall)
 	{
@@ -820,6 +821,7 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 						}
 					}
 					mapData.setNeighbors();
+					redChanged = !redChanged;
 				}
 			
 
@@ -850,6 +852,7 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 						}
 					}
 					mapData.setNeighbors();
+					blueChanged = !blueChanged;
 				}
 			
 			}
@@ -880,6 +883,7 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 							}
 						}
 						mapData.setNeighbors();
+						grayChanged = !grayChanged;
 					}
 					
 				}

@@ -33,6 +33,7 @@ namespace input
 	bool isKeyHeld(int b);
 	bool isKeyReleased(int b);
 
+
 	int getMoveDir();
 
 	bool isControllerInput();

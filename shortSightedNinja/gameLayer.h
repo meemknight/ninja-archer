@@ -48,5 +48,5 @@ bool gameLogic(float deltaTime);
 void closeGame();
 void imguiFunc(float deltaTime);
 
-void saveState(glm::ivec2 playerSpawnPos, int levelId, std::unordered_map<glm::ivec2, FullDialogData> &dialogData);
-bool loadLevelFromLastState(int &level, glm::ivec2 &spawn, glm::ivec2 *dialogs);
+void saveState(glm::ivec2 playerSpawnPos, int levelId, std::unordered_map<glm::ivec2, FullDialogData> &dialogData, int blueChanged, int redChanged, int grayChanged);
+bool loadLevelFromLastState(int &level, glm::ivec2 &spawn, glm::ivec2 *dialogs, int& blueChanged, int& redChanged, int& grayChanged);

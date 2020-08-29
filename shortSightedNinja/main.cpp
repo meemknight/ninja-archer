@@ -691,6 +691,11 @@ namespace platform
 			rez = 0;
 		}
 
+		//if(sizeRead != size)
+		//{
+		//	rez = 0;
+		//}
+
 		CloseHandle(file);
 
 		return rez;

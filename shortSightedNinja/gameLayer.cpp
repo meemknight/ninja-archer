@@ -432,8 +432,15 @@ bool gameLogic(float deltaTime)
 				
 				glm::ivec2 dialogPos[20];
 
-				if(loadLevelFromLastState(currentLevel, playerSpawnPos, dialogPos, blueChanged, redChanged, grayChanged))
+				blueChanged = 0;
+				redChanged = 0; 
+				grayChanged = 0;
+
+				if(loadLevelFromLastState(currentLevel, playerSpawnPos, dialogPos, blueChanged, redChanged, grayChanged)
+					&& currentLevel != -2
+					)
 				{
+
 					glm::ivec2 i = playerSpawnPos;
 					loadLevel(i, true);
 
@@ -525,7 +532,7 @@ bool gameLogic(float deltaTime)
 			
 		}else if (menuState == MenuState::levelSelector)
 		{
-
+			/*
 			Ui::Frame f({ 0, 0, w, h });
 
 			glm::vec4 frame2 = Ui::Box().xCenter().yTop(50).yDimensionPercentage(0.6).xAspectRatio(1.f);
@@ -667,6 +674,29 @@ bool gameLogic(float deltaTime)
 			{
 				currentLevel = selectedLevel;
 				loadLevel();
+			}
+			*/
+			
+			menu::startMenu(1020);
+
+			menu::uninteractableCentreText("Select zone");
+
+			bool selected[LEVELS] = {};
+
+			for(int i=0; i<LEVELS; i++)
+			{
+				menu::interactableText(levelNames[i], &selected[i]);
+			}
+
+			menu::endMenu(renderer2d, uiDialogBox, font, nullptr, deltaTime);
+
+			for(int i=0;i<LEVELS; i++)
+			{
+				if(selected[i])
+				{
+					currentLevel = i;
+					loadLevel();
+				}
 			}
 
 		}else if (menuState == MenuState::settingsMenu)
@@ -1055,7 +1085,6 @@ bool gameLogic(float deltaTime)
 
 				if (g.type == Block::flagDown)
 				{
-					//todo probably move under block change
 					if (mapData.get(playerSpawnPos.x, playerSpawnPos.y).type == Block::flagUp)
 					{
 						mapData.get(playerSpawnPos.x, playerSpawnPos.y).type = Block::flagDown;
@@ -1110,6 +1139,9 @@ bool gameLogic(float deltaTime)
 						{
 							player.isExitingLevel = iter->levelId;	
 							//saveProgress(iter->levelId);
+							mapData.dialogs.clear();
+							saveState({ -1,-1 }, iter->levelId, mapData.dialogs, 0, 0, 0);
+
 						}
 					}else
 					{
@@ -1280,7 +1312,6 @@ bool gameLogic(float deltaTime)
 
 #pragma endregion
 
-		//todo remove intensity
 		simuleteLightSpot({ i.pos.x * BLOCK_SIZE + BLOCK_SIZE / 2,i.pos.y * BLOCK_SIZE + BLOCK_SIZE / 2 },
 			r * lightPerc, mapData, arrows, pickups);
 
@@ -1573,13 +1604,13 @@ bool gameLogic(float deltaTime)
 				}
 
 				int center = currentArrow;
-				if (center <= -1)
+				if (center <= -1 || actualInventorty.size() <= center)
 				{
-
+					center = -1;
 				}
 				else
 				{
-					centerCount = actualInventorty[center].count;
+					centerCount = actualInventorty[center].count; //!todo
 					center = actualInventorty[center].type;
 				}
 
@@ -1747,7 +1778,7 @@ bool gameLogic(float deltaTime)
 				bird.startEndMove(bird.position, getDiagonalBirdPos(bird.position, player.pos));
 			}
 			
-			saveState( playerSpawnPos, currentLevel, mapData.dialogs, blueChanged, redChanged, grayChanged);
+			//saveState( playerSpawnPos, currentLevel, mapData.dialogs, blueChanged, redChanged, grayChanged);
 		}
 		 
 	}
@@ -1837,7 +1868,9 @@ void closeGame()
 
 	soundManager.stoppMusic();
 
-	saveState(playerSpawnPos, currentLevel, mapData.dialogs, blueChanged, redChanged, grayChanged);
+	//saveState(playerSpawnPos, currentLevel, mapData.dialogs, blueChanged, redChanged, grayChanged);
+	settings::saveSettings();
+
 
 }
 

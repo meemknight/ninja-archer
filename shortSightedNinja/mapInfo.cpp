@@ -671,6 +671,12 @@ struct SaveLevelData
 };
 
 
+void clearSave()
+{
+	std::unordered_map<glm::ivec2, FullDialogData> dialogData;
+	saveState({ -1,-1 }, -2, dialogData, 0, 0, 0);
+}
+
 void saveState(glm::ivec2 playerSpawnPos, int levelId, std::unordered_map<glm::ivec2, FullDialogData> &dialogData, int blueChanged, int redChanged, int grayChanged)
 {
 
@@ -678,7 +684,11 @@ void saveState(glm::ivec2 playerSpawnPos, int levelId, std::unordered_map<glm::i
 
 	if(levelId == -2 || levelId >= LEVELS)
 	{
-		return;
+		SaveLevelData data = {};
+		data.levelId = -2;
+
+		platform::writeEntireFile("resources//state", &data, sizeof(data));
+		return ;
 	}
 
 	//std::ofstream f("resources//state");

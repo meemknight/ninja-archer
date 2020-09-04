@@ -41,9 +41,7 @@ gl2d::Renderer2D renderer2d;
 
 
 //music
-sf::SoundBuffer pickupSoundbuffer;
-sf::SoundBuffer leavesSoundbuffer;
-sf::Sound soundPlayer;
+
 
 SoundManager soundManager;
 
@@ -111,7 +109,6 @@ int currentLevel=-2;
 
 float jumpDelayTime = 0;
 
-int maxLevel=0;
 static int ingameMenuMainPage = 1;
 bool inGameMenu = 0;
 
@@ -138,9 +135,10 @@ const char* levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki
 
 void respawn();
 
+int blueChanged = 0, redChanged = 0, grayChanged = 0;
+
 void loadLevel(glm::ivec2 spawn = { 0, 0 }, bool setSpawn = 0)
 {
-	menu::resetMenuState();
 	ingameMenuMainPage = 1;
 	inGameMenu = 0;
 	//currentDialog.dialogData.push_back({{ "Dialog, Sample.\nFraze 2. Text3." }, textureDataForDialog["character"]});
@@ -231,6 +229,7 @@ void loadLevel(glm::ivec2 spawn = { 0, 0 }, bool setSpawn = 0)
 	player.velocity = {};
 	player.isExitingLevel = -1;
 	player.wallGrab = 0;
+	player.iceGrab = 0;
 	player.isSittingOnIce = 0;
 
 	wallLights.clear();
@@ -250,7 +249,7 @@ void loadLevel(glm::ivec2 spawn = { 0, 0 }, bool setSpawn = 0)
 	soundManager.setMusicPositions(mapData);
 
 
-	saveState(playerSpawnPos, currentLevel);
+	saveState(playerSpawnPos, currentLevel, mapData.dialogs, 0, 0, 0);
 	respawn();
 }
 
@@ -273,8 +272,14 @@ void respawn()
 	lightPerc = 1;
 	player.velocity = {};
 	player.wallGrab = 0;
+	player.iceGrab = 0;
 	player.isSittingOnIce = 0;
 
+	//reset pickups
+	for (auto& i : pickups)
+	{
+		i.cullDown = 0;
+	}
 }
 
 bool initGame()
@@ -341,15 +346,11 @@ bool initGame()
 
 	jumpParticle.animCount = 3;
 
-	arrows.reserve(10);
+	arrows.reserve(20);
 
 
 	{//music
-		pickupSoundbuffer.loadFromFile("resources//pick_up.wav");
-		leavesSoundbuffer.loadFromFile("resources//leaves.wav");
-	
-		soundPlayer.setVolume(2);
-	
+		
 		soundManager.loadMusic();
 	}
 
@@ -365,7 +366,9 @@ bool initGame()
 		//loadLevel();
 	}
 
-	loadProgress(maxLevel);
+	//loadProgress(maxLevel);
+
+	settings::loadSettings();
 
 	return true;
 }
@@ -404,72 +407,101 @@ bool gameLogic(float deltaTime)
 		
 		soundManager.stoppMusic();
 
-		soundPlayer.stop();
-
 		renderer2d.currentCamera = gl2d::cameraCreateDefault();
 
 		if(menuState == MenuState::mainMenu)
 		{
-			Ui::Frame f({ 0, 0, w, h });
-			
-			auto button1 = Ui::Box().xCenter().yCenter( - 200).xDimensionPercentage(0.5).yDimensionPixels(150)();
-			auto button2 = Ui::Box().xCenter().yCenter().xDimensionPercentage(0.5).yDimensionPixels(150)();
-			auto button3 = Ui::Box().xCenter().yCenter(+200).xDimensionPercentage(0.5).yDimensionPixels(150)();
-
-			auto p = platform::getRelMousePosition();
 			
 			bool playButton = 0;
 			bool levelSelectButton = 0;
-			bool creditsSelectButton = 0;
+			bool settingsButton = 0;
+			bool exitButton = 0;
 
-			//todo refactor
-			if (Ui::isButtonReleased(p, button1))
-			{
-					playButton = 1;
-			}
+			menu::startMenu(6);
+		
+			menu::uninteractableCentreText("Midnight arrow");
+			menu::interactableText("Continue jurney", &playButton);
+			menu::interactableText("Select zone", &levelSelectButton);
+			menu::interactableText("Settings", &settingsButton);
+			menu::interactableText("Exit", &exitButton);
 
-			if (Ui::isButtonReleased(p, button2))
-			{
-				levelSelectButton = 1;
-			}
-
-			if (Ui::isButtonReleased(p, button3))
-			{
-				creditsSelectButton = 1;
-			}
-
-			renderer2d.render9Patch2( button1,
-				8, { 1,1,1,1 }, {}, 0, uiButton, {0,1,1,0}, { 0,0.8,0.8,0 });
-
-			renderer2d.render9Patch2(button2,
-				8, { 1,1,1,1 }, {}, 0, uiButton, { 0,1,1,0 }, { 0,0.8,0.8,0 });
-
-			renderer2d.render9Patch2(button3,
-				8, { 1,1,1,1 }, {}, 0, uiButton, { 0,1,1,0 }, { 0,0.8,0.8,0 });
-
-
-			renderer2d.renderText({button1.x + button1.z/2,button1.y + button1.w/2}, 
-				"Continue jurney", font, {1,1,1,1}, 0.6, 4, 3, true, { 0.1,0.1,0.1,1 });
-
-
-			renderer2d.renderText({ button2.x + button2.z / 2,button2.y + button2.w / 2 },
-				"Select zone", font, { 1,1,1,1 }, 0.6, 4, 3, true, { 0.1,0.1,0.1,1 });
-
-			renderer2d.renderText({ button3.x + button3.z / 2,button3.y + button3.w / 2 },
-				"Settings", font, { 1,1,1,1 }, 0.6, 4, 3, true, { 0.1,0.1,0.1,1 });
-
+			menu::endMenu(renderer2d, uiDialogBox, font, nullptr, deltaTime);
 
 			if (playButton)
 			{
 				
-				if(loadLevelFromLastState(currentLevel, playerSpawnPos))
+				glm::ivec2 dialogPos[20];
+
+				if(loadLevelFromLastState(currentLevel, playerSpawnPos, dialogPos, blueChanged, redChanged, grayChanged))
 				{
 					glm::ivec2 i = playerSpawnPos;
 					loadLevel(i, true);
+
+					for(int i=0; i<20; i++)
+					{
+						if(dialogPos[i].x == -1)
+						{
+							break;
+						}
+
+						auto it = mapData.dialogs.find(dialogPos[i]);
+
+						if(it != mapData.dialogs.end())
+						{
+							it->second.hasShown = true;
+						}
+
+					}
+
+					for (int y = 0; y < mapData.h; y++)
+						for (int x = 0; x < mapData.w; x++)
+						{
+							auto &b = mapData.get(x, y);
+
+							if(blueChanged)
+							{
+								if(isBlueSolid(b.type))
+								{
+									b.type++;
+								}else 
+								if (isBlueNoSolid(b.type))
+								{
+									b.type--;
+								}
+							}
+							
+							if(redChanged)
+							{
+								if (isRedSolid(b.type))
+								{
+									b.type++;
+								}
+								else
+								if (isRedNoSolid(b.type))
+								{
+									b.type--;
+								}
+							}
+
+							if(grayChanged)
+							{
+								if (b.type == Block::fenceSolid)
+								{
+									b.type++;
+								}
+								else
+								if (b.type == Block::fenceNoSolid)
+								{
+									b.type--;
+								}
+							}
+						}
+
 				}else
 				{
 					currentLevel = 0;
 					loadLevel();
+					blueChanged = 0; redChanged = 0; grayChanged = 0;
 				}
 
 			}
@@ -480,12 +512,17 @@ bool gameLogic(float deltaTime)
 				selectedLevel = 0;
 			}
 
-			if(creditsSelectButton)
+			if(settingsButton)
 			{
 				menuState = MenuState::settingsMenu;
 				settings::setMainSettingsPage();
 			}
 
+			if(exitButton)
+			{
+				return 0;
+			}
+			
 		}else if (menuState == MenuState::levelSelector)
 		{
 
@@ -520,21 +557,14 @@ bool gameLogic(float deltaTime)
 					{}, 0, uiTiki);
 
 
-				uiArrows;
+				//uiArrows
 			}
 
 			glm::vec4 playBox= Ui::Box().xCenter().yBottom(-20).yDimensionPixels(100).xDimensionPercentage(0.8);
 			
 			std::string temp;
-			if(selectedLevel > maxLevel)
-			{
-				temp = (std::string("Locked area: ") + (levelNames[selectedLevel]));
-
-			}else
-			{
-				temp = (std::string("Play area: ") + (levelNames[selectedLevel]));
-
-			}
+			
+			temp = (std::string("Play area: ") + (levelNames[selectedLevel]));
 
 			renderer2d.render9Patch2(playBox,
 				8, { 1,1,1,1 }, {}, 0, uiButton, { 0,1,1,0 }, { 0,0.8,0.8,0 });
@@ -633,7 +663,6 @@ bool gameLogic(float deltaTime)
 				//loadLevel();
 			}
 
-			if (selectedLevel <= maxLevel)
 			if(Ui::isButtonReleased(p, playBox))
 			{
 				currentLevel = selectedLevel;
@@ -649,37 +678,7 @@ bool gameLogic(float deltaTime)
 				menuState = MenuState::mainMenu;
 			}
 
-			/*
-			auto p = platform::getRelMousePosition();
-
-			Ui::Frame f({ 0, 0, w, h });
-
-			auto button1 = Ui::Box().xLeft(100).yCenter(-200).yDimensionPixels(150).xAspectRatio(1)();
-			auto button2 = Ui::Box().xLeft(100).yCenter().yDimensionPixels(150).xAspectRatio(1)();
-			auto button3 = Ui::Box().xLeft(100).yCenter(+200).yDimensionPixels(150).xAspectRatio(1)();
-			
-			renderer2d.render9Patch2(button1,
-				8, { 1,1,1,1 }, {}, 0, uiItch, { 0,1,1,0 }, { 0,0.8,0.8,0 });
-
-			renderer2d.render9Patch2(button2,
-				8, { 1,1,1,1 }, {}, 0, uiMusic, { 0,1,1,0 }, { 0,0.8,0.8,0 });
-
-			renderer2d.render9Patch2(button3,
-				8, { 1,1,1,1 }, {}, 0, uiArt, { 0,1,1,0 }, { 0,0.8,0.8,0 });
-
-
-			renderer2d.renderText({ button1.x + button1.z + 200 ,button1.y + button1.w / 2 },
-				"Our page", font, { 1,1,1,1 }, 0.6);
-
-
-			renderer2d.renderText({ button2.x + button2.z + 200 ,button2.y + button2.w / 2 },
-				"Music", font, { 1,1,1,1 }, 0.6);
-
-			renderer2d.renderText({ button3.x + button3.z + 200 ,button3.y + button3.w / 2 },
-				"Art", font, { 1,1,1,1 }, 0.6);
-		
-
-		https://wuxia.itch.io/
+			/*		https://wuxia.itch.io/
 			if (isButtonReleased(p, button1)) {system("start https://wuxia.itch.io/"); };
 			if (isButtonReleased(p, button2)) {system("start https://www.youtube.com/channel/UCEXX5i6961zc4-L8thTctBg");};
 			if (isButtonReleased(p, button3)) {system("start https://itch.io/profile/adamatomic"); };
@@ -693,84 +692,19 @@ bool gameLogic(float deltaTime)
 
 #pragma endregion
 
-	
+	float copyDeltaTime = deltaTime;
+	if(inGameMenu)
 	{
-	
-		if (inGameMenu)
-		{
-
-			if(ingameMenuMainPage)
-			{
-				
-				menu::startMenu();
-			
-				menu::uninteractableCentreText("Menu");
-				bool s = 0;
-				bool exit = 0;
-
-				menu::interactableText("Settings", &s);
-				menu::interactableText("Exit level", &exit);
-
-				bool back = 0;
-				menu::endMenu(renderer2d, uiDialogBox, font, &back, deltaTime);
-				
-				if(back)
-				{
-					inGameMenu = false;
-				}
-				if(s)
-				{
-					ingameMenuMainPage = 0;
-					menu::resetMenuState();
-					settings::setMainSettingsPage();
-				}
-				if (exit)
-				{
-					mapData.cleanup();
-					currentLevel = -2;
-					loadLevel();
-				}
-			}else
-			{
-				settings::displaySettings(renderer2d, deltaTime);
-				if (currentSettingsMenu == 0) 
-				{
-					menu::resetMenuState();
-					ingameMenuMainPage = 1;
-				};
-			}
-
-			renderer2d.flush();
-
-			if (input::isControllerInput()
-				&& input::isKeyReleased(input::Buttons::menu)
-				)
-			{
-				inGameMenu = false;
-			}
-
-			soundManager.settings.musicVolume = settings::getMusicSound();
-			soundManager.settings.ambientVolume = settings::getAmbientSound();
-			soundManager.updateSoundVolume();
-
-			return 1;
-		}
-
-		if (input::isKeyReleased(input::Buttons::menu))
-		{
-			inGameMenu = true;
-			menu::resetMenuState();
-			ingameMenuMainPage = 1;
-			settings::setMainSettingsPage();
-		}
+		deltaTime = 0;
 	}
+
 
 	//if (platform::isKeyPressedOn('T'))
 	//{
 	//	loadLevel();
 	//}
 
-	if (player.dying || player.isExitingLevel != -1)
+	if (player.dying || player.isExitingLevel != -1 )
 	{
 		lightPerc -= deltaTime * 1.8;
 		if (lightPerc < 0)
@@ -785,7 +719,7 @@ bool gameLogic(float deltaTime)
 				if(currentLevel == -2)
 				{
 					mapData.cleanup();
-					loadLevel();
+					loadLevel(); //todo other function for close level
 
 					return 1;
 				}else
@@ -799,33 +733,21 @@ bool gameLogic(float deltaTime)
 
 #pragma region music
 	 
-	soundManager.settings.musicVolume = settings::getMusicSound();
-	soundManager.settings.ambientVolume = settings::getAmbientSound();
 
-	//greenPlayer.setVolume(mapData.getGreenPercentage(player.pos)* settings::getMusicSound());
-	//redPlayer.setVolume(mapData.getRedPercentage(player.pos)    * settings::getMusicSound());
-	//grayPlayer.setVolume(mapData.getCavePercentage(player.pos)  * settings::getMusicSound());
-	//tikiPlayer.setVolume(mapData.getTikiPercentage(player.pos)  * settings::getMusicSound());
+	soundManager.updateSoundVolume();
 
 	soundManager.setMusicAndEffectVolume(player.pos);
 	soundManager.updateSoundTransation(deltaTime);
 
-	soundPlayer.setVolume(4 * settings::getAmbientSound());
-
 #pragma endregion
 
-	//stencilRenderer2d.updateWindowMetrics(backGroundFBO.texture.GetSize().x, 
-	//	backGroundFBO.texture.GetSize().y);
 
-	//renderer2d.renderRectangle({ 100,100,100,100 }, Colors_Green);
-	//renderer2d.flush();
-
-
-	//renderer2d.currentCamera.position = { -500,-100 };
 
 #pragma region controlls
 	
-	if(!currentDialog.blockMovement())
+	renderer2d.currentCamera.zoom = settings::getZoom();
+
+	if(!currentDialog.blockMovement() && !inGameMenu)
 	{
 		if (player.wallGrab == 0)
 		{
@@ -838,8 +760,6 @@ bool gameLogic(float deltaTime)
 				player.airRun(deltaTime * input::getMoveDir());
 			}
 		}
-
-		renderer2d.currentCamera.zoom = settings::getZoom();
 
 		if (jumpDelayTime > 0)
 		{
@@ -873,6 +793,7 @@ bool gameLogic(float deltaTime)
 				player.redGrab = 0;
 				player.grayGrab = 0;
 				player.blueGrab = 0;
+				player.iceGrab = 0;
 				jumpParticle.set(player.pos, 1, !player.movingRight);
 
 			}
@@ -882,6 +803,7 @@ bool gameLogic(float deltaTime)
 				player.strafe(1);
 				player.jumpFromWall();
 				player.wallGrab = 0;
+				player.iceGrab = 0;
 				player.redGrab = 0;
 				player.grayGrab = 0;
 				player.blueGrab = 0;
@@ -899,7 +821,7 @@ bool gameLogic(float deltaTime)
 		}
 
 		if (input::isKeyPressedOn(input::Buttons::shoot) && currentArrow > -1 && !player.dying
-			&& player.isExitingLevel == -1)
+			&& player.isExitingLevel == -1 && ! inGameMenu)
 		{
 			player.idleTime = 0;
 			{
@@ -955,6 +877,7 @@ bool gameLogic(float deltaTime)
 			if (input::isKeyHeld(input::Buttons::down))
 			{
 				player.wallGrab = 0;
+				player.iceGrab = 0;
 			}
 			else
 			{
@@ -1026,7 +949,6 @@ bool gameLogic(float deltaTime)
 		}
 
 #pragma endregion
-
 
 		
 		}
@@ -1123,7 +1045,7 @@ bool gameLogic(float deltaTime)
 					glm::vec2 playerP = player.pos;
 					glm::vec2 blockP = { x*BLOCK_SIZE , y*BLOCK_SIZE };
 
-					if(glm::distance(playerP, blockP) < (BLOCK_SIZE * 0.7))
+					if(glm::distance(playerP, blockP) < (BLOCK_SIZE * 0.65))
 					{
 						player.dying = 1;
 						player.lockMovementDie = 1;
@@ -1133,12 +1055,13 @@ bool gameLogic(float deltaTime)
 
 				if (g.type == Block::flagDown)
 				{
+					//todo probably move under block change
 					if (mapData.get(playerSpawnPos.x, playerSpawnPos.y).type == Block::flagUp)
 					{
 						mapData.get(playerSpawnPos.x, playerSpawnPos.y).type = Block::flagDown;
 					}
 
-					saveState({ x,y }, currentLevel);
+					saveState({ x,y }, currentLevel, mapData.dialogs, blueChanged, redChanged, grayChanged);
 
 					playerSpawnPos = { x,y };
 					g.type = Block::flagUp;
@@ -1165,13 +1088,14 @@ bool gameLogic(float deltaTime)
 				if (isInteractableGrass(g.type))
 				{
 					playedGrassSoundThisFrame = 1;
-					if (soundPlayer.getStatus() == sf::Sound::Status::Stopped && !playedGrassSound && grassTimeDelay <=0)
+
+					if(!playedGrassSound && grassTimeDelay <= 0)
 					{
-						grassTimeDelay = rand()%5+1;
-						soundPlayer.setBuffer(leavesSoundbuffer);
+						grassTimeDelay = rand() % 5 + 1;
 						playedGrassSound = 1;
-						soundPlayer.play();
+						soundManager.playSound(SoundManager::soundEffects::soundEffectGrass);
 					}
+
 				}
 				
 				if (g.type == Block::levelExit)
@@ -1185,7 +1109,7 @@ bool gameLogic(float deltaTime)
 						if (input::isKeyPressedOn(input::Buttons::up))
 						{
 							player.isExitingLevel = iter->levelId;	
-							saveProgress(iter->levelId);
+							//saveProgress(iter->levelId);
 						}
 					}else
 					{
@@ -1392,7 +1316,7 @@ bool gameLogic(float deltaTime)
 
 #pragma region target
 	{
-		if (currentArrow >= 0 && !player.dying && player.isExitingLevel == -1 && 
+		if (currentArrow >= 0 && !player.dying && player.isExitingLevel == -1 && !inGameMenu &&
 			currentArrow < actualInventorty.size() )
 		{
 			glm::vec4 color = { 1,1,1,1 };
@@ -1482,33 +1406,41 @@ bool gameLogic(float deltaTime)
 
 
 #pragma region pickups
-	for (auto& i : pickups)
 	{
-		i.draw(renderer2d, arrowSprite, deltaTime);
-		i.light = 0;
+		bool pickedUpNow = 0;
 
-		if (i.colidePlayer(player) && i.cullDown <= 0)
+		for (auto& i : pickups)
 		{
-			i.cullDown = arrowPickupCullDown;
-			inventory[i.type].count = inventory[i.type].maxCount;
-			if (soundPlayer.getStatus() == sf::Sound::Status::Stopped)
+			i.draw(renderer2d, arrowSprite, deltaTime);
+			i.light = 0;
+
+			if (i.colidePlayer(player) && i.cullDown <= 0)
 			{
-				soundPlayer.setBuffer(pickupSoundbuffer);
-				soundPlayer.play();
+				pickedUpNow = 1;
+
+				i.cullDown = arrowPickupCullDown;
+				inventory[i.type].count = inventory[i.type].maxCount;
+
+				soundManager.playSound(SoundManager::soundEffects::soundEffectPickUp);
 			}
 		}
-	}
 
-	actualInventorty.clear();
+		actualInventorty.clear();
 
-	for (auto i : inventory)
-	{
-		if (i.count)
+		for (auto i : inventory)
 		{
-			actualInventorty.push_back(i);
+			if (i.count)
+			{
+				actualInventorty.push_back(i);
+			}
 		}
-	}
+	
+		if(actualInventorty.size() == 1 && pickedUpNow)
+		{
+			currentArrow = 0;
+		}
 
+	}
 #pragma endregion
 
 #pragma region particles
@@ -1550,7 +1482,7 @@ bool gameLogic(float deltaTime)
 
 		a.move(deltaTime * BLOCK_SIZE);
 		a.draw(renderer2d, arrowSprite);
-		a.checkCollision(mapData, isInRedBlock, isInBlueBlock, isInGrayBlock);
+		a.checkCollision(mapData, isInRedBlock, isInBlueBlock, isInGrayBlock, redChanged, blueChanged, grayChanged);
 		a.light = 0;
 
 
@@ -1613,8 +1545,16 @@ bool gameLogic(float deltaTime)
 			{
 
 				int left = currentArrow - 1;
-				if (left <= -1)
+				if (left == -1)
 				{
+
+				}else if(left < -1)
+				{
+					if (actualInventorty.size() > 1)
+					{
+						leftCount = (actualInventorty.end()-1)->count;
+						left = (actualInventorty.end()-1)->type;
+					}
 				}
 				else
 				{
@@ -1655,15 +1595,17 @@ bool gameLogic(float deltaTime)
 					right = actualInventorty[right].type;
 				}
 
+				float angle = 45.f;
+
 				if (left > -1)
 				{
 					float dim = 0.2;
-					for (int i = -1; i < leftCount - 1; i++)
+					for (int i = -1; i < leftCount -1; i++)
 					{
 						renderer2d.renderRectangle(
 							Ui::Box().xLeft(i * 8).yCenter().yDimensionPercentage(0.7f).xAspectRatio(1)
 							, { 0.4 * dim,0.4 * dim,0.4 * dim,1 }
-						, {}, 45, arrowSprite, gl2d::computeTextureAtlas(Arrow::lastArror, 1, left, 0));
+						, {}, angle, arrowSprite, gl2d::computeTextureAtlas(Arrow::lastArror, 1, left, 0));
 						dim += 0.1;
 					}
 				}
@@ -1677,7 +1619,7 @@ bool gameLogic(float deltaTime)
 						renderer2d.renderRectangle(
 							Ui::Box().xRight(i * 8).yCenter().yDimensionPercentage(0.7f).xAspectRatio(1)
 							, { 0.4 * dim,0.4 * dim,0.4 * dim,1 }
-						, {}, 45, arrowSprite, gl2d::computeTextureAtlas(Arrow::lastArror, 1, right, 0));
+						, {}, angle, arrowSprite, gl2d::computeTextureAtlas(Arrow::lastArror, 1, right, 0));
 						dim += 0.1;
 					}
 				}
@@ -1692,7 +1634,7 @@ bool gameLogic(float deltaTime)
 						renderer2d.renderRectangle(
 							Ui::Box().xCenter(i * 10).yCenter().yDimensionPercentage(0.9f).xAspectRatio(1),
 							{ dim,dim,dim,1 },
-							{}, 45, arrowSprite, gl2d::computeTextureAtlas(Arrow::lastArror, 1, center, 0));
+							{}, angle, arrowSprite, gl2d::computeTextureAtlas(Arrow::lastArror, 1, center, 0));
 						dim += 0.1;
 					}
 
@@ -1708,12 +1650,28 @@ bool gameLogic(float deltaTime)
 		//the 2 buttons
 		if(actualInventorty.size() != 0 && settings::showArrowIndicators())
 		{
+			float leftDim = 0.6;
+			float righttDim = 0.6;
+
 			auto left = Ui::Box().xLeft(10).yBottom(-20).xDimensionPercentage(0.04f).yAspectRatio(1.f)();
 			auto right = Ui::Box().xLeftPerc(0.2).yBottom(-20).xDimensionPercentage(0.04f).yAspectRatio(1.f)();
+
+			if(input::isKeyHeld(input::Buttons::swapLeft))
+			{
+				left = Ui::Box().xLeft(10).yBottom(-15).xDimensionPercentage(0.04f).yAspectRatio(1.f)();
+				leftDim = 0.4;
+			}
+
+			if (input::isKeyHeld(input::Buttons::swapRight))
+			{
+				right = Ui::Box().xLeftPerc(0.2).yBottom(-15).xDimensionPercentage(0.04f).yAspectRatio(1.f)();
+				righttDim = 0.4;
+			}
+
 			right.x += 10;
 
-			input::drawButton(renderer2d, left, left.z, input::Buttons::swapLeft, 0.4f);
-			input::drawButton(renderer2d, right, right.z, input::Buttons::swapRight, 0.4f);
+			input::drawButton(renderer2d, left, left.z, input::Buttons::swapLeft, input::isControllerInput(), leftDim, {3.f, 3.f}, 1.f);
+			input::drawButton(renderer2d, right, right.z, input::Buttons::swapRight, input::isControllerInput(), righttDim, { 3.f, 3.f }, 1.f);
 			
 		}
 
@@ -1788,13 +1746,85 @@ bool gameLogic(float deltaTime)
 			{
 				bird.startEndMove(bird.position, getDiagonalBirdPos(bird.position, player.pos));
 			}
+			
+			saveState( playerSpawnPos, currentLevel, mapData.dialogs, blueChanged, redChanged, grayChanged);
 		}
-		//currentDialog.setNewDialog("Partea a doua a dialogului");
 		 
 	}
 
 #pragma endregion
+	
+	{
 
+		bool shouldClose = 0;
+
+		if (inGameMenu)
+		{
+
+			if (ingameMenuMainPage)
+			{
+
+				menu::startMenu(1);
+
+				menu::uninteractableCentreText("Menu");
+				bool s = 0;
+				bool exit = 0;
+
+				menu::interactableText("Settings", &s);
+				menu::interactableText("Exit level", &exit);
+
+				bool back = 0;
+				menu::endMenu(renderer2d, uiDialogBox, font, &back, copyDeltaTime);
+
+				if (back)
+				{
+					inGameMenu = false;
+					shouldClose = true;
+				}
+				if (s)
+				{
+					ingameMenuMainPage = 0;
+					settings::setMainSettingsPage();
+				}
+				if (exit)
+				{
+					mapData.cleanup();
+					currentLevel = -2;
+					loadLevel(); // todo other function for close level
+				}
+			}
+			else
+			{
+				settings::displaySettings(renderer2d, copyDeltaTime);
+				if (currentSettingsMenu == 0)
+				{
+					ingameMenuMainPage = 1;
+				};
+			}
+
+			if (
+				input::isControllerInput()
+				&& input::isKeyReleased(input::Buttons::menu)
+				)
+			{
+				//todo fix somehow
+				inGameMenu = false;
+				shouldClose = true;
+			}
+
+			soundManager.updateSoundVolume();
+
+		}
+
+		if (input::isKeyReleased(input::Buttons::menu) && !shouldClose)
+		{
+			inGameMenu = true;
+			ingameMenuMainPage = 1;
+			settings::setMainSettingsPage();
+		}
+
+
+	}
 
 	renderer2d.flush();
 
@@ -1804,12 +1834,10 @@ bool gameLogic(float deltaTime)
 
 void closeGame()
 {
-	
-	soundPlayer.stop();
 
 	soundManager.stoppMusic();
 
-	saveState(playerSpawnPos, currentLevel);
+	saveState(playerSpawnPos, currentLevel, mapData.dialogs, blueChanged, redChanged, grayChanged);
 
 }
 

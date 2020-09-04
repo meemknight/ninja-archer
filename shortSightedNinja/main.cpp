@@ -170,7 +170,6 @@ int MAIN
 
 
 
-
 	if (!initGame())
 	{
 		return 0;
@@ -334,7 +333,7 @@ int MAIN
 	CloseWindow(wind);
 
 	closeGame();
-
+	//todo not always workking
 
 	return 0;
 }
@@ -439,6 +438,9 @@ endImgui:
 	}
 		break;
 	case WM_CLOSE:
+		quit = true;
+		break;
+	case WM_DESTROY:
 		quit = true;
 		break;
 	case WM_MOUSEMOVE:
@@ -641,6 +643,57 @@ namespace platform
 	bool mouseMoved()
 	{
 		return bMouseMoved;
+	}
+
+
+	bool writeEntireFile(const char* name, void* buffer, size_t size)
+	{
+		HANDLE file = CreateFile(name, GENERIC_WRITE, NULL, NULL,
+			CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+		if (file == INVALID_HANDLE_VALUE)
+		{
+			return 0;
+		}
+
+		DWORD sizeWritten = 0;
+		int rez = 1;
+
+		if (!WriteFile(file, buffer, size, &sizeWritten, NULL))
+		{
+			rez = 0;
+		}
+
+		assert(size == sizeWritten);
+
+		CloseHandle(file);
+
+		return rez;
+	}
+
+
+	bool readEntireFile(const char* name, void* buffer, size_t size)
+	{
+		HANDLE file = CreateFile(name, GENERIC_READ, NULL, NULL,
+			OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+		if (file == INVALID_HANDLE_VALUE)
+		{
+			return 0;
+		}
+
+		DWORD sizeRead = 0;
+
+		int rez = 1;
+
+		if (!ReadFile(file, buffer, size, &sizeRead, NULL))
+		{
+			rez = 0;
+		}
+
+		CloseHandle(file);
+
+		return rez;
 	}
 
 };

@@ -72,6 +72,11 @@ namespace input
 		return buttonsReleased[b];
 	}
 
+	bool isControllerMenuButtonReleased()
+	{
+		return false;
+	}
+
 	int getMoveDir()
 	{
 		return -isKeyHeld(Buttons::left) + isKeyHeld(Buttons::right);
@@ -117,7 +122,6 @@ namespace input
 #pragma region determin whether controller or not
 		if(read)
 		{
-			
 
 			XINPUT_KEYSTROKE ks = {};
 			if(DynamicXInputGetKeystroke && DynamicXInputGetKeystroke(0, 0, &ks) == ERROR_SUCCESS)
@@ -145,7 +149,31 @@ namespace input
 				GetAsyncKeyState(VK_RIGHT) ||
 				GetAsyncKeyState(VK_LSHIFT) ||
 				GetAsyncKeyState(VK_SHIFT)||
-				GetAsyncKeyState(VK_ACCEPT)
+				GetAsyncKeyState(VK_ACCEPT)||
+				GetAsyncKeyState(VK_RETURN)||
+				GetAsyncKeyState(VK_ESCAPE) ||
+				GetAsyncKeyState(VK_F1) ||
+				GetAsyncKeyState(VK_F2) ||
+				GetAsyncKeyState(VK_F3) ||
+				GetAsyncKeyState(VK_F4) ||
+				GetAsyncKeyState(VK_F5) ||
+				GetAsyncKeyState(VK_F6) ||
+				GetAsyncKeyState(VK_F7) ||
+				GetAsyncKeyState(VK_F8) ||
+				GetAsyncKeyState(VK_F9) ||
+				GetAsyncKeyState(VK_F10) ||
+				GetAsyncKeyState(VK_F11) ||
+				GetAsyncKeyState(VK_F12)||
+				GetAsyncKeyState(VK_NUMPAD0)||
+				GetAsyncKeyState(VK_NUMPAD1)||
+				GetAsyncKeyState(VK_NUMPAD2) ||
+				GetAsyncKeyState(VK_NUMPAD3) ||
+				GetAsyncKeyState(VK_NUMPAD4) ||
+				GetAsyncKeyState(VK_NUMPAD5) ||
+				GetAsyncKeyState(VK_NUMPAD6) ||
+				GetAsyncKeyState(VK_NUMPAD7) ||
+				GetAsyncKeyState(VK_NUMPAD8) ||
+				GetAsyncKeyState(VK_NUMPAD9) 
 				)
 			{
 				usedController = false;
@@ -251,6 +279,20 @@ namespace input
 		pos.x += 1;
 		
 		renderer.renderRectangle({ pos.x, pos.y, size, size }, {1,1,1,a}, {}, 0, uiButtons, uiAtlas.get(button, isController));
+
+	}
+
+	void drawButton(gl2d::Renderer2D& renderer, glm::vec2 pos, float size, int button, bool isController, float a, glm::vec2 shadow, float shadowA)
+	{
+		glm::ivec2 s = uiButtons.GetSize();
+		gl2d::TextureAtlasPadding uiAtlas(Buttons::buttonsCount, 2, s.x, s.y);
+
+		renderer.renderRectangle({ pos.x, pos.y, size, size }, { 0,0,0,shadowA }, {}, 0, uiButtons, uiAtlas.get(button, isController));
+
+		pos.y -= shadow.y;
+		pos.x += shadow.x;
+
+		renderer.renderRectangle({ pos.x, pos.y, size, size }, { 1,1,1,a }, {}, 0, uiButtons, uiAtlas.get(button, isController));
 
 	}
 

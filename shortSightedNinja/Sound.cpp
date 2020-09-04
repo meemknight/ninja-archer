@@ -1,7 +1,27 @@
 #include "Sound.h"
 #include "tools.h"
+#include "Settings.h"
 
 #define MinSoundDist 32
+
+
+#ifdef _DEBUG
+
+void SoundManager::setMusicPositions(MapData& mapData) {}
+
+void SoundManager::loadMusic() {}
+
+void SoundManager::setMusicAndEffectVolume(glm::vec2 pos) {}
+
+void SoundManager::updateSoundTransation(float deltaTime) {}
+
+void SoundManager::updateSoundVolume(){}
+
+void SoundManager::stoppMusic() {}
+
+void SoundManager::playSound(int sound) {}
+
+#else
 
 void SoundManager::setMusicPositions(MapData & mapData)
 {
@@ -104,6 +124,17 @@ void SoundManager::setMusicPositions(MapData & mapData)
 
 void SoundManager::loadMusic()
 {
+
+
+	for(int i=0; i<soundEffects::soundEffectCount; i++)
+	{
+		
+		soundBuffers[i].loadFromFile(soundNames[i]);
+			
+	}
+
+	soundPlayer.setVolume(2);
+
 
 	for(int i=0; i<musicTapesCount; i++)
 	{
@@ -306,7 +337,7 @@ void SoundManager::updateSoundTransation(float deltaTime)
 				musicVect[i].currentVolume = musicVect[i].desiredVolume;
 			}
 
-			musicVect[i].setVolume(musicVect[i].currentVolume * settings.musicVolume);
+			musicVect[i].setVolume(musicVect[i].currentVolume * settings::getMusicSound());
 
 		}
 	
@@ -315,7 +346,7 @@ void SoundManager::updateSoundTransation(float deltaTime)
 	for (int i = 0; i < musicEffectsCount; i++)
 	{
 		effectsVect[i].currentVolume = effectsVect[i].desiredVolume;
-		effectsVect[i].setVolume(effectsVect[i].currentVolume * settings.ambientVolume);
+		effectsVect[i].setVolume(effectsVect[i].currentVolume * settings::getAmbientSound());
 	}
 }
 
@@ -323,13 +354,15 @@ void SoundManager::updateSoundVolume()
 {
 	for (int i = 0; i < musicTapesCount; i++)
 	{
-		musicVect[i].setVolume(musicVect[i].currentVolume * settings.musicVolume);
+		musicVect[i].setVolume(musicVect[i].currentVolume * settings::getMusicSound());
 	}
 
 	for (int i = 0; i < musicEffectsCount; i++)
 	{
-		effectsVect[i].setVolume(effectsVect[i].currentVolume * settings.ambientVolume);
+		effectsVect[i].setVolume(effectsVect[i].currentVolume * settings::getAmbientSound());
 	}
+
+	soundPlayer.setVolume(10 * settings::getAmbientSound());
 
 }
 
@@ -345,4 +378,18 @@ void SoundManager::stoppMusic()
 		effectsVect[i].stop();
 	}
 
+	soundPlayer.stop();
 }
+
+void SoundManager::playSound(int sound)
+{
+
+	if (soundPlayer.getStatus() == sf::Sound::Status::Stopped)
+	{
+		soundPlayer.setBuffer(soundBuffers[sound]);
+		soundPlayer.play();
+	}
+
+}
+
+#endif // !_debug

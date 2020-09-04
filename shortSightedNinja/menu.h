@@ -4,7 +4,7 @@
 namespace menu 
 {
 
-	void startMenu();
+	void startMenu(int id);
 
 	void uninteractableCentreText(const char *text);
 
@@ -16,9 +16,6 @@ namespace menu
 
 	///back pressed can be nullptr and in that case the back option will not be available
 	void endMenu(gl2d::Renderer2D &renderer, gl2d::Texture backgroundTexture, gl2d::Font f, bool *backPressed, float deltaTime);
-
-	///should be called whenever you start a menu or change the menu
-	void resetMenuState();
 
 };
 

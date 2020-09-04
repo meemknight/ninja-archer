@@ -33,6 +33,7 @@ namespace input
 	bool isKeyHeld(int b);
 	bool isKeyReleased(int b);
 
+
 	int getMoveDir();
 
 	bool isControllerInput();
@@ -50,6 +51,7 @@ namespace input
 	void drawButton(gl2d::Renderer2D &renderer, glm::vec2 pos, float size, int button, float a= 1.f);
 	void drawButtonWithHover(gl2d::Renderer2D &renderer, glm::vec2 pos, float size, int button, float a = 1.f);
 	void drawButton(gl2d::Renderer2D &renderer, glm::vec2 pos, float size ,int button, bool isController, float a = 1.f);
+	void drawButton(gl2d::Renderer2D& renderer, glm::vec2 pos, float size, int button, bool isController, float a, glm::vec2 shadow, float shadowA);
 
 
 }

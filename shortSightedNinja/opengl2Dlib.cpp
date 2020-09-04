@@ -368,7 +368,7 @@ namespace gl2d
 
 		int fileSize = 0;
 		fileFont.seekg(0, std::ios::end);
-		fileSize = fileFont.tellg();
+		fileSize = (int)fileFont.tellg();
 		fileFont.seekg(0, std::ios::beg);
 		unsigned char * fileData = new unsigned char[fileSize];
 		fileFont.read((char*)fileData, fileSize);
@@ -547,14 +547,14 @@ namespace gl2d
 			v4 = scaleAroundPoint(v4, cameraCenter, currentCamera.zoom);
 		}
 
-		v1.x = internal::positionToScreenCoordsX(v1.x, windowW);
-		v2.x = internal::positionToScreenCoordsX(v2.x, windowW);
-		v3.x = internal::positionToScreenCoordsX(v3.x, windowW);
-		v4.x = internal::positionToScreenCoordsX(v4.x, windowW);
-		v1.y = internal::positionToScreenCoordsY(v1.y, windowH);
-		v2.y = internal::positionToScreenCoordsY(v2.y, windowH);
-		v3.y = internal::positionToScreenCoordsY(v3.y, windowH);
-		v4.y = internal::positionToScreenCoordsY(v4.y, windowH);
+		v1.x = internal::positionToScreenCoordsX(v1.x, (float)windowW);
+		v2.x = internal::positionToScreenCoordsX(v2.x, (float)windowW);
+		v3.x = internal::positionToScreenCoordsX(v3.x, (float)windowW);
+		v4.x = internal::positionToScreenCoordsX(v4.x, (float)windowW);
+		v1.y = internal::positionToScreenCoordsY(v1.y, (float)windowH);
+		v2.y = internal::positionToScreenCoordsY(v2.y, (float)windowH);
+		v3.y = internal::positionToScreenCoordsY(v3.y, (float)windowH);
+		v4.y = internal::positionToScreenCoordsY(v4.y, (float)windowH);
 
 		spritePositions[spritePositionsCount++] = glm::vec2{ v1.x, v1.y };
 		spritePositions[spritePositionsCount++] = glm::vec2{ v2.x, v2.y };
@@ -941,10 +941,10 @@ namespace gl2d
 			v3 = scaleAroundPoint(v3, cameraCenter, currentCamera.zoom);
 		}
 
-		v1.x = internal::positionToScreenCoordsX(v1.x, windowW);
-		v3.x = internal::positionToScreenCoordsX(v3.x, windowW);
-		v1.y = internal::positionToScreenCoordsY(v1.y, windowH);
-		v3.y = internal::positionToScreenCoordsY(v3.y, windowH);
+		v1.x = internal::positionToScreenCoordsX(v1.x, (float)windowW);
+		v3.x = internal::positionToScreenCoordsX(v3.x, (float)windowW);
+		v1.y = internal::positionToScreenCoordsY(v1.y, (float)windowH);
+		v3.y = internal::positionToScreenCoordsY(v3.y, (float)windowH);
 
 		return glm::vec4(v1.x, v1.y, v3.x, v3.y);
 	}
@@ -954,7 +954,7 @@ namespace gl2d
 	{
 		glm::vec2 position = {};
 
-		const int text_length = strlen(text);
+		const int text_length = (int)strlen(text);
 		Rect rectangle;
 		rectangle.x = position.x;
 		float linePositionY = position.y;
@@ -1029,7 +1029,7 @@ namespace gl2d
 		, const Color4f LightColor
 		)
 	{
-		const int text_length = strlen(text);
+		const int text_length = (int)strlen(text);
 		Rect rectangle;
 		rectangle.x = position.x;
 		float linePositionY = position.y;
@@ -1222,7 +1222,7 @@ namespace gl2d
 	{
 		if(b==nullptr)
 		{
-			const char buff[] =
+			const unsigned char buff[] =
 			{
 				0xff,
 				0xff,
@@ -1230,7 +1230,7 @@ namespace gl2d
 				0xff
 			};
 
-			createFromBuffer(buff, 1, 1);
+			createFromBuffer((char*)buff, 1, 1);
 		}else
 		{
 			createFromBuffer(b, 1, 1);
@@ -1246,7 +1246,7 @@ namespace gl2d
 		int height = 0;
 		int channels = 0;
 
-		const unsigned char* decodedImage = stbi_load_from_memory(image_file_data, image_file_size, &width, &height, &channels, 4);
+		const unsigned char* decodedImage = stbi_load_from_memory(image_file_data, (int)image_file_size, &width, &height, &channels, 4);
 
 		createFromBuffer((const char*)decodedImage, width, height);
 
@@ -1262,7 +1262,7 @@ namespace gl2d
 		int height = 0;
 		int channels = 0;
 
-		const unsigned char* decodedImage = stbi_load_from_memory(image_file_data, image_file_size, &width, &height, &channels, 4);
+		const unsigned char* decodedImage = stbi_load_from_memory(image_file_data, (int)image_file_size, &width, &height, &channels, 4);
 
 		/*
 		int newW = width + (width / blockSize);
@@ -1457,7 +1457,7 @@ namespace gl2d
 
 		int fileSize = 0;
 		file.seekg(0, std::ios::end);
-		fileSize = file.tellg();
+		fileSize = (int)file.tellg();
 		file.seekg(0, std::ios::beg);
 		unsigned char * fileData = new unsigned char[fileSize];
 		file.read((char*)fileData, fileSize);
@@ -1484,7 +1484,7 @@ namespace gl2d
 
 		int fileSize = 0;
 		file.seekg(0, std::ios::end);
-		fileSize = file.tellg();
+		fileSize = (int)file.tellg();
 		file.seekg(0, std::ios::beg);
 		unsigned char * fileData = new unsigned char[fileSize];
 		file.read((char*)fileData, fileSize);
@@ -1532,15 +1532,15 @@ namespace gl2d
 
 		delta = glm::normalize(delta);
 
-		if(len < 4)
+		if(len < 4.f)
 		{
-			speed /= 4;
-		}else if(len < 8)
+			speed /= 4.f;
+		}else if(len < 8.f)
 		{
-			speed /= 2;
+			speed /= 2.f;
 		}
 
-		if(len > 1)
+		if(len > 2.f)
 		if(len > max)
 		{
 			len = max;

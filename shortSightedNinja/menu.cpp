@@ -35,15 +35,19 @@ struct
 
 }perFrameData;
 
+static int lastId = -1;
 
-void menu::startMenu()
+void menu::startMenu(int id)
 {
-	perFrameData = {};
-}
+	if(lastId != id)
+	{
+		perMenuData = {};
+		//resetMenuState();
+	}
 
-void menu::resetMenuState()
-{
-	perMenuData = {};
+	lastId = id;
+
+	perFrameData.lines.clear();
 }
 
 void menu::uninteractableCentreText(const char * text)
@@ -82,14 +86,16 @@ void menu::interactableText(const char * text, bool *hasPressed)
 	perFrameData.lines.push_back(info);
 }
 
-float speed = 0.3;
+float speed = 0.3f;
 
-const glm::vec4 selectedButtonColor = Colors::lightGreen;
-const glm::vec4 selectedArrowColor = Colors::darkGreen;
-const glm::vec4 uninteractebleTextColor = Colors::darkGray;
 
 void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture, gl2d::Font f, bool * backPressed, float deltaTime)
 {
+	const glm::vec4 selectedButtonColor = Colors::lightGreen;
+	const glm::vec4 selectedArrowColor = Colors::darkGreen;
+	const glm::vec4 uninteractebleTextColor = Colors::darkGray;
+	const glm::vec4 dropShadowColor = { 0.1f,0.1f,0.1f,1.f };
+
 	//input bindings
 	///todo add your own functions here
 
@@ -108,9 +114,9 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 	renderer.currentCamera.setDefault();
 
 
-	float inPerc = 0.9;
+	float inPerc = 0.9f;
 
-	renderer.renderRectangle({ 0,0,renderer.windowW, renderer.windowH }, {}, 0,
+	renderer.renderRectangle({ 0,0,renderer.windowW, renderer.windowH }, {1,1,1,0.5}, {}, 0,
 		backgroundTexture);
 
 #pragma region setInnerRegion
@@ -132,9 +138,9 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 			isSelected = true;
 		}
 
-		glm::vec4 textBox = Ui::Box().xLeft(20).yTop(posy);
-		glm::vec2 size = renderer.getTextSize(i.text, f, 0.7);
-		float oneLineSize = renderer.getTextSize("|", f, 0.7).y;
+		glm::vec4 textBox = Ui::Box().xLeft(20).yTop((int)posy);
+		glm::vec2 size = renderer.getTextSize(i.text, f, 0.7f);
+		float oneLineSize = renderer.getTextSize("|", f, 0.7f).y;
 		textBox.z = size.x;
 		textBox.w = size.y;
 		auto p = platform::getRelMousePosition();
@@ -147,12 +153,12 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 		{
 			glm::vec4 center = Ui::Box().xCenter().yCenter()();
 			renderer.renderText({ textBox.x, textBox.y }, i.text, f, uninteractebleTextColor,
-				0.7, 4, 3, false, { 0.1,0.1,0.1,1 }, { 0.2,0.3,0.5,0.1 });
+				0.7f, 4, 3, false, dropShadowColor, { 0.2f,0.3f,0.5f,0.1f });
 		}
 			break;
 		case i.booleanTextBox:
 		{
-			float bonusW = renderer.getTextSize(" : off ", f, 0.7, 4, 3).x + 20;
+			float bonusW = renderer.getTextSize(" : off ", f, 0.7f, 4, 3).x + 20;
 
 			glm::vec4 color = Colors::white;
 			glm::vec4 box = textBox;
@@ -173,7 +179,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 				color = selectedButtonColor;
 				textBox.x += 20;
 				renderer.renderText({ textBox.x, textBox.y }, i.text, f, color,
-					0.7, 4, 3, false);
+					0.7f, 4, 3, false);
 
 
 				if (acceptKeyReleased ||
@@ -189,7 +195,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 			else
 			{
 				renderer.renderText({ textBox.x, textBox.y }, i.text, f, color,
-					0.7, 4, 3, false);
+					0.7f, 4, 3, false);
 			}
 
 
@@ -205,7 +211,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 					c = " : off";
 				}
 				renderer.renderText({ textBox.x + textBox.z, textBox.y }, c, f, color,
-					0.7, 4, 3, false);
+					0.7f, 4, 3, false);
 			}
 
 			
@@ -223,15 +229,15 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 				textBox.x += 20;
 			}
 
-			float bonusW = renderer.getTextSize(" : < 100%  >", f, 0.7, 4, 3).x;
+			float bonusW = renderer.getTextSize(" : < 100%  >", f, 0.7f, 4, 3).x;
 
 			glm::vec4 box = textBox;
 			box.y -= oneLineSize;
 			box.z += bonusW + 30;
 
 
-			float bonusLeft1 = renderer.getTextSize(" :", f, 0.7, 4, 3).x;
-			float size = renderer.getTextSize(" < ", f, 0.7, 4, 3).x;
+			float bonusLeft1 = renderer.getTextSize(" :", f, 0.7f, 4, 3).x;
+			float size = renderer.getTextSize(" < ", f, 0.7f, 4, 3).x;
 			bool leftArrowIn = Ui::isInButton(p,
 				{ textBox.x + textBox.z + bonusLeft1, box.y, size, box.w });
 			bool rightArrowIn = Ui::isInButton(p,
@@ -270,7 +276,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 			}
 
 			renderer.renderText({ textBox.x, textBox.y }, i.text, f, color,
-					0.7, 4, 3, false, { 0.1,0.1,0.1,1 });
+					0.7f, 4, 3, false, dropShadowColor);
 
 			float v = *i.fVal * 100;
 
@@ -305,16 +311,16 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 				}
 
 				renderer.renderText({ textBox.x + textBox.z, textBox.y }, " : ", f, color,
-					0.7, 4, 3, false, { 0.1,0.1,0.1,1 });
-				bonus += renderer.getTextSize("  :", f, 0.7, 4, 3).x;
+					0.7f, 4, 3, false, dropShadowColor);
+				bonus += renderer.getTextSize("  :", f, 0.7f, 4, 3).x;
 				renderer.renderText({ textBox.x + textBox.z + bonus, textBox.y }, "< ", f, leftColor,
-					0.7, 4, 3, false, { 0.1,0.1,0.1,1 });
-				bonus += renderer.getTextSize(" <", f, 0.7, 4, 3).x;
+					0.7f, 4, 3, false, dropShadowColor);
+				bonus += renderer.getTextSize(" <", f, 0.7f, 4, 3).x;
 				renderer.renderText({ textBox.x + textBox.z + bonus, textBox.y }, (stream.str() + "% ").c_str(), f, color,
-					0.7, 4, 3, false, { 0.1,0.1,0.1,1 });
-				bonus += renderer.getTextSize((stream.str() + " %").c_str(), f, 0.7, 4, 3).x;
+					0.7f, 4, 3, false, dropShadowColor);
+				bonus += renderer.getTextSize((stream.str() + " %").c_str(), f, 0.7f, 4, 3).x;
 				renderer.renderText({ textBox.x + textBox.z + bonus, textBox.y }, ">", f, rightColor,
-					0.7, 4, 3, false, { 0.1,0.1,0.1,1 });
+					0.7f, 4, 3, false, dropShadowColor);
 			}
 
 			count++;
@@ -322,7 +328,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 			break;
 		case i.interactableText:
 		{
-			float bonusW = renderer.getTextSize(" ", f, 0.7, 4, 3).x + 20;
+			float bonusW = renderer.getTextSize(" ", f, 0.7f, 4, 3).x + 20;
 
 			glm::vec4 box = textBox;
 			box.y -= oneLineSize;
@@ -341,7 +347,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 			{
 				textBox.x += 20;
 				renderer.renderText({ textBox.x, textBox.y }, i.text, f, selectedButtonColor,
-					0.7, 4, 3, false, { 0.1,0.1,0.1,1 });
+					0.7f, 4, 3, false, dropShadowColor);
 
 				if (acceptKeyReleased ||
 					(
@@ -356,7 +362,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 			else
 			{
 				renderer.renderText({ textBox.x, textBox.y }, i.text, f, Colors::white,
-					0.7, 4, 3, false, { 0.1,0.1,0.1,1 });
+					0.7f, 4, 3, false, dropShadowColor);
 			}
 
 			count++;

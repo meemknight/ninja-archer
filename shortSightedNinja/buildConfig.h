@@ -2,4 +2,4 @@
 
 //#define RemoveImgui
 //#define ERRORS_ONLY
-#define FORCE_LOG
+//#define FORCE_LOG

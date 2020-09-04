@@ -1,22 +1,14 @@
 #include "Settings.h"
 #include "opengl2Dlib.h"
 #include "menu.h"
+#include "gameLayer.h"
 
 extern gl2d::Texture uiDialogBox;
 extern gl2d::Font font;
 
 int currentSettingsMenu = 0;
 
-struct SettingsData
-{
-float zoom = 0.5;
-float uiScale = 1;
-bool bShowArrowsIndicators = 1;
-float musicSound=0.5;
-float ambientSound = 0.5;
-float buttonSound=0.5;
-bool fullScreen = 1;
-}sData;
+settings::SettingsData sData;
 
 namespace settings {
 
@@ -60,6 +52,30 @@ namespace settings {
 		return sData.fullScreen;
 	}
 
+	SettingsData &getSettingsData()
+	{
+		return sData;
+	}
+
+	void saveSettings()
+	{
+
+		platform::writeEntireFile("resources//settings",
+			(void*)&settings::getSettingsData(), sizeof(settings::getSettingsData()));
+
+	}
+
+	void loadSettings()
+	{
+		if (!platform::readEntireFile("resources//settings",
+			(void*)&settings::getSettingsData(), sizeof(settings::getSettingsData())))
+		{
+			settings::getSettingsData() = SettingsData();
+		}
+
+	}
+
+
 	void displaySettings(gl2d::Renderer2D &renderer, float deltaTime)
 	{
 		auto c = renderer.currentCamera;
@@ -68,7 +84,7 @@ namespace settings {
 
 		if (currentSettingsMenu == 1)
 		{
-			menu::startMenu();
+			menu::startMenu(2);
 
 			menu::uninteractableCentreText("Settings page");
 
@@ -106,7 +122,7 @@ namespace settings {
 			bool pressedWindowed = 0;
 			bool pressedFullScreen = 0;
 
-			menu::startMenu();
+			menu::startMenu(3);
 
 			menu::uninteractableCentreText("Visual settings");
 
@@ -146,7 +162,7 @@ namespace settings {
 		else if (currentSettingsMenu == 3)
 		{
 
-			menu::startMenu();
+			menu::startMenu(4);
 
 			menu::uninteractableCentreText("Sound settings");
 
@@ -167,7 +183,7 @@ namespace settings {
 		else if (currentSettingsMenu == 4)
 		{
 
-			menu::startMenu();
+			menu::startMenu(5);
 
 			menu::uninteractableCentreText("Controlls");
 

@@ -171,7 +171,7 @@ namespace gl2d
 	};
 
 
-#define Renderer2D_Max_Buffer_Capacity 6000
+#define Renderer2D_Max_Buffer_Capacity 7000
 #define DefaultTextureCoords (glm::vec4{ 0, 1, 1, 0 })
 
 	enum Renderer2DBufferType

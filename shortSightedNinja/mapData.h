@@ -616,13 +616,6 @@ struct MapData
 
 	std::unordered_map<glm::ivec2, FullDialogData> dialogs;
 
-	float getWaterPercentage(glm::vec2 pos);
-	float getGreenPercentage(glm::vec2 pos);
-	float getTikiPercentage(glm::vec2 pos);
-	float getRedPercentage(glm::vec2 pos);
-	float getSnowPercentage(glm::vec2 pos);
-	float getCavePercentage(glm::vec2 pos);
-
 	BlockInfo* data;
 
 	int w;
@@ -641,7 +634,3 @@ struct MapData
 };
 
 void setupMap(MapData &md, int levelId);
-
-void saveProgress(int nextLevel);
-
-void loadProgress(int & nextLevel);

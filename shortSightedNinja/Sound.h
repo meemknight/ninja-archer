@@ -4,13 +4,6 @@
 
 struct SoundManager
 {
-	struct DataToSave
-	{
-		float musicVolume = 0.5;
-		float ambientVolume = 0.5;
-		float buttonsVolume = 0.5;
-
-	}settings;
 
 	enum tapes
 	{
@@ -60,6 +53,19 @@ struct SoundManager
 		0,
 	};
 
+	enum soundEffects
+	{
+		soundEffectGrass = 0,
+		soundEffectPickUp,
+		soundEffectCount,
+	};
+
+	static constexpr const char* soundNames[soundEffects::soundEffectCount] =
+	{
+		"resources//leaves.wav",
+		"resources//pick_up.wav",
+	};
+
 	//this is the thing that playes music
 	struct MusicStruct
 	{
@@ -73,9 +79,17 @@ struct SoundManager
 		void setVolume(float f) { if (loaded)m.setVolume(f * 100); }
 	};
 
+#ifndef _DEBUG
+
+	sf::SoundBuffer soundBuffers[soundEffects::soundEffectCount];
+	sf::Sound soundPlayer;
+
 	//this vector holds music players
 	MusicStruct musicVect[musicTapesCount] = {};
 	MusicStruct effectsVect[musicEffectsCount] = {};
+
+#endif // !_DEBUG
+
 
 	//this holds sound emitors positions and it has no size, that sound doesn't exist
 	std::vector<glm::vec2> musicPositions[tapes::musicTapesCount] = {};
@@ -88,10 +102,12 @@ struct SoundManager
 	void setMusicAndEffectVolume(glm::vec2 pos);
 
 	void updateSoundTransation(float deltaTime);
-	
+		
 	void updateSoundVolume();
 
 	void stoppMusic();
 
-};
+	void playSound(int sound);
+}
+;
 

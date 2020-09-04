@@ -7,6 +7,7 @@
 #include "Particle.h"
 
 float gravitationalAcceleration = 64;
+float gravitationalAccelerationOnIce = 5;
 float jumpSpeed = 22;
 float jumpFromWallSpeed = 22;
 float velocityClampY = 30;
@@ -22,6 +23,7 @@ float notGrabTimeVal = 0.06;
 bool snapWallGrab = 0;
 float ghostJumpTime = 0.08;
 float iceSlipX = 3;
+float velocityOnAirRun = 10.f;
 
 float arrowSpeed = 20;
 
@@ -129,7 +131,7 @@ void Entity::resolveConstrains(MapData & mapData)
 	if (pos.x < 0) { pos.x = 0; }
 	if (pos.x + dimensions.x > (mapData.w) * BLOCK_SIZE ) { pos.x = ((mapData.w) * BLOCK_SIZE )-dimensions.x; }
 
-
+	//todo maby slow this down
 	if (upTouch)
 	{
 		if (velocity.y < 0)
@@ -282,10 +284,13 @@ void Entity::airRun(float speed)
 	float velocityDir = velocity.x < 0 ? -1 : 1;
 
 
-	if((grounded && !isSittingOnIce) || ((dir != velocityDir) && speed)) { velocity.x = 0; }
+	//this removes velocity when grounded
+	if((grounded && !isSittingOnIce) || ((dir != velocityDir) && speed)) 
+	{ velocity.x = 0; }
 	
-	//this removes velocity
-	if (speed && !isSittingOnIce ) { velocity.x = 0; }
+	//this removes velocity when moving in air
+	if (speed && !isSittingOnIce ) 
+	{ velocity.x = dir * velocityOnAirRun; }
 
 	if(iswebs)
 	{
@@ -301,9 +306,10 @@ void Entity::applyGravity(float deltaTime)
 {
 	if(wallGrab == 0)
 	{
-	
-			velocity.y += deltaTime * gravitationalAcceleration * BLOCK_SIZE;
-			
+			velocity.y += deltaTime * gravitationalAcceleration * BLOCK_SIZE;		
+	}else if(iceGrab)
+	{
+		velocity.y += deltaTime * gravitationalAccelerationOnIce * BLOCK_SIZE;
 	}
 }
 
@@ -324,7 +330,7 @@ void Entity::applyVelocity(float deltaTime)
 	const float cy = velocityClampY * BLOCK_SIZE;
 	velocity = glm::clamp(velocity, { -cx,-cy }, { cx, cy });
 
-	if(wallGrab != 0)
+	if(wallGrab != 0 && !iceGrab)
 	{
 		velocity.y = 0;
 	}
@@ -468,10 +474,25 @@ void Entity::checkWall(MapData & mapData, int move)
 		checkLeft = 1;
 	}
 
-	int rightX = floor((pos.x + dimensions.x) / BLOCK_SIZE);
+	int rightX = floor((pos.x + dimensions.x + 2) / BLOCK_SIZE);
 	int leftX = floor((pos.x-2) / BLOCK_SIZE);
 	if (leftX < 0) { return; }
 	
+	if(iceGrab)
+	{
+		if(wallGrab == 1)
+		{
+			move = 1;
+			//checkRight = 1;
+		}else if(wallGrab == -1)
+		{
+			move = -1;
+			//checkLeft = 1;
+		}
+	
+		wallGrab = 0;
+		iceGrab = 0;
+	}
 
 	if(isCollidable(mapData.get(rightX, minY).type) && move > 0 && checkRight && mapData.get(rightX, minY).type != Block::bareer)
 	{
@@ -489,6 +510,11 @@ void Entity::checkWall(MapData & mapData, int move)
 			grayGrab = 1;
 		}
 
+		if(isIce(mapData.get(rightX, minY).type))
+		{
+			iceGrab = 1;
+		}
+
 		//if ((minY == 0 || !isColidable(mapData.get(rightX, minY - 1).type)))
 		{
 			if(snapWallGrab)
@@ -498,7 +524,11 @@ void Entity::checkWall(MapData & mapData, int move)
 			pos.x = (rightX - 1)*BLOCK_SIZE;
 			wallGrab = 1;
 			velocity.x = 0;
-			velocity.y = 0;
+
+			if(!iceGrab)
+			{
+				velocity.y = 0;
+			}
 		}
 	}
 
@@ -518,6 +548,12 @@ void Entity::checkWall(MapData & mapData, int move)
 		{
 			grayGrab = 1;
 		}
+
+		if (isIce(mapData.get(leftX, minY).type))
+		{
+			iceGrab = 1;
+		}
+
 		//if (minY == 0 || !isColidable(mapData.get(leftX, minY - 1).type))
 		{
 			if (snapWallGrab)
@@ -527,7 +563,12 @@ void Entity::checkWall(MapData & mapData, int move)
 			pos.x = (leftX + 1)*BLOCK_SIZE;
 			wallGrab = -1;
 			velocity.x = 0;
-			velocity.y = 0;
+			
+			if(!iceGrab)
+			{
+				velocity.y = 0;
+			}
+
 		}
 	}
 
@@ -675,6 +716,8 @@ glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 s
 }
 
 
+#pragma region arrow
+
 void Arrow::draw(gl2d::Renderer2D & renderer, gl2d::Texture t)
 {
 	gl2d::TextureAtlas ta(5, 1);
@@ -711,8 +754,8 @@ void Arrow::move(float deltaTime)
 	}
 }
 
-
-void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool grayTouch)
+void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool grayTouch,
+	int& redChanged, int& blueChanged, int& grayChanged)
 {
 	if(stuckInWall)
 	{
@@ -778,6 +821,7 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 						}
 					}
 					mapData.setNeighbors();
+					redChanged = !redChanged;
 				}
 			
 
@@ -808,6 +852,7 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 						}
 					}
 					mapData.setNeighbors();
+					blueChanged = !blueChanged;
 				}
 			
 			}
@@ -838,6 +883,7 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 							}
 						}
 						mapData.setNeighbors();
+						grayChanged = !grayChanged;
 					}
 					
 				}
@@ -1010,6 +1056,11 @@ bool Arrow::timeOut(float deltaTime)
 	return false;
 }
 
+#pragma endregion
+
+
+#pragma region pickup
+
 bool Pickup::colidePlayer(Entity &player)
 {
 	return aabb({ player.pos, player.dimensions }, { pos.x*BLOCK_SIZE, pos.y*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE });
@@ -1042,6 +1093,11 @@ void Pickup::draw(gl2d::Renderer2D & renderer2d, gl2d::Texture arrowTexture, flo
 		{ opacity, opacity, opacity, light * opacity }, {}, 45,
 		arrowTexture, ta.get(type, 0));
 }
+
+#pragma endregion
+
+
+#pragma region birb brother
 
 float birdSpeed = BLOCK_SIZE * 7;
 
@@ -1193,3 +1249,5 @@ float Bird::getShowPerc()
 	return glm::distance(position, destination) / glm::distance(startPos, destination);
 
 }
+
+#pragma endregion

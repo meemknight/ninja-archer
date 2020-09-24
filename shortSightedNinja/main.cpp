@@ -1,6 +1,7 @@
 #include <Windows.h>
 #include "gameLayer.h"
 #include <GL/glew.h>
+#include <GL/wglew.h>
 #include <ctime>
 #include <stdio.h>
 #include <algorithm>
@@ -56,6 +57,7 @@ static bool openglVsync = 0;
 
 WINDOWPLACEMENT windowPlacementPrev = { sizeof(windowPlacementPrev) };
 
+
 void setupFullscreen()
 {
 
@@ -108,10 +110,84 @@ void setupFullscreen()
 
 }
 
+LRESULT CALLBACK tempWindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	return DefWindowProc(hWnd, message, wParam, lParam);
+}
+
 int MAIN
 {
 
-	HINSTANCE h = GetModuleHandle(0);
+HINSTANCE h = GetModuleHandle(0);
+
+
+#pragma region fake window
+{
+	//---- fake Window
+	WNDCLASSEX wcex;
+	wcex.cbSize = sizeof(WNDCLASSEX);
+	wcex.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+	wcex.lpfnWndProc = tempWindProc;
+	wcex.cbClsExtra = 0;
+	wcex.cbWndExtra = 0;
+	wcex.hInstance = h;
+	wcex.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	wcex.lpszMenuName = NULL;
+	wcex.lpszClassName = "coco";
+	wcex.hIconSm = NULL;
+	
+	if (!RegisterClassEx(&wcex))
+	{
+		return 0;
+	}
+	
+	HWND hwnd = CreateWindow(
+		"coco",
+		"dddd",
+		WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT, CW_USEDEFAULT,
+		500, 500,
+		NULL,
+		NULL,
+		h,
+		NULL
+	);
+	
+	HDC hdc = GetDC(hwnd);
+	PIXELFORMATDESCRIPTOR pfd = {};
+	
+	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+	pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW;
+	pfd.iPixelType = PFD_TYPE_RGBA;
+	pfd.cColorBits = 32;
+	pfd.cDepthBits = 32;
+	pfd.iLayerType = PFD_MAIN_PLANE;
+	
+	int nPixelFormat = ChoosePixelFormat(hdc, &pfd);
+	
+	SetPixelFormat(hdc, nPixelFormat, &pfd);
+	
+	HGLRC hrc = wglCreateContext(hdc);
+	
+	wglMakeCurrent(hdc, hrc);
+	
+	glewExperimental = true;
+	if (glewInit() != GLEW_OK)
+	{
+		MessageBoxA(0, "glewInit", "Error from glew", MB_ICONERROR);
+		return 1;
+	}
+
+	wglMakeCurrent(NULL, NULL);
+	wglDeleteContext(hrc);
+	ReleaseDC(hwnd, hdc);
+	DestroyWindow(hwnd);
+
+}
+#pragma endregion
+
 
 	WNDCLASS wc = {};
 	wc.hInstance = h;
@@ -122,7 +198,6 @@ int MAIN
 	wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 
 	RegisterClass(&wc);
-
 
 	wind = CreateWindow(
 		wc.lpszClassName,
@@ -142,11 +217,11 @@ int MAIN
 	HGLRC hrc;
 
 	EnableOpenGL(wind, &hdc, &hrc);
-	if (glewInit() != GLEW_OK)
-	{
-		MessageBoxA(0, "glewInit", "Error from glew", MB_ICONERROR);
-		return 1;
-	}
+	//if (glewInit() != GLEW_OK)
+	//{
+	//	MessageBoxA(0, "glewInit", "Error from glew", MB_ICONERROR);
+	//	return 1;
+	//}
 
 	gl2d::setErrorFuncCallback([](const char* c) {elog(c); });
 	gl2d::init();
@@ -167,7 +242,6 @@ int MAIN
 #endif // !RemoveImgui
 
 	input::loadXinput();
-
 
 
 	if (!initGame())
@@ -477,15 +551,8 @@ endImgui:
 
 void EnableOpenGL(HWND hwnd, HDC* hDC, HGLRC* hRC)
 {
-	//todo look into this more (all of this function)
+
 	PIXELFORMATDESCRIPTOR pfd = {};
-
-	int iFormat;
-
-	/* get the device context (DC) */
-	*hDC = GetDC(hwnd);
-
-
 	pfd.nSize = sizeof(pfd);
 	pfd.nVersion = 1;
 	pfd.dwFlags = PFD_DRAW_TO_WINDOW |
@@ -496,14 +563,65 @@ void EnableOpenGL(HWND hwnd, HDC* hDC, HGLRC* hRC)
 	pfd.cStencilBits = 8;
 	pfd.iLayerType = PFD_MAIN_PLANE;
 
-	iFormat = ChoosePixelFormat(*hDC, &pfd);
+	if (
+		true
+		//wglewIsSupported("WGL_ARB_create_context") == 1
+		)
+	{
+		
 
-	SetPixelFormat(*hDC, iFormat, &pfd);
+		*hDC = GetDC(hwnd);
 
-	/* create and enable the render context (RC) */
-	*hRC = wglCreateContext(*hDC);
+		const int iPixelFormatAttribList[] = {
+			WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
+			WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
+			WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
+			WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,
+			WGL_COLOR_BITS_ARB, 32,
+			WGL_DEPTH_BITS_ARB, 24,
+			WGL_STENCIL_BITS_ARB, 8,
+			WGL_SAMPLE_BUFFERS_ARB, GL_TRUE,
+			WGL_SAMPLES_ARB, 4,
+			0 // End of attributes list
+		};
+		int attributes[] = {
+			//WGL_CONTEXT_MAJOR_VERSION_ARB, 3
+			//, WGL_CONTEXT_MINOR_VERSION_ARB, 2
+			//, WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+			0
+		};
 
-	wglMakeCurrent(*hDC, *hRC);
+		int nPixelFormat = 0;
+		UINT iNumFormats = 0;
+
+		wglChoosePixelFormatARB(*hDC, iPixelFormatAttribList, NULL, 1, &nPixelFormat, (UINT*)&iNumFormats);
+
+		SetPixelFormat(*hDC, nPixelFormat, &pfd);
+
+		*hRC = wglCreateContextAttribsARB(*hDC, 0, attributes);
+
+		wglMakeCurrent(*hDC, *hRC);
+
+	}else
+	{
+		
+
+		int iFormat;
+
+		/* get the device context (DC) */
+		*hDC = GetDC(hwnd);
+
+		iFormat = ChoosePixelFormat(*hDC, &pfd);
+
+		SetPixelFormat(*hDC, iFormat, &pfd);
+
+		/* create and enable the render context (RC) */
+		*hRC = wglCreateContext(*hDC);
+
+		wglMakeCurrent(*hDC, *hRC);
+	}
+
+	
 }
 
 

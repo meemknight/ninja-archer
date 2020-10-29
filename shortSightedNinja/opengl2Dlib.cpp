@@ -476,6 +476,7 @@ namespace gl2d
 	void enableNecessaryGLFeatures()
 	{
 		glEnable(GL_BLEND);
+		//glEnable(GL_MULTISAMPLE);
 
 		glDisable(GL_DEPTH_TEST);
 

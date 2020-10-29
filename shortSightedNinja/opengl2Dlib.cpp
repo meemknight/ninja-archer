@@ -2,7 +2,6 @@
 #include <GL/wglew.h>
 #include <fstream>
 #include <sstream>
-#include "tools.h"
 #include <algorithm>
 
 #undef max
@@ -57,14 +56,14 @@ namespace gl2d
 
 #pragma endregion
 
-	static errorFuncType *errorFunc = defaultErrorFunc;
+	static errorFuncType* errorFunc = defaultErrorFunc;
 
 	void defaultErrorFunc(const char* msg)
 	{
 
 	}
 
-	errorFuncType *setErrorFuncCallback(errorFuncType *newFunc)
+	errorFuncType* setErrorFuncCallback(errorFuncType* newFunc)
 	{
 		auto a = errorFunc;
 		errorFunc = newFunc;
@@ -86,14 +85,14 @@ namespace gl2d
 		stbtt_aligned_quad fontGetGlyphQuad(const Font font, const char c)
 		{
 			stbtt_aligned_quad quad = { 0 };
-		
-			float x=0;
-			float y=0;
+
+			float x = 0;
+			float y = 0;
 
 			stbtt_GetPackedQuad(font.packedCharsBuffer,
 				font.size.x, font.size.y, c - ' ', &x, &y, &quad, 1);
-			
-			
+
+
 			return quad;
 		}
 
@@ -191,8 +190,12 @@ namespace gl2d
 		bool WGL_EXT_swap_control_ext;
 	}extensions = {};
 
+	bool hasInitialized = 0;
 	void init()
 	{
+		if (hasInitialized) { return; }
+		hasInitialized = true;
+
 		//int last = 0;
 		//glGetIntegerv(GL_NUM_EXTENSIONS, &last);
 		//for(int i=0; i<last; i++)
@@ -217,7 +220,7 @@ namespace gl2d
 
 	bool setVsync(bool b)
 	{
-		if(extensions.WGL_EXT_swap_control_ext)
+		if (extensions.WGL_EXT_swap_control_ext)
 		{
 			wglSwapIntervalEXT(b);
 			return true;
@@ -254,7 +257,7 @@ namespace gl2d
 	///////////////////// Texture /////////////////////
 #pragma region Texture
 
-	void convertFromRetardedCoordonates(int tSizeX, int tSizeY, int x, int y, int sizeX, int sizeY, int s1, int s2, int s3, int s4, Texture_Coords *outer, Texture_Coords *inner)
+	void convertFromRetardedCoordonates(int tSizeX, int tSizeY, int x, int y, int sizeX, int sizeY, int s1, int s2, int s3, int s4, Texture_Coords* outer, Texture_Coords* inner)
 	{
 		float newX = (float)tSizeX / (float)x;
 		float newY = (float)tSizeY / (float)y;
@@ -286,7 +289,7 @@ namespace gl2d
 	///////////////////// Font /////////////////////
 #pragma region Font
 
-	void Font::createFromTTF(const unsigned char * ttf_data, const size_t ttf_data_size)
+	void Font::createFromTTF(const unsigned char* ttf_data, const size_t ttf_data_size)
 	{
 
 		size.x = 2000,
@@ -353,7 +356,7 @@ namespace gl2d
 		}
 	}
 
-	void Font::createFromFile(const char * file)
+	void Font::createFromFile(const char* file)
 	{
 		std::ifstream fileFont(file, std::ios::binary);
 
@@ -370,7 +373,7 @@ namespace gl2d
 		fileFont.seekg(0, std::ios::end);
 		fileSize = (int)fileFont.tellg();
 		fileFont.seekg(0, std::ios::beg);
-		unsigned char * fileData = new unsigned char[fileSize];
+		unsigned char* fileData = new unsigned char[fileSize];
 		fileFont.read((char*)fileData, fileSize);
 		fileFont.close();
 
@@ -883,11 +886,7 @@ namespace gl2d
 		texturePositionsCount = 0;
 		spriteTexturesCount = 0;
 
-		windowW;
-		windowH;
-
-		currentShader = defaultShader;
-		currentCamera = defaultCamera;
+		this->resetCameraAndShader();
 
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
@@ -909,7 +908,7 @@ namespace gl2d
 		glBindVertexArray(0);
 	}
 
-	glm::vec4 Renderer2D::toScreen(const glm::vec4 &transform)
+	glm::vec4 Renderer2D::toScreen(const glm::vec4& transform)
 	{
 		//We need to flip texture_transforms.y
 		const float transformsY = transform.y * -1;
@@ -928,7 +927,7 @@ namespace gl2d
 		v3.y += currentCamera.position.y;
 		v4.x -= currentCamera.position.x;
 		v4.y += currentCamera.position.y;
-	
+
 		//Apply camera zoom
 		//if(renderer->currentCamera.zoom != 1)
 		{
@@ -949,7 +948,7 @@ namespace gl2d
 		return glm::vec4(v1.x, v1.y, v3.x, v3.y);
 	}
 
-	glm::vec2 Renderer2D::getTextSize(const char * text, const Font font,
+	glm::vec2 Renderer2D::getTextSize(const char* text, const Font font,
 		const float size, const float spacing, const float line_space)
 	{
 		glm::vec2 position = {};
@@ -960,7 +959,6 @@ namespace gl2d
 		float linePositionY = position.y;
 
 		//This is the y position we render at because it advances when we encounter newlines
-
 		float maxPos = 0;
 		float maxPosY = 0;
 		float bonusY = 0;
@@ -1020,21 +1018,21 @@ namespace gl2d
 		paddY += font.max_height * size + bonusY;
 
 		return glm::vec2{ paddX, paddY };
-		
+
 	}
 
-	void Renderer2D::renderText(glm::vec2 position, const char * text, const Font font,
+	void Renderer2D::renderText(glm::vec2 position, const char* text, const Font font,
 		const Color4f color, const float size, const float spacing, const float line_space, bool showInCenter,
 		const Color4f ShadowColor
 		, const Color4f LightColor
-		)
+	)
 	{
 		const int text_length = (int)strlen(text);
 		Rect rectangle;
 		rectangle.x = position.x;
 		float linePositionY = position.y;
 
-		if(showInCenter)
+		if (showInCenter)
 		{
 			//This is the y position we render at because it advances when we encounter newlines
 
@@ -1062,7 +1060,7 @@ namespace gl2d
 					(font, '_');
 					auto x = quad.x1 - quad.x0;
 
-					rectangle.x += x * size+ spacing*size;
+					rectangle.x += x * size + spacing * size;
 				}
 				else if (text[i] >= ' ' && text[i] <= '~')
 				{
@@ -1135,13 +1133,13 @@ namespace gl2d
 				//rectangle.y = linePositionY - rectangle.w;
 				rectangle.y = linePositionY + quad.y0 * size;
 
-				glm::vec4 colorData[4] = { color, color, color, color };				
-				
-				if(ShadowColor.w)
+				glm::vec4 colorData[4] = { color, color, color, color };
+
+				if (ShadowColor.w)
 				{
 					glm::vec2 pos = { -5, 3 };
 					pos *= size;
-					renderRectangle({ rectangle.x + pos.x, rectangle.y + pos.y,  rectangle.z, rectangle.w},
+					renderRectangle({ rectangle.x + pos.x, rectangle.y + pos.y,  rectangle.z, rectangle.w },
 						ShadowColor, glm::vec2{ 0, 0 }, 0, font.texture,
 						glm::vec4{ quad.s0, quad.t0, quad.s1, quad.t1 });
 
@@ -1149,7 +1147,7 @@ namespace gl2d
 
 				renderRectangle(rectangle, colorData, glm::vec2{ 0, 0 }, 0, font.texture, glm::vec4{ quad.s0, quad.t0, quad.s1, quad.t1 });
 
-				if(LightColor.w)
+				if (LightColor.w)
 				{
 					glm::vec2 pos = { -2, 1 };
 					pos *= size;
@@ -1159,7 +1157,7 @@ namespace gl2d
 
 				}
 
-				
+
 				rectangle.x += rectangle.z + spacing * size;
 			}
 		}
@@ -1198,7 +1196,7 @@ namespace gl2d
 		return s;
 	}
 
-	void Texture::createFromBuffer(const char * image_data, const int width, const int height)
+	void Texture::createFromBuffer(const char* image_data, const int width, const int height)
 	{
 		GLuint id = 0;
 
@@ -1218,9 +1216,9 @@ namespace gl2d
 		this->id = id;
 	}
 
-	void Texture::create1PxSquare(const char *b)
+	void Texture::create1PxSquare(const char* b)
 	{
-		if(b==nullptr)
+		if (b == nullptr)
 		{
 			const unsigned char buff[] =
 			{
@@ -1231,14 +1229,15 @@ namespace gl2d
 			};
 
 			createFromBuffer((char*)buff, 1, 1);
-		}else
+		}
+		else
 		{
 			createFromBuffer(b, 1, 1);
 		}
-	
+
 	}
 
-	void Texture::createFromFileData(const unsigned char * image_file_data, const size_t image_file_size)
+	void Texture::createFromFileData(const unsigned char* image_file_data, const size_t image_file_size)
 	{
 		stbi_set_flip_vertically_on_load(true);
 
@@ -1254,7 +1253,7 @@ namespace gl2d
 		free((void*)decodedImage);
 	}
 
-	void Texture::createFromFileDataWithPixelPadding(const unsigned char * image_file_data, const size_t image_file_size, int blockSize)
+	void Texture::createFromFileDataWithPixelPadding(const unsigned char* image_file_data, const size_t image_file_size, int blockSize)
 	{
 		stbi_set_flip_vertically_on_load(true);
 
@@ -1305,20 +1304,20 @@ namespace gl2d
 
 				}
 			}
-			
+
 		}
 		*/
-		
+
 		int newW = width + ((width * 2) / blockSize);
 		int newH = height + ((height * 2) / blockSize);
 
 		auto getOld = [decodedImage, width](int x, int y, int c)->const unsigned char
 		{
-			return decodedImage[4*(x + (y * width)) + c];
+			return decodedImage[4 * (x + (y * width)) + c];
 		};
 
-		
-		unsigned char *newData = new unsigned char[newW * newH * 4];
+
+		unsigned char* newData = new unsigned char[newW * newH * 4];
 		ZeroMemory(newData, newW * newH * 4);
 
 		auto getNew = [newData, newW](int x, int y, int c)
@@ -1330,36 +1329,37 @@ namespace gl2d
 		int dataCursor = 0;
 
 		//first copy data
-		for(int y=0; y < newH; y++)
+		for (int y = 0; y < newH; y++)
 		{
 			int yNo = 0;
-			if((y==0 || y== newH-1
-				|| ((y)%(blockSize+2))==0||
-				((y+1) % (blockSize + 2)) == 0
+			if ((y == 0 || y == newH - 1
+				|| ((y) % (blockSize + 2)) == 0 ||
+				((y + 1) % (blockSize + 2)) == 0
 				))
 			{
 				yNo = 1;
 			}
-			
+
 			for (int x = 0; x < newW; x++)
 			{
 				if (
-					yNo||
-					
+					yNo ||
+
 					((
-					x == 0 || x == newW - 1
-					|| (x % (blockSize + 2)) == 0 ||
-					((x + 1) % (blockSize + 2)) == 0
-					) 
+						x == 0 || x == newW - 1
+						|| (x % (blockSize + 2)) == 0 ||
+						((x + 1) % (blockSize + 2)) == 0
 						)
-					
+						)
+
 					)
 				{
 					newData[newDataCursor++] = 0;
 					newData[newDataCursor++] = 0;
 					newData[newDataCursor++] = 0;
 					newData[newDataCursor++] = 0;
-				}else
+				}
+				else
 				{
 					newData[newDataCursor++] = decodedImage[dataCursor++];
 					newData[newDataCursor++] = decodedImage[dataCursor++];
@@ -1368,20 +1368,20 @@ namespace gl2d
 				}
 
 			}
-		
+
 		}
 
 		//then add margins
-		
 
-		for(int x =1; x< newW-1; x++)
+
+		for (int x = 1; x < newW - 1; x++)
 		{
 			//copy on left
-			if (x == 1 || 
-				(x%(blockSize+2)) == 1
+			if (x == 1 ||
+				(x % (blockSize + 2)) == 1
 				)
 			{
-				for(int y=0; y< newH; y++)
+				for (int y = 0; y < newH; y++)
 				{
 					*getNew(x - 1, y, 0) = *getNew(x, y, 0);
 					*getNew(x - 1, y, 1) = *getNew(x, y, 1);
@@ -1389,22 +1389,23 @@ namespace gl2d
 					*getNew(x - 1, y, 3) = *getNew(x, y, 3);
 				}
 
-			}else //copy on rigght
+			}
+			else //copy on rigght
 				if (x == newW - 2 ||
 					(x % (blockSize + 2)) == blockSize
 					)
 				{
 					for (int y = 0; y < newH; y++)
 					{
-						*getNew(x+1, y, 0) = *getNew(x, y, 0);
-						*getNew(x+1, y, 1) = *getNew(x, y, 1);
-						*getNew(x+1, y, 2) = *getNew(x, y, 2);
-						*getNew(x+1, y, 3) = *getNew(x, y, 3);
+						*getNew(x + 1, y, 0) = *getNew(x, y, 0);
+						*getNew(x + 1, y, 1) = *getNew(x, y, 1);
+						*getNew(x + 1, y, 2) = *getNew(x, y, 2);
+						*getNew(x + 1, y, 3) = *getNew(x, y, 3);
 					}
 				}
 		}
 
-		for(int y=1; y< newH -1; y++)
+		for (int y = 1; y < newH - 1; y++)
 		{
 			if (y == 1 ||
 				(y % (blockSize + 2)) == 1
@@ -1412,10 +1413,10 @@ namespace gl2d
 			{
 				for (int x = 0; x < newW; x++)
 				{
-					*getNew(x, y-1, 0) = *getNew(x, y, 0);
-					*getNew(x, y-1, 1) = *getNew(x, y, 1);
-					*getNew(x, y-1, 2) = *getNew(x, y, 2);
-					*getNew(x, y-1, 3) = *getNew(x, y, 3);
+					*getNew(x, y - 1, 0) = *getNew(x, y, 0);
+					*getNew(x, y - 1, 1) = *getNew(x, y, 1);
+					*getNew(x, y - 1, 2) = *getNew(x, y, 2);
+					*getNew(x, y - 1, 3) = *getNew(x, y, 3);
 				}
 			}
 			else
@@ -1425,13 +1426,13 @@ namespace gl2d
 				{
 					for (int x = 0; x < newW; x++)
 					{
-						*getNew(x ,y+1, 0) = *getNew(x, y , 0);
-						*getNew(x, y+1, 1) = *getNew(x, y , 1);
-						*getNew(x, y+1, 2) = *getNew(x, y , 2);
-						*getNew(x, y+1, 3) = *getNew(x, y , 3);
+						*getNew(x, y + 1, 0) = *getNew(x, y, 0);
+						*getNew(x, y + 1, 1) = *getNew(x, y, 1);
+						*getNew(x, y + 1, 2) = *getNew(x, y, 2);
+						*getNew(x, y + 1, 3) = *getNew(x, y, 3);
 					}
 				}
-		
+
 		}
 
 
@@ -1442,7 +1443,7 @@ namespace gl2d
 		delete[] newData;
 	}
 
-	void Texture::loadFromFile(const char * fileName)
+	void Texture::loadFromFile(const char* fileName)
 	{
 		std::ifstream file(fileName, std::ios::binary);
 
@@ -1459,7 +1460,7 @@ namespace gl2d
 		file.seekg(0, std::ios::end);
 		fileSize = (int)file.tellg();
 		file.seekg(0, std::ios::beg);
-		unsigned char * fileData = new unsigned char[fileSize];
+		unsigned char* fileData = new unsigned char[fileSize];
 		file.read((char*)fileData, fileSize);
 		file.close();
 
@@ -1469,7 +1470,7 @@ namespace gl2d
 
 	}
 
-	void Texture::loadFromFileWithPixelPadding(const char * fileName, int blockSize)
+	void Texture::loadFromFileWithPixelPadding(const char* fileName, int blockSize)
 	{
 		std::ifstream file(fileName, std::ios::binary);
 
@@ -1486,7 +1487,7 @@ namespace gl2d
 		file.seekg(0, std::ios::end);
 		fileSize = (int)file.tellg();
 		file.seekg(0, std::ios::beg);
-		unsigned char * fileData = new unsigned char[fileSize];
+		unsigned char* fileData = new unsigned char[fileSize];
 		file.read((char*)fileData, fileSize);
 		file.close();
 
@@ -1524,32 +1525,34 @@ namespace gl2d
 
 	void Camera::follow(glm::vec2 pos, float speed, float max, float w, float h)
 	{
-		pos.x -= w /2.F;
+		pos.x -= w / 2.F;
 		pos.y -= h / 2.f;
-		
+
 		glm::vec2 delta = pos - position;
 		float len = glm::length(delta);
 
 		delta = glm::normalize(delta);
 
-		if(len < 4.f)
+		if (len < 4.f)
 		{
 			speed /= 4.f;
-		}else if(len < 8.f)
+		}
+		else if (len < 8.f)
 		{
 			speed /= 2.f;
 		}
 
-		if(len > 2.f)
-		if(len > max)
-		{
-			len = max;
-			position = pos - (max * delta);
-			position += delta * speed;
-		}else
-		{
-			position += delta * speed;
-		}
+		if (len > 2.f)
+			if (len > max)
+			{
+				len = max;
+				position = pos - (max * delta);
+				position += delta * speed;
+			}
+			else
+			{
+				position += delta * speed;
+			}
 
 	}
 
@@ -1620,10 +1623,11 @@ namespace gl2d
 		float xSize = 1.f / xCount;
 		float ySize = 1.f / yCount;
 
-		if(flip)
+		if (flip)
 		{
-			return { (x+1) * xSize, 1 - (y * ySize), (x) * xSize, 1.f - ((y + 1) * ySize) };
-		}else
+			return { (x + 1) * xSize, 1 - (y * ySize), (x)*xSize, 1.f - ((y + 1) * ySize) };
+		}
+		else
 		{
 			return { x * xSize, 1 - (y * ySize), (x + 1) * xSize, 1.f - ((y + 1) * ySize) };
 		}
@@ -1637,12 +1641,12 @@ namespace gl2d
 		float ySize = 1.f / yCount;
 
 		float Xpadding = 1.f / mapXsize;
-		float Ypadding = 1.f /mapYsize;
+		float Ypadding = 1.f / mapYsize;
 
 		//todo
 		if (flip)
 		{
-			return { (x + 1) * xSize - Xpadding, 1 - (y * ySize) - Ypadding, (x)* xSize + Xpadding, 1.f - ((y + 1) * ySize) + Ypadding };
+			return { (x + 1) * xSize - Xpadding, 1 - (y * ySize) - Ypadding, (x)*xSize + Xpadding, 1.f - ((y + 1) * ySize) + Ypadding };
 		}
 		else
 		{

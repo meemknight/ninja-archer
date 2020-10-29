@@ -876,44 +876,16 @@ bool gameLogic(float deltaTime)
 			}
 		}
 
-	}else
-	{
-	player.idleTime = 0;
-	jumpDelayTime = 0;
-	}
 
-	if (!platform::isFocused())
-	{
-		player.idleTime = 0;
-		jumpDelayTime = 0;
-	}
-
-		renderer2d.currentCamera.follow(player.pos + (player.dimensions / 2.f), deltaTime * 100, 4 * BLOCK_SIZE, renderer2d.windowW, renderer2d.windowH);
-
-		player.applyGravity(deltaTime);
-		player.applyVelocity(deltaTime);
-
-		player.resolveConstrains(mapData);
-
-		player.updateMove(deltaTime);
-
-		player.checkGrounded(mapData, deltaTime);
-
-		//ilog(player.velocity.x);
-
-		if(!currentDialog.blockMovement())
+		if (input::isKeyHeld(input::Buttons::down))
 		{
-
-			if (input::isKeyHeld(input::Buttons::down))
-			{
-				player.wallGrab = 0;
-				player.iceGrab = 0;
-			}
-			else
-			{
-				player.checkWall(mapData, input::getMoveDir());
-			}
-
+			player.wallGrab = 0;
+			player.iceGrab = 0;
+		}
+		else
+		{
+			player.checkWall(mapData, input::getMoveDir());
+		}
 
 
 #pragma region jump prticle
@@ -944,48 +916,76 @@ bool gameLogic(float deltaTime)
 		}
 
 #pragma endregion
-		
-		
+
+
+	}else
+	{
+	player.idleTime = 0;
+	jumpDelayTime = 0;
+	}
+
+	if (!platform::isFocused())
+	{
+		player.idleTime = 0;
+		jumpDelayTime = 0;
+	}
+
+	renderer2d.currentCamera.follow(player.pos + (player.dimensions / 2.f), deltaTime * 100, 4 * BLOCK_SIZE, renderer2d.windowW, renderer2d.windowH);
+
+	player.applyGravity(deltaTime);
+	player.applyVelocity(deltaTime);
+
+	player.resolveConstrains(mapData);
+
+	player.updateMove(deltaTime);
+
+	player.checkGrounded(mapData, deltaTime);
+
+	//ilog(player.velocity.x);
+
+	if(!currentDialog.blockMovement() && !inGameMenu)
+	{
+
 
 #pragma region inventory
 
-		if (!platform::isFocused())
-		{
-			currentArrow = -1;
-		}
+	if (!platform::isFocused())
+	{
+		currentArrow = -1;
+	}
 
-		if (input::isKeyPressedOn(input::Buttons::swapLeft))
-		{
-			currentArrow--;
-		}
-		else if (input::isKeyPressedOn(input::Buttons::swapRight))
-		{
-			currentArrow++;
-		}
+	if (input::isKeyPressedOn(input::Buttons::swapLeft))
+	{
+		currentArrow--;
+	}
+	else if (input::isKeyPressedOn(input::Buttons::swapRight))
+	{
+		currentArrow++;
+	}
 
-		if (currentArrow < -1)
-		{
-			currentArrow = actualInventorty.size() - 1;
-		}
+	if (currentArrow < -1)
+	{
+		currentArrow = actualInventorty.size() - 1;
+	}
 
-		if (currentArrow >= actualInventorty.size())
-		{
-			currentArrow = -1;
-		}
+	if (currentArrow >= actualInventorty.size())
+	{
+		currentArrow = -1;
+	}
 
-		if (actualInventorty.size() == 0)
-		{
-			currentArrow = -1;
-		}
+	if (actualInventorty.size() == 0)
+	{
+		currentArrow = -1;
+	}
 
 #pragma endregion
 
-		
-		}
-		else
-		{
-			currentArrow = -1;
-		}
+	
+	}
+	else
+	{
+		currentArrow = -1;
+	}
 
 
 #pragma endregion
@@ -999,8 +999,6 @@ bool gameLogic(float deltaTime)
 			actualInventorty.push_back(i);
 		}
 	}
-
-	
 
 	//stencilRenderer2d.currentCamera = renderer2d.currentCamera;
 

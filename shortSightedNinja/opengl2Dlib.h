@@ -14,7 +14,7 @@ namespace gl2d
 
 	using errorFuncType = decltype(defaultErrorFunc);
 
-	errorFuncType *setErrorFuncCallback(errorFuncType *newFunc);
+	errorFuncType* setErrorFuncCallback(errorFuncType* newFunc);
 
 	struct Font;
 
@@ -72,19 +72,19 @@ namespace gl2d
 		GLuint id = 0;
 
 		Texture() {};
-		Texture(const char *file) { loadFromFile(file); }
+		Texture(const char* file) { loadFromFile(file); }
 
 		glm::ivec2 GetSize();
 
 		//Note: This function expects a buffer of bytes in GL_RGBA format
 		void createFromBuffer(const char* image_data, const int width, const int height);
-		void create1PxSquare(const char *b = 0);
+		void create1PxSquare(const char* b = 0);
 		void createFromFileData(const unsigned char* image_file_data, const size_t image_file_size);
-		void createFromFileDataWithPixelPadding(const unsigned char* image_file_data, 
+		void createFromFileDataWithPixelPadding(const unsigned char* image_file_data,
 			const size_t image_file_size, int blockSize);
 
-		void loadFromFile(const char *fileName);
-		void loadFromFileWithPixelPadding(const char *fileName, int blockSize);
+		void loadFromFile(const char* fileName);
+		void loadFromFileWithPixelPadding(const char* fileName, int blockSize);
 
 		void bind(const unsigned int sample = 0);
 		void unbind();
@@ -121,7 +121,7 @@ namespace gl2d
 		explicit Font(const char* file) { createFromFile(file); }
 
 		void createFromTTF(const unsigned char* ttf_data, const size_t ttf_data_size);
-		void createFromFile(const char *file);
+		void createFromFile(const char* file);
 	};
 
 #pragma endregion
@@ -216,7 +216,7 @@ namespace gl2d
 		void updateWindowMetrics(int w, int h) { windowW = w; windowH = h; }
 
 		//converts pixels to screen (top left) (bottom right)
-		glm::vec4 toScreen(const glm::vec4 &transform);
+		glm::vec4 toScreen(const glm::vec4& transform);
 
 		inline void clearDrawData()
 		{
@@ -309,8 +309,8 @@ namespace gl2d
 	{
 		TextureAtlasPadding() {};
 		//count count size size
-		TextureAtlasPadding(int x, int y, int xSize, int ySize) :xCount(x), yCount(y) 
-		,xSize(xSize), ySize(ySize){};
+		TextureAtlasPadding(int x, int y, int xSize, int ySize) :xCount(x), yCount(y)
+			, xSize(xSize), ySize(ySize) {};
 
 		int xCount;
 		int yCount;

@@ -55,8 +55,10 @@ const float heigth = 680;
 static LARGE_INTEGER queryFrequency;
 static bool openglVsync = 0;
 
-WINDOWPLACEMENT windowPlacementPrev = { sizeof(windowPlacementPrev) };
+#pragma region fullScreen
 
+WINDOWPLACEMENT windowPlacementPrev = { sizeof(windowPlacementPrev) };
+float fullScreenZoom = 1;
 
 void setupFullscreen()
 {
@@ -87,28 +89,78 @@ void setupFullscreen()
 	monitorSettings.dmDriverExtra = 0;
 	bool found = 0;
 
-	for (int i = 0; EnumDisplaySettings(monitorName, i, &monitorSettings); i++)
-	{
+	//for (int i = 0; EnumDisplaySettings(monitorName, i, &monitorSettings); i++)
+	//{
+	//
+	//	const char* c = (monitorSettings.dmDisplayFixedOutput == DMDFO_DEFAULT) ? "DMDFO_DEFAULT" :
+	//		((monitorSettings.dmDisplayFixedOutput == DMDFO_STRETCH)? "DMDFO_STRETCH" : "DMDFO_CENTER");
+	//
+	//
+	//	std::cout << c << " " << monitorSettings.dmPelsWidth << " " << monitorSettings.dmPelsHeight << "\n";
+	//
+	//}
 
-		if (monitorSettings.dmDisplayFixedOutput == DMDFO_DEFAULT
-			&& monitorSettings.dmPanningWidth == 1920 
-			&& monitorSettings.dmPanningHeight == 1080
-			)
-		{
-			found = 1;
-			break;
-		}
+	std::vector<std::pair<DEVMODE, float>> validMonitorSettings;
+	validMonitorSettings.reserve(10);
+
+	//https://en.wikipedia.org/wiki/Display_resolution
+
+	//16:9
+	glm::vec4 sizes16_9[] =
+	{
+		{3840, 2160, 8.294, 1},	//4K UHD
+		{2560, 1440, 3.686, 1},	//QHD
+		{2048, 1152, 2.359, 1},	//QWXGA
+		{1920, 1080, 2.074, 1},	//FHD
+		{1600, 900,  1.440, 1},	//HD+
+		{1536, 864,  1.327, 1},	//Other
+		{1366, 768,  1.049, 1},	//HD ~16:9
+		{1360, 768,  1.044, 1},	//HD ~16:9
+		{1280, 720,  0.922, 1},	//WXGA
+		{640, 360,   0.230, 1},	//nHD
+	};
+
+	for (int j = 0; j < sizeof(sizes16_9) / sizeof(sizes16_9[0]); j++)
+	{
+		sizes16_9[j].w = sizes16_9[j].x / 1920.f;
 
 	}
 
-
-	if (found) 
+	for (int i = 0; EnumDisplaySettings(monitorName, i, &monitorSettings); i++)
 	{
-		ChangeDisplaySettings(&monitorSettings, CDS_FULLSCREEN);
+
+		for (int j = 0; j < sizeof(sizes16_9) / sizeof(sizes16_9[0]); j++)
+		{
+			if (monitorSettings.dmDisplayFixedOutput == DMDFO_DEFAULT
+				&& monitorSettings.dmPelsWidth == sizes16_9[j].x
+				&& monitorSettings.dmPelsHeight == sizes16_9[j].y)
+			{
+				validMonitorSettings.push_back({ monitorSettings, sizes16_9[j].w });
+			}
+
+		}
+
+
+	}
+
+	std::sort(validMonitorSettings.begin(), validMonitorSettings.end(),
+		[](const std::pair<DEVMODE, float>& a, std::pair<DEVMODE, float>& b) {return a.second > b.second; });
+
+	int i = 0;
+	if (validMonitorSettings.size() > i)
+	{
+		//std::cout << "Current mode: " << validMonitorSettings[i].first.dmPelsWidth <<
+		//	" " << validMonitorSettings[i].first.dmPelsHeight << "  zoom: " << validMonitorSettings[i].second << "\n";
+
+		ChangeDisplaySettings(&validMonitorSettings[i].first, CDS_FULLSCREEN);
+		fullScreenZoom = validMonitorSettings[i].second;
 	}
 
 
 }
+
+#pragma endregion
+
 
 LRESULT CALLBACK tempWindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -363,8 +415,8 @@ HINSTANCE h = GetModuleHandle(0);
 						GetMonitorInfo(MonitorFromWindow(wind,
 							//MONITOR_DEFAULTTONEAREST
 							MONITOR_DEFAULTTOPRIMARY
-							),&mi)
-						) 
+						), &mi)
+						)
 					{
 						SetWindowLong(wind, GWL_STYLE,
 							dwStyle & ~WS_OVERLAPPEDWINDOW);
@@ -373,10 +425,10 @@ HINSTANCE h = GetModuleHandle(0);
 							mi.rcMonitor.right - mi.rcMonitor.left,
 							mi.rcMonitor.bottom - mi.rcMonitor.top,
 							SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
-					}
-					fullScreen = 1;
+						fullScreen = 1;
 
-					setupFullscreen();
+						setupFullscreen();
+					}
 				}
 				else 
 				{
@@ -620,6 +672,15 @@ void EnableOpenGL(HWND hwnd, HDC* hDC, HGLRC* hRC)
 
 		wglMakeCurrent(*hDC, *hRC);
 	}
+
+	
+	int multiSample = 0;
+	int samples = 0;
+	glGetIntegerv(GL_SAMPLE_BUFFERS, &multiSample);
+	glGetIntegerv(GL_SAMPLES, &samples);
+
+	ilog("Multi sample window:", multiSample);
+	ilog("Samples count:", samples);
 
 	
 }

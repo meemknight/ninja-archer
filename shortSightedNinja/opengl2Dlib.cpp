@@ -14,7 +14,7 @@ namespace gl2d
 	static Camera defaultCamera = cameraCreateDefault();
 
 	static const char* defaultVertexShader =
-		"#version 300 es\n"
+		"#version 430\n"
 		"precision mediump float;\n"
 		"in vec2 quad_positions;\n"
 		"in vec4 quad_colors;\n"
@@ -29,11 +29,11 @@ namespace gl2d
 		"}\n";
 
 	static const char* defaultFragmentShader =
-		"#version 300 es\n"
+		"#version 430 \n"
 		"precision mediump float;\n"
 		"out vec4 color;\n"
-		"in vec4 v_color;\n"
-		"in vec2 v_texture;\n"
+		"sample in vec4 v_color;\n"
+		"sample in vec2 v_texture;\n"
 		"uniform sampler2D u_sampler;\n"
 		"void main()\n"
 		"{\n"
@@ -476,7 +476,9 @@ namespace gl2d
 	void enableNecessaryGLFeatures()
 	{
 		glEnable(GL_BLEND);
-		//glEnable(GL_MULTISAMPLE);
+		glEnable(GL_MULTISAMPLE);
+		glEnable(GL_LINE_SMOOTH);
+		glEnable(GL_POLYGON_SMOOTH);
 
 		glDisable(GL_DEPTH_TEST);
 

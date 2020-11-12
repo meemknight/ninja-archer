@@ -14,7 +14,7 @@ namespace settings {
 
 	float getZoom()
 	{
-		return 3 + sData.zoom * 4;
+		return 2 + sData.zoom * 2;
 	}
 
 	float getUiScale()
@@ -126,7 +126,11 @@ namespace settings {
 
 			menu::uninteractableCentreText("Visual settings");
 
-			menu::slider0_1("Zoom", &sData.zoom);
+			if(!settings::isFullScreen())
+			{
+				menu::slider0_1("Zoom", &sData.zoom);
+			}
+
 			menu::slider0_1("Ui scale", &sData.uiScale);
 
 			if(sData.fullScreen)

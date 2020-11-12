@@ -28,6 +28,7 @@ extern float grabMargin;
 extern float notGrabTimeVal;
 extern bool snapWallGrab;
 
+extern float fullScreenZoom;
 
 extern gl2d::internal::ShaderProgram maskShader;
 extern GLint maskSamplerUniform;
@@ -157,7 +158,6 @@ void loadLevel(glm::ivec2 spawn = { 0, 0 }, bool setSpawn = 0)
 
 	wallLights.clear();
 
-	renderer2d.currentCamera.zoom = 5.1;
 
 	pickups.clear();
 	arrows.clear();
@@ -775,7 +775,14 @@ bool gameLogic(float deltaTime)
 
 #pragma region controlls
 	
-	renderer2d.currentCamera.zoom = settings::getZoom();
+	if(settings::isFullScreen())
+	{
+		renderer2d.currentCamera.zoom = fullScreenZoom * 4;
+	}else
+	{
+		renderer2d.currentCamera.zoom = settings::getZoom();
+	}
+
 
 	if(!currentDialog.blockMovement() && !inGameMenu)
 	{

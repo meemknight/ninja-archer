@@ -1,3 +1,8 @@
+#include "freeListAllocator.h"
+
+char memBlock[GB(1)] = {};
+FreeListAllocator allocator(memBlock, sizeof(memBlock));
+
 #include <Windows.h>
 #include "gameLayer.h"
 #include <GL/glew.h>
@@ -22,6 +27,8 @@
 
 #include "input.h"
 #include "Settings.h"
+
+
 
 extern bool g_WantUpdateHasGamepad;
 
@@ -117,6 +124,8 @@ LRESULT CALLBACK tempWindProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 int MAIN
 {
+
+	allocator.initialized = 1;
 
 HINSTANCE h = GetModuleHandle(0);
 

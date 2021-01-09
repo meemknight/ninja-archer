@@ -5,7 +5,7 @@
 #define MinSoundDist 32
 
 
-#ifdef _DEBUG
+#if 1
 
 void SoundManager::setMusicPositions(MapData& mapData) {}
 

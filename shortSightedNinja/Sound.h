@@ -79,7 +79,7 @@ struct SoundManager
 		void setVolume(float f) { if (loaded)m.setVolume(f * 100); }
 	};
 
-#ifndef _DEBUG
+#if 0
 
 	sf::SoundBuffer soundBuffers[soundEffects::soundEffectCount];
 	sf::Sound soundPlayer;

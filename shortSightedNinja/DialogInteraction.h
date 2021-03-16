@@ -37,7 +37,7 @@ struct FullDialogData
 struct DialogInteraction
 {
 
-	std::vector<DialogData> dialogData;
+	std::vector<DialogData> dialogData = {};
 	int currentDialogPos = 0;
 	
 	void resetDialogData();
@@ -47,12 +47,12 @@ struct DialogInteraction
 	///should be used to close dialog with input
 	bool hasFinishedDialog = 0;
 
-	std::string text;
+	std::string text = "";
 
-	std::string mTextToShow;
+	std::string mTextToShow = "";
 	float mAnimTimePerLetter=0;
 	int mNextLetter = 0;
-	textureDataWithUV currentImage;
+	textureDataWithUV currentImage = {};
 
 	//updates new data
 	void setNewDialog(const std::string &newText, textureDataWithUV img);

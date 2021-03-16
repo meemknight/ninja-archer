@@ -747,7 +747,7 @@ void errorMessage(const char *c)
 void setRelMousePosition(int x, int y)
 {
 	POINT p = { x, y };
-	WINDOWPLACEMENT wp;
+	WINDOWPLACEMENT wp = {};
 
 	GetWindowPlacement(wind, &wp);
 	p.x += wp.rcNormalPosition.left;
@@ -791,13 +791,13 @@ namespace platform
 
 	int isKeyHeld(int key)
 	{
-		return keyBoard[key].held;
+		return keyBoard[key].held && platform::isFocused();
 		//return GetAsyncKeyState(key) && platform::isFocused();
 	}
 
 	int isKeyPressedOn(int key)
 	{
-		return keyBoard[key].pressed;
+		return keyBoard[key].pressed && platform::isFocused();
 		//return ( GetAsyncKeyState(key) & 0x8000) && platform::isFocused();
 	}
 
@@ -808,7 +808,7 @@ namespace platform
 		ImGuiIO& io = ImGui::GetIO();
 		return (!io.WantCaptureMouse) && lbuttonPressed && platform::isFocused();
 #else
-		return  lbuttonPressed && platform::isFocused();
+		return  lbuttonPressed & platform::isFocused();
 #endif
 	
 	}
@@ -819,7 +819,7 @@ namespace platform
 		ImGuiIO& io = ImGui::GetIO();
 		return (!io.WantCaptureMouse) && lbuttonReleased && platform::isFocused();
 #else
-		return  lbuttonReleased && platform::isFocused();
+		return  lbuttonReleased & platform::isFocused();
 #endif
 
 	}
@@ -830,7 +830,7 @@ namespace platform
 		ImGuiIO& io = ImGui::GetIO();
 		return (!io.WantCaptureMouse) && lbutton && platform::isFocused();
 #else
-		return lbutton && platform::isFocused();
+		return lbutton & platform::isFocused();
 #endif
 	
 	}

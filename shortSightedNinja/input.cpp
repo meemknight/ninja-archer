@@ -82,7 +82,7 @@ namespace input
 
 	int getMoveDir()
 	{
-		return -isKeyHeld(Buttons::left) + isKeyHeld(Buttons::right);
+		return -(int)isKeyHeld(Buttons::left) + (int)isKeyHeld(Buttons::right);
 	}
 
 	bool isControllerInput()
@@ -266,7 +266,7 @@ namespace input
 
 	void drawButtonWithHover(gl2d::Renderer2D & renderer, glm::vec2 pos, float size, int button, float a)
 	{
-		float f = (std::sin(clock() / 220.f) / 2.f + 1) * 3.5;
+		float f = (std::sin(clock() / 220.f) / 2.f + 1) * 3.5f;
 		pos.y -= f;
 		drawButton(renderer, pos, size, button, a);
 	}
@@ -319,7 +319,7 @@ namespace input
 				if (b == input::Buttons::jump)
 				{
 					val = pad->bLeftTrigger > 20;
-					val = val | (pad->wButtons & bindingsController[b]);
+					val = val || (pad->wButtons & bindingsController[b]);
 				}
 				else if (b == input::Buttons::shoot)
 				{
@@ -338,7 +338,7 @@ namespace input
 					}
 
 					val = retValX < -moveSensitivity;
-					val =  val | (pad->wButtons & bindingsController[b]);
+					val =  val || (pad->wButtons & bindingsController[b]);
 				}else if(b == input::Buttons::right)
 				{
 					float retValX = pad->sThumbLX / (float)SHRT_MAX;
@@ -352,7 +352,7 @@ namespace input
 					}
 
 					val = retValX > moveSensitivity;
-					val = val | (pad->wButtons & bindingsController[b]);
+					val = val || (pad->wButtons & bindingsController[b]);
 				}else if(b == input::Buttons::down)
 				{
 					float retValY = pad->sThumbLY / (float)SHRT_MAX;
@@ -366,7 +366,7 @@ namespace input
 					}
 
 					val = retValY < (-moveSensitivity * 3.8);
-					val = val | (pad->wButtons & bindingsController[b]);
+					val = val || (pad->wButtons & bindingsController[b]);
 				}else if (b == input::Buttons::up)
 				{
 					float retValY = pad->sThumbLY / (float)SHRT_MAX;
@@ -380,7 +380,7 @@ namespace input
 					}
 
 					val = retValY > moveSensitivity * 3.8;
-					val = val | (pad->wButtons & bindingsController[b]);
+					val = val || (pad->wButtons & bindingsController[b]);
 				}
 				else
 				{

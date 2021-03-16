@@ -170,6 +170,9 @@ void loadLevel(glm::ivec2 spawn = { 0, 0 }, bool setSpawn = 0)
 		return;
 	}
 
+	currentDialog.resetDialogData();
+	currentDialog = {};
+
 	setupMap(mapData, currentLevel);
 	
 	for (int y = 0; y < mapData.h; y++)

@@ -1,3 +1,5 @@
+#define RemoveImgui
+
 #include <Windows.h>
 #include "gameLayer.h"
 #include <GL/glew.h>
@@ -789,12 +791,14 @@ namespace platform
 
 	int isKeyHeld(int key)
 	{
-		return GetAsyncKeyState(key) && platform::isFocused();
+		return keyBoard[key].held;
+		//return GetAsyncKeyState(key) && platform::isFocused();
 	}
 
 	int isKeyPressedOn(int key)
 	{
-		return ( GetAsyncKeyState(key) & 0x8000) && platform::isFocused();
+		return keyBoard[key].pressed;
+		//return ( GetAsyncKeyState(key) & 0x8000) && platform::isFocused();
 	}
 
 	int isLMouseButtonPressed()

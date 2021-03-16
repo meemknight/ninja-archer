@@ -46,7 +46,10 @@ namespace input
 
 	}
 
-	int bindings[Buttons::buttonsCount] = { 0, 'S', 'A', 'D', VK_SPACE, 0, 'W', 'Q', 'E', VK_ESCAPE, VK_ESCAPE };
+	int bindings[Buttons::buttonsCount] = { 0, Button::S, Button::A, Button::D, Button::Space, 0,
+		Button::W, Button::Q, Button::E, Button::Escape, Button::Escape };
+	
+	
 	WORD bindingsController[Buttons::buttonsCount] = { 0, XINPUT_GAMEPAD_DPAD_DOWN
 		, XINPUT_GAMEPAD_DPAD_LEFT, XINPUT_GAMEPAD_DPAD_RIGHT, XINPUT_GAMEPAD_A, 0, XINPUT_GAMEPAD_DPAD_UP,
 	XINPUT_GAMEPAD_LEFT_SHOULDER, XINPUT_GAMEPAD_RIGHT_SHOULDER, XINPUT_GAMEPAD_B, XINPUT_GAMEPAD_START };
@@ -392,23 +395,23 @@ namespace input
 			}
 			else if(b == input::Buttons::left)
 			{
-				val = val || platform::isKeyHeld(bindings[b]) || platform::isKeyHeld(VK_LEFT);
+				val = val || platform::isKeyHeld(bindings[b]) || platform::isKeyHeld(Button::Left);
 			}
 			else if (b == input::Buttons::right)
 			{
-				val = val || platform::isKeyHeld(bindings[b]) || platform::isKeyHeld(VK_RIGHT);
+				val = val || platform::isKeyHeld(bindings[b]) || platform::isKeyHeld(Button::Right);
 			}
 			else if (b == input::Buttons::down)
 			{
-				val = val || platform::isKeyHeld(bindings[b]) || platform::isKeyHeld(VK_DOWN);
+				val = val || platform::isKeyHeld(bindings[b]) || platform::isKeyHeld(Button::Down);
 			}
 			else if (b == input::Buttons::up)
 			{
-				val = val || platform::isKeyHeld(bindings[b]) || platform::isKeyHeld(VK_UP);
+				val = val || platform::isKeyHeld(bindings[b]) || platform::isKeyHeld(Button::Up);
 			}
 			else if (b == input::Buttons::jump)
 			{
-				val = val || platform::isKeyHeld(bindings[b]) || platform::isKeyHeld(VK_RETURN);
+				val = val || platform::isKeyHeld(bindings[b]) || platform::isKeyHeld(Button::Enter);
 			}
 			else
 			{

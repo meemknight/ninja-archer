@@ -57,11 +57,17 @@ void Entity::checkCollisionBrute(glm::vec2 &pos, glm::vec2 lastPos, MapData & ma
 
 	glm::vec2 delta = pos - lastPos;
 
-	if (pos.y < -dimensions.y)
+	if (
+		(pos.y < -dimensions.y)
+		|| (pos.x < -dimensions.x)
+		|| (pos.y > mapData.h * BLOCK_SIZE)
+		|| (pos.x > mapData.w * BLOCK_SIZE)
+		)
 	{
 		return;
 	}
 
+	
 	glm::vec2 newPos = performCollision(mapData, { pos.x, lastPos.y }, { dimensions.x, dimensions.y }, { delta.x, 0 },
 		upTouch, downTouch, leftTouch, rightTouch);
 	pos = performCollision(mapData, { newPos.x, pos.y }, { dimensions.x, dimensions.y }, { 0, delta.y },
@@ -594,14 +600,7 @@ void Entity::draw(gl2d::Renderer2D & renderer2d, float deltaTime, gl2d::Texture 
 	auto s = characterSprite.GetSize();
 	gl2d::TextureAtlasPadding playerAtlas(4, 8, s.x,s.y);
 
-	currentCount += deltaTime;
-	while(currentCount >= frameDuration)
-	{
-		currentCount -= frameDuration;
-		currentFrame++;
-	}
 
-	currentFrame %= 4;
 
 	int state = 0;
 
@@ -638,6 +637,31 @@ void Entity::draw(gl2d::Renderer2D & renderer2d, float deltaTime, gl2d::Texture 
 	{
 		idleTime = 0;
 	}
+
+
+	currentCount += deltaTime;
+
+	if (state == 0)
+	{
+		while (currentCount >= idlefFameDuration)
+		{
+			currentCount -= idlefFameDuration;
+			currentFrame++;
+		}
+	}
+	else
+	{
+		while (currentCount >= frameDuration)
+		{
+			currentCount -= frameDuration;
+			currentFrame++;
+		}
+	}
+
+	
+
+	currentFrame %= 4;
+
 
 	renderer2d.renderRectangle({ pos - glm::vec2(0,0),  8, 8 }, {}, 0, characterSprite,
 		playerAtlas.get(currentFrame, state, !movingRight));

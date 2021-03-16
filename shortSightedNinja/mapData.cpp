@@ -144,6 +144,9 @@ void MapData::cleanup()
 		delete[] data;
 		data = nullptr;
 	}
+
+	w = 0;
+	h = 0;
 }
 
 bool BlockInfo::hasNeighborLeft()

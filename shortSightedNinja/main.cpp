@@ -55,6 +55,8 @@ const float heigth = 680;
 static LARGE_INTEGER queryFrequency;
 static bool openglVsync = 0;
 
+input::Button keyBoard[input::Button::BUTTONS_COUNT];
+
 #pragma region fullScreen
 
 WINDOWPLACEMENT windowPlacementPrev = { sizeof(windowPlacementPrev) };
@@ -157,6 +159,7 @@ void setupFullscreen()
 	}
 
 
+	//to get the zoom use this: actualScreenW / 1920.f;
 }
 
 #pragma endregion
@@ -214,11 +217,13 @@ HINSTANCE h = GetModuleHandle(0);
 	pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW;
 	pfd.iPixelType = PFD_TYPE_RGBA;
 	pfd.cColorBits = 32;
+	pfd.cAlphaBits = 8;
 	pfd.cDepthBits = 32;
 	pfd.iLayerType = PFD_MAIN_PLANE;
 	
 	int nPixelFormat = ChoosePixelFormat(hdc, &pfd);
-	
+	DescribePixelFormat(hdc, nPixelFormat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
+
 	SetPixelFormat(hdc, nPixelFormat, &pfd);
 	
 	HGLRC hrc = wglCreateContext(hdc);
@@ -539,6 +544,9 @@ endImgui:
 
 	LRESULT l = 0;
 
+	bool isDown = 0;
+	bool isUp = 1;
+
 	switch (m)
 	{
 	case WM_LBUTTONDOWN:
@@ -556,6 +564,28 @@ endImgui:
 		lbutton = false;
 		lbuttonReleased = true;
 		break;
+
+	case WM_SYSKEYDOWN:
+	case WM_KEYDOWN:
+	isDown = 1;
+	isUp = 0;
+	case WM_SYSKEYUP:
+	case WM_KEYUP:
+	{
+		bool altWasDown = lp & (1 << 29);
+
+		for (int i = 0; i < input::Button::BUTTONS_COUNT; i++)
+		{
+			if (wp == input::Button::buttonValues[i])
+			{
+				input::processEventButton(keyBoard[i], isDown);
+			}
+		}
+
+		//so altf4 works
+		l = DefWindowProc(wind, m, wp, lp);
+	}break;
+
 	case WM_GETMINMAXINFO:
 	{
 		LPMINMAXINFO lpMMI = (LPMINMAXINFO)lp;
@@ -573,23 +603,38 @@ endImgui:
 		bMouseMoved = 1;
 		break;
 	case WM_ACTIVATE:
-		if (wp == WA_ACTIVE)
+		if (wp)
 		{
 			isFocus = true;
 			if (fullScreen) 
 			{
-				setupFullscreen();
+				//setupFullscreen();
 			}
 		}
-		else if (wp == WA_INACTIVE)
+		else 
 		{
 			isFocus = false;
 
+			//set keys to up
+			lbuttonPressed = false;
+			rbuttonPressed = false;
+			bMouseMoved = false;
+			lbuttonReleased = false;
+
+			for (int i = 0; i < input::Button::BUTTONS_COUNT; i++)
+			{
+				keyBoard[i] = {};
+			}
+
 			if(fullScreen)
 			{
-				ChangeDisplaySettings(0, 0);
+				//ChangeDisplaySettings(0, 0);
 			}
 		}
+		break;
+	case WM_MENUCHAR:
+		//to remove an annoying sound
+		l = MNC_CLOSE << 16;
 		break;
 
 	default:
@@ -610,8 +655,9 @@ void EnableOpenGL(HWND hwnd, HDC* hDC, HGLRC* hRC)
 	pfd.dwFlags = PFD_DRAW_TO_WINDOW |
 		PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
 	pfd.iPixelType = PFD_TYPE_RGBA;
-	pfd.cColorBits = 32; //todo look into this (24)
+	pfd.cColorBits = 32;
 	pfd.cDepthBits = 16;
+	pfd.cAlphaBits = 8;
 	pfd.cStencilBits = 8;
 	pfd.iLayerType = PFD_MAIN_PLANE;
 
@@ -632,6 +678,7 @@ void EnableOpenGL(HWND hwnd, HDC* hDC, HGLRC* hRC)
 			WGL_COLOR_BITS_ARB, 32,
 			WGL_DEPTH_BITS_ARB, 24,
 			WGL_STENCIL_BITS_ARB, 8,
+			WGL_ALPHA_BITS_ARB, 8,
 			WGL_SAMPLE_BUFFERS_ARB, GL_TRUE,
 			WGL_SAMPLES_ARB, 4,
 			0 // End of attributes list
@@ -656,7 +703,6 @@ void EnableOpenGL(HWND hwnd, HDC* hDC, HGLRC* hRC)
 
 	}else
 	{
-		
 
 		int iFormat;
 
@@ -664,6 +710,8 @@ void EnableOpenGL(HWND hwnd, HDC* hDC, HGLRC* hRC)
 		*hDC = GetDC(hwnd);
 
 		iFormat = ChoosePixelFormat(*hDC, &pfd);
+		
+		DescribePixelFormat(*hDC, iFormat, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
 
 		SetPixelFormat(*hDC, iFormat, &pfd);
 
@@ -785,13 +833,13 @@ namespace platform
 
 	int isRMouseButtonPressed()
 	{
-		return rbuttonPressed && platform::isFocused();
+		return (bool)rbuttonPressed & (bool)platform::isFocused();
 	}
 
 
 	int isRMouseHeld()
 	{
-		return rbutton && platform::isFocused();
+		return (bool)rbutton & (bool)platform::isFocused();
 	}
 
 	static bool lastShow = 1;
@@ -816,7 +864,8 @@ namespace platform
 	bool isFocused()
 	{
 		//return 1;
-		return GetActiveWindow() == wind;
+		return isFocus;
+		//return GetActiveWindow() == wind;
 	}
 
 	bool mouseMoved()

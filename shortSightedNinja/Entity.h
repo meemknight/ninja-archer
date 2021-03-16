@@ -32,13 +32,12 @@ struct Entity
 	float timeLeftGrounded;
 
 	float frameDuration = 0.10f;
+	float idlefFameDuration = 0.13f;
 	float currentCount = 0;
 	int currentFrame = 0;
 
 	float idleTime = 0;
-
-	void checkCollisionBrute(glm::vec2 &pos, glm::vec2 lastPos, MapData &mapData,
-	bool &upTouch, bool &downTouch, bool &leftTouch, bool &rightTouch);
+	
 	void resolveConstrains(MapData &mapData);
 
 	float notGrabTime = 0;
@@ -80,8 +79,11 @@ struct Entity
 	void jumpFromWall();
 
 private:
+	void checkCollisionBrute(glm::vec2& pos, glm::vec2 lastPos, MapData& mapData,
+		bool& upTouch, bool& downTouch, bool& leftTouch, bool& rightTouch);
 	glm::vec2 performCollision(MapData &mapDat, glm::vec2 pos, glm::vec2 size, glm::vec2 delta,
-	bool &upTouch, bool &downTouch, bool &leftTouch, bool &rightTouch);
+		bool &upTouch, bool &downTouch, bool &leftTouch, bool &rightTouch);
+
 };
 
 bool aabb(glm::vec4 b1, glm::vec4 b2);

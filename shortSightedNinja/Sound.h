@@ -13,10 +13,10 @@ struct SoundManager
 		musicCave1,
 		musicIce,
 		musicBlue,
-		musicCrimson,
+		musicCrimson,	//tension
 		musicKhaki,
 		musicDarkGreen,
-		musicLime,
+		musicLime, //jungle 1
 		musicGray, //cave 2 I guess
 		musicTapesCount
 	};
@@ -27,12 +27,12 @@ struct SoundManager
 		"resources//tikiForest.wav",
 		0,
 		"resources//cave.wav",
-		0,
-		0,
-		0,
-		0,
-		0,
-		0,
+		0,//ice
+		0,//snow cave ?
+		"resources//tension.wav",//tension
+		0,//wood
+		0,//dark green
+		"resources//jungle1.wav",
 		0,
 	};
 
@@ -41,7 +41,7 @@ struct SoundManager
 		musicEffectBirds = 0,
 		musicEffectSnowStorm,
 		musicEffectWater,
-		musicEffectCavem,
+		musicEffectCavem, // gray
 		musicEffectsCount
 	};
 
@@ -74,7 +74,7 @@ struct SoundManager
 		float currentVolume = 0;
 		float desiredVolume = 0;
 
-		void play() { if (loaded)m.play(); }
+		void play() { if (loaded) { m.play(); m.setLoop(1); } }
 		void stop() { if (loaded)m.stop(); }
 		void setVolume(float f) { if (loaded)m.setVolume(f * 100); }
 	};

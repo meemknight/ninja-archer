@@ -130,23 +130,6 @@ torchData MapData::getTorchData(int x, int y)
 	}
 }
 
-//todo remove
-//glm::vec2 MapData::getTorchLightBox(int x, int y)
-//{
-//	auto iter = std::find_if(torchDataVector.begin(), torchDataVector.end(),
-//		[x, y](torchData &d)->bool { return (d.pos.x == x && d.pos.y == y); });
-//
-//	if (iter != torchDataVector.end())
-//	{
-//		return { iter->xBox, iter->yBox };
-//	}
-//	else
-//	{
-//		return { 0,0 };
-//	}
-//
-//}
-
 void MapData::clearColorData()
 {
 	if (data)

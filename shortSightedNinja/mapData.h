@@ -595,10 +595,17 @@ struct exitData
 struct torchData
 {
 	torchData() {};
-	torchData(glm::ivec2 p, float i) :pos(p), light(i) {};
+	torchData(glm::ivec2 p, float i):pos(p), light(i) {};
+	torchData(glm::ivec2 p, float i, 
+		float xBox, float yBox)
+		:pos(p), light(i), xBox(xBox), yBox(yBox) {};
+	
 
 	glm::ivec2 pos;
 	float light;
+
+	float xBox = 0;
+	float yBox = 0;
 };
 
 struct MapData
@@ -624,7 +631,12 @@ struct MapData
 	void create(int w, int h, unsigned short* d);
 	BlockInfo& get(int x, int y);
 
-	float getTorchLight(int x, int y);
+	float getTorchLightIntensity(int x, int y);
+	
+	torchData getTorchData(int x, int y);
+
+	//todo remove please
+	//glm::vec2 getTorchLightBox(int x, int y);
 
 	void clearColorData();
 

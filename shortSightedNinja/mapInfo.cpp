@@ -596,7 +596,7 @@ void setupMap(MapData &md, int levelId)
 		md.exitDataVector.emplace_back(glm::ivec2{ 124, 21 }, 3);
 
 
-		md.torchDataVector.emplace_back(glm::ivec2{ 88, 2 }, 5);
+		md.torchDataVector.emplace_back(glm::ivec2{ 88, 2 }, 5, 0, 0);
 		md.torchDataVector.emplace_back(glm::ivec2{ 77, 10 }, 3);
 		md.torchDataVector.emplace_back(glm::ivec2{ 59, 11 }, 5);
 		md.torchDataVector.emplace_back(glm::ivec2{ 88, 12 }, 6);

@@ -235,19 +235,24 @@ void loadLevel(glm::ivec2 spawn = { 0, 0 }, bool setSpawn = 0)
 	player.iceGrab = 0;
 	player.isSittingOnIce = 0;
 
+
+#pragma region setup light sources
 	wallLights.clear();
-	//setup light sources
+
 	for (int y = 0; y < mapData.h; y++)
 		for (int x = 0; x < mapData.w; x++)
 		{
 			if (isLitTorch(mapData.get(x, y).type))
 			{
-				wallLights.push_back({ {x,y}, 0, mapData.getTorchLight(x,y) });
+				wallLights.push_back({ {x,y}, 0, mapData.getTorchLightIntensity(x,y) });
 			}else if(unLitTorch(mapData.get(x, y).type))
-			{			
-				wallLights.push_back({ {x,y}, 0, 0 });
+			{
+				auto data = mapData.getTorchData(x, y);
+				wallLights.push_back(LightSource( {x,y}, 0, 0, data.xBox, data.yBox ));
 			}
 		}
+#pragma endregion
+
 
 	soundManager.setMusicPositions(mapData);
 
@@ -1067,7 +1072,7 @@ bool gameLogic(float deltaTime)
 					if(it!= wallLights.end())
 					{
 						it->animationDuration = it->animationStartTime;
-						it->intensity = mapData.getTorchLight(x, y);
+						it->intensity = mapData.getTorchLightIntensity(x, y);
 					}
 
 				}
@@ -1276,7 +1281,7 @@ bool gameLogic(float deltaTime)
 					b.type++;
 				}
 
-				i.intensity = mapData.getTorchLight(i.pos.x, i.pos.y);
+				i.intensity = mapData.getTorchLightIntensity(i.pos.x, i.pos.y);
 				i.animationDuration = i.animationStartTime;
 			}
 		}

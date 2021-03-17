@@ -49,7 +49,6 @@ void MapData::create(int w, int h, unsigned short* d = 0)
 			data[i].type = d[i];
 			data[i].mainColor = 1;
 
-
 		}
 	}
 
@@ -68,29 +67,30 @@ void MapData::create(int w, int h, unsigned short* d = 0)
 				//d.type = Block::none;
 			}
 			else
-				if (d.type == Block::musicRed)
-				{
-					redSoundPos.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
-					//d.type = Block::none;
-				}
-				else
-					if (d.type == Block::musicTiki)
-					{
-						tikiSoundPos.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
-						//d.type = Block::none;
-					}
-					else
-						if (d.type == Block::musicSnow)
-						{
-							snowSoundPos.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
-							//d.type = Block::none;
-						}
-						else
-							if (d.type == Block::musicCave)
-							{
-								caveSoundPos.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
-								//d.type = Block::none;
-							}
+			if (d.type == Block::musicRed)
+			{
+				redSoundPos.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
+				//d.type = Block::none;
+			}
+			else
+			if (d.type == Block::musicTiki)
+			{
+				tikiSoundPos.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
+				//d.type = Block::none;
+			}
+			else
+			if (d.type == Block::musicSnow)
+			{
+				snowSoundPos.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
+				//d.type = Block::none;
+			}
+			else
+			if (d.type == Block::musicCave)
+			{
+				caveSoundPos.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
+				//d.type = Block::none;
+			}
+
 		}
 
 	setNeighbors();
@@ -101,7 +101,7 @@ BlockInfo& MapData::get(int x, int y)
 	return data[x + this->w * y];
 }
 
-float MapData::getTorchLight(int x, int y)
+float MapData::getTorchLightIntensity(int x, int y)
 {
 	auto iter = std::find_if(torchDataVector.begin(), torchDataVector.end(),
 		[x, y](torchData &d)->bool {return (d.pos.x == x && d.pos.y == y); });
@@ -114,6 +114,38 @@ float MapData::getTorchLight(int x, int y)
 		return 5;
 	}
 }
+
+torchData MapData::getTorchData(int x, int y)
+{
+	auto iter = std::find_if(torchDataVector.begin(), torchDataVector.end(),
+		[x, y](torchData &d)->bool { return (d.pos.x == x && d.pos.y == y); });
+
+	if (iter != torchDataVector.end())
+	{
+		return *iter;
+	}
+	else
+	{
+		return torchData({x, y}, 5, 0, 0);
+	}
+}
+
+//todo remove
+//glm::vec2 MapData::getTorchLightBox(int x, int y)
+//{
+//	auto iter = std::find_if(torchDataVector.begin(), torchDataVector.end(),
+//		[x, y](torchData &d)->bool { return (d.pos.x == x && d.pos.y == y); });
+//
+//	if (iter != torchDataVector.end())
+//	{
+//		return { iter->xBox, iter->yBox };
+//	}
+//	else
+//	{
+//		return { 0,0 };
+//	}
+//
+//}
 
 void MapData::clearColorData()
 {

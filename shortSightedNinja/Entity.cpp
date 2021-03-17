@@ -142,7 +142,7 @@ void Entity::resolveConstrains(MapData & mapData)
 	{
 		if (velocity.y < 0)
 		{
-			velocity.y = 0;
+			velocity.y *= 0;
 		}
 	}
 
@@ -977,7 +977,7 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 					if (it != wallLights.end())
 					{
 						it->animationDuration = it->animationStartTime;
-						it->intensity = mapData.getTorchLight(x, y);
+						it->intensity = mapData.getTorchLightIntensity(x, y);
 					}
 					//wallLights.push_back({ { curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE }, 0, 
 					//	mapData.getTorchLight( curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE ) });
@@ -1184,7 +1184,6 @@ void Bird::update(float deltaTime)
 			}
 
 		}
-
 
 
 		//todo animate stationary bird

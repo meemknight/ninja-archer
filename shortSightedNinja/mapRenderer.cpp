@@ -204,6 +204,9 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData,
 					|| data.type == Block::flagUp
 					|| data.type == Block::torchLitWood
 					|| data.type == Block::snowLitTorch
+					|| data.type == Block::lavaTop
+					|| data.type == Block::lavaBottom
+					|| data.type == Block::lavaSource
 					)
 				{
 					data.animPos = curPos;
@@ -246,6 +249,8 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData,
 					|| data.type == Block::icicle2
 					|| data.type == Block::snowPlant1
 					|| data.type == Block::snowPlant2
+					|| data.type == Block::lavaKill
+					|| data.type == Block::lava
 
 					)
 				{

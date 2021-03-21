@@ -218,10 +218,8 @@ namespace input
 				lastShootDir = { retValX, retValY };
 				lastShootDir = glm::normalize(lastShootDir);
 			}
-			
 		
 		}
-
 
 		for (int i = 0; i < Buttons::buttonsCount; i++)
 		{

@@ -8,7 +8,6 @@
 namespace input
 {
 
-
 	struct Button
 	{
 		char pressed = 0;

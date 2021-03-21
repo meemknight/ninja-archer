@@ -40,7 +40,6 @@ gl2d::Renderer2D renderer2d;
 
 #pragma region music
 
-
 //music
 
 
@@ -132,7 +131,7 @@ float lightPerc = 1;
 
 Bird bird;
 
-const char* levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki tribe", "Secret Level"};
+const char* levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki tribe", "Secret Level", "test world"};
 
 void respawn();
 
@@ -1079,7 +1078,7 @@ bool gameLogic(float deltaTime)
 
 				g.playerEntered = 1;
 
-				if (g.type == Block::water3)
+				if (g.type == Block::water3 || g.type == Block::lavaKill)
 				{
 					player.dying = 1;
 				}else
@@ -1878,12 +1877,11 @@ bool gameLogic(float deltaTime)
 
 void closeGame()
 {
-
-	soundManager.stoppMusic();
-
-	//saveState(playerSpawnPos, currentLevel, mapData.dialogs, blueChanged, redChanged, grayChanged);
 	settings::saveSettings();
 
+	//saveState(playerSpawnPos, currentLevel, mapData.dialogs, blueChanged, redChanged, grayChanged);
+	
+	soundManager.stoppMusic();
 
 }
 

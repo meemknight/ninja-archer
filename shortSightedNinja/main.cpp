@@ -247,6 +247,7 @@ HINSTANCE h = GetModuleHandle(0);
 }
 #pragma endregion
 
+#pragma region window
 
 	WNDCLASS wc = {};
 	wc.hInstance = h;
@@ -272,6 +273,10 @@ HINSTANCE h = GetModuleHandle(0);
 		0
 	);
 
+#pragma endregion
+
+#pragma region enable opengl
+
 	HDC hdc;
 	HGLRC hrc;
 
@@ -281,6 +286,9 @@ HINSTANCE h = GetModuleHandle(0);
 	//	MessageBoxA(0, "glewInit", "Error from glew", MB_ICONERROR);
 	//	return 1;
 	//}
+
+#pragma endregion
+
 
 	gl2d::setErrorFuncCallback([](const char* c) {elog(c); });
 	gl2d::init();
@@ -411,7 +419,7 @@ HINSTANCE h = GetModuleHandle(0);
 
 #pragma region fullScreen
 
-			if (fullScreen != settings::isFullScreen()) 
+			if (isFocus && ( fullScreen != settings::isFullScreen())) 
 			{
 				DWORD dwStyle = GetWindowLong(wind, GWL_STYLE);
 				if (dwStyle & (WS_OVERLAPPEDWINDOW))
@@ -454,7 +462,6 @@ HINSTANCE h = GetModuleHandle(0);
 
 #pragma endregion
 
-
 			lbuttonPressed = false;
 			rbuttonPressed = false;
 			bMouseMoved = false;
@@ -466,7 +473,7 @@ HINSTANCE h = GetModuleHandle(0);
 	CloseWindow(wind);
 
 	closeGame();
-	//todo not always workking
+	//todo not always workking mabe use raii
 
 	return 0;
 }

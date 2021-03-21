@@ -219,6 +219,8 @@ namespace input
 
 	*/
 
+platform::Button jumpButton;
+
 int buttonMapping1[Buttons::buttonsCount] =
 {
 	0,
@@ -265,8 +267,29 @@ int buttonMapping1[Buttons::buttonsCount] =
 						b.held = 1;
 						b.released = 1;
 					}
-				}
+				}else if (i == Buttons::jump)
+				{
+					bool state = 0;
 
+					auto controllerB = platform::getControllerButtons().buttons[platform::ControllerButtons::A];
+					auto controllerC = platform::getControllerButtons().RT;
+
+					state |= (bool)controllerB.pressed;
+					state |= (bool)controllerB.held;
+
+					if (controllerC > 0.3)
+					{
+						state = 1;
+					}
+
+					state |= (bool)platform::isKeyPressedOn(buttonMapping1[i]);
+					state |= (bool)platform::isKeyHeld(buttonMapping1[i]);
+
+					platform::internal::processEventButton(jumpButton, state);
+					platform::internal::updateButton(jumpButton);
+
+					b = jumpButton;
+				}
 				if(i == Buttons::left)
 				{
 					auto controllerB = platform::getControllerButtons().buttons[platform::ControllerButtons::Left];
@@ -279,9 +302,9 @@ int buttonMapping1[Buttons::buttonsCount] =
 						b.released = 1;
 					}
 
-					b.pressed |= (bool)platform::isKeyPressedOn(buttonMapping1[input::Buttons::left]);
-					b.held |= (bool)platform::isKeyHeld(buttonMapping1[input::Buttons::left]);
-					b.released |= (bool)platform::isKeyReleased(buttonMapping1[input::Buttons::left]);
+					b.pressed |= (bool)platform::isKeyPressedOn(platform::Button::Left);
+					b.held |= (bool)platform::isKeyHeld(platform::Button::Left);
+					b.released |= (bool)platform::isKeyReleased(platform::Button::Left);
 
 					b.pressed |= controllerB.pressed;
 					b.held |= controllerB.held;
@@ -300,9 +323,9 @@ int buttonMapping1[Buttons::buttonsCount] =
 						b.released = 1;
 					}
 
-					b.pressed |= (bool)platform::isKeyPressedOn(buttonMapping1[input::Buttons::right]);
-					b.held |= (bool)platform::isKeyHeld(buttonMapping1[input::Buttons::right]);
-					b.released |= (bool)platform::isKeyReleased(buttonMapping1[input::Buttons::right]);
+					b.pressed |= (bool)platform::isKeyPressedOn(platform::Button::Right);
+					b.held |= (bool)platform::isKeyHeld(platform::Button::Right);
+					b.released |= (bool)platform::isKeyReleased(platform::Button::Right);
 
 					b.pressed |= controllerB.pressed;
 					b.held |= controllerB.held;
@@ -321,9 +344,9 @@ int buttonMapping1[Buttons::buttonsCount] =
 						b.released = 1;
 					}
 
-					b.pressed |= (bool)platform::isKeyPressedOn(buttonMapping1[input::Buttons::down]);
-					b.held |= (bool)platform::isKeyHeld(buttonMapping1[input::Buttons::down]);
-					b.released |= (bool)platform::isKeyReleased(buttonMapping1[input::Buttons::down]);
+					b.pressed |= (bool)platform::isKeyPressedOn(platform::Button::Down);
+					b.held |= (bool)platform::isKeyHeld(platform::Button::Down);
+					b.released |= (bool)platform::isKeyReleased(platform::Button::Down);
 
 					b.pressed |= controllerB.pressed;
 					b.held |= controllerB.held;
@@ -342,9 +365,9 @@ int buttonMapping1[Buttons::buttonsCount] =
 						b.released = 1;
 					}
 
-					b.pressed |= platform::isKeyPressedOn(buttonMapping1[input::Buttons::down]);
-					b.held |= platform::isKeyHeld(buttonMapping1[input::Buttons::down]);
-					b.released |= platform::isKeyReleased(buttonMapping1[input::Buttons::down]);
+					b.pressed |= platform::isKeyPressedOn(platform::Button::Up);
+					b.held |= platform::isKeyHeld(platform::Button::Up);
+					b.released |= platform::isKeyReleased(platform::Button::Up);
 
 					b.pressed |= controllerB.pressed;
 					b.held |= controllerB.held;
@@ -369,23 +392,7 @@ int buttonMapping1[Buttons::buttonsCount] =
 					b.released |= (bool)controllerB.released;
 				}
 
-				if(i == Buttons::jump)
-				{
-					auto controllerB = platform::getControllerButtons().buttons[platform::ControllerButtons::A];
-					auto controllerC = platform::getControllerButtons().RT;
-
-					b.pressed |= (bool)controllerB.pressed;
-					b.held |= (bool)controllerB.held;
-					b.released |= (bool)controllerB.released;
-
-					if (controllerC > 0.3)
-					{
-						b.pressed = 1;
-						b.held = 1;
-						b.released = 1;
-					}
-				}
-
+				
 				b.pressed |= (bool)platform::isKeyPressedOn(buttonMapping1[i]);
 				b.held |= (bool)platform::isKeyHeld(buttonMapping1[i]);
 				b.released |= (bool)platform::isKeyReleased(buttonMapping1[i]);

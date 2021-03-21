@@ -861,7 +861,7 @@ bool gameLogic(float deltaTime)
 			}
 		}
 
-		if (input::isKeyReleased(input::Buttons::jump))
+		if (!input::isKeyHeld(input::Buttons::jump) && !input::isKeyPressedOn(input::Buttons::jump))
 		{
 			if (player.velocity.y < 0)
 			{

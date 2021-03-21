@@ -1,6 +1,7 @@
 #include "gameLayer.h"
 #include "gl2d/gl2d.h"
 #include "platformInput.h"
+#include "input.h"
 
 gl2d::Renderer2D renderer;
 
@@ -43,26 +44,26 @@ bool gameLogic(float deltaTime)
 #pragma region input
 	float speed = 400 * deltaTime;
 
-	if(platform::isKeyHeld(platform::Button::Up) 
-		|| platform::getControllerButtons().buttons[platform::ControllerButtons::Up].held
+	if(
+		input::isKeyHeld(input::Buttons::up)
 		)
 	{
 		gameData.posy -= speed;
 	}
-	if (platform::isKeyHeld(platform::Button::Down)
-		|| platform::getControllerButtons().buttons[platform::ControllerButtons::Down].held
+	if (
+		input::isKeyHeld(input::Buttons::down)
 		)
 	{
 		gameData.posy += speed;
 	}
-	if (platform::isKeyHeld(platform::Button::Left)
-		|| platform::getControllerButtons().buttons[platform::ControllerButtons::Left].held
+	if (
+		 input::isKeyHeld(input::Buttons::left)
 		)
 	{
 		gameData.posx -= speed;
 	}
-	if (platform::isKeyHeld(platform::Button::Right)
-		|| platform::getControllerButtons().buttons[platform::ControllerButtons::Right].held
+	if (
+		input::isKeyHeld(input::Buttons::right)
 		)
 	{
 		gameData.posx += speed;
@@ -73,17 +74,12 @@ bool gameLogic(float deltaTime)
 
 	glm::vec4 colors[4] = { Colors_Orange, Colors_Orange, Colors_Orange, Colors_Orange };
 
-	{
-		colors[0].r = platform::getControllerButtons().LT;
-		colors[1].r = platform::getControllerButtons().RT;
-		colors[2].r = platform::getControllerButtons().LStick.x;
-		colors[3].r = platform::getControllerButtons().RStick.y;
-	}
+
 
 	renderer.renderRectangle({ 10,10, 100, 100 }, colors, {}, 30);
 
 	
-	renderer.renderRectangle({ gameData.posx,gameData.posy, 100, 100 }, { 0,0 }, 0, texture);
+	renderer.renderRectangle({ gameData.posx,gameData.posy, 100, 100 }, colors);
 
 
 #pragma region set finishing stuff

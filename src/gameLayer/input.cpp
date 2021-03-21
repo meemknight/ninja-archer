@@ -7,6 +7,7 @@
 #include "tools.h"
 #include <cmath>
 #include <ctime>
+#include "platformInput.h"
 
 //todo remove extern
 gl2d::Texture uiButtons;
@@ -15,6 +16,7 @@ extern gl2d::Font font;
 namespace input
 {
 
+	/*
 	typedef DWORD WINAPI XInputGetState_t(DWORD dwUserIndex, XINPUT_STATE* pState);
 	static XInputGetState_t *DynamicXinputGetState;
 	typedef DWORD WINAPI XInputSetState_t(DWORD dwUserIndex, XINPUT_VIBRATION* pState);
@@ -57,16 +59,26 @@ namespace input
 	float deadZone = 0.28f;
 	float moveSensitivity = 0.25f;
 
+
+
+	bool isControllerMenuButtonReleased()
+	{
+		return false;
+	}
+
+	*/
+
 	int buttonsHeld[Buttons::buttonsCount] = {};
 	int buttonsPressed[Buttons::buttonsCount] = {};
 	int buttonsReleased[Buttons::buttonsCount] = {};
 
 	bool isKeyPressedOn(int b)
 	{
+
 		return buttonsPressed[b];
 	}
-	
-	bool isKeyHeld(int b) 
+
+	bool isKeyHeld(int b)
 	{
 		return buttonsHeld[b];
 	}
@@ -76,27 +88,18 @@ namespace input
 		return buttonsReleased[b];
 	}
 
-	bool isControllerMenuButtonReleased()
-	{
-		return false;
-	}
 
 	int getMoveDir()
 	{
-		return -(int)isKeyHeld(Buttons::left) + (int)isKeyHeld(Buttons::right);
+		return -(int)input::isKeyHeld(input::Buttons::left) + (int)input::isKeyHeld(input::Buttons::right);
 	}
 
-	bool isControllerInput()
-	{
-		return usedController;
-	}
-
-	glm::vec2 lastShootDir = {1,0};
+	glm::vec2 lastShootDir = { 1,0 };
 
 	glm::vec2 getShootDir(glm::vec2 centre)
 	{
 
-		if(platform::mouseMoved())
+		if (platform::mouseMoved())
 		{
 			lastShootDir = glm::vec2(platform::getRelMousePosition()) - centre;
 			lastShootDir = glm::normalize(lastShootDir);
@@ -106,6 +109,14 @@ namespace input
 
 	}
 
+
+	/*
+	bool isControllerInput()
+	{
+		return usedController;
+	}
+
+	
 	void updateInput()
 	{
 		XINPUT_STATE s;
@@ -258,6 +269,174 @@ namespace input
 
 	}
 
+	*/
+
+int buttonMapping1[Buttons::buttonsCount] =
+{
+	0, //todo add none in engine
+	platform::Button::S, 
+	platform::Button::A,
+	platform::Button::D,
+	platform::Button::Space,
+	0, //shoot
+	platform::Button::W,
+	platform::Button::Q,
+	platform::Button::E,
+	platform::Button::Escape,
+	platform::Button::Escape,
+};
+
+	void updateInput()
+	{
+		//todo add controller input
+	
+		for (int i = 0; i < Buttons::buttonsCount; i++)
+		{
+			platform::Button b = {};
+			if(i == Buttons::none)
+			{
+				b.pressed = 0;
+				b.held = 0;
+				b.released = 0;
+			}
+			if(i == Buttons::shoot)
+			{
+				b.pressed = platform::isLMousePressed();
+				b.held = platform::isLMouseHeld();
+				b.released = platform::isLMouseReleased();
+				
+				auto controllerB = platform::getControllerButtons().buttons[platform::ControllerButtons::B];
+				auto controllerC = platform::getControllerButtons().RT;
+
+				b.pressed |= controllerB.pressed;
+				b.held |= controllerB.held;
+				b.released |= controllerB.released;
+
+				if(controllerC > 0.3)
+				{
+					b.pressed = 1;
+					b.held = 1;
+					b.released = 1;
+				}
+
+			}else
+			{
+				if(i == Buttons::left)
+				{
+					auto controllerB = platform::getControllerButtons().buttons[platform::ControllerButtons::Left];
+					auto controllerC = platform::getControllerButtons().LStick.x;
+
+					if (controllerC < -0.4)
+					{
+						b.pressed = 1;
+						b.held = 1;
+						b.released = 1;
+					}
+
+					b.pressed |= platform::isKeyPressedOn(buttonMapping1[platform::Button::Left]);
+					b.held |= platform::isKeyHeld(buttonMapping1[platform::Button::Left]);
+					b.released |= platform::isKeyReleased(buttonMapping1[platform::Button::Left]);
+
+					b.pressed |= controllerB.pressed;
+					b.held |= controllerB.held;
+					b.released |= controllerB.released;
+				}
+
+				if (i == Buttons::right)
+				{
+					auto controllerB = platform::getControllerButtons().buttons[platform::ControllerButtons::Right];
+					auto controllerC = platform::getControllerButtons().LStick.x;
+
+					if (controllerC > 0.4)
+					{
+						b.pressed = 1;
+						b.held = 1;
+						b.released = 1;
+					}
+
+					b.pressed |= platform::isKeyPressedOn(buttonMapping1[platform::Button::Right]);
+					b.held |= platform::isKeyHeld(buttonMapping1[platform::Button::Right]);
+					b.released |= platform::isKeyReleased(buttonMapping1[platform::Button::Right]);
+
+					b.pressed |= controllerB.pressed;
+					b.held |= controllerB.held;
+					b.released |= controllerB.released;
+				}
+
+				if (i == Buttons::down)
+				{
+					auto controllerB = platform::getControllerButtons().buttons[platform::ControllerButtons::Down];
+					auto controllerC = platform::getControllerButtons().LStick.y;
+
+					if (controllerC > 0.4)
+					{
+						b.pressed = 1;
+						b.held = 1;
+						b.released = 1;
+					}
+
+					b.pressed |= platform::isKeyPressedOn(buttonMapping1[platform::Button::Down]);
+					b.held |= platform::isKeyHeld(buttonMapping1[platform::Button::Down]);
+					b.released |= platform::isKeyReleased(buttonMapping1[platform::Button::Down]);
+
+					b.pressed |= controllerB.pressed;
+					b.held |= controllerB.held;
+					b.released |= controllerB.released;
+				}
+
+				if (i == Buttons::up)
+				{
+					auto controllerB = platform::getControllerButtons().buttons[platform::ControllerButtons::Up];
+					auto controllerC = platform::getControllerButtons().LStick.y;
+
+					if (controllerC < -0.4)
+					{
+						b.pressed = 1;
+						b.held = 1;
+						b.released = 1;
+					}
+
+					b.pressed |= platform::isKeyPressedOn(buttonMapping1[platform::Button::Up]);
+					b.held |= platform::isKeyHeld(buttonMapping1[platform::Button::Up]);
+					b.released |= platform::isKeyReleased(buttonMapping1[platform::Button::Up]);
+
+					b.pressed |= controllerB.pressed;
+					b.held |= controllerB.held;
+					b.released |= controllerB.released;
+				}
+				
+				if(i == Buttons::jump)
+				{
+					auto controllerB = platform::getControllerButtons().buttons[platform::ControllerButtons::A];
+					auto controllerC = platform::getControllerButtons().LT;
+
+					b.pressed |= controllerB.pressed;
+					b.held |= controllerB.held;
+					b.released |= controllerB.released;
+
+					if (controllerC > 0.3)
+					{
+						b.pressed = 1;
+						b.held = 1;
+						b.released = 1;
+					}
+				}
+
+				b.pressed |= platform::isKeyPressedOn(buttonMapping1[i]);
+				b.held |= platform::isKeyHeld(buttonMapping1[i]);
+				b.released |= platform::isKeyReleased(buttonMapping1[i]);
+			}
+
+			buttonsReleased[i] = b.released;
+			buttonsHeld[i] = b.held;
+			buttonsPressed[i] = b.pressed;
+	
+		}
+	
+	}
+
+
+
 	void drawButton(gl2d::Renderer2D &renderer, glm::vec2 pos, float size, int button, float a)
 	{
 		drawButton(renderer, pos, size, button, input::isControllerInput(),a);
@@ -298,6 +477,7 @@ namespace input
 
 	}
 
+	/*
 	namespace internal
 	{
 
@@ -421,6 +601,6 @@ namespace input
 
 		}
 	}
-
+	*/
 
 };

@@ -5,6 +5,7 @@
 #include "input.h"
 #include <iomanip>
 #include "gameLayer.h"
+#include "platformInput.h"
 
 struct lineInfo
 {
@@ -98,6 +99,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 
 	//input bindings
 	///todo add your own functions here
+
 
 	bool usingControllerInput = input::isControllerInput();
 	bool acceptKeyReleased = input::isKeyReleased(input::Buttons::jump);

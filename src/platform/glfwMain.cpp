@@ -12,6 +12,7 @@
 #include "gameLayer.h"
 #include <fstream>
 #include <chrono>
+#include "input.h"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -316,6 +317,8 @@ int main()
 		if (augmentedDeltaTime > 1.f / 10) { augmentedDeltaTime = 1.f / 10; }
 	
 	#pragma endregion
+
+		input::updateInput();
 
 	#pragma region game logic
 

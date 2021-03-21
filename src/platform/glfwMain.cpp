@@ -269,6 +269,11 @@ int main()
 
 	int w = 500;
 	int h = 500;
+	
+	//	WGL_SAMPLE_BUFFERS_ARB, GL_TRUE,
+	//	WGL_SAMPLES_ARB, 4,
+	glfwWindowHint(GLFW_SAMPLES, 4);
+
 	wind = glfwCreateWindow(w, h, "geam", nullptr, nullptr);
 	glfwMakeContextCurrent(wind);
 	glfwSwapInterval(1);
@@ -281,10 +286,16 @@ int main()
 	
 	permaAssertComment(gladLoadGL(), "err initializing glad");
 
+	glEnable(GL_MULTISAMPLE);
+
+
 #pragma endregion
 
 #pragma region gl2d
+
 	gl2d::init();
+	gl2d::setErrorFuncCallback([](const char *c) { permaAssertComment(0, c); });
+
 #pragma endregion
 
 #pragma region audio

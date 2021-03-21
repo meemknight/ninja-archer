@@ -160,6 +160,37 @@ namespace platform
 			b.newState = -1;
 		}
 
+		inline void updateButtonInplace(Button &b, bool state)
+		{
+			if (state == 1)
+			{
+				if (b.held)
+				{
+					b.pressed = false;
+				}
+				else
+				{
+					b.pressed = true;
+				}
+
+				b.held = true;
+				b.released = false;
+			}
+			else if(b.held)
+			{
+				b.held = false;
+				b.pressed = false;
+				b.released = true;
+			}else
+			{
+				b.held = false;
+				b.pressed = false;
+				b.released = false;
+			}
+			
+
+			b.newState = -1;
+		}
 
 		void updateAllButtons();
 		void resetInputsToZero();

@@ -46,6 +46,17 @@ namespace input
 
 	glm::vec2 getShootDir(glm::vec2 centre)
 	{
+		float x = platform::getControllerButtons().RStick.x;
+		float y = platform::getControllerButtons().RStick.y;
+
+		glm::vec2 dir(x, y);
+
+		if(glm::length(dir) > 0.5)
+		{
+			dir /= glm::length(dir);
+			
+			return dir;
+		}
 
 		if (platform::mouseMoved())
 		{
@@ -220,6 +231,11 @@ namespace input
 	*/
 
 platform::Button jumpButton;
+platform::Button shootButton;
+platform::Button upButton;
+platform::Button downButton;
+platform::Button menuButton;
+platform::Button backButton;
 
 int buttonMapping1[Buttons::buttonsCount] =
 {
@@ -250,23 +266,32 @@ int buttonMapping1[Buttons::buttonsCount] =
 			{
 				if (i == Buttons::shoot)
 				{
-					b.pressed = platform::isLMousePressed();
-					b.held = platform::isLMouseHeld();
-					b.released = platform::isLMouseReleased();
+					bool state = 0;
 
 					auto controllerB = platform::getControllerButtons().buttons[platform::ControllerButtons::B];
 					auto controllerC = platform::getControllerButtons().LT;
 
-					b.pressed |= controllerB.pressed;
-					b.held |= controllerB.held;
-					b.released |= controllerB.released;
+					state |= (bool)controllerB.pressed;
+					state |= (bool)controllerB.held;
 
 					if (controllerC > 0.3)
 					{
-						b.pressed = 1;
-						b.held = 1;
-						b.released = 1;
+						state = 1;
 					}
+
+					state |= (bool)platform::isKeyPressedOn(buttonMapping1[i]);
+					state |= (bool)platform::isKeyHeld(buttonMapping1[i]);
+
+					state |= (bool)platform::isKeyPressedOn(platform::Button::Enter);
+					state |= (bool)platform::isKeyHeld(platform::Button::Enter);
+
+					state |= platform::isLMousePressed();
+					state |= platform::isLMouseHeld();
+
+					platform::internal::updateButtonInplace(shootButton, state);
+
+					b = shootButton;
+
 				}else if (i == Buttons::jump)
 				{
 					bool state = 0;
@@ -285,10 +310,85 @@ int buttonMapping1[Buttons::buttonsCount] =
 					state |= (bool)platform::isKeyPressedOn(buttonMapping1[i]);
 					state |= (bool)platform::isKeyHeld(buttonMapping1[i]);
 
-					platform::internal::processEventButton(jumpButton, state);
-					platform::internal::updateButton(jumpButton);
+					platform::internal::updateButtonInplace(jumpButton, state);
 
 					b = jumpButton;
+				}else if (i == Buttons::up)
+				{
+
+					bool state = 0;
+
+					auto controllerB = platform::getControllerButtons().buttons[platform::ControllerButtons::Up];
+					auto controllerC = platform::getControllerButtons().LStick.y;
+
+					state |= (bool)controllerB.pressed;
+					state |= (bool)controllerB.held;
+
+					if (controllerC < -0.4)
+					{
+						state = 1;
+					}
+
+					state |= (bool)platform::isKeyPressedOn(platform::Button::Up);
+					state |= (bool)platform::isKeyHeld(platform::Button::Up);
+
+					platform::internal::updateButtonInplace(upButton, state);
+
+					b = upButton;
+				}
+				else if (i == Buttons::down)
+				{
+
+					bool state = 0;
+
+					auto controllerB = platform::getControllerButtons().buttons[platform::ControllerButtons::Down];
+					auto controllerC = platform::getControllerButtons().LStick.y;
+
+					state |= (bool)controllerB.pressed;
+					state |= (bool)controllerB.held;
+
+					if (controllerC > 0.4)
+					{
+						state = 1;
+					}
+
+					state |= (bool)platform::isKeyPressedOn(platform::Button::Down);
+					state |= (bool)platform::isKeyHeld(platform::Button::Down);
+
+					platform::internal::updateButtonInplace(downButton, state);
+
+					b = downButton;
+				}else if(i == Buttons::menu)
+				{
+					bool state = 0;
+
+					auto controllerB = platform::getControllerButtons().buttons[platform::ControllerButtons::Start];
+
+					state |= (bool)controllerB.pressed;
+					state |= (bool)controllerB.held;
+
+					state |= (bool)platform::isKeyPressedOn(buttonMapping1[i]);
+					state |= (bool)platform::isKeyHeld(buttonMapping1[i]);
+
+					platform::internal::updateButtonInplace(menuButton, state);
+
+					b = menuButton;
+				}
+				else if (i == Buttons::esc)
+				{
+				bool state = 0;
+
+				auto controllerB = platform::getControllerButtons().buttons[platform::ControllerButtons::B];
+
+				state |= (bool)controllerB.pressed;
+				state |= (bool)controllerB.held;
+
+				state |= (bool)platform::isKeyPressedOn(buttonMapping1[i]);
+				state |= (bool)platform::isKeyHeld(buttonMapping1[i]);
+
+				platform::internal::updateButtonInplace(backButton, state);
+
+				b = backButton;
 				}
 				if(i == Buttons::left)
 				{
@@ -332,48 +432,6 @@ int buttonMapping1[Buttons::buttonsCount] =
 					b.released |= controllerB.released;
 				}
 
-				if (i == Buttons::down)
-				{
-					auto controllerB = platform::getControllerButtons().buttons[platform::ControllerButtons::Down];
-					auto controllerC = platform::getControllerButtons().LStick.y;
-
-					if (controllerC > 0.4)
-					{
-						b.pressed = 1;
-						b.held = 1;
-						b.released = 1;
-					}
-
-					b.pressed |= (bool)platform::isKeyPressedOn(platform::Button::Down);
-					b.held |= (bool)platform::isKeyHeld(platform::Button::Down);
-					b.released |= (bool)platform::isKeyReleased(platform::Button::Down);
-
-					b.pressed |= controllerB.pressed;
-					b.held |= controllerB.held;
-					b.released |= controllerB.released;
-				}
-
-				if (i == Buttons::up)
-				{
-					auto controllerB = platform::getControllerButtons().buttons[platform::ControllerButtons::Up];
-					auto controllerC = platform::getControllerButtons().LStick.y;
-
-					if (controllerC < -0.4)
-					{
-						b.pressed = 1;
-						b.held = 1;
-						b.released = 1;
-					}
-
-					b.pressed |= platform::isKeyPressedOn(platform::Button::Up);
-					b.held |= platform::isKeyHeld(platform::Button::Up);
-					b.released |= platform::isKeyReleased(platform::Button::Up);
-
-					b.pressed |= controllerB.pressed;
-					b.held |= controllerB.held;
-					b.released |= controllerB.released;
-				}
-				
 				if (i == Buttons::swapLeft)
 				{
 					auto controllerB = platform::getControllerButtons().buttons[platform::ControllerButtons::LBumper];

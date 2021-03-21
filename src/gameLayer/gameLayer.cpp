@@ -1789,7 +1789,7 @@ bool gameLogic(float deltaTime)
 	currentDialog.draw(renderer2d, w, h, deltaTime);
 
 
-	if (input::isKeyReleased(input::Buttons::jump)
+	if ((input::isKeyReleased(input::Buttons::jump)|| input::isKeyReleased(input::Buttons::shoot))
 		 && currentDialog.hasFinishedDialog)
 	{
 		if (!currentDialog.updateDialog())

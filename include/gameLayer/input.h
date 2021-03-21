@@ -29,9 +29,6 @@ namespace input
 
 	
 
-
-	//void loadXinput();
-	
 	bool isKeyPressedOn(int b);
 	bool isKeyHeld(int b);
 	bool isKeyReleased(int b);

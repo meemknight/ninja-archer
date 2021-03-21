@@ -1,3 +1,4 @@
+#ifdef PLATFORM_GLFW_IMPL
 #include "platformInput.h"
 
 platform::Button keyBoard[platform::Button::BUTTONS_COUNT];
@@ -156,3 +157,5 @@ void platform::internal::resetInputsToZero()
 	
 	controllerButtons.setAllToZero();
 }
+
+#endif

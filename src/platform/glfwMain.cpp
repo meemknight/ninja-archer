@@ -1,5 +1,5 @@
+#ifdef PLATFORM_GLFW_IMPL
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <stb_image/stb_image.h>
 #include <stb_truetype/stb_truetype.h>
 #include "gl2d/gl2d.h"
@@ -19,6 +19,7 @@
 
 #undef min
 #undef max
+#include <GLFW/glfw3.h>
 
 
 void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
@@ -347,3 +348,5 @@ int main()
 	//std::cin.clear();
 	//std::cin.get();
 }
+
+#endif

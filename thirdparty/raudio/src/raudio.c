@@ -869,7 +869,8 @@ void PlaySound(Sound sound)
 }
 
 // Play a sound in the multichannel buffer pool
-void PlaySoundMulti(Sound sound)
+void 
+Multi(Sound sound)
 {
     int index = -1;
     unsigned int oldAge = 0;

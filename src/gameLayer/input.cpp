@@ -330,7 +330,7 @@ int buttonMapping1[Buttons::buttonsCount] =
 					state |= (bool)controllerB.pressed;
 					state |= (bool)controllerB.held;
 
-					if (controllerC < -0.4)
+					if (controllerC < -0.5)
 					{
 						state = 1;
 					}
@@ -353,7 +353,7 @@ int buttonMapping1[Buttons::buttonsCount] =
 					state |= (bool)controllerB.pressed;
 					state |= (bool)controllerB.held;
 
-					if (controllerC > 0.4)
+					if (controllerC > 0.5)
 					{
 						state = 1;
 					}

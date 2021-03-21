@@ -9,7 +9,8 @@
 //
 //	features: 
 //	
-//	draw shapes with rotation color \
+//	draw shapes with rotation color 
+// 
 //		texture transparency
 //	draw text with font and shadows
 //	camera

@@ -60,14 +60,14 @@ namespace settings {
 	void saveSettings()
 	{
 
-		platform::writeEntireFile("resources//settings",
+		platform::writeEntireFile(RESOURCES_PATH "settings",
 			(void*)&settings::getSettingsData(), sizeof(settings::getSettingsData()));
 
 	}
 
 	void loadSettings()
 	{
-		if (!platform::readEntireFile("resources//settings",
+		if (!platform::readEntireFile(RESOURCES_PATH "settings",
 			(void*)&settings::getSettingsData(), sizeof(settings::getSettingsData())))
 		{
 			settings::getSettingsData() = SettingsData();

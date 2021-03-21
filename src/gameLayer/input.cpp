@@ -9,8 +9,7 @@
 #include <ctime>
 #include "platformInput.h"
 
-//todo remove extern
-gl2d::Texture uiButtons;
+extern gl2d::Texture uiButtons;
 extern gl2d::Font font;
 
 namespace input

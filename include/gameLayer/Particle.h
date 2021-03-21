@@ -12,7 +12,6 @@ struct Particle
 	int type;
 
 
-
 	float duration = 0;
 	int lookingRight = 0;
 

@@ -3,7 +3,7 @@
 #include "input.h"
 
 //toto add back extern here
-gl2d::Texture uiDialogBox;
+extern gl2d::Texture uiDialogBox;
 extern gl2d::Font font;
 std::unordered_map<std::string, textureDataWithUV> textureDataForDialog;
 

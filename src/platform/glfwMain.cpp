@@ -22,6 +22,9 @@
 #undef max
 #include <GLFW/glfw3.h>
 
+//export globals
+float fullScreenZoom = 1;
+
 
 void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {

@@ -92,7 +92,6 @@ void platform::internal::resetButtonToZero(Button &b)
 }
 
 
-
 void platform::internal::updateAllButtons()
 {
 	for (int i = 0; i < platform::Button::BUTTONS_COUNT; i++)

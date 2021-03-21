@@ -6,9 +6,9 @@ namespace platform
 {
 	struct Button
 	{
-		char pressed = 0;
-		char held = 0;
-		char released = 0;
+		bool pressed = 0;
+		bool held = 0;
+		bool released = 0;
 		char newState = -1; // this can be -1
 
 		enum

@@ -120,7 +120,7 @@ void mouseCallback(GLFWwindow *window, int key, int action, int mods)
 
 }
 
-bool windowFocus = 0;
+bool windowFocus = 1;
 
 void windowFocusCallback(GLFWwindow *window, int focused)
 {

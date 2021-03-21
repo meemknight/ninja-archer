@@ -1,5 +1,6 @@
 #pragma once
 #include "mapData.h"
+#include "raudio.h"
 
 struct SoundManager
 {
@@ -29,7 +30,7 @@ struct SoundManager
 		RESOURCES_PATH "cave.wav",
 		0,//ice
 		0,//snow cave ?
-		RESOURCES_PATH "tension.wav",//tension
+		0, //RESOURCES_PATH "tension.wav",//tension
 		0,//wood
 		0,//dark green
 		RESOURCES_PATH "jungle1.wav",
@@ -69,31 +70,23 @@ struct SoundManager
 	//this is the thing that playes music
 	struct MusicStruct
 	{
-		//sf::Music m;
+		Music m = {};
 		bool loaded = 0;
 		float currentVolume = 0;
 		float desiredVolume = 0;
 
-		//void play() { if (loaded) { m.play(); m.setLoop(1); } }
-		//void stop() { if (loaded)m.stop(); }
-		//void setVolume(float f) { if (loaded)m.setVolume(f * 100); }
-	
-		void play() {}
-		void stop() {}
-		void setVolume(float f) {  }
+		void play() { if (loaded) { PlayMusicStream(m); m.looping = true; } }
+		void stop() { if (loaded) StopMusicStream(m); }
+		void setVolume(float f) { if (loaded)SetMusicVolume(m, f); }
 
 	};
 
-#ifndef _DEBUG
 
-	sf::SoundBuffer soundBuffers[soundEffects::soundEffectCount];
-	sf::Sound soundPlayer;
+	Sound  soundBuffers[soundEffects::soundEffectCount] = {};
 
 	//this vector holds music players
 	MusicStruct musicVect[musicTapesCount] = {};
 	MusicStruct effectsVect[musicEffectsCount] = {};
-
-#endif // !_DEBUG
 
 
 	//this holds sound emitors positions and it has no size, that sound doesn't exist

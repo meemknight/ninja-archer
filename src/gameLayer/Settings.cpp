@@ -34,12 +34,12 @@ namespace settings {
 
 	float getMusicSound()
 	{
-		return sData.musicSound / 2;
+		return sData.musicSound / 2.f;
 	}
 
 	float getAmbientSound()
 	{
-		return sData.ambientSound;
+		return sData.ambientSound /4.f;
 	}
 
 	float getButtonSound()

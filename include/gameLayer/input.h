@@ -36,7 +36,7 @@ namespace input
 
 	int getMoveDir();
 
-	inline bool isControllerInput() { return 0; } //todo implement 
+	inline bool isControllerInput(); //todo implement 
 
 	glm::vec2 getShootDir(glm::vec2 centre);
 

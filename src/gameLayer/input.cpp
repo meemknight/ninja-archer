@@ -42,6 +42,12 @@ namespace input
 		return -(int)input::isKeyHeld(input::Buttons::left) + (int)input::isKeyHeld(input::Buttons::right);
 	}
 
+	bool isControllerInputFlag = false;
+	bool isControllerInput()
+	{
+		return isControllerInputFlag;
+	}
+
 	glm::vec2 lastShootDir = { 1,0 };
 
 	glm::vec2 getShootDir(glm::vec2 centre)

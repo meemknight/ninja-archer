@@ -2,10 +2,15 @@
 #include "tools.h"
 #include "Settings.h"
 
+#undef max
+#undef min
+
+#include <cmath>
+
 #define MinSoundDist 32
 
 
-#ifdef _DEBUG
+#if 0
 
 void SoundManager::setMusicPositions(MapData& mapData) {}
 
@@ -125,27 +130,23 @@ void SoundManager::setMusicPositions(MapData & mapData)
 void SoundManager::loadMusic()
 {
 
-
 	for(int i=0; i<soundEffects::soundEffectCount; i++)
 	{
-		
-		soundBuffers[i].loadFromFile(soundNames[i]);
-			
+		soundBuffers[i] = LoadSound(soundNames[i]);
 	}
-
-	soundPlayer.setVolume(2);
 
 
 	for(int i=0; i<musicTapesCount; i++)
 	{
 		if(tapesNames[i] != nullptr)
 		{
-			if(musicVect[i].m.openFromFile(tapesNames[i]))
+			musicVect[i].m = LoadMusicStream(tapesNames[i]);
+			
+			if(musicVect[i].m.sampleCount)
 			{
 				musicVect[i].loaded = true;
-				musicVect[i].m.setLoop(1);
-
 			}
+		
 		}
 	}
 
@@ -153,16 +154,17 @@ void SoundManager::loadMusic()
 	{
 		if(effectsNames[i]!=nullptr)
 		{
-			if(effectsVect[i].m.openFromFile(effectsNames[i]))
+			effectsVect[i].m = LoadMusicStream(effectsNames[i]);
+
+			if(effectsVect[i].m.sampleCount)
 			{
 				effectsVect[i].loaded = true;
-				effectsVect[i].m.setLoop(1);
 			}
 		}
 
 	}
 
-
+	updateSoundVolume();
 }
 
 float distFunc2(float dist)
@@ -178,7 +180,7 @@ float distFunc2(float dist)
 	//shortestDist /= BLOCK_SIZE;
 
 	float perc = (1.f * BLOCK_SIZE) / (pow(dist, 2) * 0.04 + 3 + pow(dist, 3) * 0.008);
-	perc = std::min(perc, 100.f);
+	perc = std::min(perc, 1.f);
 	perc = std::max(perc, 0.f);
 
 	if (perc < 0.02)
@@ -315,7 +317,7 @@ void SoundManager::setMusicAndEffectVolume(glm::vec2 pos)
 
 }
 
-constexpr float transationSpeed = 0.10;
+constexpr float transationSpeed = 0.20;
 
 void SoundManager::updateSoundTransation(float deltaTime)
 {
@@ -355,21 +357,26 @@ void SoundManager::updateSoundVolume()
 	for (int i = 0; i < musicTapesCount; i++)
 	{
 		musicVect[i].setVolume(musicVect[i].currentVolume * settings::getMusicSound());
+		UpdateMusicStream(musicVect[i].m);
 	}
 
 	for (int i = 0; i < musicEffectsCount; i++)
 	{
-		effectsVect[i].setVolume(effectsVect[i].currentVolume * settings::getAmbientSound());
+		effectsVect[i].setVolume(effectsVect[i].currentVolume * settings::getAmbientSound() * 1.5);
+		UpdateMusicStream(effectsVect[i].m);
 	}
 
-	soundPlayer.setVolume(10 * settings::getAmbientSound());
+	for (int i=0; i< soundEffects::soundEffectCount; i++)
+	{
+		SetSoundVolume(soundBuffers[i], settings::getAmbientSound());
+	}
 
 }
 
 void SoundManager::stoppMusic()
 {
 	for(int i=0; i<tapes::musicTapesCount; i++)
-	{
+	{	
 		musicVect[i].stop();
 	}
 
@@ -378,17 +385,14 @@ void SoundManager::stoppMusic()
 		effectsVect[i].stop();
 	}
 
-	soundPlayer.stop();
 }
+
+#undef PlaySound
 
 void SoundManager::playSound(int sound)
 {
 
-	if (soundPlayer.getStatus() == sf::Sound::Status::Stopped)
-	{
-		soundPlayer.setBuffer(soundBuffers[sound]);
-		soundPlayer.play();
-	}
+	PlaySound(soundBuffers[sound]);
 
 }
 

@@ -857,7 +857,7 @@ void saveState(glm::ivec2 playerSpawnPos, int levelId, std::unordered_map<glm::i
 		SaveLevelData data = {};
 		data.levelId = -2;
 
-		platform::writeEntireFile("resources//state", &data, sizeof(data));
+		platform::writeEntireFile(RESOURCES_PATH "state", &data, sizeof(data));
 		return ;
 	}
 
@@ -894,7 +894,7 @@ void saveState(glm::ivec2 playerSpawnPos, int levelId, std::unordered_map<glm::i
 		}
 	}
 
-	platform::writeEntireFile("resources//state", &data, sizeof(data));
+	platform::writeEntireFile(RESOURCES_PATH "state", &data, sizeof(data));
 
 }
 
@@ -906,7 +906,7 @@ bool loadLevelFromLastState(int &level, glm::ivec2 &spawn, glm::ivec2* dialogs,
 
 	SaveLevelData data = {};
 
-	bool status = platform::readEntireFile("resources//state", &data, sizeof(data));
+	bool status = platform::readEntireFile(RESOURCES_PATH "state", &data, sizeof(data));
 
 	if(status)
 	{

@@ -14,7 +14,7 @@ namespace settings {
 
 	float getZoom()
 	{
-		return 2 + sData.zoom * 2;
+		return 2 + sData.zoom * 2.5;
 	}
 
 	float getUiScale()
@@ -39,7 +39,7 @@ namespace settings {
 
 	float getAmbientSound()
 	{
-		return sData.ambientSound /4.f;
+		return sData.ambientSound /8.f;
 	}
 
 	float getButtonSound()

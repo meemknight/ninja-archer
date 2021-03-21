@@ -267,8 +267,8 @@ int main()
 	permaAssertComment(glfwInit(), "err initializing glfw");
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
-	int w = 500;
-	int h = 500;
+	int w = 900;
+	int h = 600;
 	
 	//	WGL_SAMPLE_BUFFERS_ARB, GL_TRUE,
 	//	WGL_SAMPLES_ARB, 4,

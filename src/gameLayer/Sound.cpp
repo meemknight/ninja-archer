@@ -317,7 +317,7 @@ void SoundManager::setMusicAndEffectVolume(glm::vec2 pos)
 
 }
 
-constexpr float transationSpeed = 0.20;
+constexpr float transationSpeed = 0.15;
 
 void SoundManager::updateSoundTransation(float deltaTime)
 {
@@ -329,7 +329,11 @@ void SoundManager::updateSoundTransation(float deltaTime)
 			{
 				if(musicVect[i].currentVolume > musicVect[i].desiredVolume)
 				{
-					musicVect[i].currentVolume -= transationSpeed * deltaTime;
+					musicVect[i].currentVolume -= transationSpeed * 2 * deltaTime;
+					if(musicVect[i].currentVolume < 0)
+					{
+						musicVect[i].currentVolume = 0;
+					}
 				}else
 				{
 					musicVect[i].currentVolume += transationSpeed * deltaTime;
@@ -362,7 +366,7 @@ void SoundManager::updateSoundVolume()
 
 	for (int i = 0; i < musicEffectsCount; i++)
 	{
-		effectsVect[i].setVolume(effectsVect[i].currentVolume * settings::getAmbientSound() * 1.5);
+		effectsVect[i].setVolume(effectsVect[i].currentVolume * settings::getAmbientSound() * 2.5);
 		UpdateMusicStream(effectsVect[i].m);
 	}
 

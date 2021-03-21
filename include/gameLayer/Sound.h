@@ -30,7 +30,7 @@ struct SoundManager
 		RESOURCES_PATH "cave.wav",
 		0,//ice
 		0,//snow cave ?
-		0, //RESOURCES_PATH "tension.wav",//tension
+		RESOURCES_PATH "tension.mp3",//tension
 		0,//wood
 		0,//dark green
 		RESOURCES_PATH "jungle1.wav",

@@ -1139,7 +1139,7 @@ bool gameLogic(float deltaTime)
 
 					if (!playedGrassSound && grassTimeDelay <= 0)
 					{
-						grassTimeDelay = rand() % 5 + 1;
+						grassTimeDelay = (rand() % 10)*0.1 + 0.5;
 						playedGrassSound = 1;
 						soundManager.playSound(SoundManager::soundEffects::soundEffectGrass);
 					}

@@ -75,17 +75,17 @@ namespace input
 	bool isKeyPressedOn(int b)
 	{
 
-		return buttonsPressed[b];
+		return buttonsPressed[b] && platform::isFocused();
 	}
 
 	bool isKeyHeld(int b)
 	{
-		return buttonsHeld[b];
+		return buttonsHeld[b] && platform::isFocused();
 	}
 
 	bool isKeyReleased(int b)
 	{
-		return buttonsReleased[b];
+		return buttonsReleased[b] && platform::isFocused();
 	}
 
 
@@ -273,7 +273,7 @@ namespace input
 
 int buttonMapping1[Buttons::buttonsCount] =
 {
-	0, //todo add none in engine
+	0,
 	platform::Button::S, 
 	platform::Button::A,
 	platform::Button::D,
@@ -288,7 +288,7 @@ int buttonMapping1[Buttons::buttonsCount] =
 
 	void updateInput()
 	{
-		//todo add controller input
+		
 	
 		for (int i = 0; i < Buttons::buttonsCount; i++)
 		{
@@ -405,6 +405,24 @@ int buttonMapping1[Buttons::buttonsCount] =
 					b.released |= controllerB.released;
 				}
 				
+				if (i == Buttons::swapLeft)
+				{
+					auto controllerB = platform::getControllerButtons().buttons[platform::ControllerButtons::LBumper];
+					
+					b.pressed |= controllerB.pressed;
+					b.held |= controllerB.held;
+					b.released |= controllerB.released;
+				}
+
+				if (i == Buttons::swapRight)
+				{
+					auto controllerB = platform::getControllerButtons().buttons[platform::ControllerButtons::RBumper];
+
+					b.pressed |= controllerB.pressed;
+					b.held |= controllerB.held;
+					b.released |= controllerB.released;
+				}
+
 				if(i == Buttons::jump)
 				{
 					auto controllerB = platform::getControllerButtons().buttons[platform::ControllerButtons::A];

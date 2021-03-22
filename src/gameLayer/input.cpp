@@ -1,5 +1,5 @@
 #include "input.h"
-#include <Windows.h>
+//#include <Windows.h>
 #include"gameLayer.h"
 #include <math.h>
 #include <algorithm>

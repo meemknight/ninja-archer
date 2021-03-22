@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="stb_image"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\thirdparty\;CMake Files\thirdparty\glfw-3.3.2\;CMake Files\thirdparty\glfw-3.3.2\src\;CMake Files\thirdparty\gl2d\;CMake Files\thirdparty\glad\;CMake Files\thirdparty\stb_image\;CMake Files\thirdparty\stb_truetype\;CMake Files\thirdparty\raudio\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/mihui/Dev/ninja-archer/cmake-build-debug/thirdparty/stb_image"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j4 -f &quot;/home/mihui/Dev/ninja-archer/cmake-build-debug/thirdparty/stb_image/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/home/mihui/Dev/ninja-archer/cmake-build-debug/thirdparty/stb_image/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j4 -f &quot;/home/mihui/Dev/ninja-archer/cmake-build-debug/thirdparty/stb_image/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j4 -f &quot;/home/mihui/Dev/ninja-archer/cmake-build-debug/thirdparty/stb_image/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/mihui/Dev/ninja-archer/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/home/mihui/Dev/ninja-archer/thirdparty/glfw-3.3.2/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\thirdparty\glfw-3.3.2\"/>
+		</Unit>
+		<Unit filename="/home/mihui/Dev/ninja-archer/thirdparty/glfw-3.3.2/src/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\thirdparty\glfw-3.3.2\src\"/>
+		</Unit>
+		<Unit filename="/home/mihui/Dev/ninja-archer/thirdparty/glfw-3.3.2/src/glfw3.pc.in">
+			<Option virtualFolder="CMake Files\thirdparty\glfw-3.3.2\src\"/>
+		</Unit>
+		<Unit filename="/home/mihui/Dev/ninja-archer/thirdparty/glfw-3.3.2/src/glfw3Config.cmake.in">
+			<Option virtualFolder="CMake Files\thirdparty\glfw-3.3.2\src\"/>
+		</Unit>
+		<Unit filename="/home/mihui/Dev/ninja-archer/thirdparty/glfw-3.3.2/src/glfw_config.h.in">
+			<Option virtualFolder="CMake Files\thirdparty\glfw-3.3.2\src\"/>
+		</Unit>
+		<Unit filename="/home/mihui/Dev/ninja-archer/thirdparty/gl2d/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\thirdparty\gl2d\"/>
+		</Unit>
+		<Unit filename="/home/mihui/Dev/ninja-archer/thirdparty/glad/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\thirdparty\glad\"/>
+		</Unit>
+		<Unit filename="/home/mihui/Dev/ninja-archer/thirdparty/stb_image/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\thirdparty\stb_image\"/>
+		</Unit>
+		<Unit filename="/home/mihui/Dev/ninja-archer/thirdparty/stb_truetype/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\thirdparty\stb_truetype\"/>
+		</Unit>
+		<Unit filename="/home/mihui/Dev/ninja-archer/thirdparty/raudio/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\thirdparty\raudio\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

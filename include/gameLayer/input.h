@@ -1,6 +1,6 @@
 #pragma once
-#include <Windows.h>
-#include <Xinput.h>
+//#include <Windows.h>
+//#include <Xinput.h>
 #include <glm/vec2.hpp>
 #include "gl2d.h"
 #include <string>

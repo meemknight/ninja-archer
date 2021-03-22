@@ -282,7 +282,7 @@ bool initGame()
 {
 	srand(time(0));
 
-	font.createFromFile(RESOURCES_PATH "font.ttf");
+	font.createFromFile(RESOURCES_PATH "font.TTF");
 
 	glClearColor(BACKGROUNDF_R, BACKGROUNDF_G, BACKGROUNDF_B, 1.f);
 
@@ -323,7 +323,7 @@ bool initGame()
 	tDDBird = { uiImages, uiImagesAtlas.get(3,0) };
 
 
-	const char buff[] =
+	const unsigned char buff[] =
 	{
 		BACKGROUND_R,
 		BACKGROUND_G,

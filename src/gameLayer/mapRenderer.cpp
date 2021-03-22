@@ -1,4 +1,4 @@
-#include "MapRenderer.h"
+#include "mapRenderer.h"
 #include <algorithm>
 #undef min
 #undef max

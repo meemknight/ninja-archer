@@ -366,13 +366,13 @@ void SoundManager::updateSoundVolume()
 
 	for (int i = 0; i < musicEffectsCount; i++)
 	{
-		effectsVect[i].setVolume(effectsVect[i].currentVolume * settings::getAmbientSound() * 2.5);
+		effectsVect[i].setVolume(effectsVect[i].currentVolume * settings::getAmbientSound() );
 		UpdateMusicStream(effectsVect[i].m);
 	}
 
 	for (int i=0; i< soundEffects::soundEffectCount; i++)
 	{
-		SetSoundVolume(soundBuffers[i], settings::getAmbientSound());
+		SetSoundVolume(soundBuffers[i], settings::getAmbientSound() / 7.f);
 	}
 
 }

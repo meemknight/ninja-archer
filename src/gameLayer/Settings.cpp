@@ -39,7 +39,7 @@ namespace settings {
 
 	float getAmbientSound()
 	{
-		return sData.ambientSound /8.f;
+		return sData.ambientSound * 2;
 	}
 
 	float getButtonSound()

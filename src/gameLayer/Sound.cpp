@@ -179,6 +179,13 @@ float distFunc2(float dist)
 	dist = std::max(1.f, dist);
 	//shortestDist /= BLOCK_SIZE;
 
+
+	//min distance:
+	if(dist > 15)
+	{
+		return 0;
+	}
+
 	float perc = (1.f * BLOCK_SIZE) / (pow(dist, 2) * 0.04 + 3 + pow(dist, 3) * 0.008);
 	perc = std::min(perc, 1.f);
 	perc = std::max(perc, 0.f);

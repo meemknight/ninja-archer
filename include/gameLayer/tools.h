@@ -14,7 +14,8 @@
 
 
 #include <iostream>
-//#include <Windows.h>
+
+
 #include <sstream>
 #include "buildConfig.h"
 
@@ -25,6 +26,12 @@
 #ifdef ERRORS_ONLY
 #undef FORCE_LOG
 #endif // ERRORS_ONLY
+
+
+#ifdef _WIN32
+#include <Windows.h>
+#undef FORCE_LOG
+#endif
 
 #ifdef FORCE_LOG
 #define MAIN main()

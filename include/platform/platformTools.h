@@ -159,11 +159,11 @@
 		unsigned const line_number,
 		const char *comment = "---")
 	{
-        std::ofstream f(RESOURCES_PATH "debug_text.txt", std::ios::app);
+		std::ofstream f(RESOURCES_PATH "debug_text.txt", std::ios::app);
 
-        f<<expression<<" "<<file_name<<" "<<" "<<line_number<<" "<<"\n"<<comment<<"\n\n";
-        std::cout<<expression<<" "<<file_name<<" "<<" "<<line_number<<" "<<"\n"<<comment<<"\n\n";
-        f.close();
+		f<<expression<<" "<<file_name<<" "<<" "<<line_number<<" "<<"\n"<<comment<<"\n\n";
+		std::cout<<expression<<" "<<file_name<<" "<<" "<<line_number<<" "<<"\n"<<comment<<"\n\n";
+		f.close();
 		raise(SIGABRT);
 
 	}

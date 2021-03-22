@@ -60,15 +60,6 @@ gl2d::Texture particlesSprite;
 gl2d::Texture crackTexture;
 gl2d::Texture birdTexture;
 
-gl2d::Texture uiFrame;
-gl2d::Texture uiForest;
-gl2d::Texture uiTiki;
-gl2d::Texture uiCastle;
-gl2d::Texture uiCave;
-gl2d::Texture uiMountain;
-gl2d::Texture uiSnowMountain;
-gl2d::Texture uiArrows;
-gl2d::Texture uiButton;
 gl2d::Texture uiItch;
 gl2d::Texture uiMusic;
 gl2d::Texture uiArt;
@@ -317,15 +308,6 @@ bool initGame()
 	crackTexture.loadFromFileWithPixelPadding(RESOURCES_PATH "crackAnim.png", 8);
 	birdTexture.loadFromFileWithPixelPadding(RESOURCES_PATH "bird.png", 8);
 
-	uiFrame.loadFromFile(RESOURCES_PATH "ui//uiFrame.png");
-	uiForest.loadFromFile(RESOURCES_PATH "ui//forest.png");
-	uiTiki.loadFromFile(RESOURCES_PATH "ui//tikiForest.png");
-	uiCastle.loadFromFile(RESOURCES_PATH "ui//castle.png");
-	uiCave.loadFromFile(RESOURCES_PATH "ui//cave.png");
-	uiMountain.loadFromFile(RESOURCES_PATH "ui//mountain.png");
-	uiSnowMountain.loadFromFile(RESOURCES_PATH "ui//snowMountain.png");
-	uiArrows.loadFromFile(RESOURCES_PATH "ui//arrow.png");
-	uiButton.loadFromFile(RESOURCES_PATH "ui//button.png");
 	uiItch.loadFromFile(RESOURCES_PATH "ui//itch.png");
 	uiMusic.loadFromFile(RESOURCES_PATH "ui//music.jpg");
 	uiArt.loadFromFile(RESOURCES_PATH "ui//art.png");

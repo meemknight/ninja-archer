@@ -24,17 +24,17 @@ struct SoundManager
 	static constexpr const char *tapesNames[tapes::musicTapesCount] = 
 	{
 		
-		RESOURCES_PATH "jungle.wav",
-		RESOURCES_PATH "tikiForest.wav",
-		0,
-		RESOURCES_PATH "cave.wav",
+		RESOURCES_PATH "jungle.mp3",
+		RESOURCES_PATH "tikiForest.mp3",
+		RESOURCES_PATH "snow.mp3",
+		RESOURCES_PATH "cave.mp3",
 		0,//ice
 		0,//snow cave ?
 		RESOURCES_PATH "tension.mp3",//tension
 		0,//wood
 		0,//dark green
-		RESOURCES_PATH "jungle1.wav",
-		0,
+		RESOURCES_PATH "jungle1.mp3",
+		RESOURCES_PATH "castle.mp3",
 	};
 
 	enum musicEffects

@@ -69,6 +69,7 @@ namespace platform
 		Right = GLFW_GAMEPAD_BUTTON_DPAD_RIGHT,  
 		Down = GLFW_GAMEPAD_BUTTON_DPAD_DOWN, 
 		Left = GLFW_GAMEPAD_BUTTON_DPAD_LEFT,  
+		ButtonCount = 15,
 		};
 
 		Button buttons[GLFW_GAMEPAD_BUTTON_LAST + 1];
@@ -114,6 +115,8 @@ namespace platform
 
 	int isLMouseHeld();
 	int isRMouseHeld();
+
+	bool keyboardMousePressed();
 
 	ControllerButtons getControllerButtons();
 

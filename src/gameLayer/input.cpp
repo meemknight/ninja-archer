@@ -60,7 +60,7 @@ namespace input
 		if(glm::length(dir) > 0.5)
 		{
 			dir /= glm::length(dir);
-			
+			lastShootDir = dir;
 			return dir;
 		}
 
@@ -74,167 +74,6 @@ namespace input
 
 	}
 
-
-	/*
-	bool isControllerInput()
-	{
-		return usedController;
-	}
-
-	
-	void updateInput()
-	{
-		XINPUT_STATE s;
-		bool read = 0;
-		if (xInputLoaded != 0)
-		{
-			for(int i=0; i<3; i++)
-			{
-				if (DynamicXinputGetState(i, &s) != ERROR_SUCCESS)
-				{
-					read = 1;
-					break;
-				}
-			}
-
-		}
-
-#pragma region determin whether controller or not
-		if(read)
-		{
-
-			XINPUT_KEYSTROKE ks = {};
-			if(DynamicXInputGetKeystroke && DynamicXInputGetKeystroke(0, 0, &ks) == ERROR_SUCCESS)
-			{
-				if(ks.Flags & (XINPUT_KEYSTROKE_REPEAT | XINPUT_KEYSTROKE_KEYDOWN | XINPUT_KEYSTROKE_KEYUP))
-				{
-					usedController = true;
-				}
-			}
-
-			for(int i='0'; i<='z';i++)
-			{
-				if(GetAsyncKeyState(i))
-				{
-					usedController = false;
-					break;
-				}
-			}
-			if(GetAsyncKeyState(VK_SPACE) ||
-				GetAsyncKeyState(VK_BACK) ||
-				GetAsyncKeyState(VK_CONTROL) ||
-				GetAsyncKeyState(VK_DOWN) ||
-				GetAsyncKeyState(VK_UP) ||
-				GetAsyncKeyState(VK_LEFT) ||
-				GetAsyncKeyState(VK_RIGHT) ||
-				GetAsyncKeyState(VK_LSHIFT) ||
-				GetAsyncKeyState(VK_SHIFT)||
-				GetAsyncKeyState(VK_ACCEPT)||
-				GetAsyncKeyState(VK_RETURN)||
-				GetAsyncKeyState(VK_ESCAPE) ||
-				GetAsyncKeyState(VK_F1) ||
-				GetAsyncKeyState(VK_F2) ||
-				GetAsyncKeyState(VK_F3) ||
-				GetAsyncKeyState(VK_F4) ||
-				GetAsyncKeyState(VK_F5) ||
-				GetAsyncKeyState(VK_F6) ||
-				GetAsyncKeyState(VK_F7) ||
-				GetAsyncKeyState(VK_F8) ||
-				GetAsyncKeyState(VK_F9) ||
-				GetAsyncKeyState(VK_F10) ||
-				GetAsyncKeyState(VK_F11) ||
-				GetAsyncKeyState(VK_F12)||
-				GetAsyncKeyState(VK_NUMPAD0)||
-				GetAsyncKeyState(VK_NUMPAD1)||
-				GetAsyncKeyState(VK_NUMPAD2) ||
-				GetAsyncKeyState(VK_NUMPAD3) ||
-				GetAsyncKeyState(VK_NUMPAD4) ||
-				GetAsyncKeyState(VK_NUMPAD5) ||
-				GetAsyncKeyState(VK_NUMPAD6) ||
-				GetAsyncKeyState(VK_NUMPAD7) ||
-				GetAsyncKeyState(VK_NUMPAD8) ||
-				GetAsyncKeyState(VK_NUMPAD9) 
-				)
-			{
-				usedController = false;
-			}
-
-			if(platform::isLMouseHeld() 
-				|| platform::isRMouseHeld()
-				||platform::mouseMoved()
-				)
-			{
-				usedController = false;
-			}
-
-		}else
-		{
-			usedController = false;
-		}
-#pragma endregion
-
-		if (read)
-		{
-			//todo proper normalize
-			const XINPUT_GAMEPAD *pad = &s.Gamepad;
-			float retValX = pad->sThumbRX / (float)SHRT_MAX;
-			float retValY = -pad->sThumbRY / (float)SHRT_MAX;
-
-			retValX = std::max(-1.f, retValX);
-			retValX = std::min(1.f, retValX);
-
-			retValY = std::max(-1.f, retValY);
-			retValY = std::min(1.f, retValY);
-
-			if (abs(retValX) < deadZone && abs(retValY) < deadZone)
-			{
-
-			}
-			else
-			{
-				lastShootDir = { retValX, retValY };
-				lastShootDir = glm::normalize(lastShootDir);
-			}
-		
-		}
-
-		for (int i = 0; i < Buttons::buttonsCount; i++)
-		{
-			bool state;
-			if (read)
-			{
-				state = internal::getisKeyHeldDirect(i, &s);
-			}
-			else
-			{
-				state = internal::getisKeyHeldDirect(i, nullptr);
-			}
-
-			if(!state && buttonsHeld[i])
-			{
-				buttonsReleased[i] = 1;
-			}else
-			{
-				buttonsReleased[i] = 0;
-			}
-
-			buttonsPressed[i] = 0;
-
-			if (state)
-			{
-				if (buttonsHeld[i] == 0)
-				{
-					buttonsPressed[i] = 1;
-				}
-			}
-
-			buttonsHeld[i] = state;
-
-		}
-
-	}
-
-	*/
 
 platform::Button jumpButton;
 platform::Button shootButton;
@@ -260,7 +99,39 @@ int buttonMapping1[Buttons::buttonsCount] =
 
 	void updateInput()
 	{
-		
+		{
+			if(platform::keyboardMousePressed() || platform::mouseMoved())
+			{
+				isControllerInputFlag = 0;
+			}
+
+			for (int i = 0; i < platform::ControllerButtons::Buttons::ButtonCount; i++)
+			{
+				if (platform::getControllerButtons().buttons[i].held)
+				{
+					isControllerInputFlag = 1;
+					break;
+				}
+			}
+
+			if(
+				platform::getControllerButtons().LT > 0.3 ||
+				platform::getControllerButtons().RT > 0.3 ||
+				platform::getControllerButtons().LStick.x > 0.3 ||
+				platform::getControllerButtons().LStick.x < -0.3 ||
+				platform::getControllerButtons().LStick.y > 0.3 ||
+				platform::getControllerButtons().LStick.y < -0.3 ||
+				platform::getControllerButtons().RStick.x > 0.3 ||
+				platform::getControllerButtons().RStick.x < -0.3 ||
+				platform::getControllerButtons().RStick.y > 0.3 ||
+				platform::getControllerButtons().RStick.y < -0.3 
+				)
+			{
+				isControllerInputFlag = 1;
+			}
+
+		}
+
 		for (int i = 0; i < Buttons::buttonsCount; i++)
 		{
 			platform::Button b = {};

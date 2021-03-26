@@ -25,9 +25,17 @@
 //export globals
 float fullScreenZoom = 1;
 
+bool keyboardMousePressedFlag = 0;
+bool platform::keyboardMousePressed()
+{
+	return keyboardMousePressedFlag;
+}
+
 
 void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
+
+	keyboardMousePressedFlag = 1;
 
 	bool state = 0;
 
@@ -96,6 +104,8 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
 
 void mouseCallback(GLFWwindow *window, int key, int action, int mods)
 {
+	keyboardMousePressedFlag = 1;
+
 	bool state = 0;
 
 	if (action == GLFW_PRESS)
@@ -124,6 +134,7 @@ void mouseCallback(GLFWwindow *window, int key, int action, int mods)
 }
 
 bool windowFocus = 1;
+
 
 void windowFocusCallback(GLFWwindow *window, int focused)
 {
@@ -346,6 +357,7 @@ int main()
 	#pragma region reset flags
 
 		mouseMovedFlag = 0;
+		keyboardMousePressedFlag = 0;
 		platform::internal::updateAllButtons();
 
 	#pragma endregion

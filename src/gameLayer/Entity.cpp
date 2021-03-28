@@ -1217,7 +1217,6 @@ void Bird::draw(gl2d::Renderer2D & renderer, float deltaTime, gl2d::Texture t, g
 	}
 
 	//animate
-
 	frameTime -= deltaTime;
 
 	if (frameTime <= 0)
@@ -1274,3 +1273,77 @@ float Bird::getShowPerc()
 }
 
 #pragma endregion
+
+void Butterfly::draw(gl2d::Renderer2D &renderer, float deltaTime, gl2d::Texture t)
+{
+
+	auto size = t.GetSize();
+	gl2d::TextureAtlasPadding ta(4, 4, size.x, size.y);
+
+	//animate
+	frameTime -= deltaTime;
+
+	if (frameTime <= 0)
+	{
+		frameTime += 0.15; //animation speed
+		texturePos.x++;
+	}
+	texturePos.x %= 4;
+
+	//todo add light
+	renderer.renderRectangle({ position,BLOCK_SIZE,BLOCK_SIZE },
+		{ 1,1,1,light },
+		{}, 0, t, ta.get(texturePos.x, texturePos.y, facingLeft)
+	);
+
+}
+
+void Butterfly::updateMove(float deltaTime, MapData &mapData)
+{
+	float xMaxSpeed = 1.5f * BLOCK_SIZE;
+	float yMaxSpeed = 0.7f * BLOCK_SIZE;
+
+	timeTillChangeDir -= deltaTime;
+
+	if (timeTillChangeDir <= 0)
+	{
+		timeTillChangeDir = (rand()%400 + 300)/100.f; 
+
+		direction = { ((rand() % 200 - 100) * xMaxSpeed) / 100.f, ((rand() % 200 - 100) * yMaxSpeed) / 100.f };
+	}
+	
+	position += direction * deltaTime;
+	
+	if (isCollidable(mapData.get(position.x/ BLOCK_SIZE, position.y/ BLOCK_SIZE).type)
+		&&
+		aabb(
+		{ position, glm::vec2{BLOCK_SIZE, BLOCK_SIZE-1} }, 
+		{ position.x / BLOCK_SIZE * BLOCK_SIZE, position.y / BLOCK_SIZE * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }
+		)
+		)
+	{
+		direction *= -1;
+		position += direction * deltaTime * 2.f;
+
+	}
+
+	if(glm::distance(position, anchor) > BLOCK_SIZE*8)
+	{
+		timeTillChangeDir = (rand() % 300 + 300) / 100.f;
+
+		direction = (glm::normalize(anchor - position)) * (float)xMaxSpeed * (rand() % 100 / 100.f);
+		
+	}
+
+
+	facingLeft = (direction.x > 0) ? 0 : 1;
+
+}
+
+static int p = 0;
+
+void Butterfly::create()
+{
+	//texturePos.y = rand() % 4;
+	texturePos.y = p++;
+}

@@ -2,6 +2,8 @@
 #include <string>
 //#include "mapRenderer.h"
 #include <algorithm>
+#include "Entity.h"
+
 
 #undef min;
 #undef max;
@@ -56,39 +58,12 @@ void MapData::create(int w, int h, unsigned short* d = 0)
 		for (int x = 0; x < w; x++)
 		{
 			auto& d = get(x, y);
-			if (isWaterMusicSource(d.type))
+			
+		
+			if(d.type == Block::butterfy)
 			{
-				waterPos.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
-			}
-
-			if (d.type == Block::musicEffectGreen)
-			{
-				greenSoundPos.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
-				//d.type = Block::none;
-			}
-			else
-			if (d.type == Block::musicRed)
-			{
-				redSoundPos.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
-				//d.type = Block::none;
-			}
-			else
-			if (d.type == Block::musicTiki)
-			{
-				tikiSoundPos.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
-				//d.type = Block::none;
-			}
-			else
-			if (d.type == Block::musicSnow)
-			{
-				snowSoundPos.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
-				//d.type = Block::none;
-			}
-			else
-			if (d.type == Block::musicCave)
-			{
-				caveSoundPos.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
-				//d.type = Block::none;
+				butterflies.push_back(glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f });
+				d.type = Block::none;
 			}
 
 		}
@@ -143,16 +118,13 @@ void MapData::clearColorData()
 
 void MapData::cleanup()
 {
-	waterPos.clear();
+	
 	signDataVector.clear();
-	greenSoundPos.clear();
-	redSoundPos.clear();
-	tikiSoundPos.clear();
-	snowSoundPos.clear();
-	caveSoundPos.clear();
+	
 	exitDataVector.clear();
 	torchDataVector.clear();
 	dialogs.clear();
+	butterflies.clear();
 
 	if (data)
 	{

@@ -4,14 +4,19 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+
+#define BLOCK_SIZE 8
+
 #include "DialogInteraction.h"
+
+
+struct Butterfly;
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/hash.hpp"
 
-#define BLOCK_SIZE 8
 #define BLOCK_COUNT 424
-#define LEVELS 6
+#define LEVELS 7
 
 namespace Block
 {
@@ -150,10 +155,10 @@ namespace Block
 		unfinished56, unfinished57, unfinished58, unfinished59, unfinished60,
 		unfinished61, unfinished62, unfinished63, unfinished64, unfinished65,
 		unfinished66, unfinished67, unfinished68, unfinished69, unfinished70,
-		unfinished71, unfinished72, unfinished73, unfinished74, unfinished75,
+		unfinished71, unfinished72, unfinished73, unfinished74,
 #pragma endregion
-
-		chainDecoration, /////////////////////////////start walls
+		brickDecoration,/////////////////////////////start walls
+		chainDecoration, 
 		brickDecoration1,
 		brickDecoration2,
 		brickDecoration3,
@@ -315,6 +320,18 @@ namespace Block
 		lavaSource,
 		table1,
 		table2,
+		vines3,
+		vines4,
+		vines5,
+		vines6,
+		vines7,
+		vines8,
+		vines9,
+		mushroom2,
+		grassWall1,
+		grassWall2,
+		grassWall3,
+		butterfy,
 		lastBlock,
 
 	};
@@ -462,7 +479,7 @@ inline bool isCollidable(unsigned short b)
 		return 0;
 	}
 
-	if (b < Block::chainDecoration)
+	if (b < Block::brickDecoration)
 	{
 		return 1;
 	}
@@ -506,11 +523,20 @@ inline bool unLitTorch(unsigned short b)
 inline bool isInteractableGrass(unsigned short b)
 {
 
-	return b == Block::grassDecoration ||
+	return 
+		b == Block::grassDecoration ||
 		b == Block::leavesRight ||
 		b == Block::leavesLeft ||
 		b == Block::vines1 ||
 		b == Block::vines2 ||
+		b == Block::vines3 ||
+		b == Block::vines4 ||
+		b == Block::vines5 ||
+		b == Block::vines6 ||
+		b == Block::vines7 ||
+		b == Block::vines8 ||
+		b == Block::vines9 ||
+		b == Block::mushroom2 ||
 		b == Block::grassDecoration2 ||
 		b == Block::grassDecoration3 ||
 		b == Block::grassDecoration4 ||
@@ -526,6 +552,16 @@ inline bool isSign(unsigned short b)
 		b == Block::signDecoration3 ||
 		b == Block::signDecoration4 ||
 		b == Block::signDecoration5;
+}
+
+inline bool isDoor(unsigned short b)
+{
+	return b == Block::levelExit;
+}
+
+inline bool isUnfinished(unsigned short b)
+{
+	return b >= Block::unfinished30 && b <= Block::unfinished74;
 }
 
 inline bool isIce(unsigned short b)
@@ -630,12 +666,8 @@ struct MapData
 	std::vector<exitData> exitDataVector;
 	std::vector<torchData> torchDataVector;
 
-	std::vector<glm::vec2> waterPos;
-	std::vector<glm::vec2> greenSoundPos;
-	std::vector<glm::vec2> redSoundPos;
-	std::vector<glm::vec2> tikiSoundPos;
-	std::vector<glm::vec2> snowSoundPos;
-	std::vector<glm::vec2> caveSoundPos;
+	std::vector<Butterfly> butterflies;
+
 
 	std::unordered_map<glm::ivec2, FullDialogData> dialogs;
 

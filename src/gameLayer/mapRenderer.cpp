@@ -217,6 +217,13 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData,
 					data.type == Block::leavesLeft ||
 					data.type == Block::vines1||
 					data.type == Block::vines2 ||
+					data.type == Block::vines3 ||
+					data.type == Block::vines4 ||
+					data.type == Block::vines5 ||
+					data.type == Block::vines6 ||
+					data.type == Block::vines7 ||
+					data.type == Block::vines8 ||
+					data.type == Block::vines9 ||
 					data.type == Block::snowDecoration1||
 					data.type == Block::waterFall ||
 					data.type == Block::grassDecoration2||
@@ -251,6 +258,7 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData,
 					|| data.type == Block::snowPlant2
 					|| data.type == Block::lavaKill
 					|| data.type == Block::lava
+					|| data.type == Block::mushroom2
 
 					)
 				{

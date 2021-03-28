@@ -190,3 +190,27 @@ struct Bird
 	float getShowPerc();
 
 };
+
+//todo calculate light for butterfly
+struct Butterfly
+{
+	Butterfly() { create(); }
+	Butterfly(glm::vec2 anchor):anchor(anchor), position(anchor) { create(); }
+
+	glm::vec2 anchor;
+	glm::vec2 position;
+
+	glm::ivec2 texturePos = {0,0};
+	float frameTime = 0;
+
+	bool facingLeft = 0;
+	void draw(gl2d::Renderer2D &renderer, float deltaTime, gl2d::Texture t);
+	void create();
+
+	float light = 0;
+
+	glm::vec2 direction = {};
+	float timeTillChangeDir = 0;
+	void updateMove(float deltaTime, MapData &mapData);
+
+};

@@ -2,7 +2,6 @@
 #include "gl2d.h"
 #include "mapRenderer.h"
 #include "mapData.h"
-#include "Entity.h"
 #include "input.h"
 #include "Ui.h"
 #include "Particle.h"
@@ -59,6 +58,8 @@ gl2d::Texture arrowSprite;
 gl2d::Texture particlesSprite;
 gl2d::Texture crackTexture;
 gl2d::Texture birdTexture;
+gl2d::Texture butterflyTexture;
+
 
 gl2d::Texture uiItch;
 gl2d::Texture uiMusic;
@@ -118,7 +119,7 @@ float lightPerc = 1;
 
 Bird bird;
 
-const char *levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki tribe", "Secret Level", "test world" };
+const char *levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki tribe", "Secret Level", "test world", "shire" };
 
 void respawn();
 
@@ -307,6 +308,7 @@ bool initGame()
 	particlesSprite.loadFromFileWithPixelPadding(RESOURCES_PATH "particles.png", 8);
 	crackTexture.loadFromFileWithPixelPadding(RESOURCES_PATH "crackAnim.png", 8);
 	birdTexture.loadFromFileWithPixelPadding(RESOURCES_PATH "bird.png", 8);
+	butterflyTexture.loadFromFileWithPixelPadding(RESOURCES_PATH "butterfly.png", 8);
 
 	uiItch.loadFromFile(RESOURCES_PATH "ui//itch.png");
 	uiMusic.loadFromFile(RESOURCES_PATH "ui//music.jpg");
@@ -1011,7 +1013,7 @@ bool gameLogic(float deltaTime)
 	mapData.clearColorData();
 
 	simuleteLightSpot(player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2),
-		playerLight * lightPerc, mapData, arrows, pickups);
+		playerLight * lightPerc, mapData, arrows, pickups, mapData.butterflies);
 
 #pragma region lights
 
@@ -1037,8 +1039,7 @@ bool gameLogic(float deltaTime)
 		maxX = std::min(mapData.w, maxX);
 		maxY = std::min(mapData.h, maxY);
 
-		static bool playedGrassSound = 0;
-		bool playedGrassSoundThisFrame = 0;
+		bool playedGrassSound = 0;
 		static float grassTimeDelay;
 
 		player.iswebs = 0;
@@ -1115,13 +1116,13 @@ bool gameLogic(float deltaTime)
 					player.iswebs = true;
 				}
 
-				if (isInteractableGrass(g.type))
+				if (isInteractableGrass(g.type) && g.animPos == 1)
 				{
-					playedGrassSoundThisFrame = 1;
 
 					if (!playedGrassSound && grassTimeDelay <= 0)
 					{
-						grassTimeDelay = (rand() % 6)*0.1 + 0.3;
+						grassTimeDelay = (rand() % 6) * 0.1 + 0.4;
+						//grassTimeDelay = 0;
 						playedGrassSound = 1;
 						soundManager.playSound(SoundManager::soundEffects::soundEffectGrass);
 					}
@@ -1215,10 +1216,7 @@ bool gameLogic(float deltaTime)
 		grassTimeDelay -= deltaTime;
 		if (grassTimeDelay < 0) { grassTimeDelay = 0; }
 
-		if (!playedGrassSoundThisFrame)
-		{
-			playedGrassSound = 0;
-		}
+		
 
 	}
 
@@ -1315,7 +1313,7 @@ bool gameLogic(float deltaTime)
 	#pragma endregion
 
 		simuleteLightSpot({ i.pos.x * BLOCK_SIZE + BLOCK_SIZE / 2,i.pos.y * BLOCK_SIZE + BLOCK_SIZE / 2 },
-			r * lightPerc, mapData, arrows, pickups);
+			r * lightPerc, mapData, arrows, pickups, mapData.butterflies);
 
 	}
 
@@ -1338,7 +1336,7 @@ bool gameLogic(float deltaTime)
 			if (r > 0)
 			{
 				simuleteLightSpot({ i.pos },
-					r * lightPerc, mapData, arrows, pickups);
+					r * lightPerc, mapData, arrows, pickups, mapData.butterflies);
 			}
 
 		}
@@ -1500,8 +1498,21 @@ bool gameLogic(float deltaTime)
 
 #pragma endregion
 
+#pragma region butterflies
+
+	for(auto &i :mapData.butterflies)
+	{
+		i.updateMove(deltaTime, mapData);
+		i.draw(renderer2d, deltaTime, butterflyTexture);
+
+	}
+
+#pragma endregion
+
+
 
 	player.draw(renderer2d, deltaTime, characterSprite);
+
 
 #pragma region arrows
 	for (auto i = 0; i < arrows.size(); i++)

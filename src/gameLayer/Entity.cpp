@@ -1314,12 +1314,8 @@ void Butterfly::updateMove(float deltaTime, MapData &mapData)
 	
 	position += direction * deltaTime;
 	
-	if (isCollidable(mapData.get(position.x/ BLOCK_SIZE, position.y/ BLOCK_SIZE).type)
-		&&
-		aabb(
-		{ position, glm::vec2{BLOCK_SIZE, BLOCK_SIZE-1} }, 
-		{ position.x / BLOCK_SIZE * BLOCK_SIZE, position.y / BLOCK_SIZE * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }
-		)
+	if (isCollidable(mapData.get((position.x+4)/ BLOCK_SIZE,
+		(position.y+4)/ BLOCK_SIZE).type)
 		)
 	{
 		direction *= -1;
@@ -1344,6 +1340,7 @@ static int p = 0;
 
 void Butterfly::create()
 {
-	//texturePos.y = rand() % 4;
-	texturePos.y = p++;
+	texturePos.y = rand() % 4;
+	//texturePos.y = p++;
+	//p %= 4;
 }

@@ -126,7 +126,7 @@ namespace settings {
 
 			menu::uninteractableCentreText("Visual settings");
 
-			if(!settings::isFullScreen())
+			//if(!settings::isFullScreen())
 			{
 				menu::slider0_1("Zoom", &sData.zoom);
 			}

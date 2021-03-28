@@ -770,11 +770,11 @@ bool gameLogic(float deltaTime)
 
 #pragma region controlls
 
-	if (settings::isFullScreen())
-	{
-		renderer2d.currentCamera.zoom = fullScreenZoom * 4;
-	}
-	else
+	//if (settings::isFullScreen())
+	//{
+	//	renderer2d.currentCamera.zoom = fullScreenZoom * 4;
+	//}
+	//else
 	{
 		renderer2d.currentCamera.zoom = settings::getZoom();
 	}

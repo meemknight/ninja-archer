@@ -13,6 +13,7 @@
 #include <fstream>
 #include <chrono>
 #include "input.h"
+#include "Settings.h"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -22,8 +23,12 @@
 #undef max
 #include <GLFW/glfw3.h>
 
-//export globals
+//export g1lobals
 float fullScreenZoom = 1;
+//
+
+bool fullScreen = 0;
+
 
 bool keyboardMousePressedFlag = 0;
 bool platform::keyboardMousePressed()
@@ -295,6 +300,7 @@ int main()
 	glfwSetWindowSizeCallback(wind, windowSizeCallback);
 	glfwSetCursorPosCallback(wind, cursorPositionCallback);
 	
+	
 	permaAssertComment(gladLoadGL(), "err initializing glad");
 
 	glEnable(GL_MULTISAMPLE);
@@ -347,12 +353,62 @@ int main()
 
 	#pragma region game logic
 
+		//if(active)
+
 		if (!gameLogic(augmentedDeltaTime))
 		{
 			return 0;
 		}
 
 	#pragma endregion
+
+	#pragma region fullscreen 
+
+		if(platform::isFocused() && fullScreen != settings::isFullScreen())
+		{
+			static int lastW = w;
+			static int lastH = w;
+			static int lastPosX = 0;
+			static int lastPosY = 0;
+
+			if(settings::isFullScreen())
+			{
+				lastW = w;
+				lastH = h;
+
+				glfwWindowHint(GLFW_DECORATED, NULL); // Remove the border and titlebar..  
+				glfwGetWindowPos(wind, &lastPosX, &lastPosY);
+
+				// get resolution of monitor
+				const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+				// switch to full screen
+				glfwSetWindowMonitor(wind, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, 0);
+
+
+				fullScreen = 1;
+
+			}else
+			{
+				glfwWindowHint(GLFW_DECORATED, GLFW_TRUE); // Remove the border and titlebar..  
+				glfwSetWindowMonitor(wind, nullptr, lastPosX, lastPosY, lastW, lastH, 0);
+
+				fullScreen = 0;
+			}
+
+		}
+
+		if(input::isControllerInput())
+		{
+			platform::showMouse(false);
+		}else
+		{
+			platform::showMouse(true);
+		}
+
+	#pragma endregion
+
+
 
 	#pragma region reset flags
 
@@ -364,8 +420,8 @@ int main()
 
 	#pragma region window stuff
 
-		glfwSwapBuffers(wind);
 		glfwPollEvents();
+		glfwSwapBuffers(wind);
 
 	#pragma endregion
 

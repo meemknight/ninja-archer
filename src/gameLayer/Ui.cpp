@@ -8,7 +8,7 @@ static inline glm::vec4 convert(unsigned char r, unsigned  char g, unsigned  cha
 }
 
 
-const glm::vec4 Colors::backgroundBlue = convert(62, 61, 76);
+const glm::vec4 Colors::backgroundBlue = convert(33, 38, 63);
 const glm::vec4 Colors::darkGreen = convert(58, 83, 57);
 const glm::vec4 Colors::lightGreen = convert(107, 123, 57);
 const glm::vec4 Colors::lightRed= convert(192, 70, 31);

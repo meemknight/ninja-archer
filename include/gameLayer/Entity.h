@@ -116,7 +116,7 @@ struct Arrow
 
 	bool timeOut(float deltaTime);
 
-	float light = 1;
+	float light = 0;
 
 	float liveTime = 5;
 

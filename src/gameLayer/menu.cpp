@@ -102,7 +102,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 
 
 	bool usingControllerInput = input::isControllerInput();
-	bool acceptKeyReleased = input::isKeyReleased(input::Buttons::jump) || input::isKeyReleased(input::Buttons::shoot);
+	bool acceptKeyReleased = input::isKeyReleased(input::Buttons::jump) || platform::isKeyReleased(platform::Button::Enter);
 	bool leftPressed = input::isKeyHeld(input::Buttons::left);
 	bool rightPressed = input::isKeyHeld(input::Buttons::right);
 	bool upReleased = input::isKeyReleased(input::Buttons::up);

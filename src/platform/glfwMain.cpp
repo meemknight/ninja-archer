@@ -73,7 +73,7 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
 			platform::internal::setButtonState(platform::Button::Space, state);
 		}
 		else
-		if (key == GLFW_KEY_ENTER)
+		if (key == GLFW_KEY_ENTER || key == GLFW_KEY_KP_ENTER)
 		{
 			platform::internal::setButtonState(platform::Button::Enter, state);
 		}
@@ -376,21 +376,22 @@ int main()
 				lastW = w;
 				lastH = h;
 
-				glfwWindowHint(GLFW_DECORATED, NULL); // Remove the border and titlebar..  
+				//glfwWindowHint(GLFW_DECORATED, NULL); // Remove the border and titlebar..  
 				glfwGetWindowPos(wind, &lastPosX, &lastPosY);
 
-				// get resolution of monitor
-				const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
+				auto monitor = glfwGetPrimaryMonitor();
+				const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+				
 				// switch to full screen
-				glfwSetWindowMonitor(wind, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, 0);
+				glfwSetWindowMonitor(wind, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
 
 
 				fullScreen = 1;
 
 			}else
 			{
-				glfwWindowHint(GLFW_DECORATED, GLFW_TRUE); // Remove the border and titlebar..  
+				//glfwWindowHint(GLFW_DECORATED, GLFW_TRUE); // 
 				glfwSetWindowMonitor(wind, nullptr, lastPosX, lastPosY, lastW, lastH, 0);
 
 				fullScreen = 0;

@@ -1504,7 +1504,7 @@ bool gameLogic(float deltaTime)
 	{
 		i.updateMove(deltaTime, mapData);
 		i.draw(renderer2d, deltaTime, butterflyTexture);
-
+		i.light = 0;
 	}
 
 #pragma endregion
@@ -1754,19 +1754,37 @@ bool gameLogic(float deltaTime)
 			}
 
 			float c = iter.time / ANIM_TIME;
+				
+			auto s = renderer2d.getTextSize(iter.text.c_str(), font, 0.09, 4, 3);
+			//auto backgroundSize = s;
+			//backgroundSize.y += BLOCK_SIZE;
+			//
+			//if(iter.button >= 0)
+			//{
+			//	backgroundSize.x += BLOCK_SIZE * 2;
+			//}
+			//
+			//renderer2d.renderRectangle({ BLOCK_SIZE * (iter.pos.x) - backgroundSize.x * c * 0.5, 
+			//	BLOCK_SIZE * (iter.pos.y - 2), backgroundSize.x * c, backgroundSize.y * sqrt(c) },
+			//		Colors::backgroundBlue);
 
-			//render text from sign
-			renderer2d.renderText({ BLOCK_SIZE * (iter.pos.x), BLOCK_SIZE * (iter.pos.y - 1) },
-				iter.text.c_str(), font, { 1,1,1,c }, 0.09, 4, 3, true, { 0.1,0.1,0.1,c });
-
-			if (iter.button >= 0)
+			//if (c >= 0.90)
 			{
-				glm::vec2 pos = renderer2d.getTextSize(iter.text.c_str(), font, 0.09, 4, 3);
-				pos.y = 0;
-				pos.x /= 2;
-				pos += glm::vec2(BLOCK_SIZE * (iter.pos.x), BLOCK_SIZE * (iter.pos.y - 1));
-				input::drawButtonWithHover(renderer2d, pos, BLOCK_SIZE, iter.button, c);
+				//render text from sign
+				renderer2d.renderText({ BLOCK_SIZE * (iter.pos.x), BLOCK_SIZE * (iter.pos.y - 1) },
+					iter.text.c_str(), font, { 1,1,1,c }, 0.09, 4, 3, true, { 0.1,0.1,0.1,c });
+
+				if (iter.button >= 0)
+				{
+					glm::vec2 pos = s;
+					pos.y = 0;
+					pos.x /= 2;
+					pos += glm::vec2(BLOCK_SIZE * (iter.pos.x), BLOCK_SIZE * (iter.pos.y - 1));
+					input::drawButtonWithHover(renderer2d, pos, BLOCK_SIZE, iter.button, c);
+				}
 			}
+
+			
 
 		}
 

@@ -16,7 +16,6 @@ struct Butterfly;
 #include "glm/gtx/hash.hpp"
 
 #define BLOCK_COUNT 424
-#define LEVELS 7
 
 namespace Block
 {

@@ -359,6 +359,8 @@ bool initGame()
 
 	settings::loadSettings();
 
+	initLevelSelectorData();
+
 	return true;
 }
 
@@ -374,7 +376,7 @@ enum MenuState:int
 bool gameLogic(float deltaTime)
 {
 
-	glClear(GL_COLOR_BUFFER_BIT );
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	int w, h;
 	w = platform::getWindowSizeX();
 	h = platform::getWindowSizeY();
@@ -540,7 +542,7 @@ bool gameLogic(float deltaTime)
 			if (l > 0) 
 			{
 				currentLevel = l;
-				loadLevel;
+				loadLevel();
 			}
 			
 		}

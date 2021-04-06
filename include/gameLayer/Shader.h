@@ -28,7 +28,6 @@ struct Shader
 
 	void compile(const char* name)
 	{
-		//todo switch to c++
 		size_t size;
 		FILE *input;
 		input = fopen(name, "rb");
@@ -89,9 +88,10 @@ struct cmp_str //for compairing the strings literals
 ///bref this class is used for compiling shaders and also using their data
 class ShaderProgram
 {
+public:
+
 	void compileProgram();
 
-public:
 
 	ShaderProgram();
 	ShaderProgram(const VertexShader &vs, const FragmentShader &fs);

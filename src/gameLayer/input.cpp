@@ -334,8 +334,15 @@ int buttonMapping1[Buttons::buttonsCount] =
 			}
 
 			buttonsReleased[i] = b.released;
+
+			if(buttonsHeld[i])
+			{
+				buttonsPressed[i] = 0;
+			}else
+			{
+				buttonsPressed[i] = b.pressed;
+			}
 			buttonsHeld[i] = b.held;
-			buttonsPressed[i] = b.pressed;
 	
 		}
 	

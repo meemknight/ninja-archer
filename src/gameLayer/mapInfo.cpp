@@ -4,6 +4,7 @@
 #include "input.h"
 #include "tools.h"
 #include "gameLayer.h"
+#include "levelSelector.h"
 
 #pragma region levelData
 

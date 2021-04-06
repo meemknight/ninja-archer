@@ -98,9 +98,6 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 	const glm::vec4 dropShadowColor = { 0.1f,0.1f,0.1f,1.f };
 
 	//input bindings
-	///todo add your own functions here
-
-
 	bool usingControllerInput = input::isControllerInput();
 	bool acceptKeyReleased = input::isKeyReleased(input::Buttons::jump) || platform::isKeyReleased(platform::Button::Enter);
 	bool leftPressed = input::isKeyHeld(input::Buttons::left);

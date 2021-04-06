@@ -60,3 +60,4 @@ void ShaderProgram::deleteProgram()
 	glDeleteProgram(id);
 	id = 0;
 }
+

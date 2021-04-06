@@ -13,6 +13,7 @@
 #include "Settings.h"
 #include "Sound.h"
 #include "gameMath.h"
+#include "levelSelector.h"
 
 extern float gravitationalAcceleration;
 extern float jumpSpeed;
@@ -119,7 +120,6 @@ float lightPerc = 1;
 
 Bird bird;
 
-const char *levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki tribe", "Secret Level", "test world", "shire" };
 
 void respawn();
 
@@ -374,12 +374,22 @@ enum MenuState:int
 bool gameLogic(float deltaTime)
 {
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT );
 	int w, h;
 	w = platform::getWindowSizeX();
 	h = platform::getWindowSizeY();
 	glViewport(0, 0, w, h);
 	renderer2d.updateWindowMetrics(w, h);
+
+	if (input::isControllerInput() || (currentArrow == -1 && currentLevel != -2 && !inGameMenu))
+	{
+		platform::showMouse(false);
+	}
+	else
+	{
+		platform::showMouse(true);
+	}
+
 
 #pragma region MyRegion
 
@@ -416,7 +426,7 @@ bool gameLogic(float deltaTime)
 
 			menu::endMenu(renderer2d, uiDialogBox, font, nullptr, deltaTime);
 
-			if (playButton)
+			if (playButton) //load from last state
 			{
 
 				glm::ivec2 dialogPos[20];
@@ -524,173 +534,15 @@ bool gameLogic(float deltaTime)
 		}
 		else if (menuState == MenuState::levelSelector)
 		{
-			/*
-			Ui::Frame f({ 0, 0, w, h });
 
-			glm::vec4 frame2 = Ui::Box().xCenter().yTop(50).yDimensionPercentage(0.6).xAspectRatio(1.f);
+			int l = levelSelectorMenu(deltaTime, renderer2d, uiDialogBox, font);
 
-			renderer2d.renderRectangle(
-				frame2,
-				{}, 0, uiFrame);
-
+			if (l > 0) 
 			{
-				Ui::Frame f(frame2);
-
-				renderer2d.renderRectangle(
-					Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
-					{}, 0, uiForest);
-				renderer2d.renderRectangle(
-					Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
-					{}, 0, uiCastle);
-				renderer2d.renderRectangle(
-					Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
-					{}, 0, uiCave);
-				renderer2d.renderRectangle(
-					Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
-					{}, 0, uiMountain);
-				renderer2d.renderRectangle(
-					Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
-					{}, 0, uiSnowMountain);
-				renderer2d.renderRectangle(
-					Ui::Box().xCenter().yCenter().yDimensionPercentage(0.6).xAspectRatio(1.f),
-					{}, 0, uiTiki);
-
-
-				//uiArrows
+				currentLevel = l;
+				loadLevel;
 			}
-
-			glm::vec4 playBox= Ui::Box().xCenter().yBottom(-20).yDimensionPixels(100).xDimensionPercentage(0.8);
-
-			std::string temp;
-
-			temp = (std::string("Play area: ") + (levelNames[selectedLevel]));
-
-			renderer2d.render9Patch2(playBox,
-				8, { 1,1,1,1 }, {}, 0, uiButton, { 0,1,1,0 }, { 0,0.8,0.8,0 });
-			renderer2d.renderText({ playBox.x + playBox.z /2 ,playBox.y + playBox.w / 2 },
-				temp.c_str(), font, { 1,1,1,1 }, 0.6, 4, 3, true, { 0.1,0.1,0.1,1 });
-
-			gl2d::TextureAtlas arrowsAtlas(1, 2);
-			int leftPressed = 0;
-			int rightPressed = 0;
-
-			int lReleased = 0;
-			int rReleased = 0;
-
-			auto leftBox = Ui::Box().xCenter(-frame2.z / 1.5).yCenter().yDimensionPercentage(0.2).xAspectRatio(1.f)();
-			auto rightBox = Ui::Box().xCenter(frame2.z / 1.5).yCenter().yDimensionPercentage(0.2).xAspectRatio(1.f)();
-
-			auto p = platform::getRelMousePosition();
-
-#pragma region buttons
-
-			if (platform::isLMouseHeld())
-			{
-				if (p.x >= leftBox.x && p.x <= leftBox.x + leftBox.z
-					&&
-					p.y >= leftBox.y && p.y <= leftBox.y + leftBox.w
-					)
-				{
-
-					leftPressed = 1;
-				}
-
-				if (p.x >= rightBox.x && p.x <= rightBox.x + rightBox.z
-					&&
-					p.y >= rightBox.y && p.y <= rightBox.y + rightBox.w
-					)
-				{
-
-					rightPressed = 1;
-				}
-			}
-
-			{
-				if (p.x >= leftBox.x && p.x <= leftBox.x + leftBox.z
-					&&
-					p.y >= leftBox.y && p.y <= leftBox.y + leftBox.w
-					)
-				{
-					if (platform::isLMouseButtonReleased())
-					{
-						lReleased = 1;
-					}
-				}
-
-				if (p.x >= rightBox.x && p.x <= rightBox.x + rightBox.z
-					&&
-					p.y >= rightBox.y && p.y <= rightBox.y + rightBox.w
-					)
-				{
-					if (platform::isLMouseButtonReleased())
-					{
-						rReleased = 1;
-					}
-				}
-			}
-
-#pragma endregion
-
-			if(selectedLevel >0)
-			renderer2d.renderRectangle(leftBox,
-				{}, 0, uiArrows, arrowsAtlas.get(0, leftPressed, 1));
-
-			if (selectedLevel < LEVELS-1)
-			renderer2d.renderRectangle(rightBox,
-				{}, 0, uiArrows, arrowsAtlas.get(0, rightPressed));
-
-			if (lReleased)
-			{
-
-				selectedLevel--;
-				if(selectedLevel <0)
-				{
-					selectedLevel = 0;
-				}
-
-				//currentLevel = 2;
-				//loadLevel();
-			}
-			if (rReleased)
-			{
-				selectedLevel++;
-				if (selectedLevel >= LEVELS)
-				{
-					selectedLevel = LEVELS-1;
-				}
-				//currentLevel = 2;
-				//loadLevel();
-			}
-
-			if(Ui::isButtonReleased(p, playBox))
-			{
-				currentLevel = selectedLevel;
-				loadLevel();
-			}
-			*/
-
-			menu::startMenu(1020);
-
-			menu::uninteractableCentreText("Select zone");
-
-			bool selected[LEVELS] = {};
-
-			for (int i = 0; i < LEVELS; i++)
-			{
-				menu::interactableText(levelNames[i], &selected[i]);
-			}
-
-			menu::endMenu(renderer2d, uiDialogBox, font, nullptr, deltaTime);
-
-			for (int i = 0; i < LEVELS; i++)
-			{
-				if (selected[i])
-				{
-					currentLevel = i;
-					loadLevel();
-				}
-			}
-
+			
 		}
 		else if (menuState == MenuState::settingsMenu)
 		{
@@ -1010,12 +862,13 @@ bool gameLogic(float deltaTime)
 	//mapRenderer.addBlock(renderer2d.toScreen({ 100,100,100,100 }), { 0,1,1,0 }, {1,1,1,1});
 	//mapRenderer.render();
 
+#pragma region lights
+
 	mapData.clearColorData();
 
 	simuleteLightSpot(player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2),
 		playerLight * lightPerc, mapData, arrows, pickups, mapData.butterflies);
 
-#pragma region lights
 
 	bool isInRedBlock = 0;
 	bool isInBlueBlock = 0;
@@ -1801,7 +1654,7 @@ bool gameLogic(float deltaTime)
 
 
 	if ((input::isKeyReleased(input::Buttons::jump)|| input::isKeyReleased(input::Buttons::shoot))
-		 && currentDialog.hasFinishedDialog)
+		 && currentDialog.hasFinishedDialog && !inGameMenu)
 	{
 		if (!currentDialog.updateDialog())
 		{

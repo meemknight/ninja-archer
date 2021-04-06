@@ -182,7 +182,6 @@ namespace platform
 
 	}
 
-	//todo test
 	glm::ivec2 getRelMousePosition()
 	{
 		double x = 0, y = 0;
@@ -191,7 +190,6 @@ namespace platform
 		return { x, y };
 	}
 
-	//todo test
 	glm::ivec2 getWindowSize()
 	{
 		int x = 0; int y = 0;
@@ -201,7 +199,6 @@ namespace platform
 		return { x, y };
 	}
 
-	//todo test
 	void showMouse(bool show)
 	{
 		if(show)
@@ -399,13 +396,13 @@ int main()
 
 		}
 
-		if(input::isControllerInput())
-		{
-			platform::showMouse(false);
-		}else
-		{
-			platform::showMouse(true);
-		}
+		//if(input::isControllerInput())
+		//{
+		//	platform::showMouse(false);
+		//}else
+		//{
+		//	platform::showMouse(true);
+		//}
 
 	#pragma endregion
 

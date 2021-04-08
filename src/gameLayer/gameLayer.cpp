@@ -519,7 +519,9 @@ bool gameLogic(float deltaTime)
 			if (levelSelectButton)
 			{
 				menuState = MenuState::levelSelector;
+				enterMenu(); //init stuff
 				selectedLevel = 0;
+
 			}
 
 			if (settingsButton)
@@ -539,7 +541,7 @@ bool gameLogic(float deltaTime)
 
 			int l = levelSelectorMenu(deltaTime, renderer2d, uiDialogBox, font);
 
-			if (l > 0) 
+			if (l > -1) 
 			{
 				currentLevel = l;
 				loadLevel();
@@ -1654,23 +1656,31 @@ bool gameLogic(float deltaTime)
 
 	currentDialog.draw(renderer2d, w, h, deltaTime);
 
-
-	if ((input::isKeyReleased(input::Buttons::jump)|| input::isKeyReleased(input::Buttons::shoot))
-		 && currentDialog.hasFinishedDialog && !inGameMenu)
+	if (!inGameMenu)
 	{
-		if (!currentDialog.updateDialog())
+		if ((input::isKeyReleased(input::Buttons::jump) || input::isKeyReleased(input::Buttons::shoot))
+			 && currentDialog.hasFinishedDialog)
 		{
-			currentDialog.close();
-
-			//todo check if bird is in dialog
-			if (bird.showing)
+			if (!currentDialog.updateDialog())
 			{
-				bird.startEndMove(bird.position, getDiagonalBirdPos(bird.position, player.pos));
+				currentDialog.close();
+
+				//todo check if bird is in dialog
+				if (bird.showing)
+				{
+					bird.startEndMove(bird.position, getDiagonalBirdPos(bird.position, player.pos));
+				}
+
+				//saveState( playerSpawnPos, currentLevel, mapData.dialogs, blueChanged, redChanged, grayChanged);
 			}
 
-			//saveState( playerSpawnPos, currentLevel, mapData.dialogs, blueChanged, redChanged, grayChanged);
 		}
-
+		else if ((input::isKeyReleased(input::Buttons::jump) || input::isKeyReleased(input::Buttons::shoot)) && currentDialog.mState == 0)
+		{
+			currentDialog.hasFinishedDialog = 1;
+			currentDialog.mTextToShow = currentDialog.text;
+			currentDialog.text = "";
+		}
 	}
 
 #pragma endregion

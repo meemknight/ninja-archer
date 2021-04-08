@@ -92,8 +92,9 @@ void SoundManager::setMusicPositions(MapData & mapData)
 	{
 		if(musicPositions[i].size() != 0)
 		{
-			musicVect[i].setVolume(0);
+			musicVect[i].stop();
 			musicVect[i].play();
+			musicVect[i].setVolume(0);
 			musicVect[i].currentVolume = 0;
 			musicVect[i].desiredVolume = 0;
 

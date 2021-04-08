@@ -10,181 +10,24 @@
 #include <glm/gtx/transform.hpp>
 #include "OBJ_Loader.h"
 
-const char *levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki tribe", "Secret Level", "test world", "shire" };
+#undef max
+
+const char *levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki tribe", "Ice mountain", "level2", "testWorld" };
+const char *modelNames[LEVELS] = { "level1.obj", "enchantedForest.obj", "cave.obj", "tikiTribe.obj", "iceLevel.obj", "level2.obj", "level2.obj" };
 
 
 ShaderProgram shader;
-GLuint vao;
-GLuint buffer;
-GLuint indexBuffer;
+
 GLint u_ModelViewProjection = -1;
 GLint u_modelToWorld = -1;
 GLint u_eyePosition = -1;
+GLint u_lightPos = -1;
+GLint u_lightCount = -1;
 gl2d::Texture colorTexture;
 GLint u_albedo = -1;
-
-int primitiveCount;
-
-float uv = 1;
-float cubePositionsNormals[] = {
-	-1.0f, +1.0f, +1.0f, // 0
-	+0.0f, +1.0f, +0.0f, // Normal
-	0, 0,				 //uv
-	//0,0,0,				 //tangent
-	//0,0,0,				 //btangent
-
-	+1.0f, +1.0f, +1.0f, // 1
-	+0.0f, +1.0f, +0.0f, // Normal
-	1 * uv, 0,				 //uv
-	//0,0,0,				 //tangent
-	//0,0,0,				 //btangent
-
-	+1.0f, +1.0f, -1.0f, // 2
-	+0.0f, +1.0f, +0.0f, // Normal
-	1 * uv, 1 * uv,				 //uv
-	//0,0,0,				 //tangent
-	//0,0,0,				 //btangent
-
-	-1.0f, +1.0f, -1.0f, // 3
-	+0.0f, +1.0f, +0.0f, // Normal
-	0, 1 * uv,				 //uv
-	//0,0,0,				 //tangent
-	//0,0,0,				 //btangent
+GLint u_color = -1;
 
 
-
-	-1.0f, +1.0f, -1.0f, // 4
-	 0.0f, +0.0f, -1.0f, // Normal
-	 0, 1 * uv,				 //uv
-	//0,0,0,				 //tangent
-	//0,0,0,				 //btangent
-
-	+1.0f, +1.0f, -1.0f, // 5
-	 0.0f, +0.0f, -1.0f, // Normal
-	 1 * uv, 1 * uv,				 //uv
-	//0,0,0,				 //tangent
-	//0,0,0,				 //btangent
-
-	 +1.0f, -1.0f, -1.0f, // 6
-	 0.0f, +0.0f, -1.0f, // Normal
-	 1 * uv, 0,				 //uv
-	 //0,0,0,				 //tangent
-	 //0,0,0,				 //btangent
-
-	-1.0f, -1.0f, -1.0f, // 7
-	 0.0f, +0.0f, -1.0f, // Normal
-	 0, 0,				 //uv
-	//0,0,0,				 //tangent
-	//0,0,0,				 //btangent
-
-	+1.0f, +1.0f, -1.0f, // 8
-	+1.0f, +0.0f, +0.0f, // Normal
-	1 * uv, 0,				 //uv
-	//0,0,0,				 //tangent
-	//0,0,0,				 //btangent
-
-	+1.0f, +1.0f, +1.0f, // 9
-	+1.0f, +0.0f, +0.0f, // Normal
-	1 * uv, 1 * uv,				 //uv
-	//0,0,0,				 //tangent
-	//0,0,0,				 //btangent
-
-	+1.0f, -1.0f, +1.0f, // 10
-	+1.0f, +0.0f, +0.0f, // Normal
-	0, 1 * uv,				 //uv
-	//0,0,0,				 //tangent
-	//0,0,0,				 //btangent
-
-	+1.0f, -1.0f, -1.0f, // 11
-	+1.0f, +0.0f, +0.0f, // Normal
-	0, 0,				 //uv
-	//0,0,0,				 //tangent
-	//0,0,0,				 //btangent
-
-	-1.0f, +1.0f, +1.0f, // 12
-	-1.0f, +0.0f, +0.0f, // Normal
-	1 * uv, 1 * uv,				 //uv
-	//0,0,0,				 //tangent
-	//0,0,0,				 //btangent
-
-	-1.0f, +1.0f, -1.0f, // 13
-	-1.0f, +0.0f, +0.0f, // Normal
-	1 * uv, 0,				 //uv
-	//0,0,0,				 //tangent
-	//0,0,0,				 //btangent
-
-	-1.0f, -1.0f, -1.0f, // 14
-	-1.0f, +0.0f, +0.0f, // Normal
-	0, 0,				 //uv
-	//0,0,0,				 //tangent
-	//0,0,0,				 //btangent
-
-	-1.0f, -1.0f, +1.0f, // 15
-	-1.0f, +0.0f, +0.0f, // Normal
-	0, 1 * uv,				 //uv
-	//0,0,0,				 //tangent
-	//0,0,0,				 //btangent
-
-
-	+1.0f, +1.0f, +1.0f, // 16
-	+0.0f, +0.0f, +1.0f, // Normal
-	1 * uv, 1 * uv,				 //uv
-	//0,0,0,				 //tangent
-	//0,0,0,				 //btangent
-
-	-1.0f, +1.0f, +1.0f, // 17
-	+0.0f, +0.0f, +1.0f, // Normal
-	0, 1 * uv,				 //uv
-	//0, 0, 0,				 //tangent
-	//0, 0, 0,				 //btangent
-
-	-1.0f, -1.0f, +1.0f, // 18
-	+0.0f, +0.0f, +1.0f, // Normal
-	0, 0,				 //uv
-	//0, 0, 0,				 //tangent
-	//0, 0, 0,				 //btangent
-
-	+1.0f, -1.0f, +1.0f, // 19
-	+0.0f, +0.0f, +1.0f, // Normal
-	1 * uv, 0,				 //uv
-	//0, 0, 0,				 //tangent
-	//0, 0, 0,				 //btangent
-
-
-	+1.0f, -1.0f, -1.0f, // 20
-	+0.0f, -1.0f, +0.0f, // Normal
-	1 * uv, 0,				 //uv
-	//0, 0, 0,				 //tangent
-	//0, 0, 0,				 //btangent
-
-	-1.0f, -1.0f, -1.0f, // 21
-	+0.0f, -1.0f, +0.0f, // Normal
-	0, 0,				 //uv
-	//0, 0, 0,				 //tangent
-	//0, 0, 0,				 //btangent
-
-	-1.0f, -1.0f, +1.0f, // 22
-	+0.0f, -1.0f, +0.0f, // Normal
-	0, 1 * uv,				 //uv
-	//0, 0, 0,				 //tangent
-	//0, 0, 0,				 //btangent
-
-	+1.0f, -1.0f, +1.0f, // 23
-	+0.0f, -1.0f, +0.0f, // Normal
-	1 * uv, 1 * uv,				 //uv
-	//0, 0, 0,				 //tangent
-	//0, 0, 0,				 //btangent
-
-};
-
-unsigned int cubeIndices[] = {
-0,   1,  2,  0,  2,  3, // Top
-4,   5,  6,  4,  6,  7, // Back
-8,   9, 10,  8, 10, 11, // Right
-12, 13, 14, 12, 14, 15, // Left
-16, 17, 18, 16, 18, 19, // Front
-20, 22, 21, 20, 23, 22, // Bottom
-};
 
 GLint getUniform(GLuint id, const char *name)
 {
@@ -208,7 +51,95 @@ glm::mat4 getTransformMatrix(glm::vec3 position, glm::vec3 rotation, glm::vec3 s
 	return t * r * s;
 }
 
-objl::Loader model;
+
+struct Model
+{
+	GLuint buffer;
+	GLuint indexBuffer;
+	int primitiveCount;
+	float maxSize = 1;
+
+	void load(std::string path)
+	{
+		objl::Loader model;
+		model.LoadFile(path);
+
+		std::vector<float> modelData;
+		modelData.reserve(model.LoadedVertices.size() * 8);
+
+		glm::vec3 minPos = glm::vec3(model.LoadedVertices[0].Position.X, model.LoadedVertices[0].Position.Y, model.LoadedVertices[0].Position.Z);
+		glm::vec3 maxPos = glm::vec3(model.LoadedVertices[0].Position.X, model.LoadedVertices[0].Position.Y, model.LoadedVertices[0].Position.Z);
+		for (auto &i : model.LoadedVertices)
+		{
+			float x = i.Position.X;
+			float y = i.Position.Y;
+			float z = i.Position.Z;
+
+			if (x < minPos.x) { minPos.x = x; }
+			if (y < minPos.y) { minPos.y = y; }
+			if (z < minPos.z) { minPos.z = z; }
+
+			if (x > maxPos.x) { maxPos.x = x; }
+			if (y > maxPos.y) { maxPos.y = y; }
+			if (z > maxPos.z) { maxPos.z = z; }
+		}
+
+		glm::vec3 modelSize = maxPos - minPos;
+		glm::vec3 modelCentre = modelSize / 2.f;
+		glm::vec3 modelDelta = modelCentre - maxPos;
+
+		maxSize = std::max(modelSize.z, std::max(modelSize.x, modelSize.y));
+
+		for (auto &i : model.LoadedVertices)
+		{
+			i.Position.X += modelDelta.x;
+			i.Position.Y += modelDelta.y;
+			i.Position.Z += modelDelta.z;
+		}
+
+		for (auto &i : model.LoadedVertices)
+		{
+			modelData.push_back(i.Position.X);
+			modelData.push_back(i.Position.Y);
+			modelData.push_back(i.Position.Z);
+
+			modelData.push_back(i.Normal.X);
+			modelData.push_back(i.Normal.Y);
+			modelData.push_back(i.Normal.Z);
+
+			modelData.push_back(i.TextureCoordinate.X);
+			modelData.push_back(i.TextureCoordinate.Y);
+
+		}
+
+		std::vector<unsigned int> modelIndices;
+
+		for (auto &i : model.LoadedIndices)
+		{
+			modelIndices.push_back(i);
+		}
+
+		
+		glGenBuffers(1, &buffer);
+		glBindBuffer(GL_ARRAY_BUFFER, buffer);
+		glBufferData(GL_ARRAY_BUFFER, modelData.size() * sizeof(float), modelData.data(), GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+
+		glGenBuffers(1, &indexBuffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, modelIndices.size() * sizeof(unsigned int), modelIndices.data(), GL_STATIC_DRAW);
+
+		primitiveCount = modelIndices.size();
+	}
+};
+
+Model models[LEVELS] = {};
 
 void initLevelSelectorData()
 {
@@ -219,43 +150,43 @@ void initLevelSelectorData()
 	u_ModelViewProjection = getUniform(shader.id, "u_ModelViewProjection");
 	u_modelToWorld = getUniform(shader.id, "u_modelToWorld");
 	u_eyePosition = getUniform(shader.id, "u_eyePosition");
+	u_lightPos = getUniform(shader.id, "u_lightPos");
 	u_albedo = getUniform(shader.id, "u_albedo");
-
+	u_color = getUniform(shader.id, "u_color");
+	u_lightCount = getUniform(shader.id, "u_lightCount");
+	
 	colorTexture.loadFromFile(RESOURCES_PATH "colors.png");
 	//colorTexture.loadFromFile(RESOURCES_PATH "ui/art.png");
 
-	model.LoadFile(RESOURCES_PATH "models/level1.obj");
-
-	std::vector<float> modelData;
-	modelData.reserve(model.LoadedVertices.size() * 8);
-
-	for(auto &i :model.LoadedVertices)
+	for(int i=0; i<LEVELS; i++)
 	{
-		modelData.push_back(i.Position.X);
-		modelData.push_back(i.Position.Y);
-		modelData.push_back(i.Position.Z);
-
-		modelData.push_back(i.Normal.X);
-		modelData.push_back(i.Normal.Y);
-		modelData.push_back(i.Normal.Z);
-
-		modelData.push_back(i.TextureCoordinate.X);
-		modelData.push_back(i.TextureCoordinate.Y);
+	
+		models[i].load(RESOURCES_PATH "models/" + std::string(modelNames[i]));
 
 	}
 
-	std::vector<unsigned int> modelIndices;
 
-	for(auto &i :model.LoadedIndices)
-	{
-		modelIndices.push_back(i);
-	}
+}
 
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-	glGenBuffers(1, &buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, modelData.size() * 8, modelData.data(), GL_STATIC_DRAW);
+int currentLevelLooking = 0;
+float rotation = 0;
+
+float maxY = 2;
+float minY = -0.5;
+
+glm::vec3 eyePosition = glm::vec3{ 0,0.8,1.5 };
+std::vector<glm::vec3> lightPositions = { glm::vec3(-0.5, 2.5, 1.2), glm::vec3(-0.2, 0.1, 4) };
+
+
+
+void renderModel(float aspectRatio, int index, float scale, glm::vec3 pos, float color = 1)
+{
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+
+	shader.bind();
+
+	glBindBuffer(GL_ARRAY_BUFFER, models[index].buffer);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
@@ -263,30 +194,15 @@ void initLevelSelectorData()
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+	
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, models[index].indexBuffer);
 
-	glGenBuffers(1, &indexBuffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, modelIndices.size() * 8, modelIndices.data(), GL_STATIC_DRAW);
+	float size = (1.5 * scale) / models[index].maxSize;
 
-	primitiveCount = modelIndices.size();
-
-}
-
-int currentLevelLooking = 0;
-float rotation = 0;
-
-glm::vec3 eyePosition = glm::vec3{ 0,1.2,1.5 };
-void renderModel(float aspectRatio)
-{
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_BLEND);
-
-	glBindVertexArray(vao);
-	shader.bind();
-
-	auto modelMatrix = getTransformMatrix({ 0,0, 0 }, {0, -rotation, 0}, { 0.6,0.6,0.6 });
+	auto modelMatrix = getTransformMatrix(pos, {0, -rotation, 0},
+		{ size, size, size });
 	auto viewMatrix = glm::lookAt(eyePosition, {0, 0, 0}, { 0,1,0 });
-	auto projectionMatrix = glm::perspective(glm::radians(100.f), aspectRatio, 0.01f, 100.f);
+	auto projectionMatrix = glm::perspective(glm::radians(90.f), aspectRatio, 0.01f, 100.f);
 
 	glUniformMatrix4fv(u_ModelViewProjection, 1, GL_FALSE,
 		&(projectionMatrix * viewMatrix * modelMatrix)[0][0]);
@@ -299,11 +215,27 @@ void renderModel(float aspectRatio)
 	glUniform1i(u_albedo, 0);
 	colorTexture.bind();
 
-	glDrawElements(GL_TRIANGLES, primitiveCount, GL_UNSIGNED_INT, 0);
+	glUniform1i(u_lightCount, lightPositions.size());
+	glUniform1f(u_color, color);
+	
+	glUniform3fv(u_lightPos, lightPositions.size(), &lightPositions[0][0]);
 
-	glBindVertexArray(0);
+	glDrawElements(GL_TRIANGLES, models[index].primitiveCount, GL_UNSIGNED_INT, 0);
+
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
+
+}
+
+float ANIMATE_DURATION = 0.5;
+float animateTime = 0;
+int animateDirection = 0;
+
+void enterMenu()
+{
+
+	animateTime = ANIMATE_DURATION;
+	animateDirection = 0;
 
 }
 
@@ -321,36 +253,44 @@ int levelSelectorMenu(float deltaTime, gl2d::Renderer2D &renderer2d, gl2d::Textu
 	bool acceptKeyReleased = input::isKeyReleased(input::Buttons::jump) || platform::isKeyReleased(platform::Button::Enter);
 	bool leftPressed = input::isKeyPressedOn(input::Buttons::left);
 	bool rightPressed = input::isKeyPressedOn(input::Buttons::right);
-	bool upReleased = input::isKeyReleased(input::Buttons::up);
-	bool downReleased = input::isKeyReleased(input::Buttons::down);
+	bool upHeld = input::isKeyHeld(input::Buttons::up);
+	bool downHeld = input::isKeyHeld(input::Buttons::down);
 	//bool escReleased = input::isKeyReleased(input::Buttons::esc);
 
+	float fontSize = 1;
 #pragma endregion
 
 #pragma region handle input
-
-	if (leftPressed)
+	int changeDirection = 0;
+	if (leftPressed && currentLevelLooking > 0)
 	{
-		currentLevelLooking--;
+		changeDirection = -1;
+	}else
+	if (rightPressed && currentLevelLooking < LEVELS -1)
+	{
+		changeDirection = 1;
 	}
 
-	if (rightPressed)
-	{
-		currentLevelLooking++;
-	}
-
-	while(currentLevelLooking < 0)
-	{
-		currentLevelLooking = LEVELS + currentLevelLooking;
-	}
-
-	currentLevelLooking = currentLevelLooking % LEVELS;
+	currentLevelLooking = glm::clamp(currentLevelLooking, 0, LEVELS - 1);
 
 
 	if(acceptKeyReleased)
 	{
 		return currentLevelLooking;
 	}
+
+	float upDownSpeed = 1;
+	if(upHeld)
+	{
+		eyePosition.y += deltaTime * upDownSpeed;
+	}
+
+	if (downHeld)
+	{
+		eyePosition.y -= deltaTime * upDownSpeed;
+	}
+
+	eyePosition.y = glm::clamp(eyePosition.y, minY, maxY);
 
 #pragma endregion
 
@@ -363,21 +303,64 @@ int levelSelectorMenu(float deltaTime, gl2d::Renderer2D &renderer2d, gl2d::Textu
 		rotation -= glm::radians(360.f);
 	}
 
+
+	if(changeDirection == 1)
+	{
+		animateTime = ANIMATE_DURATION;
+		animateDirection += changeDirection;
+		currentLevelLooking += changeDirection;
+
+	}else if (changeDirection == -1)
+	{
+		animateTime = ANIMATE_DURATION;
+		animateDirection += changeDirection;
+		currentLevelLooking += changeDirection;
+	
+	}
+
+	float scaleToDraw = 1;
+	if(animateTime > 0)
+	{
+		scaleToDraw = animateTime/ANIMATE_DURATION;
+		scaleToDraw = 1 - scaleToDraw;
+		scaleToDraw /= 2.f;
+		scaleToDraw += 0.5;
+
+
+		animateTime -= deltaTime;
+	
+	}
+
+	if (currentLevelLooking > 0)
+	{
+		renderModel((float)renderer2d.windowW / renderer2d.windowH, currentLevelLooking-1, scaleToDraw /3, {-1, -0.1, 0.5}, 0.2);
+	}
+
+	if(currentLevelLooking < LEVELS-1)
+	{
+		renderModel((float)renderer2d.windowW / renderer2d.windowH, currentLevelLooking + 1, scaleToDraw /3, { 1, -0.1, 0.5 }, 0.2);
+	}
+
+	renderModel((float)renderer2d.windowW / renderer2d.windowH, currentLevelLooking, scaleToDraw, {});
+
 #pragma endregion
 
 
-	renderModel((float)renderer2d.windowW / renderer2d.windowH);
+#pragma region UI
 
 	{
 		Ui::Frame fullScreenFrame({ 0,0, renderer2d.windowW, renderer2d.windowH });
 
-		auto textSize = renderer2d.getTextSize(levelNames[currentLevelLooking], font);
+		auto textSize = renderer2d.getTextSize(levelNames[currentLevelLooking], font, fontSize);
 
 		auto textBox = Ui::Box().xCenter().yBottom(-textSize.y * 1.5)();
 
-		renderer2d.renderText(glm::vec2(textBox), levelNames[currentLevelLooking], font, textColor);
+		renderer2d.renderText(glm::vec2(textBox), levelNames[currentLevelLooking], font, textColor, fontSize);
 
 	}
+
+#pragma endregion
+
 
 	return -1;
 

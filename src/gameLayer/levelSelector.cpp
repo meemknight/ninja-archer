@@ -12,8 +12,8 @@
 
 #undef max
 
-const char *levelNames[LEVELS] = { "Tutorial", "Enchanted forest", "Cave", "Tiki tribe", "Ice mountain", "level2", "testWorld" };
-const char *modelNames[LEVELS] = { "level1.obj", "enchantedForest.obj", "cave.obj", "tikiTribe.obj", "iceLevel.obj", "level2.obj", "level2.obj" };
+const char *levelNames[LEVELS] = { "Tutorial", "home", "Enchanted forest", "Cave", "Tiki tribe", "Ice mountain", "testWorld" };
+const char *modelNames[LEVELS] = { "level1.obj",  "level2.obj","enchantedForest.obj", "cave.obj", "tikiTribe.obj", "iceLevel.obj", "level2.obj" };
 
 
 ShaderProgram shader;
@@ -307,21 +307,22 @@ int levelSelectorMenu(float deltaTime, gl2d::Renderer2D &renderer2d, gl2d::Textu
 	if(changeDirection == 1)
 	{
 		animateTime = ANIMATE_DURATION;
-		animateDirection += changeDirection;
+		animateDirection = 1;
 		currentLevelLooking += changeDirection;
 
 	}else if (changeDirection == -1)
 	{
 		animateTime = ANIMATE_DURATION;
-		animateDirection += changeDirection;
+		animateDirection = -1;
 		currentLevelLooking += changeDirection;
-	
 	}
 
 	float scaleToDraw = 1;
+	float animPos = 1;
 	if(animateTime > 0)
 	{
 		scaleToDraw = animateTime/ANIMATE_DURATION;
+		animPos = 1 - scaleToDraw;
 		scaleToDraw = 1 - scaleToDraw;
 		scaleToDraw /= 2.f;
 		scaleToDraw += 0.5;
@@ -330,18 +331,41 @@ int levelSelectorMenu(float deltaTime, gl2d::Renderer2D &renderer2d, gl2d::Textu
 		animateTime -= deltaTime;
 	
 	}
+	
+	scaleToDraw = 1;
+	animPos = glm::clamp(animPos, 0.f, 1.f);
+
+	const glm::vec3 middleTarget = { 0,0,0 };
+	const glm::vec3 leftTarget = { -2, 0, -2 };
+	const glm::vec3 rightTarget = { 2, 0, -2 };
+
+	glm::vec3 middlePos = middleTarget;
+	glm::vec3 leftPos = leftTarget;
+	glm::vec3 rightPos = rightTarget;
+
+	if(animateDirection == 1)
+	{
+		leftPos = glm::mix(middleTarget, leftTarget, animPos);
+		middlePos = glm::mix(rightTarget, middleTarget, animPos);
+		rightPos = glm::mix({ rightTarget.x + 1, rightTarget.y, rightTarget.z }, rightTarget, animPos);
+	}else if(animateDirection == -1)
+	{
+		leftPos = glm::mix({leftTarget.x-1,leftTarget.y, leftTarget.z}, leftTarget, animPos);
+		middlePos = glm::mix(leftTarget, middleTarget, animPos);
+		rightPos = glm::mix(middleTarget, rightTarget, animPos);
+	}
 
 	if (currentLevelLooking > 0)
 	{
-		renderModel((float)renderer2d.windowW / renderer2d.windowH, currentLevelLooking-1, scaleToDraw /3, {-1, -0.1, 0.5}, 0.2);
+		renderModel((float)renderer2d.windowW / renderer2d.windowH, currentLevelLooking-1, scaleToDraw, leftPos, 0.2);
 	}
 
 	if(currentLevelLooking < LEVELS-1)
 	{
-		renderModel((float)renderer2d.windowW / renderer2d.windowH, currentLevelLooking + 1, scaleToDraw /3, { 1, -0.1, 0.5 }, 0.2);
+		renderModel((float)renderer2d.windowW / renderer2d.windowH, currentLevelLooking + 1, scaleToDraw, rightPos, 0.2);
 	}
 
-	renderModel((float)renderer2d.windowW / renderer2d.windowH, currentLevelLooking, scaleToDraw, {});
+	renderModel((float)renderer2d.windowW / renderer2d.windowH, currentLevelLooking, scaleToDraw, middlePos);
 
 #pragma endregion
 

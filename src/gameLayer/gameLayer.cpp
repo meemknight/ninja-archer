@@ -1675,7 +1675,8 @@ bool gameLogic(float deltaTime)
 			}
 
 		}
-		else if ((input::isKeyReleased(input::Buttons::jump) || input::isKeyReleased(input::Buttons::shoot)) && currentDialog.mState == 0)
+		else if ((input::isKeyReleased(input::Buttons::jump) || input::isKeyReleased(input::Buttons::shoot))
+			&& currentDialog.mState == 0 && currentDialog.showing)
 		{
 			currentDialog.hasFinishedDialog = 1;
 			currentDialog.mTextToShow = currentDialog.text;

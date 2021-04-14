@@ -124,6 +124,8 @@ Bird bird;
 void respawn();
 
 int blueChanged = 0, redChanged = 0, grayChanged = 0;
+glm::ivec2 litTorchesThisGame[256] = {};
+int litTorchesThisGameCount = 0;
 
 void loadLevel(glm::ivec2 spawn = { 0, 0 }, bool setSpawn = 0)
 {
@@ -245,8 +247,10 @@ void loadLevel(glm::ivec2 spawn = { 0, 0 }, bool setSpawn = 0)
 
 	soundManager.setMusicPositions(mapData);
 
+	//memset(litTorchesThisGame, 0, sizeof(litTorchesThisGame));
+	//litTorchesThisGameCount = 0;
 
-	saveState(playerSpawnPos, currentLevel, mapData.dialogs, 0, 0, 0);
+	saveState(playerSpawnPos, currentLevel, mapData.dialogs, 0, 0, 0, litTorchesThisGame, litTorchesThisGameCount);
 	respawn();
 }
 
@@ -352,7 +356,6 @@ bool initGame()
 	//}else
 	{
 		currentLevel = -2;
-		//loadLevel();
 	}
 
 	//loadProgress(maxLevel);
@@ -421,7 +424,9 @@ bool gameLogic(float deltaTime)
 			menu::startMenu(6);
 
 			menu::uninteractableCentreText("Midnight arrow");
-			menu::interactableText("Continue jurney", &playButton);
+			//if (getSavedLevelNumber() >= 0) //todo
+			{ menu::interactableText("Continue journey", &playButton); }
+
 			menu::interactableText("Select zone", &levelSelectButton);
 			menu::interactableText("Settings", &settingsButton);
 			menu::interactableText("Exit", &exitButton);
@@ -437,7 +442,8 @@ bool gameLogic(float deltaTime)
 				redChanged = 0;
 				grayChanged = 0;
 
-				if (loadLevelFromLastState(currentLevel, playerSpawnPos, dialogPos, blueChanged, redChanged, grayChanged)
+				if (loadLevelFromLastState(currentLevel, playerSpawnPos, dialogPos, blueChanged, redChanged, grayChanged
+					,litTorchesThisGame, litTorchesThisGameCount)
 					&& currentLevel != -2
 					)
 				{
@@ -457,6 +463,25 @@ bool gameLogic(float deltaTime)
 						if (it != mapData.dialogs.end())
 						{
 							it->second.hasShown = true;
+						}
+
+					}
+
+					for (int i = 0; i < litTorchesThisGameCount; i++)
+					{
+						int x = litTorchesThisGame[i].x;
+						int y = litTorchesThisGame[i].y;
+
+						auto it = std::find_if(wallLights.begin(), wallLights.end(), [x, y](LightSource &ls)
+						{
+							return ls.pos.x == x && ls.pos.y == y;
+						});
+
+						if (it != wallLights.end())
+						{
+							it->animationDuration = 0;
+							it->intensity = mapData.getTorchLightIntensity(x, y);
+							mapData.get(x, y).type++; //lit texture up
 						}
 
 					}
@@ -506,12 +531,15 @@ bool gameLogic(float deltaTime)
 							}
 						}
 
+					mapData.setNeighbors();
 				}
 				else
 				{
 					currentLevel = 0;
 					loadLevel();
 					blueChanged = 0; redChanged = 0; grayChanged = 0;
+					memset(litTorchesThisGame, 0, sizeof(litTorchesThisGame));
+					litTorchesThisGameCount = 0;
 				}
 
 			}
@@ -545,6 +573,8 @@ bool gameLogic(float deltaTime)
 			{
 				currentLevel = l;
 				loadLevel();
+				memset(litTorchesThisGame, 0, sizeof(litTorchesThisGame));
+				litTorchesThisGameCount = 0;
 			}
 			
 		}
@@ -918,6 +948,8 @@ bool gameLogic(float deltaTime)
 					{
 						it->animationDuration = it->animationStartTime;
 						it->intensity = mapData.getTorchLightIntensity(x, y);
+						litTorchesThisGame[litTorchesThisGameCount++] = glm::ivec2{ x,y };
+
 					}
 
 				}
@@ -949,7 +981,8 @@ bool gameLogic(float deltaTime)
 						mapData.get(playerSpawnPos.x, playerSpawnPos.y).type = Block::flagDown;
 					}
 
-					saveState({ x,y }, currentLevel, mapData.dialogs, blueChanged, redChanged, grayChanged);
+					saveState({ x,y }, currentLevel, mapData.dialogs, blueChanged, redChanged, grayChanged
+					, litTorchesThisGame, litTorchesThisGameCount);
 
 					playerSpawnPos = { x,y };
 					g.type = Block::flagUp;
@@ -999,7 +1032,8 @@ bool gameLogic(float deltaTime)
 							player.isExitingLevel = iter->levelId;
 							//saveProgress(iter->levelId);
 							mapData.dialogs.clear();
-							saveState({ -1,-1 }, iter->levelId, mapData.dialogs, 0, 0, 0);
+							saveState({ -1,-1 }, iter->levelId, mapData.dialogs, 0, 0, 0
+							,litTorchesThisGame, litTorchesThisGameCount);
 
 						}
 					}
@@ -1124,6 +1158,7 @@ bool gameLogic(float deltaTime)
 				{
 					b.type++;
 				}
+				litTorchesThisGame[litTorchesThisGameCount++] = glm::ivec2{ i.pos.x, i.pos.y };
 
 				i.intensity = mapData.getTorchLightIntensity(i.pos.x, i.pos.y);
 				i.animationDuration = i.animationStartTime;
@@ -1384,7 +1419,8 @@ bool gameLogic(float deltaTime)
 
 		a.move(deltaTime * BLOCK_SIZE);
 		a.draw(renderer2d, arrowSprite);
-		a.checkCollision(mapData, isInRedBlock, isInBlueBlock, isInGrayBlock, redChanged, blueChanged, grayChanged);
+		a.checkCollision(mapData, isInRedBlock, isInBlueBlock, isInGrayBlock, redChanged, blueChanged, grayChanged,
+			litTorchesThisGame, litTorchesThisGameCount);
 		a.light = 0;
 
 
@@ -1671,7 +1707,8 @@ bool gameLogic(float deltaTime)
 					bird.startEndMove(bird.position, getDiagonalBirdPos(bird.position, player.pos));
 				}
 
-				//saveState( playerSpawnPos, currentLevel, mapData.dialogs, blueChanged, redChanged, grayChanged);
+				saveState( playerSpawnPos, currentLevel, mapData.dialogs, blueChanged, redChanged, grayChanged
+				, litTorchesThisGame, litTorchesThisGameCount);
 			}
 
 		}
@@ -1768,7 +1805,11 @@ void closeGame()
 {
 	settings::saveSettings();
 
-	//saveState(playerSpawnPos, currentLevel, mapData.dialogs, blueChanged, redChanged, grayChanged);
+	if(currentLevel >= 0)
+	{
+		saveState(playerSpawnPos, currentLevel, mapData.dialogs, blueChanged, redChanged, grayChanged
+		,litTorchesThisGame ,litTorchesThisGameCount);
+	}
 
 	soundManager.stoppMusic();
 

@@ -1091,27 +1091,32 @@ I should at least prepare you\nfor the dangers outside.",  tDDBird });
 
 struct SaveLevelData
 {
+	int levelId;
 	glm::ivec2 playerSpawnPos;
 	glm::ivec2 dialogs[20];
-	int levelId;
 	char blueChanged;
 	char redChanged;
 	char grayChanged;
+	int litTorchesCount = 0;
+	glm::ivec2 litTorches[256] = {};
+	
 };
 
 
 void clearSave()
 {
+	glm::ivec2 litTorches[256] = {};
 	std::unordered_map<glm::ivec2, FullDialogData> dialogData;
-	saveState({ -1,-1 }, -2, dialogData, 0, 0, 0);
+	saveState({ -1,-1 }, -2, dialogData, 0, 0, 0, litTorches, 0);
 }
 
-void saveState(glm::ivec2 playerSpawnPos, int levelId, std::unordered_map<glm::ivec2, FullDialogData> &dialogData, int blueChanged, int redChanged, int grayChanged)
+void saveState(glm::ivec2 playerSpawnPos, int levelId, std::unordered_map<glm::ivec2, FullDialogData> &dialogData,
+	int blueChanged, int redChanged, int grayChanged, glm::ivec2 litTorches[], int litTorchesCount)
 {
 
 	settings::saveSettings();
 
-	if(levelId == -2 || levelId >= LEVELS)
+	if(levelId < 0 || levelId >= LEVELS)
 	{
 		SaveLevelData data = {};
 		data.levelId = -2;
@@ -1138,6 +1143,8 @@ void saveState(glm::ivec2 playerSpawnPos, int levelId, std::unordered_map<glm::i
 	data.blueChanged = blueChanged;
 	data.redChanged = redChanged;
 	data.grayChanged = grayChanged;
+	data.litTorchesCount = litTorchesCount;
+	memcpy(data.litTorches, litTorches, litTorchesCount * sizeof(glm::ivec2));
 
 	for(int i=0; i< sizeof(data.dialogs) / sizeof(glm::ivec4); i++)
 	{
@@ -1157,8 +1164,23 @@ void saveState(glm::ivec2 playerSpawnPos, int levelId, std::unordered_map<glm::i
 
 }
 
+int getSavedLevelNumber()
+{
+	std::ifstream file(RESOURCES_PATH "state", std::ios::binary);
+	int nextLevel = -2;
+	if(!file.is_open())
+	{
+		return nextLevel;
+	}
+	
+	file.read((char*)(&nextLevel), sizeof(int));
+
+	return nextLevel;
+	file.close();
+}
+
 bool loadLevelFromLastState(int &level, glm::ivec2 &spawn, glm::ivec2* dialogs,
-	int& blueChanged, int& redChanged, int& grayChanged)
+	int& blueChanged, int& redChanged, int& grayChanged, glm::ivec2 litTorches[], int &litTorchesCount)
 {
 	level = -2;
 	spawn = {};
@@ -1176,7 +1198,10 @@ bool loadLevelFromLastState(int &level, glm::ivec2 &spawn, glm::ivec2* dialogs,
 		redChanged = data.redChanged;
 		grayChanged = data.grayChanged;
 
+		litTorchesCount = data.litTorchesCount;
+
 		memcpy(dialogs, data.dialogs, sizeof(data.dialogs));
+		memcpy(litTorches, data.litTorches, litTorchesCount * sizeof(glm::ivec2));
 	}
 
 

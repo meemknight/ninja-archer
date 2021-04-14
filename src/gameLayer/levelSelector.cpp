@@ -234,7 +234,7 @@ int animateDirection = 0;
 void enterMenu()
 {
 
-	animateTime = ANIMATE_DURATION;
+	animateTime = 0;
 	animateDirection = 0;
 
 }
@@ -343,29 +343,39 @@ int levelSelectorMenu(float deltaTime, gl2d::Renderer2D &renderer2d, gl2d::Textu
 	glm::vec3 leftPos = leftTarget;
 	glm::vec3 rightPos = rightTarget;
 
+	float leftColor = 1 - animPos;
+	float middleColor = animPos;
+	float rightColor = 1 - animPos;
+
 	if(animateDirection == 1)
 	{
 		leftPos = glm::mix(middleTarget, leftTarget, animPos);
 		middlePos = glm::mix(rightTarget, middleTarget, animPos);
 		rightPos = glm::mix({ rightTarget.x + 1, rightTarget.y, rightTarget.z }, rightTarget, animPos);
+		rightColor = 0;
 	}else if(animateDirection == -1)
 	{
 		leftPos = glm::mix({leftTarget.x-1,leftTarget.y, leftTarget.z}, leftTarget, animPos);
 		middlePos = glm::mix(leftTarget, middleTarget, animPos);
 		rightPos = glm::mix(middleTarget, rightTarget, animPos);
+		leftColor = 0;
 	}
+
+	leftColor += 0.2; leftColor /= 1.2;
+	middleColor += 0.2; middleColor /= 1.2;
+	rightColor += 0.2; rightColor /= 1.2;
 
 	if (currentLevelLooking > 0)
 	{
-		renderModel((float)renderer2d.windowW / renderer2d.windowH, currentLevelLooking-1, scaleToDraw, leftPos, 0.2);
+		renderModel((float)renderer2d.windowW / renderer2d.windowH, currentLevelLooking-1, scaleToDraw, leftPos, leftColor);
 	}
 
 	if(currentLevelLooking < LEVELS-1)
 	{
-		renderModel((float)renderer2d.windowW / renderer2d.windowH, currentLevelLooking + 1, scaleToDraw, rightPos, 0.2);
+		renderModel((float)renderer2d.windowW / renderer2d.windowH, currentLevelLooking + 1, scaleToDraw, rightPos, rightColor);
 	}
 
-	renderModel((float)renderer2d.windowW / renderer2d.windowH, currentLevelLooking, scaleToDraw, middlePos);
+	renderModel((float)renderer2d.windowW / renderer2d.windowH, currentLevelLooking, scaleToDraw, middlePos, middleColor);
 
 #pragma endregion
 

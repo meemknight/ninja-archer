@@ -110,7 +110,8 @@ struct Arrow
 
 	void move(float deltaTime);
 
-	void checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool grayTouch, int& redChanged, int& blueChanged, int& grayChanged);
+	void checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool grayTouch, int& redChanged, int& blueChanged, int& grayChanged,
+		glm::ivec2 litTorches[], int litTorchesCount);
 	
 	bool leftMap(int w, int h);
 

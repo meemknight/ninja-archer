@@ -49,7 +49,8 @@ void closeGame();
 void imguiFunc(float deltaTime);
 
 void clearSave();
-void saveState(glm::ivec2 playerSpawnPos, int levelId, std::unordered_map<glm::ivec2, FullDialogData> &dialogData, int blueChanged, int redChanged, int grayChanged);
-bool loadLevelFromLastState(int &level, glm::ivec2 &spawn, glm::ivec2 *dialogs, int &blueChanged, int &redChanged, int &grayChanged);
+void saveState(glm::ivec2 playerSpawnPos, int levelId, std::unordered_map<glm::ivec2, FullDialogData> &dialogData, int blueChanged, int redChanged, int grayChanged, glm::ivec2 litTorches[], int litTorchesCount);
+bool loadLevelFromLastState(int &level, glm::ivec2 &spawn, glm::ivec2 *dialogs, int &blueChanged, int &redChanged, int &grayChanged, glm::ivec2 litTorches[], int &litTorchesCount);
+int getSavedLevelNumber();
 
 

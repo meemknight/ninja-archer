@@ -779,7 +779,7 @@ void Arrow::move(float deltaTime)
 }
 
 void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool grayTouch,
-	int& redChanged, int& blueChanged, int& grayChanged)
+	int& redChanged, int& blueChanged, int& grayChanged, glm::ivec2 litTorches[], int litTorchesCount)
 {
 	if(stuckInWall)
 	{
@@ -966,7 +966,7 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 			{
 				if (type == Arrow::ArrowTypes::fireArrow)
 				{
-					t++;
+					t++; //light the torch texture up
 					int x = curPos.x / BLOCK_SIZE;
 					int y = curPos.y / BLOCK_SIZE;
 					auto it = std::find_if(wallLights.begin(), wallLights.end(), [x, y](LightSource &ls)
@@ -978,6 +978,8 @@ void Arrow::checkCollision(MapData &mapData, bool redTouch, bool blueTouch, bool
 					{
 						it->animationDuration = it->animationStartTime;
 						it->intensity = mapData.getTorchLightIntensity(x, y);
+
+						litTorches[litTorchesCount++] = glm::ivec2{ x,y };
 					}
 					//wallLights.push_back({ { curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE }, 0, 
 					//	mapData.getTorchLight( curPos.x / BLOCK_SIZE, curPos.y / BLOCK_SIZE ) });

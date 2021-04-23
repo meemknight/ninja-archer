@@ -7,6 +7,7 @@ in vec2 v_uv;
 out vec4 a_outColor;
 
 uniform vec3 u_lightPos[10];
+uniform vec3 u_lightPosShadow;
 uniform int u_lightCount;
 uniform float u_color;
 
@@ -17,6 +18,10 @@ float specularExponent = 32;
 
 uniform vec3 u_eyePosition;
 uniform sampler2D u_albedo;
+uniform sampler2D u_shadow;
+uniform mat4 u_lightSpaceMatrix;
+
+uniform int u_shadows;
 
 
 const float PI = 3.14159265359;
@@ -101,6 +106,39 @@ vec3 computePointLightSource(vec3 lightPosition, float metallic, float roughness
 	return Lo;
 }
 
+
+
+float shadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
+{
+	vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+	projCoords = projCoords * 0.5 + 0.5;
+	float closestDepth = texture(u_shadow, projCoords.xy).r; 
+	float currentDepth = projCoords.z;
+
+	float bias = max(0.001 * (1.0 - dot(normal, lightDir)), 0.001);
+
+	
+	//float shadow = 0.0;
+	//vec2 texelSize = 1.0 / textureSize(u_shadow, 0);
+	//for(int x = -1; x <= 1; ++x)
+	//{
+	//	for(int y = -1; y <= 1; ++y)
+	//	{
+	//		float pcfDepth = texture(u_shadow, projCoords.xy + vec2(x, y) * texelSize).r; 
+	//		shadow += (currentDepth - bias) < pcfDepth  ? 1.0 : 0.0;        
+	//	}    
+	//}
+	//shadow /= 9.0;
+	
+	float shadow = (currentDepth - bias) < closestDepth  ? 1.0 : 0.0;        
+
+	// keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
+	if(projCoords.z > 1.0)
+		shadow = 0.0;
+		
+	return shadow;
+}
+
 void main()
 {
 
@@ -126,13 +164,23 @@ void main()
 		float val = dot(normalize(u_lightPos[i] - pos).xyz, normal.xyz);
 		clamp(val, 0, 1);
 	
-
 		Lo += mix(vec3(0,0,0), vec3(1,1,1), vec3(val, val, val));
-
 
 	}
 
+	if(u_shadows != 0)
+	{
+		vec3 lightDir = normalize(u_lightPosShadow - pos);
 
+		float val = dot(lightDir, normal.xyz);
+		clamp(val, 0, 1);
+
+		vec3 light = vec3(val, val, val);
+		light *= shadowCalculation(u_lightSpaceMatrix * vec4(v_worldSpacePos,1), normal, lightDir);
+		Lo += light;
+	}
+
+	//Lo += vec3(0.04); // ambient
 
 	//vec3 ambientColor = vec3(0.03);
 	//vec3 ambient = ambientColor * albedo.rgb * material.b; //this value is made up

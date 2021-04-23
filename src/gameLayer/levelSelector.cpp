@@ -16,18 +16,29 @@ const char *levelNames[LEVELS] = { "Tutorial", "home", "Enchanted forest", "Cave
 const char *modelNames[LEVELS] = { "level1.obj",  "level2.obj","enchantedForest.obj", "cave.obj", "tikiTribe.obj", "iceLevel.obj", "level2.obj" };
 
 
-ShaderProgram shader;
+static ShaderProgram shader;
+static ShaderProgram shadowShader;
 
-GLint u_ModelViewProjection = -1;
-GLint u_modelToWorld = -1;
-GLint u_eyePosition = -1;
-GLint u_lightPos = -1;
-GLint u_lightCount = -1;
-gl2d::Texture colorTexture;
-GLint u_albedo = -1;
-GLint u_color = -1;
+static GLint u_ModelViewProjection = -1;
+static GLint u_modelToWorld = -1;
+static GLint u_eyePosition = -1;
+static GLint u_lightPos = -1;
+static GLint u_lightPosShadow = -1;
+static GLint u_shadow = -1;
+static GLint u_lightCount = -1;
+static GLint u_lightSpaceMatrix = -1;
+static gl2d::Texture colorTexture;
+static GLint u_albedo = -1;
+static GLint u_color = -1;
+static GLint u_shadows = -1;
+static GLuint shadowFBO;
+static GLuint depthShadowTexture;
 
+static GLuint u_shadow_lightSpaceMatrix;
+static GLuint u_shadow_model;
 
+static constexpr int shadowW = 2048;
+static constexpr int shadowH = 2048;
 
 GLint getUniform(GLuint id, const char *name)
 {
@@ -146,15 +157,27 @@ void initLevelSelectorData()
 	shader.fs = FragmentShader(RESOURCES_PATH "model.frag");
 	shader.vs = VertexShader(RESOURCES_PATH "model.vert");
 	shader.compileProgram();
+
+	shadowShader.fs = FragmentShader(RESOURCES_PATH "shadow.frag");
+	shadowShader.vs = VertexShader(RESOURCES_PATH "shadow.vert");
+	shadowShader.compileProgram();
 	
 	u_ModelViewProjection = getUniform(shader.id, "u_ModelViewProjection");
 	u_modelToWorld = getUniform(shader.id, "u_modelToWorld");
 	u_eyePosition = getUniform(shader.id, "u_eyePosition");
 	u_lightPos = getUniform(shader.id, "u_lightPos");
+	u_lightPosShadow = getUniform(shader.id, "u_lightPosShadow");
+	u_shadow = getUniform(shader.id, "u_shadow");
 	u_albedo = getUniform(shader.id, "u_albedo");
 	u_color = getUniform(shader.id, "u_color");
 	u_lightCount = getUniform(shader.id, "u_lightCount");
-	
+	u_shadows = getUniform(shader.id, "u_shadows");
+	u_lightSpaceMatrix = getUniform(shader.id, "u_lightSpaceMatrix");
+
+	u_shadow_lightSpaceMatrix = getUniform(shadowShader.id, "u_shadow_lightSpaceMatrix");
+	u_shadow_model = getUniform(shadowShader.id, "u_shadow_model");
+
+
 	colorTexture.loadFromFile(RESOURCES_PATH "colors.png");
 	//colorTexture.loadFromFile(RESOURCES_PATH "ui/art.png");
 
@@ -165,6 +188,26 @@ void initLevelSelectorData()
 
 	}
 
+	
+
+	glGenTextures(1, &depthShadowTexture);
+	glBindTexture(GL_TEXTURE_2D, depthShadowTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32,
+				 shadowW, shadowH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+	glGenFramebuffers(1, &shadowFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, shadowFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthShadowTexture, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	
 
 }
 
@@ -176,15 +219,14 @@ float minY = -0.5;
 
 glm::vec3 eyePosition = glm::vec3{ 0,0.8,1.5 };
 std::vector<glm::vec3> lightPositions = { glm::vec3(-0.5, 2.5, 1.2), glm::vec3(-0.2, 0.1, 4) };
+glm::vec3 lightShadowPosition{ -5, 10, 0.1 };
 
 
-
-void renderModel(float aspectRatio, int index, float scale, glm::vec3 pos, float color = 1)
+void renderModel(float aspectRatio, int index, float scale, glm::vec3 pos, float color = 1, int shadows = 0)
 {
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_BLEND);
 
-	shader.bind();
 
 	glBindBuffer(GL_ARRAY_BUFFER, models[index].buffer);
 
@@ -198,9 +240,44 @@ void renderModel(float aspectRatio, int index, float scale, glm::vec3 pos, float
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, models[index].indexBuffer);
 
 	float size = (1.5 * scale) / models[index].maxSize;
-
-	auto modelMatrix = getTransformMatrix(pos, {0, -rotation, 0},
+	auto modelMatrix = getTransformMatrix(pos, { 0, -rotation, 0 },
 		{ size, size, size });
+
+	glm::mat4 lightSpaceMatrix(1);
+
+	if(shadows)
+	{
+		glViewport(0, 0, shadowW, shadowH);
+		glBindFramebuffer(GL_FRAMEBUFFER, shadowFBO);
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		float near_plane = 6.f, far_plane = 12.f;
+		glm::mat4 lightProjection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, near_plane, far_plane);
+		glm::mat4 lightView = glm::lookAt(lightShadowPosition, { 0.f,0.f,0.f }, { 0.f,1.f,0.f });
+			
+		lightSpaceMatrix = lightProjection * lightView;
+
+		shadowShader.bind();
+
+		glUniformMatrix4fv(u_shadow_model, 1, GL_FALSE,
+		&(modelMatrix)[0][0]);
+
+		glUniformMatrix4fv(u_shadow_lightSpaceMatrix, 1, GL_FALSE,
+		&(lightSpaceMatrix)[0][0]);
+			
+		glDrawElements(GL_TRIANGLES, models[index].primitiveCount, GL_UNSIGNED_INT, 0);
+
+
+		//return state
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		auto s = platform::getWindowSize();
+		glViewport(0, 0, s.x, s.y);
+
+	}
+
+
+	shader.bind();
+
 	auto viewMatrix = glm::lookAt(eyePosition, {0, 0, 0}, { 0,1,0 });
 	auto projectionMatrix = glm::perspective(glm::radians(90.f), aspectRatio, 0.01f, 100.f);
 
@@ -219,6 +296,15 @@ void renderModel(float aspectRatio, int index, float scale, glm::vec3 pos, float
 	glUniform1f(u_color, color);
 	
 	glUniform3fv(u_lightPos, lightPositions.size(), &lightPositions[0][0]);
+	glUniform3f(u_lightPosShadow, lightShadowPosition.x, lightShadowPosition.y, lightShadowPosition.z);
+
+	glUniform1i(u_shadow, 1);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, depthShadowTexture);
+
+	glUniform1i(u_shadows, shadows);
+	glUniformMatrix4fv(u_lightSpaceMatrix, 1, GL_FALSE,
+		&(lightSpaceMatrix)[0][0]);
 
 	glDrawElements(GL_TRIANGLES, models[index].primitiveCount, GL_UNSIGNED_INT, 0);
 
@@ -375,7 +461,7 @@ int levelSelectorMenu(float deltaTime, gl2d::Renderer2D &renderer2d, gl2d::Textu
 		renderModel((float)renderer2d.windowW / renderer2d.windowH, currentLevelLooking + 1, scaleToDraw, rightPos, rightColor);
 	}
 
-	renderModel((float)renderer2d.windowW / renderer2d.windowH, currentLevelLooking, scaleToDraw, middlePos, middleColor);
+	renderModel((float)renderer2d.windowW / renderer2d.windowH, currentLevelLooking, scaleToDraw, middlePos, middleColor, 1);
 
 #pragma endregion
 

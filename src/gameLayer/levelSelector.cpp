@@ -251,7 +251,7 @@ void renderModel(float aspectRatio, int index, float scale, glm::vec3 pos, float
 		glBindFramebuffer(GL_FRAMEBUFFER, shadowFBO);
 		glClear(GL_DEPTH_BUFFER_BIT);
 
-		float near_plane = 6.f, far_plane = 12.f;
+		float near_plane = 6.f, far_plane = 14.f;
 		glm::mat4 lightProjection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, near_plane, far_plane);
 		glm::mat4 lightView = glm::lookAt(lightShadowPosition, { 0.f,0.f,0.f }, { 0.f,1.f,0.f });
 			

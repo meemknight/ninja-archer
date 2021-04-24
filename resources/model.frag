@@ -106,6 +106,24 @@ vec3 computePointLightSource(vec3 lightPosition, float metallic, float roughness
 	return Lo;
 }
 
+vec3 rgbTohsv(in vec3 c)
+{
+	vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+	vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+	vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+
+	float d = q.x - min(q.w, q.y);
+	float e = 1.0e-10;
+	return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+}
+ 
+
+vec3 hsvTorgb(in vec3 c)
+{
+	vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+	vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+	return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
 
 
 float shadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
@@ -115,22 +133,22 @@ float shadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir)
 	float closestDepth = texture(u_shadow, projCoords.xy).r; 
 	float currentDepth = projCoords.z;
 
-	float bias = max(0.001 * (1.0 - dot(normal, lightDir)), 0.001);
+	float bias = max(0.001 * (1.0 - dot(normal, lightDir)), 0.0002);
 
 	
-	//float shadow = 0.0;
-	//vec2 texelSize = 1.0 / textureSize(u_shadow, 0);
-	//for(int x = -1; x <= 1; ++x)
-	//{
-	//	for(int y = -1; y <= 1; ++y)
-	//	{
-	//		float pcfDepth = texture(u_shadow, projCoords.xy + vec2(x, y) * texelSize).r; 
-	//		shadow += (currentDepth - bias) < pcfDepth  ? 1.0 : 0.0;        
-	//	}    
-	//}
-	//shadow /= 9.0;
+	float shadow = 0.0;
+	vec2 texelSize = 1.0 / textureSize(u_shadow, 0);
+	for(int x = -1; x <= 1; ++x)
+	{
+		for(int y = -1; y <= 1; ++y)
+		{
+			float pcfDepth = texture(u_shadow, projCoords.xy + vec2(x, y) * texelSize).r; 
+			shadow += (currentDepth - bias) < pcfDepth  ? 1.0 : 0.0;        
+		}    
+	}
+	shadow /= 9.0;
 	
-	float shadow = (currentDepth - bias) < closestDepth  ? 1.0 : 0.0;        
+	//shadow = (currentDepth - bias) < closestDepth  ? 1.0 : 0.0;        
 
 	// keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
 	if(projCoords.z > 1.0)
@@ -163,17 +181,20 @@ void main()
 
 		float val = dot(normalize(u_lightPos[i] - pos).xyz, normal.xyz);
 		clamp(val, 0, 1);
-	
-		Lo += mix(vec3(0,0,0), vec3(1,1,1), vec3(val, val, val));
+		
+		val *= 0.8;
+
+		Lo += vec3(val);
 
 	}
 
 	if(u_shadows != 0)
 	{
-		vec3 lightDir = normalize(u_lightPosShadow - pos);
+		//vec3 lightDir = normalize(u_lightPosShadow - pos);
+		vec3 lightDir = normalize(u_lightPosShadow);
 
 		float val = dot(lightDir, normal.xyz);
-		clamp(val, 0, 1);
+		val	= clamp(val, 0, 1);
 
 		vec3 light = vec3(val, val, val);
 		light *= shadowCalculation(u_lightSpaceMatrix * vec4(v_worldSpacePos,1), normal, lightDir);
@@ -194,14 +215,16 @@ void main()
 	vec3 color = albedo.rgb * Lo;
 
 	//HDR 
-	//color = color / (color + vec3(1.0));
-	//float exposure = 1;
-	//color = vec3(1.0) - exp(-color  * exposure);
+	float exposure = 1;
+	color = vec3(1.0) - exp(-color  * exposure);
 	
 	//todo move gamma 
 	//gamma correction
 	color = pow(color, vec3(1.0/2.2));
 
+	color = rgbTohsv(color);
+	color.g = pow(color.g, 0.8);
+	color = hsvTorgb(color);
 
 	a_outColor = clamp(vec4(color.rgb, 1), 0, 1);
 	a_outColor *= u_color;

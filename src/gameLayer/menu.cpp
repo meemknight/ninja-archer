@@ -27,6 +27,7 @@ struct
 {
 	int cursorIndex = 0;
 	int lastcursorIndex = 0;
+	int usedMouse = 0;
 
 }perMenuData;
 
@@ -108,6 +109,16 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 
 	//
 
+	if (upReleased || downReleased || leftPressed || rightPressed)
+	{
+		perMenuData.usedMouse = false;
+	}
+
+	if(platform::mouseMoved())
+	{
+		perMenuData.usedMouse = true;
+	}
+
 
 	auto c = renderer.currentCamera;
 	renderer.currentCamera.setDefault();
@@ -132,7 +143,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 	for(auto &i: perFrameData.lines)
 	{
 		bool isSelected = false;
-		if(perMenuData.cursorIndex == count)
+		if(perMenuData.cursorIndex == count && !perMenuData.usedMouse)
 		{
 			isSelected = true;
 		}
@@ -144,8 +155,6 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 		textBox.w = size.y;
 		auto p = platform::getRelMousePosition();
 
-		bool mouseMoved = platform::mouseMoved();
-		
 		switch (i.type)
 		{
 		case i.uninteractableCentreText:
@@ -166,7 +175,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 
 			if(!usingControllerInput)
 			{
-				if(Ui::isInButton(p,box) && mouseMoved)
+				if(Ui::isInButton(p,box) && perMenuData.usedMouse)
 				{
 					isSelected = true;
 					perMenuData.cursorIndex = count;
@@ -220,6 +229,19 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 			break;
 		case i.slider0_1:
 		{
+			float bonusW = renderer.getTextSize(" : < 100%  >", f, 0.7f, 4, 3).x;
+			glm::vec4 box = textBox;
+			box.y -= oneLineSize;
+			box.z += bonusW + 30;
+
+			if (!usingControllerInput)
+			{
+				if (Ui::isInButton(p, box) && perMenuData.usedMouse)
+				{
+					isSelected = true;
+					perMenuData.cursorIndex = count;
+				}
+			}
 
 			glm::vec4 color(1, 1, 1, 1);
 			if (isSelected)
@@ -228,11 +250,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 				textBox.x += 20;
 			}
 
-			float bonusW = renderer.getTextSize(" : < 100%  >", f, 0.7f, 4, 3).x;
-
-			glm::vec4 box = textBox;
-			box.y -= oneLineSize;
-			box.z += bonusW + 30;
+			
 
 
 			float bonusLeft1 = renderer.getTextSize(" :", f, 0.7f, 4, 3).x;
@@ -245,7 +263,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 
 			if (!usingControllerInput)
 			{
-				if (Ui::isInButton(p, box) && mouseMoved)
+				if (Ui::isInButton(p, box) && perMenuData.usedMouse)
 				{
 					isSelected = true;
 					perMenuData.cursorIndex = count;
@@ -335,7 +353,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 
 			if (!usingControllerInput)
 			{
-				if (Ui::isInButton(p, box) && mouseMoved)
+				if (Ui::isInButton(p, box) && perMenuData.usedMouse)
 				{
 					isSelected = true;
 					perMenuData.cursorIndex = count;

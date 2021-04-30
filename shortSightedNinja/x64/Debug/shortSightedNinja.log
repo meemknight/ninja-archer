@@ -1,0 +1,158 @@
+﻿  Sound.cpp
+  freeListAllocator.cpp
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\freeListAllocator.cpp(69,36): warning C4311: 'type cast': pointer truncation from 'char *' to 'int'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\freeListAllocator.cpp(69,36): warning C4302: 'type cast': truncation from 'char *' to 'int'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\freeListAllocator.cpp(89,25): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\freeListAllocator.cpp(164,51): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\freeListAllocator.cpp(209,51): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\freeListAllocator.cpp(282,1): warning C4010: single-line comment contains line-continuation character
+  gameLayer.cpp
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\Entity.h(47,34): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\math.h(23,57): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\math.h(23,66): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\Particle.h(19,26): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(160,37): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(287,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(344,3): warning C4838: conversion from 'int' to 'const char' requires a narrowing conversion
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(344,3): warning C4309: 'initializing': truncation of constant value
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(739,31): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(804,24): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(849,29): warning C4305: '*=': truncation from 'double' to 'T'
+          with
+          [
+              T=float
+          ]
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(891,138): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(891,118): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(931,26): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(937,27): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(968,46): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1029,25): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1030,47): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1032,29): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1033,51): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1123,35): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1167,1): warning C4010: single-line comment contains line-continuation character
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1170,25): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1171,47): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1173,29): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1174,51): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1291,25): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1373,33): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1377,15): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1377,42): warning C4244: '+=': conversion from 'float' to 'int', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1390,70): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1390,50): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1391,48): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1391,28): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1394,14): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1400,19): warning C4305: '*=': truncation from 'double' to 'T'
+          with
+          [
+              T=float
+          ]
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1414,22): warning C4305: '-=': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1528,16): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1529,16): warning C4244: '=': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1563,37): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1594,41): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1633,21): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1640,17): warning C4305: '+=': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1647,21): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1654,17): warning C4305: '+=': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1669,17): warning C4305: '+=': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1684,23): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1685,25): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1688,40): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1693,18): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1698,36): warning C4305: 'argument': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1699,20): warning C4305: '=': truncation from 'double' to 'float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1704,44): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
+          with
+          [
+              T=glm::i32
+          ]
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1705,46): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
+          with
+          [
+              T=glm::i32
+          ]
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1743,78): warning C4305: 'argument': truncation from 'double' to 'const float'
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\gameLayer.cpp(1747,79): warning C4305: 'argument': truncation from 'double' to 'const float'
+  main.cpp
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\main.cpp(211,1): warning C4244: 'argument': conversion from 'const float' to 'int', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\main.cpp(285,18): warning C4244: 'initializing': conversion from 'LONGLONG' to 'int', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\main.cpp(294,21): warning C4244: 'initializing': conversion from 'const _Ty' to 'float', possible loss of data
+          with
+          [
+              _Ty=double
+          ]
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\main.cpp(325,14): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\main.cpp(338,21): warning C4244: 'initializing': conversion from 'LONGLONG' to 'int', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\main.cpp(341,16): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\main.cpp(351,22): warning C4244: 'initializing': conversion from 'LONGLONG' to 'int', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\main.cpp(354,31): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\main.cpp(59,21): warning C4244: '=': conversion from 'float' to 'LONG', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\main.cpp(60,22): warning C4244: '=': conversion from 'float' to 'LONG', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\main.cpp(789,6): warning C4267: 'argument': conversion from 'size_t' to 'DWORD', possible loss of data
+C:\Users\Lenovo\source\repos\ninja-archer\shortSightedNinja\main.cpp(816,6): warning C4267: 'argument': conversion from 'size_t' to 'DWORD', possible loss of data
+  Generating Code...
+LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
+glew32s.lib(glew.obj) : warning LNK4099: PDB 'vc120.pdb' was not found with 'glew32s.lib(glew.obj)' or at 'C:\Users\Lenovo\source\repos\ninja-archer\x64\Debug\vc120.pdb'; linking object as if no debug info
+  shortSightedNinja.vcxproj -> C:\Users\Lenovo\source\repos\ninja-archer\x64\Debug\MidnightArrow.exe

@@ -14,6 +14,7 @@
 #include "Sound.h"
 #include "gameMath.h"
 #include "levelSelector.h"
+#include <ctime>
 
 extern float gravitationalAcceleration;
 extern float jumpSpeed;

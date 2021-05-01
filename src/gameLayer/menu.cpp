@@ -26,7 +26,6 @@ struct lineInfo
 struct
 {
 	int cursorIndex = 0;
-	int lastcursorIndex = 0;
 	int usedMouse = 0;
 
 }perMenuData;
@@ -108,16 +107,6 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 	bool escReleased = input::isKeyReleased(input::Buttons::esc);
 
 	//
-
-	if (upReleased || downReleased || leftPressed || rightPressed)
-	{
-		perMenuData.usedMouse = false;
-	}
-
-	if(platform::mouseMoved())
-	{
-		perMenuData.usedMouse = true;
-	}
 
 
 	auto c = renderer.currentCamera;
@@ -419,6 +408,17 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 	else
 	if(perMenuData.cursorIndex >= count)
 	{
+		perMenuData.cursorIndex = 0;
+	}
+
+	if (upReleased || downReleased || leftPressed || rightPressed)
+	{
+		perMenuData.usedMouse = false;
+	}
+
+	if (platform::mouseMoved())
+	{
+		perMenuData.usedMouse = true;
 		perMenuData.cursorIndex = 0;
 	}
 

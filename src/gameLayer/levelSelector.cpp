@@ -188,8 +188,6 @@ void initLevelSelectorData()
 
 	}
 
-	
-
 	glGenTextures(1, &depthShadowTexture);
 	glBindTexture(GL_TEXTURE_2D, depthShadowTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32,
@@ -207,7 +205,6 @@ void initLevelSelectorData()
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	
 
 }
 
@@ -252,7 +249,7 @@ void renderModel(float aspectRatio, int index, float scale, glm::vec3 pos, float
 		glClear(GL_DEPTH_BUFFER_BIT);
 
 		float near_plane = 6.f, far_plane = 14.f;
-		glm::mat4 lightProjection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, near_plane, far_plane);
+		glm::mat4 lightProjection = glm::ortho(-3.0f, 3.0f, -3.0f, 3.0f, near_plane, far_plane);
 		glm::mat4 lightView = glm::lookAt(lightShadowPosition, { 0.f,0.f,0.f }, { 0.f,1.f,0.f });
 			
 		lightSpaceMatrix = lightProjection * lightView;

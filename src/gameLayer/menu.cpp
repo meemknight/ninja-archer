@@ -382,17 +382,19 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 
 	}
 
-
-	if (upReleased)
+	if (!perMenuData.usedMouse)
 	{
-		perMenuData.cursorIndex--;
-	}
-		
-	if(downReleased)
-	{
-		perMenuData.cursorIndex++;
-	}
+		if (upReleased)
+		{
+			perMenuData.cursorIndex--;
+		}
 
+		if (downReleased)
+		{
+			perMenuData.cursorIndex++;
+		}
+	}
+	
 	if (escReleased)
 	{
 		if(backPressed)
@@ -400,6 +402,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 			*backPressed = true;
 		}
 	}
+
 
 	if(perMenuData.cursorIndex < 0)
 	{

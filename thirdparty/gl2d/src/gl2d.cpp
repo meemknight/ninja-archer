@@ -1781,14 +1781,17 @@ void main()
 		float Xpadding = 1.f / mapXsize;
 		float Ypadding = 1.f / mapYsize;
 
-		//todo
+		glm::vec4 noFlip = { x * xSize + Xpadding, 1 - (y * ySize) - Ypadding, (x + 1) * xSize - Xpadding, 1.f - ((y + 1) * ySize) + Ypadding };
+
 		if (flip)
 		{
-			return { (x + 1) * xSize - Xpadding, 1 - (y * ySize) - Ypadding, (x)*xSize + Xpadding, 1.f - ((y + 1) * ySize) + Ypadding };
+			glm::vec4 flip = { noFlip.z, noFlip.y, noFlip.x, noFlip.w };
+
+			return flip;
 		}
 		else
 		{
-			return { x * xSize + Xpadding, 1 - (y * ySize) - Ypadding, (x + 1) * xSize - Xpadding, 1.f - ((y + 1) * ySize) + Ypadding };
+			return noFlip;
 		}
 	}
 

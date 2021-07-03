@@ -1342,7 +1342,7 @@ bool gameLogic(float deltaTime)
 
 		for (auto &i : pickups)
 		{
-			i.draw(renderer2d, arrowSprite, deltaTime);
+			i.draw(renderer2d, arrowSprite, arrowTextureAtlas, deltaTime);
 			i.light = 0;
 
 			if (i.colidePlayer(player) && i.cullDown <= 0)
@@ -1426,7 +1426,7 @@ bool gameLogic(float deltaTime)
 		}
 
 		a.move(deltaTime * BLOCK_SIZE);
-		a.draw(renderer2d, arrowSprite);
+		a.draw(renderer2d, arrowSprite, arrowTextureAtlas);
 		a.checkCollision(mapData, isInRedBlock, isInBlueBlock, isInGrayBlock, redChanged, blueChanged, grayChanged,
 			litTorchesThisGame, litTorchesThisGameCount);
 		a.light = 0;
@@ -1583,7 +1583,7 @@ bool gameLogic(float deltaTime)
 						renderer2d.renderRectangle(
 							Ui::Box().xCenter(i * 10).yCenter().yDimensionPercentage(0.9f).xAspectRatio(1),
 							{ dim,dim,dim,1 },
-							{}, angle, arrowSprite, arrowTextureAtlas.get(center, 0));
+							{}, angle, arrowSprite, arrowTextureAtlas.get(center, 0, 1));
 						dim += 0.1;
 					}
 

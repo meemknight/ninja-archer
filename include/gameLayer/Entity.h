@@ -106,7 +106,7 @@ struct Arrow
 	glm::vec2 lastPos;
 	glm::vec2 shootDir;
 
-	void draw(gl2d::Renderer2D &renderer, gl2d::Texture t);
+	void draw(gl2d::Renderer2D &renderer, gl2d::Texture t, gl2d::TextureAtlasPadding ta);
 
 	void move(float deltaTime);
 
@@ -143,7 +143,8 @@ struct Pickup
 
 	bool colidePlayer(Entity &player);
 
-	void draw(gl2d::Renderer2D &renderer2d, gl2d::Texture arrowTexture, float deltaTime);
+	void draw(gl2d::Renderer2D &renderer2d, gl2d::Texture arrowTexture, 
+		gl2d::TextureAtlasPadding ta, float deltaTime);
 
 };
 

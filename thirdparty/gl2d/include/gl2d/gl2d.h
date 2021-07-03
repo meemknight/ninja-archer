@@ -355,7 +355,8 @@ namespace gl2d
 	struct TextureAtlasPadding
 	{
 		TextureAtlasPadding() {};
-		//count count size size
+
+		//count count size of the full texture(in pixels)
 		TextureAtlasPadding(int x, int y, int xSize, int ySize):xCount(x), yCount(y)
 			, xSize(xSize), ySize(ySize)
 		{

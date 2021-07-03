@@ -744,7 +744,9 @@ glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 s
 
 void Arrow::draw(gl2d::Renderer2D & renderer, gl2d::Texture t)
 {
-	gl2d::TextureAtlas ta(5, 1);
+
+	auto tSize = t.GetSize();
+	gl2d::TextureAtlasPadding ta(5, 1, tSize.x, tSize.y);
 
 
 	float angle = 0;
@@ -1095,7 +1097,8 @@ bool Pickup::colidePlayer(Entity &player)
 void Pickup::draw(gl2d::Renderer2D & renderer2d, gl2d::Texture arrowTexture, float deltaTime)
 {
 
-	gl2d::TextureAtlas ta(5, 1);
+	auto tSize = arrowTexture.GetSize();
+	gl2d::TextureAtlasPadding ta(5, 1, tSize.x, tSize.y);
 
 	float levitate = cos((animPos += deltaTime) / 0.7f);
 	float opacity = 1;

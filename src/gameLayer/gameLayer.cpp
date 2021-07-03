@@ -57,6 +57,7 @@ Entity player;
 gl2d::Texture sprites;
 gl2d::Texture characterSprite;
 gl2d::Texture arrowSprite;
+gl2d::TextureAtlasPadding arrowTextureAtlas;
 gl2d::Texture particlesSprite;
 gl2d::Texture crackTexture;
 gl2d::Texture birdTexture;
@@ -308,8 +309,14 @@ bool initGame()
 	mapRenderer.rightTexture.loadFromFile(RESOURCES_PATH "right.png");
 
 	characterSprite.loadFromFileWithPixelPadding(RESOURCES_PATH "character.png", 8);
-	//todo replace with padding
-	arrowSprite.loadFromFile(RESOURCES_PATH "arrow.png");
+
+	//arrowSprite.loadFromFile(RESOURCES_PATH "arrow.png");
+	arrowSprite.loadFromFileWithPixelPadding(RESOURCES_PATH "arrow.png", 7);
+	{
+		auto tSize = arrowSprite.GetSize();
+		arrowTextureAtlas = gl2d::TextureAtlasPadding(5, 1, tSize.x, tSize.y);
+	}
+
 	particlesSprite.loadFromFileWithPixelPadding(RESOURCES_PATH "particles.png", 8);
 	crackTexture.loadFromFileWithPixelPadding(RESOURCES_PATH "crackAnim.png", 8);
 	birdTexture.loadFromFileWithPixelPadding(RESOURCES_PATH "bird.png", 8);
@@ -1538,6 +1545,7 @@ bool gameLogic(float deltaTime)
 
 				float angle = 45.f;
 
+
 				if (left > -1)
 				{
 					float dim = 0.2;
@@ -1546,7 +1554,7 @@ bool gameLogic(float deltaTime)
 						renderer2d.renderRectangle(
 							Ui::Box().xLeft(i * 8).yCenter().yDimensionPercentage(0.7f).xAspectRatio(1)
 							, { 0.4 * dim,0.4 * dim,0.4 * dim,1 }
-						, {}, angle, arrowSprite, gl2d::computeTextureAtlas(Arrow::lastArror, 1, left, 0));
+						, {}, angle, arrowSprite, arrowTextureAtlas.get(left, 0));
 						dim += 0.1;
 					}
 				}
@@ -1560,7 +1568,7 @@ bool gameLogic(float deltaTime)
 						renderer2d.renderRectangle(
 							Ui::Box().xRight(i * 8).yCenter().yDimensionPercentage(0.7f).xAspectRatio(1)
 							, { 0.4 * dim,0.4 * dim,0.4 * dim,1 }
-						, {}, angle, arrowSprite, gl2d::computeTextureAtlas(Arrow::lastArror, 1, right, 0));
+						, {}, angle, arrowSprite, arrowTextureAtlas.get(right, 0));
 						dim += 0.1;
 					}
 				}
@@ -1575,7 +1583,7 @@ bool gameLogic(float deltaTime)
 						renderer2d.renderRectangle(
 							Ui::Box().xCenter(i * 10).yCenter().yDimensionPercentage(0.9f).xAspectRatio(1),
 							{ dim,dim,dim,1 },
-							{}, angle, arrowSprite, gl2d::computeTextureAtlas(Arrow::lastArror, 1, center, 0));
+							{}, angle, arrowSprite, arrowTextureAtlas.get(center, 0));
 						dim += 0.1;
 					}
 

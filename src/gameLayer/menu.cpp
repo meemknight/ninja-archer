@@ -28,13 +28,13 @@ struct
 	int cursorIndex = 0;
 	int usedMouse = 0;
 
-}perMenuData;
+}static perMenuData;
 
 struct
 {
 	std::vector <lineInfo> lines;
 
-}perFrameData;
+}static perFrameData;
 
 static int lastId = -1;
 

@@ -15,6 +15,7 @@ void DialogInteraction::resetDialogData()
 	mNextLetter = 0;
 	hasFinishedDialog = 0;
 	text = {};
+	hasShownPointer = nullptr;
 }
 
 void DialogInteraction::setNewDialog(const std::string &newText, textureDataWithUV img)
@@ -176,6 +177,9 @@ void DialogInteraction::close()
 	{
 		mMoveAnimTime = animTime;
 	}
+
+	if (hasShownPointer) { *hasShownPointer = 1; }
+	hasShownPointer = 0;
 }
 
 void DialogInteraction::start()

@@ -8,7 +8,7 @@
 
 float gravitationalAcceleration = 64;
 float gravitationalAccelerationOnIce = 5;
-float jumpSpeed = 22;
+float jumpSpeed = 20;
 float jumpFromWallSpeed = 22;
 float velocityClampY = 30;
 float velocityClampX = 10;
@@ -522,6 +522,7 @@ void Entity::checkWall(MapData & mapData, int move)
 		}
 
 		//if ((minY == 0 || !isColidable(mapData.get(rightX, minY - 1).type)))
+		if(wallGrab == 0)
 		{
 			if(snapWallGrab)
 			{
@@ -561,6 +562,7 @@ void Entity::checkWall(MapData & mapData, int move)
 		}
 
 		//if (minY == 0 || !isColidable(mapData.get(leftX, minY - 1).type))
+		if (wallGrab == 0)
 		{
 			if (snapWallGrab)
 			{

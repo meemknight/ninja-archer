@@ -42,6 +42,8 @@ struct DialogInteraction
 	
 	void resetDialogData();
 
+	bool *hasShownPointer = 0;
+
 	bool showing = 0;
 	
 	///should be used to close dialog with input

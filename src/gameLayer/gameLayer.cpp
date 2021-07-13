@@ -163,6 +163,8 @@ void loadLevel(glm::ivec2 spawn = { 0, 0 }, bool setSpawn = 0)
 
 	currentDialog.resetDialogData();
 	currentDialog = {};
+	bird = Bird{};
+
 
 	setupMap(mapData, currentLevel);
 
@@ -1121,15 +1123,17 @@ bool gameLogic(float deltaTime)
 
 #pragma region dialogs
 
+	if(!currentDialog.showing)
 	for (auto &i : mapData.dialogs)
 	{
-		if (!i.second.hasShown)
+		if (!i.second.hasShown )
 		{
+
 			glm::vec2 dist = i.first;
 			dist *= BLOCK_SIZE;
 			if (glm::distance(player.pos, dist) < 5 * BLOCK_SIZE)
 			{
-				i.second.hasShown = true;
+
 				currentDialog.resetDialogData();
 				currentDialog.dialogData = i.second.data;
 				if (i.second.birdPos.x >= 0 && i.second.birdPos.y >= 0)
@@ -1138,6 +1142,7 @@ bool gameLogic(float deltaTime)
 					, player.pos), { i.second.birdPos.x * BLOCK_SIZE, i.second.birdPos.y * BLOCK_SIZE });
 				}
 				currentDialog.start();
+				currentDialog.hasShownPointer = &i.second.hasShown;
 			}
 		}
 	}
@@ -1583,7 +1588,7 @@ bool gameLogic(float deltaTime)
 						renderer2d.renderRectangle(
 							Ui::Box().xCenter(i * 10).yCenter().yDimensionPercentage(0.9f).xAspectRatio(1),
 							{ dim,dim,dim,1 },
-							{}, angle, arrowSprite, arrowTextureAtlas.get(center, 0, 1));
+							{}, angle, arrowSprite, arrowTextureAtlas.get(center, 0));
 						dim += 0.1;
 					}
 
@@ -1766,6 +1771,9 @@ bool gameLogic(float deltaTime)
 				}
 				if (exit)
 				{
+					saveState(playerSpawnPos, currentLevel, mapData.dialogs, blueChanged, redChanged, grayChanged
+						, litTorchesThisGame, litTorchesThisGameCount);
+
 					mapData.cleanup();
 					currentLevel = -2;
 					loadLevel(); // todo other function for close level

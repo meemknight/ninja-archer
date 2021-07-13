@@ -12,7 +12,6 @@
 //	check min gl version
 //	add particle demo
 //	mabe add a flag to load textures in pixelated modes
-//	add linux support
 //	remake some functions
 //
 

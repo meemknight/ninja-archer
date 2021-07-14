@@ -4,6 +4,7 @@
 #include "gameLayer.h"
 
 extern gl2d::Texture uiDialogBox;
+extern gl2d::Texture uiBackArrow;
 extern gl2d::Font font;
 
 int currentSettingsMenu = 0;
@@ -98,7 +99,7 @@ namespace settings {
 			menu::interactableText("Controlls", &showControlls);
 
 			bool backPressed = 0;
-			menu::endMenu(renderer, uiDialogBox, font, &backPressed, deltaTime);
+			menu::endMenu(renderer, uiDialogBox, uiBackArrow, font, &backPressed, deltaTime);
 
 			if (visualSettings == true)
 			{
@@ -148,7 +149,7 @@ namespace settings {
 
 
 			bool backPressed = 0;
-			menu::endMenu(renderer, uiDialogBox, font, &backPressed, deltaTime);
+			menu::endMenu(renderer, uiDialogBox, uiBackArrow, font, &backPressed, deltaTime);
 
 			if (backPressed)
 			{
@@ -175,7 +176,7 @@ namespace settings {
 			menu::slider0_1("Buttons", &sData.buttonSound);
 
 			bool backPressed = 0;
-			menu::endMenu(renderer, uiDialogBox, font, &backPressed, deltaTime);
+			menu::endMenu(renderer, uiDialogBox, uiBackArrow, font, &backPressed, deltaTime);
 
 			if (backPressed)
 			{
@@ -192,7 +193,7 @@ namespace settings {
 			menu::uninteractableCentreText("Controlls");
 
 			bool backPressed = 0;
-			menu::endMenu(renderer, uiDialogBox, font, &backPressed, deltaTime);
+			menu::endMenu(renderer, uiDialogBox, uiBackArrow, font, &backPressed, deltaTime);
 
 			if (backPressed)
 			{

@@ -70,6 +70,7 @@ gl2d::Texture uiItch;
 gl2d::Texture uiMusic;
 gl2d::Texture uiArt;
 gl2d::Texture uiDialogBox;
+gl2d::Texture uiBackArrow;
 gl2d::Texture uiImages;
 gl2d::Texture uiButtons;
 
@@ -339,6 +340,7 @@ bool initGame()
 	uiMusic.loadFromFile(RESOURCES_PATH "ui//music.jpg");
 	uiArt.loadFromFile(RESOURCES_PATH "ui//art.png");
 	uiDialogBox.loadFromFile(RESOURCES_PATH "ui//uiDialogFrame.png");
+	uiBackArrow.loadFromFile(RESOURCES_PATH "ui//back.png");
 	uiImages.loadFromFileWithPixelPadding(RESOURCES_PATH "ui//uiImages.png", 8);
 	uiButtons.loadFromFileWithPixelPadding(RESOURCES_PATH "ui//uiButtons.png", 16);
 
@@ -407,8 +409,8 @@ bool initGame()
 
 	for (auto &i : levelPreviewWallLights)
 	{
-		simuleteLightSpot({ i.pos.x * BLOCK_SIZE + BLOCK_SIZE / 2,i.pos.y * BLOCK_SIZE + BLOCK_SIZE / 2 },
-		i.intensity * lightPerc, levelPreviewMapData, arrows, pickups, levelPreviewMapData.butterflies);
+		simulateLightSpot({ i.pos.x * BLOCK_SIZE + BLOCK_SIZE / 2,i.pos.y * BLOCK_SIZE + BLOCK_SIZE / 2 },
+		i.intensity * lightPerc, levelPreviewMapData, nullptr, nullptr, nullptr);
 
 	}
 	
@@ -511,7 +513,7 @@ bool gameLogic(float deltaTime)
 			menu::interactableText("Settings", &settingsButton);
 			menu::interactableText("Exit", &exitButton);
 
-			menu::endMenu(renderer2d, {}, font, nullptr, deltaTime);
+			menu::endMenu(renderer2d, {}, uiBackArrow, font, nullptr, deltaTime);
 
 			if (playButton) //load from last state
 			{
@@ -981,8 +983,8 @@ bool gameLogic(float deltaTime)
 
 	mapData.clearColorData();
 
-	simuleteLightSpot(player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2),
-		playerLight * lightPerc, mapData, arrows, pickups, mapData.butterflies);
+	simulateLightSpot(player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2),
+		playerLight * lightPerc, mapData, &arrows, &pickups, &mapData.butterflies);
 
 
 	bool isInRedBlock = 0;
@@ -1288,8 +1290,8 @@ bool gameLogic(float deltaTime)
 
 	#pragma endregion
 
-		simuleteLightSpot({ i.pos.x * BLOCK_SIZE + BLOCK_SIZE / 2,i.pos.y * BLOCK_SIZE + BLOCK_SIZE / 2 },
-			r * lightPerc, mapData, arrows, pickups, mapData.butterflies);
+		simulateLightSpot({ i.pos.x * BLOCK_SIZE + BLOCK_SIZE / 2,i.pos.y * BLOCK_SIZE + BLOCK_SIZE / 2 },
+			r * lightPerc, mapData, &arrows, &pickups, &mapData.butterflies);
 
 	}
 
@@ -1311,8 +1313,8 @@ bool gameLogic(float deltaTime)
 
 			if (r > 0)
 			{
-				simuleteLightSpot({ i.pos },
-					r * lightPerc, mapData, arrows, pickups, mapData.butterflies);
+				simulateLightSpot({ i.pos },
+					r * lightPerc, mapData, &arrows, &pickups, &mapData.butterflies);
 			}
 
 		}
@@ -1828,7 +1830,7 @@ bool gameLogic(float deltaTime)
 				menu::interactableText("Exit level", &exit);
 
 				bool back = 0;
-				menu::endMenu(renderer2d, uiDialogBox, font, &back, copyDeltaTime);
+				menu::endMenu(renderer2d, uiDialogBox, uiBackArrow, font, &back, copyDeltaTime);
 
 				if (back)
 				{

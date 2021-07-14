@@ -15,7 +15,9 @@ namespace menu
 	void interactableText(const char *text, bool *hasPressed);
 
 	///back pressed can be nullptr and in that case the back option will not be available
-	void endMenu(gl2d::Renderer2D &renderer, gl2d::Texture backgroundTexture, gl2d::Font f, bool *backPressed, float deltaTime);
+	void endMenu(gl2d::Renderer2D &renderer, gl2d::Texture backgroundTexture,
+		gl2d::Texture backTexture,
+		gl2d::Font f, bool *backPressed, float deltaTime);
 
 };
 

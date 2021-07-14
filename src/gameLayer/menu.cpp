@@ -90,7 +90,8 @@ void menu::interactableText(const char * text, bool *hasPressed)
 float speed = 0.3f;
 
 
-void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture, gl2d::Font f, bool * backPressed, float deltaTime)
+void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
+	gl2d::Texture backTexture, gl2d::Font f, bool * backPressed, float deltaTime)
 {
 	const glm::vec4 selectedButtonColor = Colors::lightGreen;
 	const glm::vec4 selectedArrowColor = Colors::darkGreen;
@@ -117,7 +118,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 
 	if(backgroundTexture.id)
 	{
-	renderer.renderRectangle({ 0,0,renderer.windowW, renderer.windowH }, {1,1,1,0.5}, {}, 0,
+		renderer.renderRectangle({ 0,0,renderer.windowW, renderer.windowH }, {1,1,1,0.5}, {}, 0,
 		backgroundTexture);
 	}
 
@@ -130,6 +131,33 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 #pragma endregion
 
 	float posy = 20;
+
+	auto p = platform::getRelMousePosition();
+
+	if(backPressed != nullptr && backTexture.id)
+	{
+		auto box = Ui::Box().xLeftPerc(0.80).yTopPerc(0).xDimensionPercentage(0.06).yAspectRatio(1) ();
+
+
+		if (Ui::isInButton(p, box))
+		{
+
+			input::drawButton(renderer, { box.x + 10, box.y }, box.z, input::Buttons::esc, 0.7f);
+
+			if (platform::isLMouseReleased() && perMenuData.usedMouse)
+			{
+				*backPressed = true;
+			}
+		}
+		else 
+		{
+			input::drawButton(renderer, box, box.z, input::Buttons::esc, 1.f);
+		}
+
+		//renderer.renderRectangle(box, { 1,1,1,1 }, {}, 0,
+		//backTexture);
+		
+	}
 
 
 	int count = 0;
@@ -146,7 +174,6 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 		float oneLineSize = renderer.getTextSize("|", f, 0.7f).y;
 		textBox.z = size.x;
 		textBox.w = size.y;
-		auto p = platform::getRelMousePosition();
 
 		switch (i.type)
 		{

@@ -367,10 +367,10 @@ int buttonMapping1[Buttons::buttonsCount] =
 		glm::ivec2 s = uiButtons.GetSize();
 		gl2d::TextureAtlasPadding uiAtlas(Buttons::buttonsCount, 2, s.x, s.y);
 
-		renderer.renderRectangle({ pos.x, pos.y, size, size }, {0,0,0,a}, {}, 0, uiButtons, uiAtlas.get(button, isController));
+		renderer.renderRectangle({ pos.x, pos.y, size, size }, {0,0,0,a/2.f}, {}, 0, uiButtons, uiAtlas.get(button, isController));
 		
-		pos.y -= 1;
-		pos.x += 1;
+		pos.y -= 2 * (size / 16.f);
+		pos.x += 2 * (size / 16.f);
 		
 		renderer.renderRectangle({ pos.x, pos.y, size, size }, {1,1,1,a}, {}, 0, uiButtons, uiAtlas.get(button, isController));
 

@@ -133,7 +133,7 @@ struct Pickup
 
 	float animPos = 0;
 
-	float light = 1;
+	float light = 0;
 
 	int type = 1;
 

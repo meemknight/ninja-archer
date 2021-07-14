@@ -115,8 +115,12 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 
 	float inPerc = 0.9f;
 
+	if(backgroundTexture.id)
+	{
 	renderer.renderRectangle({ 0,0,renderer.windowW, renderer.windowH }, {1,1,1,0.5}, {}, 0,
 		backgroundTexture);
+	}
+
 
 #pragma region setInnerRegion
 	glm::vec2 inPercXY = { renderer.windowW, renderer.windowH };

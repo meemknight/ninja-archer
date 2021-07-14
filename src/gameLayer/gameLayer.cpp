@@ -52,6 +52,8 @@ MapData mapData;
 Entity player;
 
 
+MapData levelPreviewMapData;
+
 #pragma region Textures
 
 gl2d::Texture sprites;
@@ -115,6 +117,7 @@ std::vector <ArrowItem> inventory;
 std::vector <ArrowItem> actualInventorty;
 
 std::vector <LightSource> wallLights;
+std::vector <LightSource> levelPreviewWallLights;
 
 const float playerLight = 5;
 //this is also used to tell if the player died
@@ -269,7 +272,7 @@ void respawn()
 
 	arrows.clear();
 
-	player.pos = { BLOCK_SIZE * playerSpawnPos.x, BLOCK_SIZE * playerSpawnPos.y };
+	player.pos = { BLOCK_SIZE * playerSpawnPos.x, BLOCK_SIZE * playerSpawnPos.y + 1 };
 	player.updateMove(0);
 	player.dimensions = { 7, 7 };
 	player.dying = 0;
@@ -279,12 +282,20 @@ void respawn()
 	player.wallGrab = 0;
 	player.iceGrab = 0;
 	player.isSittingOnIce = 0;
+	player.grounded = 1;
+	player.canJump = 1;
+	player.hasTouchGround = 1;
+	player.movingRight = 1;
 
 	//reset pickups
 	for (auto &i : pickups)
 	{
 		i.cullDown = 0;
 	}
+
+	glm::vec2 camPos = player.pos + (player.dimensions / 2.f);
+	camPos -= glm::vec2(renderer2d.windowW / 2.f, renderer2d.windowH / 2.f);
+	renderer2d.currentCamera.position = camPos;
 }
 
 bool initGame()
@@ -374,6 +385,37 @@ bool initGame()
 
 	initLevelSelectorData();
 
+	loadPreviewMap(levelPreviewMapData);
+#pragma region setup light sources for the level preview
+	levelPreviewWallLights.clear();
+
+	for (int y = 0; y < levelPreviewMapData.h; y++)
+		for (int x = 0; x < levelPreviewMapData.w; x++)
+		{
+			if (isLitTorch(levelPreviewMapData.get(x, y).type))
+			{
+				levelPreviewWallLights.push_back({ {x,y}, 0, levelPreviewMapData.getTorchLightIntensity(x,y) });
+			}
+			else if (unLitTorch(levelPreviewMapData.get(x, y).type))
+			{
+				auto data = levelPreviewMapData.getTorchData(x, y);
+				levelPreviewWallLights.push_back(LightSource({ x,y }, 0, 0, data.xBox, data.yBox));
+			}
+		}
+
+	levelPreviewMapData.clearColorData();
+
+	for (auto &i : levelPreviewWallLights)
+	{
+		simuleteLightSpot({ i.pos.x * BLOCK_SIZE + BLOCK_SIZE / 2,i.pos.y * BLOCK_SIZE + BLOCK_SIZE / 2 },
+		i.intensity * lightPerc, levelPreviewMapData, arrows, pickups, levelPreviewMapData.butterflies);
+
+	}
+	
+
+#pragma endregion
+
+
 	return true;
 }
 
@@ -405,6 +447,8 @@ bool gameLogic(float deltaTime)
 		platform::showMouse(true);
 	}
 
+	float cameraZoom = (w / (float)600) * settings::getZoom();
+
 
 #pragma region MyRegion
 
@@ -420,6 +464,32 @@ bool gameLogic(float deltaTime)
 	{
 
 		soundManager.stoppMusic();
+
+
+#pragma region render preview level
+		if(menuState != MenuState::levelSelector)
+		{
+
+			renderer2d.currentCamera.zoom = cameraZoom;
+			glm::vec2 camPos = glm::vec2(20, 20) * glm::vec2(BLOCK_SIZE);
+			camPos -= glm::vec2(w / 2.f, h / 2.f);
+			renderer2d.currentCamera.position = camPos;
+			//renderer2d.currentCamera.position = glm::vec2( 20,20 );
+
+			static int animPos;
+			static float timePassed;
+			timePassed += deltaTime;
+			while (timePassed > 0.17)
+			{
+				timePassed -= 0.17;
+				animPos++;
+			}
+			animPos %= 4;
+
+			mapRenderer.drawFromMapData(renderer2d, levelPreviewMapData, deltaTime, animPos);
+		}
+#pragma endregion
+
 
 		renderer2d.currentCamera = gl2d::cameraCreateDefault();
 
@@ -441,12 +511,12 @@ bool gameLogic(float deltaTime)
 			menu::interactableText("Settings", &settingsButton);
 			menu::interactableText("Exit", &exitButton);
 
-			menu::endMenu(renderer2d, uiDialogBox, font, nullptr, deltaTime);
+			menu::endMenu(renderer2d, {}, font, nullptr, deltaTime);
 
 			if (playButton) //load from last state
 			{
 
-				glm::ivec2 dialogPos[20];
+				glm::ivec2 dialogPos[20]; //note don't change this number
 
 				blueChanged = 0;
 				redChanged = 0;
@@ -672,9 +742,8 @@ bool gameLogic(float deltaTime)
 	//}
 	//else
 	{
-		float zoom = w / (float)600;
 
-		renderer2d.currentCamera.zoom = zoom * settings::getZoom();
+		renderer2d.currentCamera.zoom = cameraZoom ;
 	}
 
 

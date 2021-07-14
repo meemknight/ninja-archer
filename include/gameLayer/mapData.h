@@ -693,3 +693,5 @@ struct MapData
 };
 
 void setupMap(MapData &md, int levelId);
+
+void loadPreviewMap(MapData& md);

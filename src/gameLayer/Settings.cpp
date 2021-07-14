@@ -14,7 +14,7 @@ namespace settings {
 
 	float getZoom()
 	{
-		return 3 + sData.zoom * 3.5;
+		return 1 + sData.zoom * 1;
 	}
 
 	float getUiScale()

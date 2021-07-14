@@ -672,7 +672,9 @@ bool gameLogic(float deltaTime)
 	//}
 	//else
 	{
-		renderer2d.currentCamera.zoom = settings::getZoom();
+		float zoom = w / (float)600;
+
+		renderer2d.currentCamera.zoom = zoom * settings::getZoom();
 	}
 
 

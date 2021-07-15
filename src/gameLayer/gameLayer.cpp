@@ -515,7 +515,7 @@ bool gameLogic(float deltaTime)
 
 			menu::interactableText("Select zone", &levelSelectButton);
 			menu::interactableText("Settings", &settingsButton);
-			menu::interactableText("View controlls", &controllsButton);
+			menu::interactableText("Controlls", &controllsButton);
 			menu::interactableText("Exit", &exitButton);
 
 			menu::endMenu(renderer2d, {}, uiBackArrow, font, nullptr, deltaTime);
@@ -1846,7 +1846,7 @@ bool gameLogic(float deltaTime)
 				bool controllsButton = 0;
 
 				menu::interactableText("Settings", &s);
-				menu::interactableText("View controlls", &controllsButton);
+				menu::interactableText("Controlls", &controllsButton);
 				menu::interactableText("Exit level", &exit);
 
 				bool back = 0;

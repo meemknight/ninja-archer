@@ -259,7 +259,8 @@ void MapRenderer::drawFromMapData(gl2d::Renderer2D &renderer, MapData & mapData,
 					|| data.type == Block::lavaKill
 					|| data.type == Block::lava
 					|| data.type == Block::mushroom2
-
+					|| data.type == Block::bridge2
+					
 					)
 				{
 

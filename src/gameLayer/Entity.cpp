@@ -508,7 +508,10 @@ void Entity::checkWall(MapData & mapData, int move)
 		iceGrab = 0;
 	}
 
-	if(isCollidable(mapData.get(rightX, minY).type) && move > 0 && checkRight && mapData.get(rightX, minY).type != Block::bareer)
+	if(isCollidable(mapData.get(rightX, minY).type) && move > 0 && checkRight &&
+		mapData.get(rightX, minY).type != Block::bareer&&
+		!isCollidable(mapData.get(rightX-1, minY+1).type)
+		)
 	{
 
 		if (isRedSolid(mapData.get(rightX, minY).type))
@@ -548,7 +551,10 @@ void Entity::checkWall(MapData & mapData, int move)
 	}
 
 
-	if (isCollidable(mapData.get(leftX, minY).type) && move < 0 && checkLeft && mapData.get(leftX, minY).type != Block::bareer)
+	if (isCollidable(mapData.get(leftX, minY).type) && move < 0 &&
+		checkLeft && mapData.get(leftX, minY).type != Block::bareer &&
+		!isCollidable(mapData.get(leftX + 1, minY + 1).type)
+		)
 	{
 
 		if(isRedSolid(mapData.get(leftX, minY).type))

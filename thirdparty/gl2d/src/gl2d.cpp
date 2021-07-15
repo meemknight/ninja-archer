@@ -370,9 +370,9 @@ void main()
 	{
 
 		size.x = 2000,
-			size.y = 2000,
-			max_height = 0,
-			packedCharsBufferSize = sizeof(stbtt_packedchar) * ('~' - ' ');
+		size.y = 2000,
+		max_height = 0,
+		packedCharsBufferSize =  ('~' - ' ');
 
 			//STB TrueType will give us a one channel buffer of the font that we then convert to RGBA for OpenGL
 		const size_t fontMonochromeBufferSize = size.x * size.y;
@@ -384,7 +384,7 @@ void main()
 		packedCharsBuffer = new stbtt_packedchar[packedCharsBufferSize];
 
 		stbtt_pack_context stbtt_context;
-		stbtt_PackBegin(&stbtt_context, fontMonochromeBuffer, size.x, size.y, 0, 1, NULL);
+		stbtt_PackBegin(&stbtt_context, fontMonochromeBuffer, size.x, size.y, 0, 2, NULL);
 		stbtt_PackSetOversampling(&stbtt_context, 2, 2);
 		stbtt_PackFontRange(&stbtt_context, ttf_data, 0, 65, ' ', '~' - ' ', packedCharsBuffer);
 		stbtt_PackEnd(&stbtt_context);

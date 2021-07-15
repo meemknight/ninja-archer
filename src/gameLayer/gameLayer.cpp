@@ -426,6 +426,7 @@ enum MenuState:int
 	mainMenu = 1,
 	levelSelector,
 	settingsMenu,
+	controlls,
 
 }; int menuState = MenuState::mainMenu;
 
@@ -502,6 +503,7 @@ bool gameLogic(float deltaTime)
 			bool levelSelectButton = 0;
 			bool settingsButton = 0;
 			bool exitButton = 0;
+			bool controllsButton = 0;
 
 			menu::startMenu(6);
 
@@ -511,6 +513,7 @@ bool gameLogic(float deltaTime)
 
 			menu::interactableText("Select zone", &levelSelectButton);
 			menu::interactableText("Settings", &settingsButton);
+			menu::interactableText("View controlls", &controllsButton);
 			menu::interactableText("Exit", &exitButton);
 
 			menu::endMenu(renderer2d, {}, uiBackArrow, font, nullptr, deltaTime);
@@ -640,6 +643,11 @@ bool gameLogic(float deltaTime)
 				settings::setMainSettingsPage();
 			}
 
+			if (controllsButton) 
+			{
+				menuState = MenuState::controlls;
+			}
+
 			if (exitButton)
 			{
 				return 0;
@@ -674,6 +682,34 @@ bool gameLogic(float deltaTime)
 			if (isButtonReleased(p, button2)) {system("start https://www.youtube.com/channel/UCEXX5i6961zc4-L8thTctBg");};
 			if (isButtonReleased(p, button3)) {system("start https://itch.io/profile/adamatomic"); };
 			*/
+		}
+		else if (menuState == MenuState::controlls)
+		{
+
+
+			menu::startMenu(5);
+
+			menu::uninteractableCentreText("Controlls");
+
+			menu::uninteractableCentreText("");
+			menu::textWithButton("Current controller type:", 0);
+			menu::uninteractableCentreText("");
+			menu::textWithButton("Move and grab walls", input::Buttons::left, input::Buttons::right);
+			menu::textWithButton("Jump", input::Buttons::jump);
+			menu::textWithButton("Shoot", input::Buttons::shoot);
+			menu::textWithButton("Switch arrows", input::Buttons::swapLeft, input::Buttons::swapRight);
+			menu::textWithButton("Finish level", input::Buttons::up);
+			menu::textWithButton("Get down from wall", input::Buttons::down);
+
+
+			bool backPressed = 0;
+			menu::endMenu(renderer2d, uiDialogBox, uiBackArrow, font, &backPressed, deltaTime);
+
+			if (backPressed)
+			{
+				menuState = mainMenu;
+			}
+
 		}
 
 

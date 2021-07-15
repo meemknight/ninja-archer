@@ -15,20 +15,25 @@ struct lineInfo
 		booleanTextBox,
 		slider0_1,
 		interactableText,
+		textWithButton,
 	};
 
 	int type = 0;
 	const char* text;
 	bool *bVal;
 	float *fVal;
+	int buttonType = 0;
+	int secondButton = -1;
 };
 
 struct
 {
 	int cursorIndex = 0;
-	int usedMouse = 0;
+	
 
 }static perMenuData;
+
+
 
 struct
 {
@@ -37,6 +42,7 @@ struct
 }static perFrameData;
 
 static int lastId = -1;
+static int usedMouse = 0;
 
 void menu::startMenu(int id)
 {
@@ -87,6 +93,16 @@ void menu::interactableText(const char * text, bool *hasPressed)
 	perFrameData.lines.push_back(info);
 }
 
+void menu::textWithButton(const char* text, int buttonType, int secondButton)
+{
+	lineInfo info = {};
+	info.type = info.textWithButton;
+	info.text = text;
+	info.buttonType = buttonType;
+	info.secondButton = secondButton;
+	perFrameData.lines.push_back(info);
+}
+
 float speed = 0.3f;
 
 
@@ -134,37 +150,48 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 
 	auto p = platform::getRelMousePosition();
 
-	if(backPressed != nullptr && backTexture.id)
+	if(backPressed != nullptr && backTexture.id && !input::isControllerInput())
 	{
-		auto box = Ui::Box().xLeftPerc(0.80).yTopPerc(0).xDimensionPercentage(0.06).yAspectRatio(1) ();
-
+		auto box = Ui::Box().xLeftPerc(0.80).yTopPerc(0).xDimensionPercentage(0.05).yAspectRatio(1) ();
 
 		if (Ui::isInButton(p, box))
 		{
+			//input::drawButton(renderer, { box.x + 10, box.y }, box.z, input::Buttons::esc, 0.7f);
 
-			input::drawButton(renderer, { box.x + 10, box.y }, box.z, input::Buttons::esc, 0.7f);
+			if(platform::isLMouseHeld())
+			{
+			
+				renderer.renderRectangle({ box.x, box.y + 10, box.z, box.w }, { 1, 1, 1, 0.6 }, {}, 0, backTexture);
 
-			if (platform::isLMouseReleased() && perMenuData.usedMouse)
+			}else
+			{
+
+				renderer.renderRectangle({ box.x, box.y, box.z, box.w }, { 1, 1, 1, 0.6 }, {}, 0, backTexture);
+
+			}
+
+			if (platform::isLMouseReleased())
 			{
 				*backPressed = true;
 			}
+
 		}
 		else 
 		{
-			input::drawButton(renderer, box, box.z, input::Buttons::esc, 1.f);
-		}
+			//input::drawButton(renderer, box, box.z, input::Buttons::esc, 1.f);
+			
 
-		//renderer.renderRectangle(box, { 1,1,1,1 }, {}, 0,
-		//backTexture);
+			renderer.renderRectangle(box, { 1,1,1,1 }, {}, 0, backTexture);
+
+		}
 		
 	}
-
 
 	int count = 0;
 	for(auto &i: perFrameData.lines)
 	{
 		bool isSelected = false;
-		if(perMenuData.cursorIndex == count && !perMenuData.usedMouse)
+		if(perMenuData.cursorIndex == count && !usedMouse)
 		{
 			isSelected = true;
 		}
@@ -195,7 +222,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 
 			if(!usingControllerInput)
 			{
-				if(Ui::isInButton(p,box) && perMenuData.usedMouse)
+				if(Ui::isInButton(p,box) && usedMouse)
 				{
 					isSelected = true;
 					perMenuData.cursorIndex = count;
@@ -256,7 +283,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 
 			if (!usingControllerInput)
 			{
-				if (Ui::isInButton(p, box) && perMenuData.usedMouse)
+				if (Ui::isInButton(p, box) && usedMouse)
 				{
 					isSelected = true;
 					perMenuData.cursorIndex = count;
@@ -270,8 +297,6 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 				textBox.x += 20;
 			}
 
-			
-
 
 			float bonusLeft1 = renderer.getTextSize(" :", f, 0.7f, 4, 3).x;
 			float size = renderer.getTextSize(" < ", f, 0.7f, 4, 3).x;
@@ -283,7 +308,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 
 			if (!usingControllerInput)
 			{
-				if (Ui::isInButton(p, box) && perMenuData.usedMouse)
+				if (Ui::isInButton(p, box) && usedMouse)
 				{
 					isSelected = true;
 					perMenuData.cursorIndex = count;
@@ -373,7 +398,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 
 			if (!usingControllerInput)
 			{
-				if (Ui::isInButton(p, box) && perMenuData.usedMouse)
+				if (Ui::isInButton(p, box) && usedMouse)
 				{
 					isSelected = true;
 					perMenuData.cursorIndex = count;
@@ -405,6 +430,30 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 			count++;
 		}
 			break;
+		case i.textWithButton:
+		{
+			float buttonSize = renderer.getTextSize("X", f, 0.7).x * 1.5;
+
+			glm::vec4 center = Ui::Box().xCenter().yCenter()();
+			renderer.renderText({ textBox.x, textBox.y }, i.text, f, uninteractebleTextColor,
+				0.7f, 4, 3, false, dropShadowColor, { 0.2f,0.3f,0.5f,0.1f });
+
+			auto size = renderer.getTextSize(i.text, f, 0.7);
+
+			input::drawButton(renderer, { textBox.x + size.x + size.y/2, textBox.y - size.y/1.5f }, buttonSize, i.buttonType);
+
+			if (i.secondButton > -1)
+			{
+				input::drawButton(renderer, { textBox.x + size.x + size.y * 2, textBox.y - size.y / 1.5f },
+					buttonSize, i.secondButton);
+
+			}
+
+		
+		
+		}
+			break;
+
 		default:
 			break;
 		}
@@ -413,7 +462,7 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 
 	}
 
-	if (!perMenuData.usedMouse)
+	if (!usedMouse)
 	{
 		if (upReleased)
 		{
@@ -447,12 +496,12 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 
 	if (upReleased || downReleased || leftPressed || rightPressed)
 	{
-		perMenuData.usedMouse = false;
+		usedMouse = false;
 	}
 
 	if (platform::mouseMoved())
 	{
-		perMenuData.usedMouse = true;
+		usedMouse = true;
 		perMenuData.cursorIndex = 0;
 	}
 

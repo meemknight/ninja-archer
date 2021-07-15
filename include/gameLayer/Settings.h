@@ -22,6 +22,7 @@ float getZoom();
 float getUiScale();
 bool showArrowIndicators();
 void setMainSettingsPage();
+void setControllsPage();
 
 float getMusicSound();
 float getAmbientSound();

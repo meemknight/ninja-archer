@@ -1104,6 +1104,7 @@ void main()
 
 	}
 
+	//todo return size
 	void Renderer2D::renderText(glm::vec2 position, const char *text, const Font font,
 		const Color4f color, const float size, const float spacing, const float line_space, bool showInCenter,
 		const Color4f ShadowColor

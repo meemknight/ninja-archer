@@ -352,13 +352,27 @@ int buttonMapping1[Buttons::buttonsCount] =
 
 	void drawButton(gl2d::Renderer2D &renderer, glm::vec2 pos, float size, int button, float a)
 	{
-		drawButton(renderer, pos, size, button, input::isControllerInput(),a);
+		if(button > 0)
+		{
+		
+			if (input::isKeyHeld(button))
+			{
+				drawButton(renderer, { pos.x, pos.y + size * 0.1f },
+					size, button, input::isControllerInput(), a*0.9f);
+			}
+			else
+			{
+				drawButton(renderer, pos, size, button, input::isControllerInput(), a);
+			}
+
+		}
+
 	}
 
 	void drawButtonWithHover(gl2d::Renderer2D & renderer, glm::vec2 pos, float size, int button, float a)
 	{
 		float f = (std::sin(clock() / 220.f) / 2.f + 1) * 3.5f;
-		pos.y -= f;
+		pos.y -= f * size / 8.f;
 		drawButton(renderer, pos, size, button, a);
 	}
 

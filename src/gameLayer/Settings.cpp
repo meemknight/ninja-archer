@@ -2,6 +2,7 @@
 #include "gl2d.h"
 #include "menu.h"
 #include "gameLayer.h"
+#include "input.h"
 
 extern gl2d::Texture uiDialogBox;
 extern gl2d::Texture uiBackArrow;
@@ -31,6 +32,11 @@ namespace settings {
 	void setMainSettingsPage()
 	{
 		currentSettingsMenu = 1;
+	}
+
+	void setControllsPage()
+	{
+		currentSettingsMenu = 4;
 	}
 
 	float getMusicSound()
@@ -95,9 +101,6 @@ namespace settings {
 			bool soundSettings = 0;
 			menu::interactableText("sound settings", &soundSettings);
 
-			bool showControlls;
-			menu::interactableText("Controlls", &showControlls);
-
 			bool backPressed = 0;
 			menu::endMenu(renderer, uiDialogBox, uiBackArrow, font, &backPressed, deltaTime);
 
@@ -108,10 +111,6 @@ namespace settings {
 			if (soundSettings == true)
 			{
 				currentSettingsMenu = 3;
-			}
-			if (showControlls == true)
-			{
-				currentSettingsMenu = 4;
 			}
 			if (backPressed)
 			{
@@ -188,17 +187,6 @@ namespace settings {
 		else if (currentSettingsMenu == 4)
 		{
 
-			menu::startMenu(5);
-
-			menu::uninteractableCentreText("Controlls");
-
-			bool backPressed = 0;
-			menu::endMenu(renderer, uiDialogBox, uiBackArrow, font, &backPressed, deltaTime);
-
-			if (backPressed)
-			{
-				currentSettingsMenu = 1;
-			}
 
 		}
 		else

@@ -103,8 +103,10 @@ int currentLevel = -2;
 
 float jumpDelayTime = 0;
 
+//todo enum here for stuff
 static int ingameMenuMainPage = 1;
 bool inGameMenu = 0;
+bool inGameControllsMenu = 0;
 
 struct ArrowItem
 {
@@ -685,29 +687,9 @@ bool gameLogic(float deltaTime)
 		}
 		else if (menuState == MenuState::controlls)
 		{
-
-
-			menu::startMenu(5);
-
-			menu::uninteractableCentreText("Controlls");
-
-			menu::uninteractableCentreText("");
-			menu::textWithButton("Current controller type:", 0);
-			menu::uninteractableCentreText("");
-			menu::textWithButton("Move and grab walls", input::Buttons::left, input::Buttons::right);
-			menu::textWithButton("Jump", input::Buttons::jump);
-			menu::textWithButton("Shoot", input::Buttons::shoot);
-			menu::textWithButton("Switch arrows", input::Buttons::swapLeft, input::Buttons::swapRight);
-			menu::textWithButton("Finish level", input::Buttons::up);
-			menu::textWithButton("Get down from wall", input::Buttons::down);
-
-
-			bool backPressed = 0;
-			menu::endMenu(renderer2d, uiDialogBox, uiBackArrow, font, &backPressed, deltaTime);
-
-			if (backPressed)
+			if(input::viewControllsPage(renderer2d, uiDialogBox, uiBackArrow, deltaTime))
 			{
-				menuState = mainMenu;
+				menuState = MenuState::mainMenu;
 			}
 
 		}
@@ -1861,8 +1843,10 @@ bool gameLogic(float deltaTime)
 				menu::uninteractableCentreText("Menu");
 				bool s = 0;
 				bool exit = 0;
+				bool controllsButton = 0;
 
 				menu::interactableText("Settings", &s);
+				menu::interactableText("View controlls", &controllsButton);
 				menu::interactableText("Exit level", &exit);
 
 				bool back = 0;
@@ -1887,14 +1871,36 @@ bool gameLogic(float deltaTime)
 					currentLevel = -2;
 					loadLevel(); // todo other function for close level
 				}
+				if (controllsButton) 
+				{
+					ingameMenuMainPage = 0;
+					inGameControllsMenu = 1;
+				}
+				
+
 			}
 			else
 			{
-				settings::displaySettings(renderer2d, copyDeltaTime);
-				if (currentSettingsMenu == 0)
+				if (inGameControllsMenu) 
 				{
-					ingameMenuMainPage = 1;
-				};
+					if (input::viewControllsPage(renderer2d, uiDialogBox, uiBackArrow, deltaTime))
+					{
+						ingameMenuMainPage = 1;
+						inGameControllsMenu = 0;
+					}
+				}
+				else
+				{
+					settings::displaySettings(renderer2d, copyDeltaTime);
+					if (currentSettingsMenu == 0)
+					{
+						ingameMenuMainPage = 1;
+						inGameControllsMenu = 0;
+
+					};
+				}
+
+				
 			}
 
 			if (

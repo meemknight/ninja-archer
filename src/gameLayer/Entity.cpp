@@ -8,7 +8,7 @@
 
 float gravitationalAcceleration = 64;
 float gravitationalAccelerationOnIce = 5;
-float jumpSpeed = 20;
+float jumpSpeed = 20.5;
 float jumpFromWallSpeed = 22;
 float velocityClampY = 30;
 float velocityClampX = 10;
@@ -412,7 +412,13 @@ void Entity::checkGrounded(MapData &mapDat, float deltaTime)
 			isSittingOnIce = true;
 		}
 		
-		if (isCollidable(mapDat.get(x, floor((pos.y + dimensions.y) / BLOCK_SIZE)).type))
+		auto b = mapDat.get(x, floor((pos.y + dimensions.y) / BLOCK_SIZE)).type;
+		if (isCollidable(b) || 
+			(isPlatofrm(b)
+				&&
+				player.lastPos.y + player.dimensions.y <= floor((pos.y + dimensions.y) / BLOCK_SIZE) * BLOCK_SIZE
+				)
+			)
 		{
 			grounded = 1;
 			canJump = 1;
@@ -732,6 +738,20 @@ glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 s
 						}
 					}
 				
+				}
+			}
+			else if (isPlatofrm(mapData.get(x, y).type))
+			{
+				if (aabb({ pos,dimensions }, { x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }))
+				{
+					if (delta.y != 0 && lastPos.y + dimensions.y <= y*BLOCK_SIZE)
+					{
+						downTouch = 1;
+						pos.y = y * BLOCK_SIZE - dimensions.y;
+						goto end;
+					
+					}
+
 				}
 			}
 

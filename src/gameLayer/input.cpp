@@ -8,6 +8,7 @@
 #include <cmath>
 #include <ctime>
 #include "platformInput.h"
+#include "menu.h"
 
 extern gl2d::Texture uiButtons;
 extern gl2d::Font font;
@@ -349,16 +350,15 @@ int buttonMapping1[Buttons::buttonsCount] =
 	}
 
 
-
 	void drawButton(gl2d::Renderer2D &renderer, glm::vec2 pos, float size, int button, float a)
 	{
-		if(button > 0)
+		if(button >= 0)
 		{
 		
 			if (input::isKeyHeld(button))
 			{
-				drawButton(renderer, { pos.x, pos.y + size * 0.1f },
-					size, button, input::isControllerInput(), a*0.9f);
+				drawButton(renderer, { pos.x, pos.y + size * 0.15f },
+					size, button, input::isControllerInput(), a*0.8f);
 			}
 			else
 			{
@@ -371,7 +371,7 @@ int buttonMapping1[Buttons::buttonsCount] =
 
 	void drawButtonWithHover(gl2d::Renderer2D & renderer, glm::vec2 pos, float size, int button, float a)
 	{
-		float f = (std::sin(clock() / 220.f) / 2.f + 1) * 3.5f;
+		float f = (std::sin(clock() / 220.f) / 2.f + 1) * 1.5f;
 		pos.y -= f * size / 8.f;
 		drawButton(renderer, pos, size, button, a);
 	}
@@ -402,6 +402,30 @@ int buttonMapping1[Buttons::buttonsCount] =
 
 		renderer.renderRectangle({ pos.x, pos.y, size, size }, { 1,1,1,a }, {}, 0, uiButtons, uiAtlas.get(button, isController));
 
+	}
+
+	int viewControllsPage(gl2d::Renderer2D& renderer2d,
+		gl2d::Texture uiDialogBox, gl2d::Texture  uiBackArrow, float deltaTime)
+	{
+		menu::startMenu(5);
+
+		menu::uninteractableCentreText("Controlls");
+
+		menu::uninteractableCentreText("");
+		menu::textWithButton("Current controller type:", 0);
+		menu::uninteractableCentreText("");
+		menu::textWithButton("Move and grab walls", input::Buttons::left, input::Buttons::right);
+		menu::textWithButton("Jump", input::Buttons::jump);
+		menu::textWithButton("Shoot", input::Buttons::shoot);
+		menu::textWithButton("Switch arrows", input::Buttons::swapLeft, input::Buttons::swapRight);
+		menu::textWithButton("Finish level", input::Buttons::up);
+		menu::textWithButton("Get down from wall", input::Buttons::down);
+
+
+		bool backPressed = 0;
+		menu::endMenu(renderer2d, uiDialogBox, uiBackArrow, font, &backPressed, deltaTime);
+
+		return backPressed;
 	}
 
 	/*

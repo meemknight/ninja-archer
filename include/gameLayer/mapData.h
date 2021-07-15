@@ -178,8 +178,8 @@ namespace Block
 		leavesDecoration3,
 		leavesDecoration4,
 		windowDecoration,
-		trunk1,
-		trunk2,
+		pole1,
+		pole2,
 		sign,
 		waterFall,
 		waterFallBegin,
@@ -331,10 +331,40 @@ namespace Block
 		grassWall2,
 		grassWall3,
 		butterfy,
+		spike5,
+		spike6,
+		spike7,
+		spike8,
+		chairDecoration,
+		torceBottom2,
+		platform1,
+		platform2,
+		platform3,
+		platform4,
+		platform5,
+		platform6,
+		pole3,
+		pole4,
+		pole5,
+		pole6,
+		platform7,
 		lastBlock,
 
 	};
 };
+
+inline bool isPlatofrm(unsigned short b)
+{
+	return
+		b == Block::platform1
+		|| b == Block::platform2
+		|| b == Block::platform3
+		|| b == Block::platform4
+		|| b == Block::platform5
+		|| b == Block::platform6
+		|| b == Block::platform7
+		;
+}
 
 inline bool isAir(unsigned short b)
 {
@@ -347,7 +377,11 @@ inline bool isSpike(unsigned short b)
 		b == Block::spike1
 		|| b == Block::spike2
 		|| b == Block::spike3
-		||b == Block::spike4
+		|| b == Block::spike4
+		|| b == Block::spike5
+		|| b == Block::spike6
+		|| b == Block::spike7
+		||b == Block::spike8
 		;
 
 }

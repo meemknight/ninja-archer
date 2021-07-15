@@ -5,6 +5,7 @@
 #include <time.h>
 #include <cstdlib>
 #include "Particle.h"
+#include "input.h"
 
 float gravitationalAcceleration = 64;
 float gravitationalAccelerationOnIce = 5;
@@ -417,6 +418,7 @@ void Entity::checkGrounded(MapData &mapDat, float deltaTime)
 			(isPlatofrm(b)
 				&&
 				player.lastPos.y + player.dimensions.y <= floor((pos.y + dimensions.y) / BLOCK_SIZE) * BLOCK_SIZE
+				&& ! input::isKeyHeld(input::Buttons::down)
 				)
 			)
 		{
@@ -740,7 +742,7 @@ glm::vec2 Entity::performCollision(MapData & mapData, glm::vec2 pos, glm::vec2 s
 				
 				}
 			}
-			else if (isPlatofrm(mapData.get(x, y).type))
+			else if (isPlatofrm(mapData.get(x, y).type) && !input::isKeyHeld(input::Buttons::down))
 			{
 				if (aabb({ pos,dimensions }, { x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }))
 				{

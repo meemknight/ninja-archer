@@ -197,7 +197,8 @@ struct Bird
 struct Butterfly
 {
 	Butterfly() { create(); }
-	Butterfly(glm::vec2 anchor):anchor(anchor), position(anchor) { create(); }
+	Butterfly(glm::vec2 anchor, int type = 0):anchor(anchor), position(anchor), type(type)
+		{ create(); }
 
 	glm::vec2 anchor;
 	glm::vec2 position;
@@ -206,10 +207,18 @@ struct Butterfly
 	float frameTime = 0;
 
 	bool facingLeft = 0;
-	void draw(gl2d::Renderer2D &renderer, float deltaTime, gl2d::Texture t);
+	void draw(gl2d::Renderer2D &renderer, float deltaTime, gl2d::Texture butterfly, gl2d::Texture firefly);
 	void create();
 
 	float light = 0;
+
+	enum
+	{
+		butterfyType = 0,
+		fireFlyType,
+	};
+
+	int type = 0;
 
 	glm::vec2 direction = {};
 	float timeTillChangeDir = 0;

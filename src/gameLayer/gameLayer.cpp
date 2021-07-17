@@ -64,6 +64,7 @@ gl2d::Texture particlesSprite;
 gl2d::Texture crackTexture;
 gl2d::Texture birdTexture;
 gl2d::Texture butterflyTexture;
+gl2d::Texture fireFlyTexture;
 
 
 gl2d::Texture uiItch;
@@ -123,6 +124,7 @@ std::vector <LightSource> wallLights;
 std::vector <LightSource> levelPreviewWallLights;
 
 const float playerLight = 6;
+const float fireFlyLight = 3;
 
 //this is also used to tell if the player died
 float lightPerc = 1;
@@ -338,6 +340,7 @@ bool initGame()
 	crackTexture.loadFromFileWithPixelPadding(RESOURCES_PATH "crackAnim.png", 8);
 	birdTexture.loadFromFileWithPixelPadding(RESOURCES_PATH "bird.png", 8);
 	butterflyTexture.loadFromFileWithPixelPadding(RESOURCES_PATH "butterfly.png", 8);
+	fireFlyTexture.loadFromFileWithPixelPadding(RESOURCES_PATH "fireFly.png", 8);
 
 	uiItch.loadFromFile(RESOURCES_PATH "ui//itch.png");
 	uiMusic.loadFromFile(RESOURCES_PATH "ui//music.jpg");
@@ -1002,8 +1005,20 @@ bool gameLogic(float deltaTime)
 
 	mapData.clearColorData();
 
+	//player
 	simulateLightSpot(player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2),
 		playerLight * lightPerc, mapData, &arrows, &pickups, &mapData.butterflies);
+
+
+	//fireFlies
+	for (auto& i : mapData.butterflies)
+	{
+		if (i.type == i.fireFlyType)
+		{
+			simulateLightSpot(i.position,
+				fireFlyLight * lightPerc, mapData, &arrows, &pickups, &mapData.butterflies);
+		}
+	}
 
 
 	bool isInRedBlock = 0;
@@ -1511,7 +1526,7 @@ bool gameLogic(float deltaTime)
 	for(auto &i :mapData.butterflies)
 	{
 		i.updateMove(deltaTime, mapData);
-		i.draw(renderer2d, deltaTime, butterflyTexture);
+		i.draw(renderer2d, deltaTime, butterflyTexture, fireFlyTexture);
 		i.light = 0;
 	}
 

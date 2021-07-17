@@ -1303,11 +1303,26 @@ float Bird::getShowPerc()
 
 #pragma endregion
 
-void Butterfly::draw(gl2d::Renderer2D &renderer, float deltaTime, gl2d::Texture t)
+void Butterfly::draw(gl2d::Renderer2D& renderer, float deltaTime,
+	gl2d::Texture butterfly, gl2d::Texture firefly)
 {
+	gl2d::TextureAtlasPadding ta;
+	gl2d::Texture t;
 
-	auto size = t.GetSize();
-	gl2d::TextureAtlasPadding ta(4, 4, size.x, size.y);
+	if (type == butterfyType)
+	{
+		auto size = butterfly.GetSize();
+		ta = gl2d::TextureAtlasPadding(4, 4, size.x, size.y);
+		t = butterfly;
+	}
+	else if(type == fireFlyType)
+	{
+		auto size = firefly.GetSize();
+		ta = gl2d::TextureAtlasPadding(4, 1, size.x, size.y);
+		t = firefly;
+		texturePos.y = 0;
+		light = 1;
+	}
 
 	//animate
 	frameTime -= deltaTime;

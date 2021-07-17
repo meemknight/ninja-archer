@@ -426,7 +426,7 @@ void main()
 			const stbtt_aligned_quad  q = internal::fontGetGlyphQuad(*this, c);
 			const float               m = q.y1 - q.y0;
 
-			if (m > max_height)
+			if (m > max_height && m < 100000.f) //wierd bug
 			{
 				max_height = m;
 			}
@@ -1084,7 +1084,7 @@ void main()
 
 				rectangle.x += rectangle.z + spacing * size;
 
-				maxPosY = std::max(maxPosY, rectangle.y);
+				maxPosY = std::max(maxPosY, rectangle.y); //note negative values here so ???
 				maxPos = std::max(maxPos, rectangle.x);
 			}
 		}

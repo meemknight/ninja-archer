@@ -56,7 +56,7 @@ void simulateLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vect
 		}
 	}
 
-	if(butterflies != butterflies)
+	if(butterflies != nullptr)
 	{
 		float r = radius;
 		float maxDist = r * r * BLOCK_SIZE * BLOCK_SIZE;

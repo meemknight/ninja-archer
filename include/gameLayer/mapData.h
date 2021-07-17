@@ -348,6 +348,7 @@ namespace Block
 		pole5,
 		pole6,
 		platform7,
+		fireFly,
 		lastBlock,
 
 	};

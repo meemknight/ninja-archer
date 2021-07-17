@@ -122,7 +122,8 @@ std::vector <ArrowItem> actualInventorty;
 std::vector <LightSource> wallLights;
 std::vector <LightSource> levelPreviewWallLights;
 
-const float playerLight = 5;
+const float playerLight = 6;
+
 //this is also used to tell if the player died
 float lightPerc = 1;
 
@@ -1024,11 +1025,36 @@ bool gameLogic(float deltaTime)
 
 		minX = std::max(0, minX);
 		minY = std::max(0, minY);
-		maxX = std::min(mapData.w, maxX);
-		maxY = std::min(mapData.h, maxY);
+		maxX = std::min(mapData.w-1, maxX);
+		maxY = std::min(mapData.h-1, maxY);
+
+		int maxYplus = std::min(mapData.h-1, maxY+2);
 
 		bool playedGrassSound = 0;
 		static float grassTimeDelay;
+
+		//for things that should be easier to touch
+		for (int y = minY; y <= maxYplus; y++)
+		{
+			for (int x = minX; x <= maxX; x++)
+			{
+				auto& g = mapData.get(x, y);
+				if (g.type == Block::flagDown)
+				{
+					if (mapData.get(playerSpawnPos.x, playerSpawnPos.y).type == Block::flagUp)
+					{
+						mapData.get(playerSpawnPos.x, playerSpawnPos.y).type = Block::flagDown;
+					}
+
+					saveState({ x,y }, currentLevel, mapData.dialogs, blueChanged, redChanged, grayChanged
+						, litTorchesThisGame, litTorchesThisGameCount);
+
+					playerSpawnPos = { x,y };
+					g.type = Block::flagUp;
+				}
+			}
+		}
+
 
 		player.iswebs = 0;
 		for (int y = minY; y <= maxY; y++)
@@ -1074,20 +1100,6 @@ bool gameLogic(float deltaTime)
 						}
 
 					}
-
-				if (g.type == Block::flagDown)
-				{
-					if (mapData.get(playerSpawnPos.x, playerSpawnPos.y).type == Block::flagUp)
-					{
-						mapData.get(playerSpawnPos.x, playerSpawnPos.y).type = Block::flagDown;
-					}
-
-					saveState({ x,y }, currentLevel, mapData.dialogs, blueChanged, redChanged, grayChanged
-					, litTorchesThisGame, litTorchesThisGameCount);
-
-					playerSpawnPos = { x,y };
-					g.type = Block::flagUp;
-				}
 
 				if (isRedNoSolid(g.type))
 				{

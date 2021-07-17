@@ -1095,7 +1095,6 @@ void _glfwPlatformSetWindowSizeLimits(_GLFWwindow* window,
     }
     else
     {
-        // TODO: find out how to trigger a resize.
         // The actual limits are checked in the wl_shell_surface::configure handler.
     }
 }
@@ -1103,7 +1102,6 @@ void _glfwPlatformSetWindowSizeLimits(_GLFWwindow* window,
 void _glfwPlatformSetWindowAspectRatio(_GLFWwindow* window,
                                        int numer, int denom)
 {
-    // TODO: find out how to trigger a resize.
     // The actual limits are checked in the wl_shell_surface::configure handler.
 }
 
@@ -1656,7 +1654,6 @@ static void dataSourceHandleSend(void* data,
             continue;
         if (ret == -1)
         {
-            // TODO: also report errno maybe.
             _glfwInputError(GLFW_PLATFORM_ERROR,
                             "Wayland: Error while writing the clipboard");
             close(fd);
@@ -1760,7 +1757,6 @@ const char* _glfwPlatformGetClipboardString(void)
     ret = pipe2(fds, O_CLOEXEC);
     if (ret < 0)
     {
-        // TODO: also report errno maybe?
         _glfwInputError(GLFW_PLATFORM_ERROR,
                         "Wayland: Impossible to create clipboard pipe fds");
         return NULL;
@@ -1793,7 +1789,6 @@ const char* _glfwPlatformGetClipboardString(void)
             continue;
         if (ret == -1)
         {
-            // TODO: also report errno maybe.
             _glfwInputError(GLFW_PLATFORM_ERROR,
                             "Wayland: Impossible to read from clipboard fd");
             close(fds[0]);

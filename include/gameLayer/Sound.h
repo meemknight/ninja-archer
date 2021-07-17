@@ -24,17 +24,17 @@ struct SoundManager
 	static constexpr const char *tapesNames[tapes::musicTapesCount] = 
 	{
 		
-		RESOURCES_PATH "jungle.mp3",
-		RESOURCES_PATH "tikiForest.mp3",
-		RESOURCES_PATH "snow.mp3",
-		RESOURCES_PATH "cave.mp3",
+		RESOURCES_PATH "music/jungle.ogg",
+		RESOURCES_PATH "music/tikiForest.ogg",
+		RESOURCES_PATH "music/snow.ogg",
+		RESOURCES_PATH "music/cave.ogg",
 		0,//ice
 		0,//snow cave ?
-		RESOURCES_PATH "tension.mp3",//tension
+		RESOURCES_PATH "music/tension.ogg",//tension
 		0,//wood
 		0,//dark green
-		RESOURCES_PATH "jungle1.mp3",
-		RESOURCES_PATH "castle.mp3",
+		RESOURCES_PATH "music/forest.ogg",
+		RESOURCES_PATH "music/castle.ogg",
 	};
 
 	enum musicEffects
@@ -48,9 +48,9 @@ struct SoundManager
 
 	static constexpr const char *effectsNames[musicEffects::musicEffectsCount] =
 	{
-		RESOURCES_PATH "rainForest.wav",
+		RESOURCES_PATH "music/rainForest.wav",
 		0,
-		RESOURCES_PATH "water.wav",
+		RESOURCES_PATH "music/water.wav",
 		0,
 	};
 
@@ -63,8 +63,8 @@ struct SoundManager
 
 	static constexpr const char* soundNames[soundEffects::soundEffectCount] =
 	{
-		RESOURCES_PATH "leaves.wav",
-		RESOURCES_PATH "pick_up.wav",
+		RESOURCES_PATH "music/leaves.wav",
+		RESOURCES_PATH "music/pick_up.wav",
 	};
 
 	//this is the thing that playes music

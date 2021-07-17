@@ -399,7 +399,6 @@ static char** parseUriList(char* text, int* count)
         if (strncmp(line, prefix, strlen(prefix)) == 0)
         {
             line += strlen(prefix);
-            // TODO: Validate hostname
             while (*line != '/')
                 line++;
         }

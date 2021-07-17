@@ -168,7 +168,6 @@ static GLFWbool parseMapping(_GLFWmapping* mapping, const char* string)
 
     while (*c)
     {
-        // TODO: Implement output modifiers
         if (*c == '+' || *c == '-')
             return GLFW_FALSE;
 
@@ -1261,7 +1260,6 @@ GLFWAPI int glfwGetGamepadState(int jid, GLFWgamepadstate* state)
         {
             const float value = js->axes[e->index] * e->axisScale + e->axisOffset;
             // HACK: This should be baked into the value transform
-            // TODO: Bake into transform when implementing output modifiers
             if (e->axisOffset < 0 || (e->axisOffset == 0 && e->axisScale > 0))
             {
                 if (value >= 0.f)

@@ -152,7 +152,6 @@ static void setCursor(_GLFWwindow* window, const char* name)
                         "Wayland: Standard cursor not found");
         return;
     }
-    // TODO: handle animated cursors too.
     image = cursor->images[0];
 
     if (!image)

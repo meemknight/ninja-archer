@@ -602,7 +602,7 @@ static void demo_draw(struct demo *demo) {
     // Get the index of the next available swapchain image:
     err = vkAcquireNextImageKHR(demo->device, demo->swapchain, UINT64_MAX,
                                 imageAcquiredSemaphore,
-                                (VkFence)0, // TODO: Show use of fence
+                                (VkFence)0, 
                                 &demo->current_buffer);
     if (err == VK_ERROR_OUT_OF_DATE_KHR) {
         // demo->swapchain is out of date (e.g. the window was resized) and
@@ -1914,8 +1914,6 @@ static void demo_init_vk(struct demo *demo) {
     vkGetPhysicalDeviceFeatures(demo->gpu, &demo->gpu_features);
 
     // Graphics queue and MemMgr queue can be separate.
-    // TODO: Add support for separate queues, including synchronization,
-    //       and appropriate tracking for QueueSubmit
 }
 
 static void demo_init_device(struct demo *demo) {
@@ -2003,8 +2001,6 @@ static void demo_init_vk_swapchain(struct demo *demo) {
                  "Swapchain Initialization Failure");
     }
 
-    // TODO: Add support for separate queues, including presentation,
-    //       synchronization, and appropriate tracking for QueueSubmit.
     // NOTE: While it is possible for an application to use a separate graphics
     //       and a present queues, this demo program assumes it is only using
     //       one:

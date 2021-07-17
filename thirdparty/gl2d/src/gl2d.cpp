@@ -846,7 +846,6 @@ void main()
 		//float end = rightBorder;
 		//float size = topBorder;
 		//
-		////todo replace with 1
 		//while(1)
 		//{
 		//	if(topPos.x + size <= end)
@@ -918,7 +917,6 @@ void main()
 		topleftTexPos.z = inner_texture_coords.x;
 		topleftTexPos.w = inner_texture_coords.y;
 		renderRectangle(topleft, colorData, Position2D{ 0, 0 }, 0, texture, topleftTexPos);
-		//todo repair
 
 
 		//topright
@@ -2065,8 +2063,6 @@ void main()
 
 	#pragma region apply movement
 
-			//todo simd
-
 	#if GL2D_SIMD == 0
 		for (int i = 0; i < size; i++)
 		{
@@ -2126,7 +2122,6 @@ void main()
 
 	}
 
-	//todo update !!!!
 	void ParticleSystem::cleanup()
 	{
 		if (posX)

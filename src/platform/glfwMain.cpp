@@ -175,7 +175,6 @@ GLFWwindow *wind = 0;
 namespace platform
 {
 
-	//todo test
 	void setRelMousePosition(int x, int y)
 	{
 		glfwSetCursorPos(wind, x, y);

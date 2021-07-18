@@ -345,17 +345,18 @@ void menu::endMenu(gl2d::Renderer2D & renderer, gl2d::Texture backgroundTexture,
 
 			float v = *i.fVal * 100;
 
-			int precision = 1;
-			if (v == 100)
-			{
-				precision = 0;
-			}else if ( v < 10)
-			{
-				precision = 2;
-			}
+			//int precision = 1;
+			//if (v == 100)
+			//{
+			//	precision = 0;
+			//}else if ( v < 10)
+			//{
+			//	precision = 2;
+			//}
 
 			std::stringstream stream;
-			stream << std::fixed << std::setprecision(precision) << v;
+			//stream << std::fixed << std::setprecision(precision) << v;
+			stream << (int)v;
 			std::string s = stream.str();
 
 			float bonus = 0;

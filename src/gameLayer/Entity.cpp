@@ -1334,7 +1334,6 @@ void Butterfly::draw(gl2d::Renderer2D& renderer, float deltaTime,
 	}
 	texturePos.x %= 4;
 
-	//todo add light
 	renderer.renderRectangle({ position,BLOCK_SIZE,BLOCK_SIZE },
 		{ 1,1,1,light },
 		{}, 0, t, ta.get(texturePos.x, texturePos.y, facingLeft)
@@ -1387,4 +1386,117 @@ void Butterfly::create()
 	texturePos.y = rand() % 4;
 	//texturePos.y = p++;
 	//p %= 4;
+}
+
+void Craw::draw(gl2d::Renderer2D& renderer, float deltaTime, gl2d::Texture t)
+{	
+	//animate
+	frameTime -= deltaTime;
+
+	if (frameTime <= 0)
+	{
+		frameTime += 0.15; //animation speed
+		texturePos++;
+	}
+	texturePos %= 4;
+
+	auto size = t.GetSize();
+	gl2d::TextureAtlasPadding ta(4, 2, size.x, size.y);
+	
+	int goingDown = (int)(direction.y > 0.3f * BLOCK_SIZE);
+
+	renderer.renderRectangle({ position,BLOCK_SIZE,BLOCK_SIZE },
+		{ 1,1,1,1 },
+		{}, 0, t, ta.get(texturePos, goingDown, facingLeft)
+	);
+
+}
+
+void Craw::updateMove(float deltaTime, glm::vec2 playerPos, MapData& mapData)
+{
+	float xMaxSpeed = 4.f * BLOCK_SIZE;
+	float yMaxSpeed = 4.f * BLOCK_SIZE;
+
+	auto getAxSpeed = [xMaxSpeed]()
+	{
+		return xMaxSpeed * (0.8f + (rand() % 100) / 100.f * 0.2f);
+	};
+
+	float attackRadius = BLOCK_SIZE * 10.f;
+	float dist = glm::distance(playerPos, position);
+	if (dist <= attackRadius && dist > 0.1 * BLOCK_SIZE && playerPos.y >= anchor.y)
+	{
+		if(attackState == 0)
+		{
+			
+			timeTillAttackPlayer -= deltaTime;
+			
+			if(timeTillAttackPlayer < 0)
+			{
+				attackState = 1;
+				timeTillAttackPlayer = ((rand() % 100) / 100.f) * 3 + 1.f;
+				timeTillChangeDir = (rand() % 400 + 300) / 100.f;
+
+				direction = playerPos - position;
+				direction = glm::normalize(direction);
+				direction *= getAxSpeed() * 2;
+
+			}
+		}
+
+
+	}
+	else
+	{
+		timeTillAttackPlayer = ((rand() % 100) / 100.f) * 3 + 1.f;
+		attackState = 0;
+	}
+
+	
+
+	timeTillChangeDir -= deltaTime;
+
+	if (timeTillChangeDir <= 0)
+	{
+		timeTillChangeDir = (rand() % 400 + 300) / 100.f;
+
+		direction = { getAxSpeed() , 0 };
+	}
+
+	//try return
+	if (attackState != 1)
+	{
+		if (position.y > anchor.y)
+		{
+			direction.y = -yMaxSpeed * (0.5f + (rand() % 100) / 200.f);
+		}
+		else
+		{
+			direction.y = 0;
+		}
+
+	}
+
+
+	//avoid collision
+	if (isCollidable(mapData.get((position.x + 4) / BLOCK_SIZE,
+		(position.y + 4) / BLOCK_SIZE).type)
+		)
+	{
+		direction *= -1;
+	}
+
+	if (glm::distance(position, anchor) > BLOCK_SIZE * 8)
+	{
+		timeTillChangeDir = (rand() % 300 + 300) / 100.f;
+
+		direction = (glm::normalize(anchor - position)) * getAxSpeed();
+
+	}
+
+	position += direction * deltaTime;
+
+
+	facingLeft = (direction.x > 0) ? 0 : 1;
+
 }

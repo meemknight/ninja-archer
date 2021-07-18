@@ -41,6 +41,7 @@ struct Entity
 	void resolveConstrains(MapData &mapData);
 
 	float notGrabTime = 0;
+	float notCrawTime = 0;
 
 	float accelerateTime = 0;
 	float maxAccelerationTime = 0.15;
@@ -193,7 +194,6 @@ struct Bird
 
 };
 
-//todo calculate light for butterfly
 struct Butterfly
 {
 	Butterfly() { create(); }
@@ -223,5 +223,28 @@ struct Butterfly
 	glm::vec2 direction = {};
 	float timeTillChangeDir = 0;
 	void updateMove(float deltaTime, MapData &mapData);
+
+};
+
+struct Craw
+{
+	Craw() {};
+	Craw(glm::vec2 anchor):anchor(anchor), position(anchor){};
+
+	glm::vec2 anchor = {};
+	glm::vec2 position = {};
+
+	int texturePos = 0;
+	float frameTime = 0;
+
+	bool facingLeft = 0;
+	void draw(gl2d::Renderer2D& renderer, float deltaTime, gl2d::Texture t);
+	void updateMove(float deltaTime, glm::vec2 playerPos, MapData& mapData);
+	float light = 0;
+	glm::vec2 direction = {};
+	float timeTillChangeDir = 0;
+	float timeTillAttackPlayer = 0;
+
+	bool attackState = 0; // 0 patrool, 1 attack
 
 };

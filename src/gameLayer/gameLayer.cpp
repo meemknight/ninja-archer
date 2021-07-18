@@ -65,6 +65,7 @@ gl2d::Texture crackTexture;
 gl2d::Texture birdTexture;
 gl2d::Texture butterflyTexture;
 gl2d::Texture fireFlyTexture;
+gl2d::Texture crawTexture;
 
 
 gl2d::Texture uiItch;
@@ -237,6 +238,7 @@ void loadLevel(glm::ivec2 spawn = { 0, 0 }, bool setSpawn = 0)
 	player.wallGrab = 0;
 	player.iceGrab = 0;
 	player.isSittingOnIce = 0;
+	player.notCrawTime = 0;
 
 
 #pragma region setup light sources
@@ -341,6 +343,8 @@ bool initGame()
 	birdTexture.loadFromFileWithPixelPadding(RESOURCES_PATH "bird.png", 8);
 	butterflyTexture.loadFromFileWithPixelPadding(RESOURCES_PATH "butterfly.png", 8);
 	fireFlyTexture.loadFromFileWithPixelPadding(RESOURCES_PATH "fireFly.png", 8);
+	crawTexture.loadFromFileWithPixelPadding(RESOURCES_PATH "craw.png", 8);
+
 
 	uiItch.loadFromFile(RESOURCES_PATH "ui//itch.png");
 	uiMusic.loadFromFile(RESOURCES_PATH "ui//music.jpg");
@@ -921,11 +925,50 @@ bool gameLogic(float deltaTime)
 
 	if (!platform::isFocused())
 	{
+		float notGrabTime = 0;
 		player.idleTime = 0;
 		jumpDelayTime = 0;
 	}
 
 	renderer2d.currentCamera.follow(player.pos + (player.dimensions / 2.f), deltaTime * 100, 4 * BLOCK_SIZE, renderer2d.windowW, renderer2d.windowH);
+
+	if (player.notCrawTime <= 0)
+	{
+		player.notCrawTime = 0;
+
+		for (auto& i : mapData.craws)
+		{
+			if (glm::distance(player.pos, i.position) < 0.7 * BLOCK_SIZE && player.notCrawTime <= 0)
+			{
+				player.notCrawTime = 0.1;
+				player.velocity.y -= BLOCK_SIZE * 10;
+				player.applyGravity(-deltaTime);
+
+
+				player.wallGrab = 0;
+				player.redGrab = 0;
+				player.grayGrab = 0;
+				player.blueGrab = 0;
+				player.iceGrab = 0;
+
+				if (player.pos.x < i.position.x)
+				{
+					//player.jumpFromWall();
+					player.strafe(-10);
+				}else
+				{
+					//player.jumpFromWall();
+					player.strafe(10);
+				}
+
+
+			}
+
+		}
+	}else
+	{
+		player.notCrawTime -= deltaTime;
+	}
 
 	player.applyGravity(deltaTime);
 	player.applyVelocity(deltaTime);
@@ -1521,7 +1564,7 @@ bool gameLogic(float deltaTime)
 
 #pragma endregion
 
-#pragma region butterflies
+#pragma region butterflies and craws
 
 	for(auto &i :mapData.butterflies)
 	{
@@ -1529,6 +1572,14 @@ bool gameLogic(float deltaTime)
 		i.draw(renderer2d, deltaTime, butterflyTexture, fireFlyTexture);
 		i.light = 0;
 	}
+
+	for (auto& i : mapData.craws) 
+	{
+		i.updateMove(deltaTime, player.pos, mapData);
+		i.draw(renderer2d, deltaTime, crawTexture);
+		i.light = 0;
+	}
+
 
 #pragma endregion
 

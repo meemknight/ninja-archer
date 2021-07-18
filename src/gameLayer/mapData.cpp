@@ -70,6 +70,11 @@ void MapData::create(int w, int h, unsigned short* d = 0)
 				butterflies.push_back({ glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f },
 					Butterfly::fireFlyType });
 				d.type = Block::none;
+			}else
+			if (d.type == Block::craw)
+			{
+				craws.push_back({ glm::vec2{ x * BLOCK_SIZE + BLOCK_SIZE / 2.f, y * BLOCK_SIZE + BLOCK_SIZE / 2.f } });
+				d.type = Block::none;
 			}
 		}
 
@@ -130,6 +135,7 @@ void MapData::cleanup()
 	torchDataVector.clear();
 	dialogs.clear();
 	butterflies.clear();
+	craws.clear();
 
 	if (data)
 	{

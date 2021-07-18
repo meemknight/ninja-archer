@@ -11,6 +11,7 @@
 
 
 struct Butterfly;
+struct Craw;
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/hash.hpp"
@@ -349,6 +350,7 @@ namespace Block
 		pole6,
 		platform7,
 		fireFly,
+		craw,
 		lastBlock,
 
 	};
@@ -701,7 +703,8 @@ struct MapData
 	std::vector<torchData> torchDataVector;
 
 	std::vector<Butterfly> butterflies;
-
+	std::vector<Craw> craws;
+	
 
 	std::unordered_map<glm::ivec2, FullDialogData> dialogs;
 

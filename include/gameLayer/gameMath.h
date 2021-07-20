@@ -5,7 +5,7 @@
 #include "Entity.h"
 
 void simulateLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vector<Arrow> *arrows, 
-	std::vector<Pickup> *pickups, std::vector<Butterfly> *butterflies);
+	std::vector<Pickup> *pickups, std::vector<Butterfly> *butterflies, std::vector<Craw>* craws);
 
 struct LightSource
 {

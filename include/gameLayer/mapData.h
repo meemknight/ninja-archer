@@ -351,6 +351,9 @@ namespace Block
 		platform7,
 		fireFly,
 		craw,
+		killBlock,
+		cart1,
+		cart2,
 		lastBlock,
 
 	};

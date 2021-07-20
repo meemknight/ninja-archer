@@ -30,16 +30,17 @@ void drawLine(glm::vec2 x, glm::vec2 y, glm::vec3 color, float width)
 }
 
 void simulateLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vector<Arrow> *arrows,
-	std::vector<Pickup> *pickups, std::vector<Butterfly> *butterflies)
+	std::vector<Pickup> *pickups, std::vector<Butterfly> *butterflies, std::vector<Craw>* craws)
 {
 	//stencilRenderer.renderRectangle({ 3 * BLOCK_SIZE, 3 * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE }, { 1,1,1,1 });
 
 	//xmaskRenderer.renderRectangle({ pos.x - radius*BLOCK_SIZE*2, pos.y - radius * BLOCK_SIZE*2, 4 * radius*BLOCK_SIZE, 4 * radius*BLOCK_SIZE }, {}, 0, lightT);
+	float r = radius;
+	float maxDist = r * r * BLOCK_SIZE * BLOCK_SIZE;
 
 	if(arrows != nullptr)
 	{
-		float r = radius;
-		float maxDist = r * r *BLOCK_SIZE * BLOCK_SIZE;
+		
 		for (auto &i : *arrows)
 		{
 
@@ -58,9 +59,25 @@ void simulateLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vect
 
 	if(butterflies != nullptr)
 	{
-		float r = radius;
-		float maxDist = r * r * BLOCK_SIZE * BLOCK_SIZE;
 		for (auto &i : *butterflies)
+		{
+
+			float x = pos.x - i.position.x;
+			float y = pos.y - i.position.y;
+			float dist = x * x + y * y;
+
+			float perc = dist / maxDist;
+			float l = (1 - perc);
+
+			if (l < 0) { l = 0; }
+
+			i.light = std::max(i.light, l);
+		}
+	}
+
+	if (craws != nullptr)
+	{
+		for (auto& i : *craws)
 		{
 
 			float x = pos.x - i.position.x;
@@ -78,8 +95,6 @@ void simulateLightSpot(glm::vec2 pos, float radius, MapData & mapData, std::vect
 
 	if(pickups != nullptr)
 	{
-		float r = radius ;
-		float maxDist = r * r *BLOCK_SIZE * BLOCK_SIZE;
 		for (auto &i : *pickups)
 		{
 			float x = pos.x - i.pos.x*BLOCK_SIZE;

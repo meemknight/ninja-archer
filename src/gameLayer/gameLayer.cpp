@@ -294,6 +294,7 @@ void respawn()
 	player.canJump = 1;
 	player.hasTouchGround = 1;
 	player.movingRight = 1;
+	player.notCrawTime = 0;
 
 	//reset pickups
 	for (auto &i : pickups)
@@ -420,7 +421,7 @@ bool initGame()
 	for (auto &i : levelPreviewWallLights)
 	{
 		simulateLightSpot({ i.pos.x * BLOCK_SIZE + BLOCK_SIZE / 2,i.pos.y * BLOCK_SIZE + BLOCK_SIZE / 2 },
-		i.intensity * lightPerc, levelPreviewMapData, nullptr, nullptr, nullptr);
+		i.intensity * lightPerc, levelPreviewMapData, nullptr, nullptr, nullptr, nullptr);
 
 	}
 	
@@ -935,15 +936,15 @@ bool gameLogic(float deltaTime)
 	if (player.notCrawTime <= 0)
 	{
 		player.notCrawTime = 0;
+		bool hit = 0;
 
 		for (auto& i : mapData.craws)
 		{
-			if (glm::distance(player.pos, i.position) < 0.7 * BLOCK_SIZE && player.notCrawTime <= 0)
+			if (glm::distance(player.pos+(player.dimensions/2.f), i.position) < 0.7 * BLOCK_SIZE && player.notCrawTime <= 0)
 			{
 				player.notCrawTime = 0.1;
-				player.velocity.y -= BLOCK_SIZE * 10;
-				player.applyGravity(-deltaTime);
-
+				player.velocity.y -= 3 * BLOCK_SIZE;
+				hit = 1;
 
 				player.wallGrab = 0;
 				player.redGrab = 0;
@@ -954,23 +955,35 @@ bool gameLogic(float deltaTime)
 				if (player.pos.x < i.position.x)
 				{
 					//player.jumpFromWall();
-					player.strafe(-10);
+					player.velocity.x = -16 * BLOCK_SIZE;
 				}else
 				{
 					//player.jumpFromWall();
-					player.strafe(10);
+					player.velocity.x = 16 * BLOCK_SIZE;
 				}
 
-
+				
 			}
 
 		}
+
+		//if (!hit)
+		{
+			player.applyGravity(deltaTime);
+		}
+
 	}else
 	{
 		player.notCrawTime -= deltaTime;
+		if (player.notCrawTime <= 0)
+		{
+			player.notCrawTime = 0;
+		}
+
+		player.applyGravity(deltaTime);
+
 	}
 
-	player.applyGravity(deltaTime);
 	player.applyVelocity(deltaTime);
 
 	player.resolveConstrains(mapData);
@@ -1050,7 +1063,7 @@ bool gameLogic(float deltaTime)
 
 	//player
 	simulateLightSpot(player.pos + glm::vec2(player.dimensions.x / 2, player.dimensions.y / 2),
-		playerLight * lightPerc, mapData, &arrows, &pickups, &mapData.butterflies);
+		playerLight * lightPerc, mapData, &arrows, &pickups, &mapData.butterflies, &mapData.craws);
 
 
 	//fireFlies
@@ -1059,7 +1072,7 @@ bool gameLogic(float deltaTime)
 		if (i.type == i.fireFlyType)
 		{
 			simulateLightSpot(i.position,
-				fireFlyLight * lightPerc, mapData, &arrows, &pickups, &mapData.butterflies);
+				fireFlyLight * lightPerc, mapData, &arrows, &pickups, &mapData.butterflies, &mapData.craws);
 		}
 	}
 
@@ -1141,7 +1154,7 @@ bool gameLogic(float deltaTime)
 
 				g.playerEntered = 1;
 
-				if (g.type == Block::water3 || g.type == Block::lavaKill)
+				if (g.type == Block::water3 || g.type == Block::lavaKill || g.type == Block::killBlock)
 				{
 					player.dying = 1;
 				}
@@ -1379,7 +1392,7 @@ bool gameLogic(float deltaTime)
 	#pragma endregion
 
 		simulateLightSpot({ i.pos.x * BLOCK_SIZE + BLOCK_SIZE / 2,i.pos.y * BLOCK_SIZE + BLOCK_SIZE / 2 },
-			r * lightPerc, mapData, &arrows, &pickups, &mapData.butterflies);
+			r * lightPerc, mapData, &arrows, &pickups, &mapData.butterflies, & mapData.craws);
 
 	}
 
@@ -1402,7 +1415,7 @@ bool gameLogic(float deltaTime)
 			if (r > 0)
 			{
 				simulateLightSpot({ i.pos },
-					r * lightPerc, mapData, &arrows, &pickups, &mapData.butterflies);
+					r * lightPerc, mapData, &arrows, &pickups, &mapData.butterflies, & mapData.craws);
 			}
 
 		}

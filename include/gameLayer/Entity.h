@@ -243,7 +243,7 @@ struct Craw
 	float light = 0;
 	glm::vec2 direction = {};
 	float timeTillChangeDir = 0;
-	float timeTillAttackPlayer = 0;
+	float timeTillAttackPlayer = ((rand() % 100) / 100.f) * 2 + 1.f;
 
 	bool attackState = 0; // 0 patrool, 1 attack
 

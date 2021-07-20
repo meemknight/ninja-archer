@@ -214,6 +214,7 @@ void Entity::run(float speed, float deltaTime)
 	{
 		return;
 	}
+	//if (player.notCrawTime > 0) { return; }
 
 	if(iswebs)
 	{
@@ -261,6 +262,8 @@ void Entity::airRun(float speed)
 	{
 		return;
 	}
+
+	//if (player.notCrawTime > 0) { return; }
 
 	if (dying)
 	{
@@ -337,7 +340,7 @@ void Entity::applyVelocity(float deltaTime)
 	const float cy = velocityClampY * BLOCK_SIZE;
 	velocity = glm::clamp(velocity, { -cx,-cy }, { cx, cy });
 
-	if(wallGrab != 0 && !iceGrab)
+	if((wallGrab != 0 && !iceGrab) && (notCrawTime <= 0))
 	{
 		velocity.y = 0;
 	}
@@ -365,7 +368,7 @@ void Entity::applyVelocity(float deltaTime)
 		velocity.y += velocity.y * (-drag * deltaTime * BLOCK_SIZE*4);
 	}
 
-	if((grounded && !isSittingOnIce) || wallGrab)
+	if(((grounded && !isSittingOnIce) || wallGrab ) && (notCrawTime <= 0))
 	{
 		velocity.x = 0;
 	}
@@ -1403,10 +1406,10 @@ void Craw::draw(gl2d::Renderer2D& renderer, float deltaTime, gl2d::Texture t)
 	auto size = t.GetSize();
 	gl2d::TextureAtlasPadding ta(4, 2, size.x, size.y);
 	
-	int goingDown = (int)(direction.y > 0.3f * BLOCK_SIZE);
+	int goingDown = (int)(direction.y > 0.6f * BLOCK_SIZE);
 
 	renderer.renderRectangle({ position,BLOCK_SIZE,BLOCK_SIZE },
-		{ 1,1,1,1 },
+		{ 1,1,1,light },
 		{}, 0, t, ta.get(texturePos, goingDown, facingLeft)
 	);
 
@@ -1434,8 +1437,8 @@ void Craw::updateMove(float deltaTime, glm::vec2 playerPos, MapData& mapData)
 			if(timeTillAttackPlayer < 0)
 			{
 				attackState = 1;
-				timeTillAttackPlayer = ((rand() % 100) / 100.f) * 3 + 1.f;
-				timeTillChangeDir = (rand() % 400 + 300) / 100.f;
+				timeTillAttackPlayer = ((rand() % 100) / 100.f) * 2 + 1.f;
+				timeTillChangeDir = (rand() % 200 + 200) / 100.f;
 
 				direction = playerPos - position;
 				direction = glm::normalize(direction);
@@ -1448,7 +1451,7 @@ void Craw::updateMove(float deltaTime, glm::vec2 playerPos, MapData& mapData)
 	}
 	else
 	{
-		timeTillAttackPlayer = ((rand() % 100) / 100.f) * 3 + 1.f;
+		timeTillAttackPlayer = ((rand() % 100) / 100.f) * 2 + 1.f;
 		attackState = 0;
 	}
 
@@ -1456,8 +1459,9 @@ void Craw::updateMove(float deltaTime, glm::vec2 playerPos, MapData& mapData)
 
 	timeTillChangeDir -= deltaTime;
 
-	if (timeTillChangeDir <= 0)
+	if (timeTillChangeDir <= 0 )
 	{
+		attackState == 0;
 		timeTillChangeDir = (rand() % 400 + 300) / 100.f;
 
 		direction = { getAxSpeed() , 0 };
@@ -1468,7 +1472,7 @@ void Craw::updateMove(float deltaTime, glm::vec2 playerPos, MapData& mapData)
 	{
 		if (position.y > anchor.y)
 		{
-			direction.y = -yMaxSpeed * (0.5f + (rand() % 100) / 200.f);
+			direction.y = -yMaxSpeed * (0.7f + (rand() % 100) / 100.f * 0.3f);
 		}
 		else
 		{
@@ -1484,14 +1488,16 @@ void Craw::updateMove(float deltaTime, glm::vec2 playerPos, MapData& mapData)
 		)
 	{
 		direction *= -1;
+		position += direction * deltaTime;
+		timeTillChangeDir = (rand() % 300 + 300) / 100.f;
 	}
 
 	if (glm::distance(position, anchor) > BLOCK_SIZE * 8)
 	{
-		timeTillChangeDir = (rand() % 300 + 300) / 100.f;
+		timeTillChangeDir = (rand() % 200 + 200) / 100.f;
 
 		direction = (glm::normalize(anchor - position)) * getAxSpeed();
-
+		attackState = 0;
 	}
 
 	position += direction * deltaTime;

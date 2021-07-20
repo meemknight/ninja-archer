@@ -1365,7 +1365,7 @@ void Butterfly::updateMove(float deltaTime, MapData &mapData)
 		)
 	{
 		direction *= -1;
-		position += direction * deltaTime * 2.f;
+		position += direction * deltaTime * 3.f;
 
 	}
 
@@ -1492,13 +1492,28 @@ void Craw::updateMove(float deltaTime, glm::vec2 playerPos, MapData& mapData)
 		timeTillChangeDir = (rand() % 300 + 300) / 100.f;
 	}
 
-	if (glm::distance(position, anchor) > BLOCK_SIZE * 8)
+	if (attackState == 0)
 	{
-		timeTillChangeDir = (rand() % 200 + 200) / 100.f;
+		if (glm::distance(position, anchor) > BLOCK_SIZE * 8)
+		{
+			timeTillChangeDir = (rand() % 200 + 200) / 100.f;
 
-		direction = (glm::normalize(anchor - position)) * getAxSpeed();
-		attackState = 0;
+			direction = (glm::normalize(anchor - position)) * getAxSpeed();
+			attackState = 0;
+		}
 	}
+	else
+	{
+		if (glm::distance(position, anchor) > BLOCK_SIZE * 11)
+		{
+			timeTillChangeDir = (rand() % 200 + 200) / 100.f;
+
+			direction = (glm::normalize(anchor - position)) * getAxSpeed();
+			attackState = 0;
+		}
+	}
+
+	
 
 	position += direction * deltaTime;
 

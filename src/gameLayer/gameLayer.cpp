@@ -940,7 +940,7 @@ bool gameLogic(float deltaTime)
 
 		for (auto& i : mapData.craws)
 		{
-			if (glm::distance(player.pos+(player.dimensions/2.f), i.position) < 0.7 * BLOCK_SIZE && player.notCrawTime <= 0)
+			if (glm::distance(player.pos+(player.dimensions/2.f), i.position) < 0.8 * BLOCK_SIZE && player.notCrawTime <= 0)
 			{
 				player.notCrawTime = 0.1;
 				player.velocity.y -= 3 * BLOCK_SIZE;

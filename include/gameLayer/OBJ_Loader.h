@@ -20,7 +20,7 @@
 // Print progress to console while loading (large models)
 //#define OBJL_CONSOLE_OUTPUT
 
-#include <glm\vec3.hpp>
+#include <glm/vec3.hpp>
 
 // Namespace: OBJL
 //

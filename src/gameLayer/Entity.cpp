@@ -1474,6 +1474,10 @@ void Craw::updateMove(float deltaTime, glm::vec2 playerPos, MapData& mapData)
 		{
 			direction.y = -yMaxSpeed * (0.7f + (rand() % 100) / 100.f * 0.3f);
 		}
+		else if(position.y < anchor.y - 0.5 * BLOCK_SIZE)
+		{
+			direction.y = yMaxSpeed * (0.7f + (rand() % 100) / 100.f * 0.3f);
+		}
 		else
 		{
 			direction.y = 0;
